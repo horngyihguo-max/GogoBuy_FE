@@ -1,0 +1,241 @@
+/* ===== Topbar ===== */
+.topbar {
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: 64px;
+  z-index: 1000;
+  background: #6d43c6;
+  /* Avalon 紫 */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 14px;
+}
+
+.topbar-left,
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.topbar-search {
+  width: 320px;
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .topbar-search {
+    display: inline-flex;
+  }
+}
+
+.topbar-search input {
+  width: 100%;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.topbar-search input::placeholder {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.topbar-search .pi {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.topbar-icon-btn.p-button.p-button-text {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+}
+
+.topbar-icon-btn.p-button.p-button-text:hover {
+  background: rgba(255, 255, 255, 0.20);
+}
+
+.GogoBuy {
+  width: 310px;
+  height: 64px;
+}
+
+.title {
+  color: var(--text-title);
+}
+
+.body {
+  color: var(--text-body);
+}
+
+.muted {
+  color: var(--text-muted);
+}
+
+
+.page {
+  background: var(--bg-main);
+  min-height: 100vh;
+}
+
+.section {
+  background: var(--bg-section);
+  padding: 24px;
+}
+
+.card {
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid var(--border-light);
+}
+
+.test {
+  margin-top: 64px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "PingFang TC", "Microsoft JhengHei", sans-serif;
+  background-color: var(--bg-main);
+  color: var(--text-body);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  /* 確保 footer 至少會貼在底部 */
+}
+
+/* --- HEADER --- */
+header {
+  background-color: var(--brand-primary);
+  border-bottom: 2px solid var(--brand-primary);
+  padding: 1rem 2rem;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+header .logo {
+  color: var(--text-disabled);
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+nav ul {
+  display: flex;
+  list-style: none;
+  gap: 20px;
+}
+
+nav a {
+  text-decoration: none;
+  color: var(--text-title);
+  font-weight: 500;
+  transition: color 0.3s;
+}
+
+nav a:hover {
+  color: var(--accent-orange);
+}
+
+/* --- MAIN --- */
+main {
+  flex: 1;
+  /* 自動撐開空間 */
+}
+
+.hero-section {
+  background-color: var(--bg-section);
+  padding: 80px 20px;
+  text-align: center;
+}
+
+.hero-section h1 {
+  font-size: 2.5rem;
+  color: var(--text-title);
+  margin-bottom: 1rem;
+}
+
+.content-grid {
+  max-width: 1000px;
+  margin: 40px auto;
+  padding: 0 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-light);
+  padding: 2rem;
+  border-radius: 12px;
+  transition: transform 0.2s;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  border-color: var(--accent-soft);
+}
+
+.card h3 {
+  color: var(--accent-orange);
+  margin-bottom: 10px;
+}
+
+.cta-button {
+  display: inline-block;
+  background-color: var(--brand-primary);
+  color: var(--bg-card);
+  padding: 12px 24px;
+  border-radius: 6px;
+  text-decoration: none;
+  margin-top: 20px;
+  transition: background 0.3s;
+}
+
+.cta-button:hover {
+  background-color: var(--brand-primary-hover);
+}
+
+/* --- FOOTER --- */
+footer {
+  background-color: var(--footer-bg);
+  color: var(--footer-text);
+  padding: 40px 20px;
+  margin-top: 60px;
+}
+
+.footer-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 30px;
+}
+
+.footer-info p {
+  font-size: 0.9rem;
+  line-height: 1.8;
+}
+
+.footer-bottom {
+  text-align: center;
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(244, 234, 234, 0.2);
+  /* 使用 footer-text 的透明度 */
+  color: var(--text-disabled);
+  font-size: 0.8rem;
+}

@@ -1,11 +1,47 @@
-<h1 class="text-3xl font-bold underline">
-  Hello world!
-  <i class="pi pi-check"></i>
-  <i class="pi pi-times"></i>
-  <span class="pi pi-search"></span>
-  <span class="pi pi-user"></span>
-</h1>
+<header>
+  <a href="#" class="logo">BRAND.</a>
+  <nav>
+    <ul>
+      <li><a href="#">首頁</a></li>
+      <li><a href="#">產品說明</a></li>
+      <li><a href="#">關於我們</a></li>
+    </ul>
+  </nav>
+</header>
 
-<div class="card flex justify-center">
-  <p-button (click)="test()" label="Check" />
-</div>
+<main>
+  <section class="hero-section">
+    <h1>溫潤質感，精心打造</h1>
+    <p>使用 --accent-soft 與 --bg-section 營造柔和的瀏覽視覺</p>
+    <a href="#" class="cta-button">開始體驗</a>
+  </section>
+
+  <div class="content-grid">
+    <div class="card">
+      <h3>核心精神</h3>
+      <p>這段文字使用了標準的 <strong>--text-body</strong>。背景則是純淨的 <strong>--bg-card</strong>。</p>
+    </div>
+    <div class="card">
+      <h3>未來展望</h3>
+      <p class="muted-text" style="color: var(--text-muted);">
+        這是一段使用 <strong>--text-muted</strong> 的次要資訊，顏色較淡但依然清晰。
+      </p>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="footer-container">
+    <div class="footer-info">
+      <h4>聯繫我們</h4>
+      <p>地址：台南市歸仁區歸仁十三路一段6號</p>
+      <p>電話：(06) 303 2550</p>
+    </div>
+    <div class="footer-links">
+      <p>隱私政策 | 服務條款</p>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    &copy; 2026 GogoBuy
+  </div>
+</footer>
