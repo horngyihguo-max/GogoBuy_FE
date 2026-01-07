@@ -13,7 +13,13 @@ export const appConfig: ApplicationConfig = {
       theme: {
         preset: Aura,
         options: {
+<<<<<<< HEAD
             darkModeSelector: false || 'none'
+=======
+          prefix: 'p',
+          darkModeSelector:  false || 'none',
+          cssLayer: false
+>>>>>>> origin/Natsuyee
         }
       }
     })

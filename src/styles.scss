@@ -1,3 +1,25 @@
 /* You can add global styles to this file, and also import other style files */
 @import "tailwindcss";
 @import "primeicons/primeicons.css";
+
+:root {
+  --brand-primary: #662222;
+  --brand-primary-hover: #8B2F2F;
+
+  --bg-main: #F7EDEB;
+  --bg-section: #FAF3F1;
+  --bg-card: #FFFFFF;
+
+  --accent-orange: #E07A3F;
+  --accent-soft: #F2B8A0;
+
+  --text-title: #3A1F1F;
+  --text-body: #5C3A3A;
+  --text-muted: #8A6A6A;
+  --text-disabled: #BFA5A5;
+
+  --border-light: #E6D2CF;
+
+  --footer-bg: #7A2E2E;
+  --footer-text: #F4EAEA;
+}

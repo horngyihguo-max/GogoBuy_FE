@@ -1,11 +1,30 @@
-<h1 class="text-3xl font-bold underline">
-  Hello world!
-  <i class="pi pi-check"></i>
-  <i class="pi pi-times"></i>
-  <span class="pi pi-search"></span>
-  <span class="pi pi-user"></span>
-</h1>
+<header>
+  <img src="GogoBuy.Newpng.png" class="logo">
+  <nav>
+    <ul>
+      <li><a href="#">首頁</a></li>
+      <li><a href="#">產品說明</a></li>
+      <li><a href="#">關於我們</a></li>
+    </ul>
+  </nav>
+</header>
 
-<div class="card flex justify-center">
-  <p-button (click)="test()" label="Check" />
-</div>
+<main>
+  <router-outlet></router-outlet>
+</main>
+
+<footer>
+  <div class="footer-container">
+    <div class="footer-info">
+      <h4>聯繫我們</h4>
+      <p>地址：台南市歸仁區歸仁十三路一段6號</p>
+      <p>電話：(06) 303 2550</p>
+    </div>
+    <div class="footer-links">
+      <p>隱私政策 | 服務條款</p>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    &copy; 2026 GogoBuy
+  </div>
+</footer>
