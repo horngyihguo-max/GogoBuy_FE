@@ -6,5 +6,6 @@ import { PageNotFoundComponent } from './page-not-found/page-not-found.component
 export const routes: Routes = [
   { path: 'gogobuy', component: GogoBuyComponent },
   { path: '', redirectTo: '/gogobuy', pathMatch: 'full' },
+  { path: '404', component: PageNotFoundComponent },
   { path: '**', component: PageNotFoundComponent }
 ];

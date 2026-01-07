@@ -2,11 +2,13 @@
   <img src="GogoBuy.Newpng.png" class="logo">
   <nav>
     <ul>
-      <li><a href="#">首頁</a></li>
-      <li><a href="#">產品說明</a></li>
-      <li><a href="#">關於我們</a></li>
+      <li><img [src]="userAvatar" class="avatar" (click)="menu.toggle($event)" alt="user avatar" />
+        <p-menu #menu [model]="items" [popup]="true"></p-menu>
+      </li>
     </ul>
   </nav>
+
+
 </header>
 
 <main>
