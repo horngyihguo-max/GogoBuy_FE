@@ -12,6 +12,9 @@ export class LoginComponent {
   // 模式: 登入 | 註冊
   pageMode: 'login' | 'register' = 'login';
 
+  // 密碼顯示用boolean
+  showPassword = false;
+
   // 表單資料模型
   user = {
     nickname: '',
@@ -31,10 +34,36 @@ export class LoginComponent {
     this.user = { nickname: '', email: '', phone: '', password: '' };
   }
 
-  // 送出註冊資料
+  // 送出分流
   onSubmit() {
-    console.log("註冊提交資料:" + JSON.stringify(this.user, null, 2));
+    if(this.pageMode == 'login'){
+      this.login();
+    }else{
+      this.register();
+    }
+  }
+
+  // 登入API
+  login() {
+    const payload = {
+      email: this.user.email,
+      password: this.user.password,
+    };
+    console.log("登入提交資料:" + JSON.stringify(payload, null, 2));
     // POST
   }
+
+  // 註冊API
+  register() {
+    const payload = {
+      nickname: this.user.nickname,
+      email: this.user.email,
+      phone: this.user.phone,
+      password: this.user.password,
+    };
+    console.log("註冊提交資料:" + JSON.stringify(payload, null, 2));
+    // POST
+  }
+
 
 }
