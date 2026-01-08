@@ -1,18 +1,10 @@
 <body class="bg-slate-50 h-svh">
 
-  <!--搜尋欄-->
-  <div class="max-w-4xl mx-auto py-12 px-6 lg:py-20">
-    <div class="ml-10 relative w-full max-w-md">
-      <i class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-lg pointer-events-none"></i>
-      <input type="search" placeholder="搜尋店家、地址" class="w-3xl pl-10 pr-4 py-3 rounded-lg border border-gray-300
-               focus:outline-none focus:ring-2 focus:ring-red-300
-               focus:border-red-400 bg-white" />
-    </div>
-  </div>
 
   <!--輪播欄-->
   <section class="max-w-4xl mx-auto ">
-    <p-carousel [value]="banners" [numVisible]="1" [numScroll]="1" [circular]="true" [autoplayInterval]="4000"
+    <!--[numVisible]一次可顯示X個圖片，[numScroll]有幾個滾稐，[circular]是否重複，[autoplayInterval]自動撥放秒數-->
+    <p-carousel [value]="banners" [numVisible]="2" [numScroll]="2" [circular]="true" [autoplayInterval]="4000"
       [showIndicators]="true" [showNavigators]="true">
       <ng-template pTemplate="item" let-banner>
         <div class="banner">
@@ -26,7 +18,25 @@
   </section>
 
   <!--開團中店家-->
-  <section class="max-w-4xl mx-auto ml-60  ">
+  <section class="max-w-4xl mx-auto">
     <h2 class="text-2xl font-bold text-slate-900 mb-4 flex items-center">正在開團中</h2>
+
+    <!--卡片-->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-8">
+      @for (store of stores; track store.id) {
+      <p-card [style]="{ width: '100%', overflow: 'hidden' }">
+
+        <!--商家圖片(stores.image)-->
+        <ng-template pTemplate="header">
+          <img alt="store" class="w-full h-[160px] object-cover" [src]="store.image" />
+        </ng-template>
+
+        <!--商家店名(stores.name)-->
+        <ng-template pTemplate="title">
+          {{ store.name }}
+        </ng-template>
+      </p-card>
+      }
+    </div>
   </section>
 </body>

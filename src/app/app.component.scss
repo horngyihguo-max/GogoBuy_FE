@@ -112,7 +112,7 @@ footer {
   bottom: 0%;
   background-color: var(--footer-bg);
   color: var(--footer-text);
-  padding: 40px 20px;
+  padding: 10px 0px 10px 0px;
   margin-top: auto;
   width: 100%;
 
@@ -134,7 +134,7 @@ footer {
 
 .footer-bottom {
   text-align: center;
-  margin-top: 30px;
+  margin-top: 10px;
   padding-top: 20px;
   border-top: 1px solid rgba(244, 234, 234, 0.2);
   /* 使用 footer-text 的透明度 */
