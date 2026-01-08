@@ -6,7 +6,6 @@ import { MenuItem } from 'primeng/api';
 import { MenuModule } from 'primeng/menu';
 import { PanelMenuModule } from 'primeng/panelmenu';
 import { InputTextModule } from 'primeng/inputtext';
-import { NgIf } from '@angular/common';
 
 
 @Component({
@@ -18,8 +17,7 @@ import { NgIf } from '@angular/common';
     InputTextModule,
     RouterLinkActive,
     RouterLink,
-    MenuModule,
-    NgIf
+    MenuModule
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',

@@ -1,4 +1,4 @@
-<body class="bg-slate-50 h-svh">
+<body class="bg-slate-50 min-h-svh">
 
 
   <!--輪播欄-->
@@ -9,6 +9,7 @@
       [showIndicators]="true" [showNavigators]="true">
       <ng-template pTemplate="item" let-banner>
         <div class="banner">
+          <!--[src]圖片，[alt]-->
           <img [src]="banner.image" [alt]="banner.title" class="banner-img" />
           <div class="banner-title">
             {{ banner.title }}
