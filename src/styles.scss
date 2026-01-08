@@ -1,3 +1,46 @@
 /* You can add global styles to this file, and also import other style files */
 @import "tailwindcss";
 @import "primeicons/primeicons.css";
+
+:root {
+  --brand-primary: #662222;
+  --brand-primary-hover: #8B2F2F;
+
+  --bg-main: #F7EDEB;
+  --bg-section: #FAF3F1;
+  --bg-card: #FFFFFF;
+
+  --accent-orange: #E07A3F;
+  --accent-soft: #F2B8A0;
+
+  --text-title: #3A1F1F;
+  --text-body: #5C3A3A;
+  --text-muted: #8A6A6A;
+  --text-disabled: #BFA5A5;
+
+  --border-light: #E6D2CF;
+
+  --footer-bg: #7A2E2E;
+  --footer-text: #F4EAEA;
+
+  /* Tag 基本 */
+  --p-tag-border-radius: 999px;
+  --p-tag-font-weight: 700;
+  --p-tag-padding: 0.25rem 0.6rem;
+
+  /* 🔵 進行中（info = 藍色） */
+  --p-tag-info-background: #2f80ed;
+  --p-tag-info-color: #ffffff;
+
+  /* 🟢 已完成（success = 綠色） */
+  --p-tag-success-background: #18b663;
+  --p-tag-success-color: #ffffff;
+
+  /* 🟡 警告 */
+  --p-tag-warn-background: #e0a13f;
+  --p-tag-warn-color: #ffffff;
+
+  /* 🔴 取消 / 錯誤 */
+  --p-tag-danger-background: #d14343;
+  --p-tag-danger-color: #ffffff;
+}

@@ -1,0 +1,44 @@
+<body class="bg-slate-50 min-h-svh">
+
+
+  <!--輪播欄-->
+  <section class="max-w-4xl mx-auto ">
+    <!--[numVisible]一次可顯示X個圖片，[numScroll]有幾個滾輪，[circular]是否重複，[autoplayInterval]自動撥放秒數，
+    [showIndicators]是否顯示滾輪，[showNavigators]是否顯示左右翻閱鍵-->
+    <p-carousel [value]="banners" [numVisible]="2" [numScroll]="2" [circular]="true" [autoplayInterval]="4000"
+      [showIndicators]="true" [showNavigators]="true">
+      <ng-template pTemplate="item" let-banner>
+        <div class="banner">
+          <!--[src]圖片，[alt]-->
+          <img [src]="banner.image" [alt]="banner.title" class="banner-img" />
+          <div class="banner-title">
+            {{ banner.title }}
+          </div>
+        </div>
+      </ng-template>
+    </p-carousel>
+  </section>
+
+  <!--開團中店家-->
+  <section class="max-w-4xl mx-auto">
+    <h2 class="text-2xl font-bold text-slate-900 mb-4 flex items-center">正在開團中</h2>
+
+    <!--卡片-->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-8">
+      @for (store of stores; track store.id) {
+      <p-card [style]="{ width: '100%', overflow: 'hidden' }">
+
+        <!--商家圖片(stores.image)-->
+        <ng-template pTemplate="header">
+          <img alt="store" class="w-full h-[160px] object-cover" [src]="store.image" />
+        </ng-template>
+
+        <!--商家店名(stores.name)-->
+        <ng-template pTemplate="title">
+          {{ store.name }}
+        </ng-template>
+      </p-card>
+      }
+    </div>
+  </section>
+</body>

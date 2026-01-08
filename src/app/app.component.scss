@@ -1,0 +1,257 @@
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+/* --- HEADER --- */
+header {
+  background-color: var(--brand-primary);
+  border-bottom: 2px solid var(--brand-primary);
+  padding: 0.3rem 2rem;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+
+nav ul {
+  display: flex;
+  list-style: none;
+  gap: 20px;
+}
+
+nav a {
+  text-decoration: none;
+  color: var(--footer-text);
+  font-weight: 500;
+  transition: color 0.3s;
+}
+
+nav i {
+  text-decoration: none;
+  color: var(--footer-text);
+  font-weight: 500;
+  transition: color 0.3s;
+}
+
+nav i:hover {
+  color: var(--accent-orange);
+}
+
+nav a:hover {
+  color: var(--accent-orange);
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  object-fit: cover;
+  border: 2px solid #fff;
+}
+
+
+
+/* --- MAIN --- */
+main {
+  flex: 1;
+  // min-height: 100vh;
+  /* 自動撐開空間 */
+}
+
+.marquee {
+  width: 100%;
+  overflow: hidden;
+  background: #f0f0f0;
+  border: 1px solid #ccc;
+  padding: 10px 0;
+  top: 64px;
+  /* ✅改成你的 header 實際高度 */
+  z-index: 999;
+  position: static;
+}
+
+.marquee__track {
+  display: flex;
+  width: max-content;
+  animation: marquee 15s linear infinite;
+}
+
+.marquee__group {
+  display: flex;
+}
+
+.marquee__item {
+  padding: 0 20px;
+  white-space: nowrap;
+}
+
+.marquee:hover .marquee__track {
+  animation-play-state: paused;
+}
+
+/* 移動半條（因為有兩份一樣的 group） */
+@keyframes marquee {
+  from {
+    transform: translateX(400%);
+  }
+
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+
+/* --- FOOTER --- */
+footer {
+  position: static;
+  background-color: var(--footer-bg);
+  color: var(--footer-text);
+  padding: 10px 0px 10px 0px;
+  margin-top: auto;
+  width: 100%;
+}
+
+.footer-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 30px;
+}
+
+.footer-info p {
+  font-size: 0.9rem;
+  line-height: 1.8;
+}
+
+.footer-bottom {
+  text-align: center;
+  margin-top: 10px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(244, 234, 234, 0.2);
+  /* 使用 footer-text 的透明度 */
+  color: var(--text-disabled);
+  font-size: 0.8rem;
+}
+
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* =========================
+   RWD: <= 1024px (平板/小筆電)
+   ========================= */
+@media (max-width: 1024px) {
+  header {
+    padding: 0.3rem 1rem;
+    gap: 12px;
+  }
+
+  /* LOGO 稍微縮小 */
+  header .logo {
+    height: 44px;
+    /* 你用 h-13(=52px) 的話，這裡讓它在 1024 內縮 */
+  }
+
+  /* 你目前 max-w-4xl + me-90 在小螢幕很容易把版面擠爆 */
+  .max-w-4xl.me-90 {
+    margin-right: 0 !important;
+    max-width: 100% !important;
+  }
+
+  /* 搜尋欄容器：不要再硬卡 max-w-md */
+  .ml-10 {
+    margin-left: 0 !important;
+  }
+
+  .max-w-md {
+    max-width: 420px !important;
+  }
+
+  nav ul {
+    gap: 14px;
+  }
+
+  .marquee__item {
+    padding: 0 14px;
+  }
+
+  .footer-container {
+    padding: 0 16px;
+  }
+
+  input[type="search"] {
+    width: 200% !important;
+  }
+}
+
+/* =========================
+   RWD: <= 768px (手機/窄平板)
+   ========================= */
+@media (max-width: 768px) {
+  header {
+    padding: 0.5rem 0.75rem;
+    flex-wrap: wrap;
+    /* ✅ 讓 header 可換行 */
+    justify-content: space-between;
+  }
+
+  /* LOGO 一排左邊 */
+  header .logo {
+    height: 40px;
+  }
+
+  /* 搜尋欄改成佔滿一整行 */
+  header .max-w-4xl {
+    width: 100%;
+  }
+
+  .max-w-md {
+    max-width: 100% !important;
+  }
+
+  input[type="search"] {
+    width: 100% !important;
+  }
+
+  nav {
+    width: 100%;
+  }
+
+  nav ul {
+    justify-content: flex-end;
+    gap: 12px;
+  }
+
+  /* 跑馬燈字距縮小 */
+  .marquee {
+    padding: 8px 0;
+  }
+
+  .marquee__item {
+    padding: 0 12px;
+    font-size: 0.9rem;
+  }
+
+  /* Footer 改直排，避免左右擠壓 */
+  .footer-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 0 16px;
+  }
+
+  .footer-links {
+    flex-wrap: wrap;
+    row-gap: 6px;
+  }
+}
