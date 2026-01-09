@@ -22,13 +22,10 @@
         <li><i class="pi pi-bell cursor-pointer" style="color: rgb(255, 255, 255); font-size: 1.5rem"></i>
         </li>
         <li><i class="pi pi-cart-plus cursor-pointer" style="color: rgb(255, 255, 255); font-size: 1.5rem"></i></li>
-        <!-- 未登入時 -->
-        <li><a href="login">登入</a></li>
-        <!-- 有登入時 -->
         <li>
           <img [src]="userAvatar" class="w-9 h-9 rounded-full cursor-pointer" (click)="menu.toggle($event)"
             alt="avatar">
-          <p-menu #menu [popup]="true" [model]="items" appendTo="body"></p-menu>
+          <p-menu #menu [popup]="true" [model]="items" [model]="filteredItems" appendTo="body"></p-menu>
         </li>
       </ul>
     </nav>

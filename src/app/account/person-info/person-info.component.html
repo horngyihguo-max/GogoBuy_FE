@@ -15,6 +15,7 @@
           <div
             class="w-32 h-32 rounded-full border-4 border-white shadow-lg overflow-hidden bg-slate-200"
           >
+            <!-- 如果沒有頭像就用名字開頭2字/或是要改成預設頭像也行 -->
             <img
               [src]="
                 editInfo.avatar_url ||
@@ -100,7 +101,7 @@
       <form
         #profileForm="ngForm"
         (ngSubmit)="updateProfile()"
-        class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6"
+        class="flex flex-col md:grid-cols-2 gap-x-8 gap-y-6"
       >
         <div class="space-y-1">
           <label
@@ -111,6 +112,7 @@
             type="text"
             name="nickname"
             [(ngModel)]="editInfo.nickname"
+            placeholder="ex: Alice"
             #nickname="ngModel"
             required
             class="w-full border-b border-slate-200 py-2 outline-none focus:border-red-900 transition-colors font-medium text-slate-700"
@@ -120,7 +122,8 @@
           }
         </div>
 
-        <div class="space-y-1">
+      <!-- 因後端OTP認證，要單獨一個EMAIL修改頁面 -->
+        <!-- <div class="space-y-1">
           <label
             class="block text-[18px] font-bold text-slate-500 uppercase tracking-widest"
             >信箱 / E-mail</label
@@ -129,6 +132,7 @@
             type="email"
             name="email"
             [(ngModel)]="editInfo.email"
+            placeholder="ex: test123@gmail.com"
             #email="ngModel"
             required
             pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
@@ -137,7 +141,7 @@
           @if (email.invalid && email.touched) {
           <p class="text-[15px] text-red-900 font-bold">Email 格式不正確</p>
           }
-        </div>
+        </div> -->
 
         <div class="space-y-1">
           <label
@@ -148,6 +152,7 @@
             type="text"
             name="phone"
             [(ngModel)]="editInfo.phone"
+            placeholder="ex: 0987654321"
             #phone="ngModel"
             required
             pattern="^09\d{2}[\s\-]?\d{3}[\s\-]?\d{3}$"
@@ -167,7 +172,7 @@
             type="text"
             name="carrier"
             [(ngModel)]="editInfo.carrier"
-            placeholder="/ABC1234"
+            placeholder="ex: /ABC1234"
             class="w-full border-b border-slate-200 py-2 outline-none focus:border-red-900 transition-colors font-medium text-slate-700"
           />
         </div>
@@ -180,8 +185,10 @@
           >
             儲存所有修改
           </button>
+          <!-- 實驗功能 -->
           <button
             type="button"
+            (click)="changePassword()"
             class="md:w-1/3 bg-slate-100 text-slate-600 font-bold py-4 rounded-2xl cursor-pointer hover:bg-slate-200 transition-all"
           >
             修改密碼

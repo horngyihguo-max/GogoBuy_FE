@@ -7,8 +7,16 @@ import { MenuItem } from 'primeng/api';
 import { MenuModule } from 'primeng/menu';
 import { PanelMenuModule } from 'primeng/panelmenu';
 import { InputTextModule } from 'primeng/inputtext';
+import { AuthService } from './@service/auth.service';
+import { HttpService } from './@service/http.service';
 
-
+export interface User {
+  id: string;
+  nickname: string;
+  email: string;
+  avatar_url: string | null;
+  role: 'ADMIN' | 'USER';
+}
 @Component({
   selector: 'app-root',
   imports: [
@@ -25,15 +33,21 @@ import { InputTextModule } from 'primeng/inputtext';
   styleUrl: './app.component.scss',
 })
 export class AppComponent {
-  constructor(public router: Router) { }
+  constructor(public router: Router, private http: HttpService, public auth: AuthService) { }
   title = 'gogobuy';
+
   // 預設頭像
   userAvatar = "/Snoopy.jpg";
+
   // 用戶頭向下拉選單
   items: MenuItem[] = [
     { label: '用戶首頁', icon: 'pi pi-user', routerLink: '/personInfo' },
     { label: '我的訂單', icon: 'pi pi-receipt', routerLink: '/orders' },
+    { label: '登入', icon: 'pi pi-sign-in', routerLink: '/login' },
+    { label: '登出', icon: 'pi pi-sign-out', command: () => { this.logout(); } }
   ];
+
+  // 手機端常見問題選單
   problems: MenuItem[] = [
     { label: '隱私政策', icon: 'pi pi-shield', routerLink: '/privacyPolicy' },
     { label: '服務條款', icon: 'pi pi-book', routerLink: '/conditions' },
@@ -43,16 +57,48 @@ export class AppComponent {
     Swal.fire('SweetAlert2 is working!');
   }
 
+  // 判斷是否在/gogobuy路徑
   get showSearch(): boolean {
     return this.router.url.startsWith('/gogobuy');
   }
 
+  // 判斷是否已登入
+  get isLoggedIn(): boolean {
+    return !!localStorage.getItem('user_session');
+  }
+
+  // 使用session判斷選單出現列表
+  get filteredItems() {
+    const loggedIn = this.isLoggedIn;
+    return this.items.filter(item => {
+      // 如果偵測到session顯示登出
+      if (item.label === '登出') {
+        return loggedIn;
+      }
+
+      // 如果沒有偵測到session顯示登入
+      if (item.label === '登入') {
+        return !loggedIn;
+      }
+      return true;
+    });
+  }
+
+  //登出清除session
+  logout() {
+    this.http.postApi('http://localhost:8080/gogobuy/user/logout', { withCredentials: true })
+      .subscribe(() => {
+        // 清除前端紀錄
+        localStorage.removeItem('user_session');
+        // 回到首頁
+        this.router.navigate(['/gogobuy']);
+        Swal.fire({
+          title: '已登出',
+          icon: 'success',
+          showConfirmButton: false,
+          timer: 1000
+        });
+      });
+  }
 }
 
-export interface User {
-  id: string;
-  nickname: string;
-  email: string;
-  avatar_url: string | null;
-  role: 'ADMIN' | 'USER';
-}

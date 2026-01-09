@@ -1,6 +1,8 @@
+import { AuthService } from './../../@service/auth.service';
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HttpService } from '../../@service/http.service';
 
 @Component({
   selector: 'app-login',
@@ -9,6 +11,8 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './login.component.scss',
 })
 export class LoginComponent {
+  constructor(private http: HttpService, public auth: AuthService) {}
+
   // 模式: 登入 | 註冊
   pageMode: 'login' | 'register' = 'login';
 
@@ -22,6 +26,13 @@ export class LoginComponent {
     phone: '',
     password: '',
   };
+
+  ngOnInit(): void {
+    //Called after the constructor, initializing input properties, and the first call to ngOnChanges.
+    //Add 'implements OnInit' to the class.
+    this.user.email ="test2@gmail.com";
+    this.user.password= 'test1234';
+  }
 
   // 切換模式
   toggleMode() {
@@ -50,7 +61,7 @@ export class LoginComponent {
       password: this.user.password,
     };
     console.log('登入提交資料:' + JSON.stringify(payload, null, 2));
-    // TODO POST
+    this.auth.login(payload); // 呼叫AuthService
   }
 
   // 註冊API
@@ -62,7 +73,7 @@ export class LoginComponent {
       password: this.user.password,
     };
     console.log('註冊提交資料:' + JSON.stringify(payload, null, 2));
-    // TODO POST
+    this.auth.register(payload); // 呼叫AuthService
   }
 
   // TODO Google 登入
