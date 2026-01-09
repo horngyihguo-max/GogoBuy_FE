@@ -1,10 +1,12 @@
+/* --- HEADER --- */
+/* 懸浮窗跟隨 */
 .topbar {
   position: sticky;
   top: 0;
   z-index: 1000;
 }
 
-/* --- HEADER --- */
+/* header背景顏色和排版 */
 header {
   background-color: var(--brand-primary);
   border-bottom: 2px solid var(--brand-primary);
@@ -17,33 +19,26 @@ header {
   align-items: center;
 }
 
-
+/* nav改為一列(原本是上下) */
 nav ul {
   display: flex;
   list-style: none;
   gap: 20px;
 }
 
+/* nav a字體顏色 */
 nav a {
-  text-decoration: none;
   color: var(--footer-text);
-  font-weight: 500;
-  transition: color 0.3s;
-}
-
-nav i {
-  text-decoration: none;
-  color: var(--footer-text);
-  font-weight: 500;
-  transition: color 0.3s;
 }
 
 nav i:hover {
-  color: var(--accent-orange);
+  transform: scale(1.2);
+  transition: all 0.5s;
 }
 
 nav a:hover {
   color: var(--accent-orange);
+  transition: all 0.5s;
 }
 
 .avatar {
@@ -55,13 +50,18 @@ nav a:hover {
   border: 2px solid #fff;
 }
 
+nav img:hover {
+  transform: scale(1.2);
+  transition: all 0.5s;
+}
 
+.search-mobile {
+  display: none;
+}
 
 /* --- MAIN --- */
 main {
   flex: 1;
-  // min-height: 100vh;
-  /* 自動撐開空間 */
 }
 
 .marquee {
@@ -71,10 +71,10 @@ main {
   border: 1px solid #ccc;
   padding: 10px 0;
   top: 64px;
-  /* ✅改成你的 header 實際高度 */
   z-index: 999;
   position: static;
 }
+
 
 .marquee__track {
   display: flex;
@@ -95,10 +95,9 @@ main {
   animation-play-state: paused;
 }
 
-/* 移動半條（因為有兩份一樣的 group） */
 @keyframes marquee {
   from {
-    transform: translateX(400%);
+    transform: translateX(100vw);
   }
 
   to {
@@ -131,12 +130,16 @@ footer {
   line-height: 1.8;
 }
 
+.footer-links a:hover {
+  color: var(--accent-orange);
+  transition: all 0.5s;
+}
+
 .footer-bottom {
   text-align: center;
   margin-top: 10px;
   padding-top: 20px;
   border-top: 1px solid rgba(244, 234, 234, 0.2);
-  /* 使用 footer-text 的透明度 */
   color: var(--text-disabled);
   font-size: 0.8rem;
 }
@@ -147,92 +150,47 @@ footer {
   min-height: 100vh;
 }
 
-/* =========================
-   RWD: <= 1024px (平板/小筆電)
-   ========================= */
-@media (max-width: 1024px) {
-  header {
-    padding: 0.3rem 1rem;
-    gap: 12px;
-  }
-
-  /* LOGO 稍微縮小 */
-  header .logo {
-    height: 44px;
-    /* 你用 h-13(=52px) 的話，這裡讓它在 1024 內縮 */
-  }
-
-  /* 你目前 max-w-4xl + me-90 在小螢幕很容易把版面擠爆 */
-  .max-w-4xl.me-90 {
-    margin-right: 0 !important;
-    max-width: 100% !important;
-  }
-
-  /* 搜尋欄容器：不要再硬卡 max-w-md */
-  .ml-10 {
-    margin-left: 0 !important;
-  }
-
-  .max-w-md {
-    max-width: 420px !important;
-  }
-
-  nav ul {
-    gap: 14px;
-  }
-
-  .marquee__item {
-    padding: 0 14px;
-  }
-
-  .footer-container {
-    padding: 0 16px;
-  }
-
-  input[type="search"] {
-    width: 200% !important;
-  }
+/*footer-mobile(平時隱藏)*/
+.footer-mobile {
+  display: none
 }
 
-/* =========================
-   RWD: <= 768px (手機/窄平板)
-   ========================= */
+/*problems(平時隱藏)*/
+.question {
+  display: none
+}
+
+/* RWD: <= 768px (手機) */
 @media (max-width: 768px) {
   header {
     padding: 0.5rem 0.75rem;
-    flex-wrap: wrap;
-    /* ✅ 讓 header 可換行 */
-    justify-content: space-between;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 
-  /* LOGO 一排左邊 */
   header .logo {
     height: 40px;
-  }
-
-  /* 搜尋欄改成佔滿一整行 */
-  header .max-w-4xl {
-    width: 100%;
-  }
-
-  .max-w-md {
-    max-width: 100% !important;
-  }
-
-  input[type="search"] {
-    width: 100% !important;
+    display: block;
+    margin: 0 auto;
   }
 
   nav {
-    width: 100%;
+    display: none;
+  }
+
+  .max-w-md {
+    max-width: 100%;
+  }
+
+  nav {
+    width: 30%;
   }
 
   nav ul {
     justify-content: flex-end;
-    gap: 12px;
   }
 
-  /* 跑馬燈字距縮小 */
   .marquee {
     padding: 8px 0;
   }
@@ -242,16 +200,142 @@ footer {
     font-size: 0.9rem;
   }
 
-  /* Footer 改直排，避免左右擠壓 */
-  .footer-container {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-    padding: 0 16px;
+  .search-mobile {
+    display: block;
+    position: fixed;
+    top: 98px;
+    z-index: 1;
+    background: #fff;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, .08);
   }
 
-  .footer-links {
-    flex-wrap: wrap;
-    row-gap: 6px;
+  input[type="search"] {
+    width: 100vh;
   }
+
+  main {
+    padding-bottom: 69px;
+  }
+
+  main.main--with-mobile-search {
+    padding-top: 49px;
+    padding-bottom: 52px;
+  }
+
+  /* 在手機端隱藏footer */
+  footer {
+    display: none;
+  }
+
+  .disappear {
+    display: none;
+  }
+
+  /* 在手機端顯示problems */
+  .question {
+    display: block;
+    position: fixed;
+    right: 16px;
+    bottom: 78px;
+    z-index: 9999;
+    width: 52px;
+    height: 52px;
+    border-radius: 999px;
+    border: none;
+    cursor: pointer;
+    background: #662222;
+    color: #fff;
+    font-size: 24px;
+    font-weight: 700;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, .18);
+    $balloon-color: rgb(0, 0, 0);
+
+    &:before,
+    &:after {
+      bottom: 100%;
+      left: 35%;
+      transform: translate(-100%, 0);
+      position: absolute;
+      z-index: 10;
+      opacity: 0;
+      animation: fadeInOut 5s forwards;
+      pointer-events: none
+    }
+
+    @keyframes fadeInOut {
+      0% {
+        opacity: 0;
+      }
+
+      10% {
+        opacity: 1;
+      }
+
+      90% {
+        opacity: 1;
+      }
+
+      100% {
+        opacity: 0;
+      }
+    }
+
+    &:after {
+      white-space: nowrap;
+      max-width: 200px;
+      line-height: 1.5;
+      text-align: left;
+      font-size: 16px;
+      background-color: $balloon-color;
+      border-radius: 4px;
+      color: white;
+      content: attr(balloon-data);
+      margin-bottom: 12px;
+      padding: 10px;
+    }
+
+    &:before {
+      content: "";
+      margin-bottom: 4px;
+      border-top: solid 8px $balloon-color;
+      border-left: solid 8px transparent;
+      border-right: solid 8px transparent;
+    }
+  }
+
+  /* 在手機端顯示footer */
+  .footer-mobile {
+    display: block;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    height: 69px;
+    display: flex;
+    background-color: var(--footer-bg);
+    justify-content: space-around;
+    align-items: center;
+
+    a {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      text-align: center;
+      text-decoration: none;
+      padding: 6px 0;
+    }
+
+    a>div,
+    a>div>i {
+      color: var(--footer-text);
+    }
+
+    a>div>img {
+      width: 24px;
+      height: 25px;
+    }
+  }
+
 }

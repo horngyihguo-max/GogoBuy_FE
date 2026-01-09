@@ -3,27 +3,31 @@
     <!-- LOGO -->
     <img routerLink="gogobuy" src="ggb3.png" class="logo cursor-pointer h-13">
 
-    <!--搜尋欄-->
+    <!--搜尋欄，@if (showSearch)讓搜尋欄只在route:gogobuy出現-->
     @if (showSearch) {
-    <div class="max-w-4xl me-90">
-      <div class="ml-10 relative w-full max-w-md">
-        <i class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-lg pointer-events-none"></i>
+    <div class="max-w-4xl me-90 disappear">
+      <div class="ml-10 relative w-full max-w-md disappear">
+        <i
+          class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-lg pointer-events-none disappear"></i>
         <input type="search" placeholder="搜尋店家、地址" class="w-3xl pl-10 pr-4 py-3 rounded-lg border border-gray-300
              focus:outline-none focus:ring-2 focus:ring-red-300
-             focus:border-red-400 bg-white" />
+             focus:border-red-400 bg-white disappear" />
       </div>
     </div>
     }
+
     <nav>
       <!-- 右側功能列表 -->
-      <ul class="items-center justify-center">
-        <li><i class="pi pi-bell cursor-pointer" style="color: rgb(255, 255, 255); font-size: 1.5rem"></i></li>
-        <li><i class="pi pi-cart-plus cursor-pointer" style="color: rgb(255, 255, 255); font-size: 1.5rem"></i></li>
+      <ul class="items-center justify-center disappear">
+        <li><i class="pi pi-bell cursor-pointer disappear" style="color: rgb(255, 255, 255); font-size: 1.5rem"></i>
+        </li>
+        <li><i class="pi pi-cart-plus cursor-pointer disappear"
+            style="color: rgb(255, 255, 255); font-size: 1.5rem"></i></li>
         <!-- 未登入時 -->
-        <li><a href="login">登入</a></li>
+        <li><a href="login" class="disappear">登入</a></li>
         <!-- 有登入時 -->
         <li>
-          <img [src]="userAvatar" class="w-9 h-9 rounded-full cursor-pointer" (click)="menu.toggle($event)"
+          <img [src]="userAvatar" class="w-9 h-9 rounded-full cursor-pointer disappear" (click)="menu.toggle($event)"
             alt="avatar">
           <p-menu #menu [popup]="true" [model]="items" appendTo="body"></p-menu>
         </li>
@@ -31,6 +35,7 @@
     </nav>
   </header>
 
+  <!-- 跑馬燈 -->
   <div class="marquee">
     <div class="marquee__track">
       <div class="marquee__group"> <span class="marquee__item">Your scrolling text goes here.</span> <span
@@ -38,11 +43,25 @@
     </div>
   </div>
 </div>
-<!-- 顯示頁面 -->
-<main>
+
+<!--搜尋欄，class="search-mobile"讓搜尋欄只在手機板出現-->
+@if (showSearch) {
+<div class="search-mobile">
+  <div class=" relative w-full max-w-md">
+    <i class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-lg pointer-events-none"></i>
+    <input type="search" placeholder="搜尋店家、地址" class="pl-10 pr-4 py-3 rounded-lg border border-gray-300
+               focus:outline-none focus:ring-2 focus:ring-red-300
+               focus:border-red-400 bg-white" />
+  </div>
+</div>
+}
+
+<!-- main(顯示頁面，其他網頁主要修改) -->
+<main [class.main--with-mobile-search]="showSearch">
   <router-outlet></router-outlet>
 </main>
 
+<!-- footer -->
 <footer>
   <div class="footer-container">
     <div class="footer-info">
@@ -62,3 +81,46 @@
     <a class="font-bold">&copy; 2026 GogoBuy</a>
   </div>
 </footer>
+
+
+<!-- 常見問題+氣泡 -->
+<button class="question" type="button" balloon-data="有甚麼疑問嗎?點擊這裡" aria-label="常見問題" (click)="problemMenu.toggle($event)">
+  ?
+</button>
+<p-menu #problemMenu [popup]="true" [model]="problems"></p-menu>
+
+<!-- 手機板footer -->
+<div class="footer-mobile">
+  <a>
+    <div>
+      <i class="pi pi-home cursor-pointer" style="font-size: 1.5rem"></i>
+    </div>
+    <div>
+      訂購
+    </div>
+  </a>
+  <a>
+    <div>
+      <i class="pi pi-cart-plus cursor-pointer" style="font-size: 1.5rem"></i>
+    </div>
+    <div>
+      購物車
+    </div>
+  </a>
+  <a>
+    <div>
+      <i class="pi pi-receipt cursor-pointer" style="font-size: 1.5rem"></i>
+    </div>
+    <div>
+      訂單
+    </div>
+  </a>
+  <a>
+    <div>
+      <img [src]="userAvatar" class="w-9 h-9 rounded-full cursor-pointer" alt="avatar">
+    </div>
+    <div>
+      我的
+    </div>
+  </a>
+</div>

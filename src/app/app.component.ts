@@ -34,7 +34,12 @@ export class AppComponent {
     { label: '產品說明', icon: 'pi pi-box', routerLink: '/404' },
     { label: '關於我們', icon: 'pi pi-info-circle', routerLink: '/about' }
   ];
-
+  problems: MenuItem[] = [
+    { label: '隱私政策', icon: 'pi pi-shield', routerLink: '/privacyPolicy' },
+    { label: '服務條款', icon: 'pi pi-book', routerLink: '/conditions' },
+    { label: '常見問題', icon: 'pi pi-headphones', routerLink: '/problems' },
+    { label: '通知訊息', icon: 'pi pi-bell', routerLink: '/404' },
+  ];
   test() {
     Swal.fire('SweetAlert2 is working!');
   }
