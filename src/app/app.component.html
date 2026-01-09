@@ -3,7 +3,7 @@
     <!-- LOGO -->
     <img routerLink="gogobuy" src="ggb3.png" class="logo cursor-pointer h-13">
 
-    <!--搜尋欄，@if (showSearch)讓搜尋欄只在route:gogobuy出現-->
+    <!-- 搜尋欄，@if (showSearch)讓搜尋欄只在route:gogobuy出現 -->
     @if (showSearch) {
     <div class="max-w-4xl me-90 disappear">
       <div class="ml-10 relative w-full max-w-md disappear">
@@ -19,15 +19,14 @@
     <nav>
       <!-- 右側功能列表 -->
       <ul class="items-center justify-center disappear">
-        <li><i class="pi pi-bell cursor-pointer disappear" style="color: rgb(255, 255, 255); font-size: 1.5rem"></i>
+        <li><i class="pi pi-bell cursor-pointer" style="color: rgb(255, 255, 255); font-size: 1.5rem"></i>
         </li>
-        <li><i class="pi pi-cart-plus cursor-pointer disappear"
-            style="color: rgb(255, 255, 255); font-size: 1.5rem"></i></li>
+        <li><i class="pi pi-cart-plus cursor-pointer" style="color: rgb(255, 255, 255); font-size: 1.5rem"></i></li>
         <!-- 未登入時 -->
-        <li><a href="login" class="disappear">登入</a></li>
+        <li><a href="login">登入</a></li>
         <!-- 有登入時 -->
         <li>
-          <img [src]="userAvatar" class="w-9 h-9 rounded-full cursor-pointer disappear" (click)="menu.toggle($event)"
+          <img [src]="userAvatar" class="w-9 h-9 rounded-full cursor-pointer" (click)="menu.toggle($event)"
             alt="avatar">
           <p-menu #menu [popup]="true" [model]="items" appendTo="body"></p-menu>
         </li>
@@ -44,7 +43,7 @@
   </div>
 </div>
 
-<!--搜尋欄，class="search-mobile"讓搜尋欄只在手機板出現-->
+<!-- 手機板搜尋欄，class="search-mobile"讓搜尋欄只在手機板出現 -->
 @if (showSearch) {
 <div class="search-mobile">
   <div class=" relative w-full max-w-md">
@@ -84,21 +83,25 @@
 
 
 <!-- 常見問題+氣泡 -->
-<button class="question" type="button" balloon-data="有甚麼疑問嗎?點擊這裡" aria-label="常見問題" (click)="problemMenu.toggle($event)">
+<button class="question" type="button" balloon-data="有甚麼疑問嗎?點擊這裡" aria-label="常見問題"
+  (click)="problemMenu.toggle($event)">
   ?
 </button>
 <p-menu #problemMenu [popup]="true" [model]="problems"></p-menu>
 
 <!-- 手機板footer -->
 <div class="footer-mobile">
-  <a>
+  <!-- 首頁 -->
+  <a routerLink="gogobuy">
     <div>
-      <i class="pi pi-home cursor-pointer" style="font-size: 1.5rem"></i>
+      <i class="pi pi-home cursor-pointer" style="font-size: 1.5rem"
+        [ngStyle]="{ 'color': (router.url == '/gogobuy') ? 'rgba(0, 0, 0)' : '' }"></i>
     </div>
-    <div>
+    <div [ngStyle]="{ 'color': (router.url == '/gogobuy') ? 'rgba(0, 0, 0)' : '' }">
       訂購
     </div>
   </a>
+  <!-- 購物車 -->
   <a>
     <div>
       <i class="pi pi-cart-plus cursor-pointer" style="font-size: 1.5rem"></i>
@@ -107,19 +110,32 @@
       購物車
     </div>
   </a>
-  <a>
+  <!-- 訂單 -->
+  <a routerLink="orders">
     <div>
-      <i class="pi pi-receipt cursor-pointer" style="font-size: 1.5rem"></i>
+      <i class="pi pi-receipt cursor-pointer" style="font-size: 1.5rem"
+        [ngStyle]="{ 'color': (router.url == '/orders') ? 'rgba(0, 0, 0)' : '' }"></i>
     </div>
-    <div>
+    <div [ngStyle]="{ 'color': (router.url == '/orders') ? 'rgba(0, 0, 0)' : '' }">
       訂單
     </div>
   </a>
-  <a>
+  <!-- 通知訊息 -->
+  <a routerLink="404">
     <div>
-      <img [src]="userAvatar" class="w-9 h-9 rounded-full cursor-pointer" alt="avatar">
+      <i class="pi pi-bell cursor-pointer" style="font-size: 1.5rem"></i>
     </div>
     <div>
+      訊息
+    </div>
+  </a>
+  <!-- 我的 -->
+  <a routerLink="personInfo">
+    <div>
+      <img [src]="userAvatar" class="w-9 h-9 rounded-full cursor-pointer" alt="avatar"
+        [ngStyle]="{ 'color': (router.url == '/personInfo') ? 'rgba(0, 0, 0)' : '' }">
+    </div>
+    <div [ngStyle]="{ 'color': (router.url == '/personInfo') ? 'rgba(0, 0, 0)' : '' }">
       我的
     </div>
   </a>

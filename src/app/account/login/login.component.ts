@@ -6,7 +6,7 @@ import { FormsModule } from '@angular/forms';
   selector: 'app-login',
   imports: [CommonModule, FormsModule],
   templateUrl: './login.component.html',
-  styleUrl: './login.component.scss'
+  styleUrl: './login.component.scss',
 })
 export class LoginComponent {
   // 模式: 登入 | 註冊
@@ -20,7 +20,7 @@ export class LoginComponent {
     nickname: '',
     email: '',
     phone: '',
-    password: ''
+    password: '',
   };
 
   // 切換模式
@@ -36,9 +36,9 @@ export class LoginComponent {
 
   // 送出分流
   onSubmit() {
-    if(this.pageMode == 'login'){
+    if (this.pageMode == 'login') {
       this.login();
-    }else{
+    } else {
       this.register();
     }
   }
@@ -49,8 +49,8 @@ export class LoginComponent {
       email: this.user.email,
       password: this.user.password,
     };
-    console.log("登入提交資料:" + JSON.stringify(payload, null, 2));
-    // POST
+    console.log('登入提交資料:' + JSON.stringify(payload, null, 2));
+    // TODO POST
   }
 
   // 註冊API
@@ -61,9 +61,12 @@ export class LoginComponent {
       phone: this.user.phone,
       password: this.user.password,
     };
-    console.log("註冊提交資料:" + JSON.stringify(payload, null, 2));
-    // POST
+    console.log('註冊提交資料:' + JSON.stringify(payload, null, 2));
+    // TODO POST
   }
 
-
+  // TODO Google 登入
+  loginWithGoogle() {
+    console.log('模擬google登入');
+  }
 }

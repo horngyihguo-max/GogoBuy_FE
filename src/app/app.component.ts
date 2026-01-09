@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { RouterOutlet, RouterLinkActive, RouterLink, Router } from '@angular/router';
 import Swal from 'sweetalert2';
 import { ButtonModule } from 'primeng/button';
@@ -17,7 +18,8 @@ import { InputTextModule } from 'primeng/inputtext';
     InputTextModule,
     RouterLinkActive,
     RouterLink,
-    MenuModule
+    MenuModule,
+    CommonModule
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
@@ -29,16 +31,13 @@ export class AppComponent {
   userAvatar = "/Snoopy.jpg";
   // 用戶頭向下拉選單
   items: MenuItem[] = [
-    { label: '首頁', icon: 'pi pi-home', routerLink: '/' },
+    { label: '用戶首頁', icon: 'pi pi-user', routerLink: '/personInfo' },
     { label: '我的訂單', icon: 'pi pi-receipt', routerLink: '/orders' },
-    { label: '產品說明', icon: 'pi pi-box', routerLink: '/404' },
-    { label: '關於我們', icon: 'pi pi-info-circle', routerLink: '/about' }
   ];
   problems: MenuItem[] = [
     { label: '隱私政策', icon: 'pi pi-shield', routerLink: '/privacyPolicy' },
     { label: '服務條款', icon: 'pi pi-book', routerLink: '/conditions' },
     { label: '常見問題', icon: 'pi pi-headphones', routerLink: '/problems' },
-    { label: '通知訊息', icon: 'pi pi-bell', routerLink: '/404' },
   ];
   test() {
     Swal.fire('SweetAlert2 is working!');

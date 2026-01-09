@@ -12,7 +12,7 @@ export class ConditionsComponent {
 
   scrollTo(elementId: string): void {
     // 根據 Nav 高度微調
-    this.viewportScroller.setOffset([0, 80]);
+    this.viewportScroller.setOffset([0, 130]);
     this.viewportScroller.scrollToAnchor(elementId);
   }
 }

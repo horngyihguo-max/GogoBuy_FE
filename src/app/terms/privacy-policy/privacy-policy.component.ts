@@ -13,7 +13,7 @@ export class PrivacyPolicyComponent {
   // 簡單的捲動邏輯
   scrollTo(elementId: string): void {
     // 設定偏移量（補償上方固定導航欄的高度）
-    this.viewportScroller.setOffset([0, 80]);
+    this.viewportScroller.setOffset([0, 130]);
     this.viewportScroller.scrollToAnchor(elementId);
   }
 
