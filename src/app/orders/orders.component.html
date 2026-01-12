@@ -1,0 +1,113 @@
+<!--佔位用訂單，沒有實際作用-->
+<body class="bg-slate-50 text-slate-800 antialiased h-svh">
+  <div class="max-w-4xl mx-auto py-12 px-6 lg:py-20">
+    <p-tabs value="active">
+      <p-tablist>
+        <p-tab value="active">進行中訂單</p-tab>
+        <p-tab value="history">歷史訂單</p-tab>
+      </p-tablist>
+
+      <p-tabpanels>
+        <!-- 進行中 -->
+        <p-tabpanel value="active">
+          <div class="actions">
+            <button pButton label="展開全部" (click)="expandAllActive()"></button>
+            <button pButton label="收合全部" (click)="collapseAllActive()"></button>
+          </div>
+
+          <p-accordion [(value)]="activeOpenValues" [multiple]="true">
+            <ng-container *ngFor="let o of activeOrders">
+              <p-accordion-panel [value]="o.code">
+                <p-accordion-header>
+                  <div class="order-header">
+                    <div>
+                      <div class="title">#{{ o.code }}｜{{ o.storeName }}</div>
+                      <div class="sub">{{ o.createdAt | date:'yyyy/MM/dd HH:mm' }}</div>
+                    </div>
+                    <p-tag [value]="
+                    o.statusLabel" [severity]="
+                    o.statusLabel === '進行中' ? 'info' :
+                    o.statusLabel === '已完成' ? 'success' :
+                    o.statusLabel === '已取消' ? 'danger' :'warn'">
+                    </p-tag>
+                  </div>
+                </p-accordion-header>
+
+                <p-accordion-content>
+                  <div class="order-body">
+                    <div class="row">
+                      <div>收件人：{{ o.receiverName }}</div>
+                      <div>電話：{{ o.phone }}</div>
+                    </div>
+
+                    <div class="items">
+                      <div class="item" *ngFor="let it of o.items">
+                        <div class="name">{{ it.name }}</div>
+                        <div class="meta">
+                          x{{ it.qty }}｜{{ it.price }} 元
+                          <span *ngIf="it.note">｜備註：{{ it.note }}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="total">總計：{{ o.total }} 元</div>
+                  </div>
+                </p-accordion-content>
+              </p-accordion-panel>
+            </ng-container>
+          </p-accordion>
+        </p-tabpanel>
+
+        <!-- 歷史 -->
+        <p-tabpanel value="history">
+          <div class="actions">
+            <button pButton label="展開全部" (click)="expandAllHistory()"></button>
+            <button pButton label="收合全部" (click)="collapseAllHistory()"></button>
+          </div>
+
+          <p-accordion [(value)]="historyOpenValues" [multiple]="true">
+            <ng-container *ngFor="let o of historyOrders">
+              <p-accordion-panel [value]="o.code">
+                <p-accordion-header>
+                  <div class="order-header">
+                    <div>
+                      <div class="title">#{{ o.code }}｜{{ o.storeName }}</div>
+                      <div class="sub">{{ o.createdAt | date:'yyyy/MM/dd HH:mm' }}</div>
+                    </div>
+                    <p-tag [value]="
+                    o.statusLabel" [severity]="
+                    o.statusLabel === '進行中' ? 'info' :
+                    o.statusLabel === '已完成' ? 'success' :
+                    o.statusLabel === '已取消' ? 'danger' :'warn'">
+                    </p-tag>
+                  </div>
+                </p-accordion-header>
+
+                <p-accordion-content>
+                  <div class="order-body">
+                    <div class="row">
+                      <div>收件人：{{ o.receiverName }}</div>
+                      <div>電話：{{ o.phone }}</div>
+                    </div>
+
+                    <div class="items">
+                      <div class="item" *ngFor="let it of o.items">
+                        <div class="name">{{ it.name }}</div>
+                        <div class="meta">
+                          x{{ it.qty }}｜{{ it.price }} 元
+                          <span *ngIf="it.note">｜備註：{{ it.note }}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="total">總計：{{ o.total }} 元</div>
+                  </div>
+                </p-accordion-content>
+              </p-accordion-panel>
+            </ng-container>
+          </p-accordion>
+        </p-tabpanel>
+      </p-tabpanels>
+    </p-tabs>
+  </div>
+</body>

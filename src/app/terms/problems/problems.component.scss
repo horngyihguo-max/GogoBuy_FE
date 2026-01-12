@@ -1,0 +1,13 @@
+.help {
+  background-color: var(--brand-primary);
+}
+
+.helpBt {
+  background-color: var(--accent-orange);
+  border: 2px solid rgb(112, 26, 26);
+}
+
+.helpBt:hover {
+  background-color: #d7753c;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.2);  /* 浮起時陰影 */
+}
