@@ -6,11 +6,8 @@ import { Routes } from '@angular/router';
 import { GogoBuyComponent } from './gogo-buy/gogo-buy.component';
 import { PageNotFoundComponent } from './terms/page-not-found/page-not-found.component';
 import { OrdersComponent } from './orders/orders.component';
-<<<<<<< HEAD
 import { PersonInfoComponent } from './account/person-info/person-info.component';
-=======
 import { StoreComponent } from './store/store.component';
->>>>>>> origin/Yaaaap
 
 export const routes: Routes = [
   // 首頁

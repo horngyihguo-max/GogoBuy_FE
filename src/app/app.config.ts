@@ -18,20 +18,11 @@ export const appConfig: ApplicationConfig = {
         preset: Aura,
         options: {
           prefix: 'p',
-<<<<<<< HEAD
           darkModeSelector: false || 'none',
-          cssLayer: false,
-        },
-      },
-    }),
-  ],
-=======
-          darkModeSelector:  false || 'none',
           cssLayer: false
         }
       }
     }),
     provideHttpClient(),
   ]
->>>>>>> origin/Yaaaap
 };
