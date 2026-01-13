@@ -1,62 +1,80 @@
 <div class="flex flex-col lg:flex-row gap-6 p-5">
   <!-- 店家資訊 左 -->
-  <div class="w-full lg:w-80 text-center space-y-3">
-    <div class="flex justify-center">
-      <p-image [src]="store.image" alt="store" width="250" class="mx-auto" />
-    </div>
-    <p class="text-2xl font-semibold">{{ store.storesname }}</p>
-    <p class="text-sm text-gray-600">{{ store.memo }}</p>
+  <div class="w-full lg:w-80 text-center space-y-3 flex justify-center">
+    <div class="w-full">
+      @if(store.isPublic == true){
+      <div class="flex justify-center">
+        <p-image [src]="store.image" alt="store" width="250" class="mx-auto" />
+      </div>
+      <p class="text-2xl font-semibold">{{ store.storesname }}</p>
 
-    <div class="text-sm text-[#662222] space-y-1">
-      <p>{{ store.address }}</p>
-      <p>{{ store.phone }}</p>
-    </div>
-    <button class="rounded-full
+      <div class="text-sm text-[#662222] space-y-1">
+        <p>{{ store.address }}</p>
+        <p>{{ store.phone }}</p>
+      </div>
+      <button class="rounded-full
          border border-[#662222] bg-white px-5 py-2
          text-sm font-medium text-[#662222] transition hover:bg-[#662222]/10" (click)="opendStoreInfo()">詳細資訊
-    </button>
+      </button>
+      } @else {
+      <div class="w-full bg-white border border-gray-200 rounded-xl overflow-hidden shadow-md">
+        <div class="p-10 flex flex-col items-center justify-center min-h-[150px]">
+          <button class="text-xs font-semibold text-blue-600 uppercase" (click)="addStore()">
+            新增店家資訊<br>
+            <span class="text-2xl block mt-2">+</span>
+          </button>
+        </div>
+      </div>
+      }
+    </div>
   </div>
 
+
+
+
   <!-- 右 -->
-  <div class="flex-1 space-y-4 ">
+  <div class="flex-1 space-y-4  bg-white border border-gray-200 rounded-xl overflow-hidden shadow-md p-5">
 
     <!-- 品項類別選擇 -->
     <div class="border-b border-[#662222]/20 mb-4">
-      <nav class="flex items-center justify-between">
-        <div class="flex items-center gap-8">
-          @for(menuCategories of store.menuCategoriesVoList; track $index){
-          <button class="group relative pb-3 text-[#662222] font-semibold whitespace-nowrap">
-            {{ menuCategories.name }}
-            <span class="absolute left-0 bottom-0 h-[2px] w-full bg-[#662222]"></span>
+      <nav class="relative flex items-end justify-between">
+        <div class="relative flex items-end gap-8">
+          @for(category of store.menuCategoriesVoList; track $index) {
+          <button #tabBtn (click)="selectCategory(category.name, $index)"
+            class="px-4 pb-2 font-semibold whitespace-nowrap transition-colors shrink-0"
+            [style.color]="selectedIndex === $index ? '#662222' : 'rgba(102, 34, 34, 0.4)'"> {{ category.name }}
           </button>
           }
+          <span class="absolute bottom-0 h-[2px] bg-[#662222] transition-all duration-300"
+            [style.width.px]="indicatorWidth" [style.transform]="'translateX(' + indicatorLeft + 'px)'"></span>
 
-          <div class="pb-3 flex items-center relative">
+          <!-- 新增類別按鈕 -->
+          <div class="flex items-center relative ml-4">
             @if (!isAdding) {
-            <button (click)="startAdding($event)"
-              class="flex items-center gap-1 text-[#662222]/60 font-semibold hover:text-[#662222] transition-colors whitespace-nowrap">
-              <i class="pi pi-plus text-xs"></i>
-              <span>新增類別</span>
+            <button type="button" (click)="startAdding($event)" class="flex items-center gap-1 text-[#662222]/60 font-semibold hover:text-[#662222] transition-colors
+                whitespace-nowrap pb-2">
+              <i class="pi pi-plus text-[10px]"></i><span>新增類別</span>
             </button>
             } @else {
-            <input #newCategoryInput type="text" [(ngModel)]="newCategoryName" (blur)="saveCategory()"
-              (keyup.enter)="saveCategory()" (keyup.escape)="cancelAdding()"
-              class="m-0 p-0 border-none bg-transparent text-[#662222] font-semibold outline-none w-24 leading-none" />
-            <span class="absolute bottom-0 h-[2px] w-full bg-[#662222]"></span>
+            <div class="relative flex items-center">
+              <input #newCategoryInput type="text" [(ngModel)]="newCategoryName" (blur)="saveCategory()"
+                (keyup.enter)="saveCategory()" (keyup.escape)="cancelAdding()"
+                class="m-0 pb-2 border-none bg-transparent text-[#662222] font-semibold outline-none w-24 leading-none" />
+            </div>
             }
           </div>
         </div>
 
+        <!-- 儲存變更按鈕 -->
         <div class="pb-3">
-          <button (click)="onSaveAll()" class="flex items-center gap-2 px-4 py-1.5 bg-[#662222] text-white rounded-full text-sm
-            font-medium hover:bg-[#662222]/90 transition-all shadow-sm active:scale-95">
+          <button type="button" (click)="onSaveAll()"
+            class="flex items-center gap-2 px-4 py-1.5 bg-[#662222] text-white rounded-full text-sm font-medium hover:bg-[#662222]/90 transition-all shadow-sm active:scale-95">
             <i class="pi pi-save text-xs"></i>
-            <span>儲存變更</span>
+            <span>儲存所有變更</span>
           </button>
         </div>
       </nav>
     </div>
-
 
 
     <!-- 品項table -->
@@ -86,10 +104,10 @@
                 編輯
               </button>
             </td>
-            <!-- <td class="px-4 py-2 border-b border-gray-200">
-                <p-toggleswitch [(ngModel)]="product.isAvailable"></p-toggleswitch>
-                <span class="ml-2">{{ product.isAvailable ? '是' : '否' }}</span>
-              </td> -->
+            <td class="px-4 py-2 border-b border-gray-200">
+              <p-toggleswitch [(ngModel)]="product.isAvailable"></p-toggleswitch>
+              <span class="ml-2">{{ product.isAvailable ? '是' : '否' }}</span>
+            </td>
           </tr>
           }
         </tbody>
@@ -107,8 +125,72 @@
   </div>
 </div>
 
-<!-- Dialog -->
-<!-- 新增Dialog -->
+<!--------------------------------- Dialog --------------------------------->
+<!-------------- 詳細資訊Dialog -------------->
+<p-dialog header="詳細資訊" [(visible)]="displayStoreInfoDialog" [modal]="true" position="left" [draggable]="false"
+  [resizable]="false" styleClass="h-screen max-h-screen m-0 rounded-none shadow-2xl"
+  [style]="{ width: '100vw', maxWidth: '30rem', height: '100vh' }">
+
+  <div class="flex absolute right-5 top-17">
+    <button (click)="editStore($event)" class="p-2 rounded-md bg-[#662222] transition-colors cursor-pointer
+    transition-colors" [routerLink]="['/store_upsert']" >
+        <i class="pi pi-pencil text-xs mr-2 text-white"></i><span class="text-white">編輯店家</span>
+    </button>
+  </div>
+
+  <div class="flex flex-col h-full">
+    <div class="border-b border-[#662222]/20 mb-4">
+      <nav class="flex gap-8">
+
+        <button (click)="storeTab = 'info'"
+          class="group relative pb-3 font-semibold transition-colors flex items-center justify-center gap-2"
+          [ngClass]="storeTab === 'info' ? 'text-[#662222]' : 'text-[#662222]/60 hover:text-[#662222]'">
+          <span>店家資訊</span>
+          <span class="absolute left-0 bottom-0 h-[2px] bg-[#662222] transition-all duration-300"
+            [ngClass]="storeTab === 'info' ? 'w-full' : 'w-0 group-hover:w-full'"></span>
+        </button>
+
+        <button (click)="storeTab = 'orderInfo'"
+          class="group relative pb-3 font-semibold transition-colors flex items-center justify-center gap-2"
+          [ngClass]="storeTab === 'orderInfo' ? 'text-[#662222]' : 'text-[#662222]/60 hover:text-[#662222]'">
+          <span>訂購資訊</span>
+          <span class="absolute left-0 bottom-0 h-[2px] bg-[#662222] transition-all duration-300"
+            [ngClass]="storeTab === 'orderInfo' ? 'w-full' : 'w-0 group-hover:w-full'"></span>
+        </button>
+      </nav>
+    </div>
+
+    <!-- 店家資訊 -->
+    <div class="flex-1 overflow-y-auto">
+      <div *ngIf="storeTab === 'info'" class="py-2">
+
+        <p class="text-gray-600 font-semibold text-lg">{{ store.storesname }}</p>
+        <p class="text-gray-600 ">{{ store.type }}</p>
+        <p class="text-gray-600"><i class="pi pi-map-marker mr-2"></i>{{ store.address }}</p>
+        <p class="text-gray-600"><i class="pi pi-phone mr-2"></i>{{ store.phone }}</p>
+        <div class="flex">
+          <i class="pi pi-clock mr-2 mt-1"></i>
+          <div class="m-0">
+            @for(week of store.operatingHoursVoList; track $index){
+            <p class="text-gray-600">@if(week.week == 1 ){星期一}@else if(week.week == 2 ){星期二}
+              @else if(week.week == 3 ){星期三}@else if(week.week == 4 ){星期四}@else if(week.week ==5 ){星期五}
+              @else if(week.week == 6 ){星期六}@else if(week.week == 7 ){星期日}
+              {{ week.openTime }} - {{ week.closeTime }}</p>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- 訂購資訊 -->
+      <div *ngIf="storeTab === 'orderInfo'" class="py-2">
+        <p class="text-gray-600">{{ store.memo }}</p>
+      </div>
+    </div>
+  </div>
+</p-dialog>
+
+
+<!-------------- 新增商品Dialog -------------->
 <p-dialog header="新增商品" [(visible)]="displayAddDialog" [modal]="true" [style]="{ width: '90vw', maxWidth: '28rem' }">
   <div class="col-span-full">
     <div class="flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
@@ -141,7 +223,7 @@
 </p-dialog>
 
 
-<!-- 編輯Dialog -->
+<!-------------- 編輯商品Dialog -------------->
 <p-dialog header="編輯品項" [(visible)]="displayEditDialog" [modal]="true" [style]="{ width: '90vw', maxWidth: '28rem' }">
   @if(selectedProduct){
   <div class="col-span-full">
@@ -173,83 +255,11 @@
   }
 </p-dialog>
 
-<!-- 詳細資訊Dialog -->
-<p-dialog header="詳細資訊" [(visible)]="displayStoreInfoDialog" [modal]="true" position="left" [draggable]="false"
-  [resizable]="false" styleClass="h-screen max-h-screen m-0 rounded-none shadow-2xl"
-  [style]="{ width: '100vw', maxWidth: '30rem', height: '100vh' }">
 
-  <div class="flex flex-col h-full">
-    <div class="border-b border-[#662222]/20 mb-4">
-      <nav class="flex gap-8">
-
-        <button (click)="storeTab = 'info'"
-          class="group relative pb-3 font-semibold transition-colors flex items-center justify-center gap-2"
-          [ngClass]="storeTab === 'info' ? 'text-[#662222]' : 'text-[#662222]/60 hover:text-[#662222]'">
-
-          <span>店家資訊</span>
-
-          <span (click)="editStore($event)"
-            class="p-1 rounded-md hover:bg-[#662222]/10 transition-colors cursor-pointer"
-            [ngClass]="storeTab === 'info' ? 'visible' : 'invisible w-0 overflow-hidden sm:w-auto'">
-            <i class="pi pi-pencil text-xs"></i>
-          </span>
-
-          <span class="absolute left-0 bottom-0 h-[2px] bg-[#662222] transition-all duration-300"
-            [ngClass]="storeTab === 'info' ? 'w-full' : 'w-0 group-hover:w-full'"></span>
-        </button>
-
-        <button (click)="storeTab = 'orderInfo'"
-          class="group relative pb-3 font-semibold transition-colors flex items-center justify-center gap-2"
-          [ngClass]="storeTab === 'orderInfo' ? 'text-[#662222]' : 'text-[#662222]/60 hover:text-[#662222]'">
-
-          <span>訂購資訊</span>
-
-          <span (click)="editStore($event)"
-            class="p-1 rounded-md hover:bg-[#662222]/10 transition-colors cursor-pointer"
-            [ngClass]="storeTab === 'orderInfo' ? 'visible' : 'invisible w-0 overflow-hidden sm:w-auto'">
-            <i class="pi pi-pencil text-xs"></i>
-          </span>
-
-          <span class="absolute left-0 bottom-0 h-[2px] bg-[#662222] transition-all duration-300"
-            [ngClass]="storeTab === 'orderInfo' ? 'w-full' : 'w-0 group-hover:w-full'"></span>
-        </button>
-
-      </nav>
-    </div>
-
-    <!-- 店家資訊 -->
-    <div class="flex-1 overflow-y-auto">
-      <div *ngIf="storeTab === 'info'" class="py-2">
-        <p class="text-gray-600 ">{{ store.storesname }}</p>
-        <p class="text-gray-600 ">{{ store.type }}</p>
-        <p class="text-gray-600"><i class="pi pi-map-marker mr-2"></i>{{ store.address }}</p>
-        <p class="text-gray-600"><i class="pi pi-phone mr-2"></i>{{ store.phone }}</p>
-        <div class="flex">
-          <i class="pi pi-clock mr-2 mt-1"></i>
-          <div class="m-0">
-            @for(week of store.operatingHoursVoList; track $index){
-            <p class="text-gray-600">@if(week.week == 1 ){星期一}@else if(week.week == 2 ){星期二}
-              @else if(week.week == 3 ){星期三}@else if(week.week == 4 ){星期四}@else if(week.week ==5 ){星期五}
-              @else if(week.week == 6 ){星期六}@else if(week.week == 7 ){星期日}
-              {{ week.openTime }} - {{ week.closeTime }}</p>
-            }
-          </div>
-        </div>
-      </div>
-
-      <!-- 訂購資訊 -->
-      <div *ngIf="storeTab === 'orderInfo'" class="py-2">
-        <p class="text-gray-600">{{ store.memo }}</p>
-      </div>
-    </div>
-  </div>
-</p-dialog>
-
-
-<!-- 儲存成功Dialog -->
-<p-dialog [(visible)]="displaySaveDialog" [modal]="true" position="left" [draggable]="false" [resizable]="false"
-  styleClass="h-screen max-h-screen m-0 rounded-none shadow-2xl"
-  [style]="{ width: '100vw', maxWidth: '30rem', height: '100vh' }">
+<!-------------- 儲存成功Dialog -------------->
+<p-dialog [(visible)]="displaySaveDialog" [modal]="true" [closable]="false" [showHeader]="false" [draggable]="false"
+  [resizable]="false" styleClass="rounded-xl overflow-hidden"
+  [style]="{ width: '90vw', maxWidth: '24rem', border: 'none' }">
 
   <div class="bg-white px-4 pb-4 pt-5 sm:p-6">
     <div>
@@ -268,9 +278,8 @@
     </div>
 
     <div class="mt-5 sm:mt-6">
-      <button type="button" (click)="displaySaveDialog = false" class="inline-flex w-full justify-center rounded-md bg-[#662222] px-3 py-2 text-sm font-semibold
-         text-white shadow-sm hover:bg-[#662222]/90 transition-all active:scale-95 outline-none">
-        確認
+      <button type="button" (click)="displaySaveDialog = false" routerLink='../gogobuy' class="inline-flex w-full justify-center rounded-md bg-[#662222] px-3 py-2 text-sm font-semibold
+        text-white shadow-sm hover:bg-[#662222]/90 transition-all active:scale-95 outline-none">確認
       </button>
     </div>
   </div>

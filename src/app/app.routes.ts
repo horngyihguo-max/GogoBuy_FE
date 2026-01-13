@@ -7,7 +7,8 @@ import { GogoBuyComponent } from './gogo-buy/gogo-buy.component';
 import { AppComponent } from './app.component';
 import { PageNotFoundComponent } from './terms/page-not-found/page-not-found.component';
 import { OrdersComponent } from './orders/orders.component';
-import { StoreComponent } from './store/store.component';
+import { StoreComponent } from './stores/store/store.component';
+import { StoreUpsertComponent } from './stores/store-upsert/store-upsert.component';
 
 export const routes: Routes = [
   // 首頁
@@ -26,6 +27,7 @@ export const routes: Routes = [
 
   //創立店家與品項
   { path: 'store', component: StoreComponent },
+  { path: 'store_upsert', component: StoreUpsertComponent },
   // 錯誤/失效網址
   { path: '**', component: PageNotFoundComponent }
 ];

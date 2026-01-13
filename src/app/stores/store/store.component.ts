@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, QueryList, ViewChildren } from '@angular/core';
 import { StepperModule } from 'primeng/stepper';
 import { ButtonModule } from 'primeng/button';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
@@ -11,7 +11,8 @@ import { TableModule } from 'primeng/table';
 import { CommonModule } from '@angular/common';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { DialogModule } from 'primeng/dialog';
-import { HttpService } from '../@service/http.service';
+import { HttpService } from '../../@service/http.service';
+import { RouterLink } from "@angular/router";
 
 @Component({
   selector: 'app-store',
@@ -22,13 +23,14 @@ import { HttpService } from '../@service/http.service';
     InputTextModule, ScrollPanelModule,
     TableModule, SelectButtonModule, CommonModule,
     DialogModule, ButtonModule,
+    RouterLink
   ],
   templateUrl: './store.component.html',
   styleUrl: './store.component.scss'
 })
-export class StoreComponent {
+export class StoreComponent implements AfterViewInit {
 
-  constructor(private http: HttpService){}
+  constructor(private http: HttpService) { }
 
   displayEditDialog = false;
   displayAddDialog = false;
@@ -43,10 +45,55 @@ export class StoreComponent {
   unusual!: string[];
 
   storeTab: 'info' | 'orderInfo' = 'info';
+  selectedIndex = 0;
+  indicatorLeft = 0;
+  indicatorWidth = 0;
+
+  selectedCategoryName = '';
   isAdding = false;
   newCategoryName = '';
 
-  @ViewChild('newCategoryInput') inputElement!: ElementRef;
+  @ViewChildren('tabBtn') tabBtns!: QueryList<ElementRef>;
+
+  ngOnInit() {
+    if (this.store.menuCategoriesVoList.length > 0) {
+      this.selectedCategoryName = this.store.menuCategoriesVoList[0].name;
+    }
+  }
+
+  ngAfterViewInit() {
+    this.updateIndicator();
+  }
+
+  previewUrl: string | ArrayBuffer | null = null;
+  selectedFile: File | null = null;
+
+  onFileSelected(event: any) {
+    const file = event.target.files[0];
+
+    if (file) {
+      this.selectedFile = file;
+
+      // 使用 FileReader 產生預覽網址
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.previewUrl = e.target?.result as string;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  removeImage(event: Event) {
+    event.preventDefault(); // 防止觸發 input 的點擊
+    event.stopPropagation();
+    this.previewUrl = null;
+    this.selectedFile = null;
+  }
+
+
+  addStore(){
+
+  }
 
   editStore(event: Event) {
     event.stopPropagation();
@@ -56,16 +103,41 @@ export class StoreComponent {
     event.stopPropagation();
     this.isAdding = true;
     this.newCategoryName = '';
-
     setTimeout(() => {
-      this.inputElement?.nativeElement.focus();
+      document.querySelector<HTMLInputElement>('#newCategoryInput')?.focus();
     }, 0);
+  }
+
+
+  get currentCategoryId(): number {
+    const index = this.store.menuCategoriesVoList.findIndex(c => c.name ===
+      this.selectedCategoryName);
+    return index + 1;
+  }
+
+  get filteredProducts() {
+    return this.store.menuVoList.filter(item => item.categoryId === this.currentCategoryId);
+  }
+
+  selectCategory(name: string, index: number) {
+    this.selectedCategoryName = name;
+    this.selectedIndex = index;
+
+    setTimeout(() => this.updateIndicator());
+  }
+
+  updateIndicator() {
+    const tab = this.tabBtns.toArray()[this.selectedIndex]?.nativeElement;
+    if (!tab) return;
+
+    this.indicatorLeft = tab.offsetLeft;
+    this.indicatorWidth = tab.offsetWidth;
   }
 
   saveCategory() {
     if (this.newCategoryName.trim()) {
-      // this.store.menuCategoriesVoList.push({ name: this.newCategoryName });
-      console.log('新增類別:', this.newCategoryName);
+      this.store.menuCategoriesVoList.push({ name: this.newCategoryName, priceLevel: [] });
+      this.selectCategory(this.newCategoryName, this.store.menuCategoriesVoList.length - 1);
     }
     this.isAdding = false;
   }
@@ -84,13 +156,13 @@ export class StoreComponent {
     this.displayAddDialog = true;
   }
 
-  opendStoreInfo(){
+  opendStoreInfo() {
     this.storeTab = 'info'
     this.displayStoreInfoDialog = true;
   }
 
-  onSaveAll(){
-
+  onSaveAll() {
+    this.displaySaveDialog = true;
   }
 
   store: Stores = {
@@ -122,6 +194,7 @@ export class StoreComponent {
         description: "嚴選紅玉紅茶",
         basePrice: 35,
         image: "tea_red.jpg",
+        isAvailable: true,
         unusual: ["去冰", "微糖"]
       }
     ],
@@ -178,6 +251,7 @@ export class StoreComponent {
       basePrice: 45,
       description: "濃醇紅茶融合香濃鮮奶，搭配Q彈波霸，口感層次豐富、甜而不膩。",
       image: "blackMilk.jpeg",
+      isAvailable: true,
       unusual: []
     }, {
       categoryId: 2,
@@ -185,6 +259,7 @@ export class StoreComponent {
       basePrice: 50,
       description: "香濃阿華田巧克力融合鮮奶，口感滑順，甜而不膩，暖心提神飲品。",
       image: "chocolate.jpeg",
+      isAvailable: true,
       unusual: []
     }
   ]
@@ -253,6 +328,7 @@ export interface MenuVoList {
   description: string;
   basePrice: number;
   image: string;
+  isAvailable: boolean;
   unusual: string[];
 }
 
