@@ -26,7 +26,17 @@
   font-size: 1rem;
 }
 
-.ng-star-inserted:hover{
+.ng-star-inserted:hover {
   cursor: pointer;
   transform: scale(1.01);
 }
+
+@media (max-width: 768px) {
+  .banner-title {
+    bottom: 2px;
+    left: 2px;
+    padding: 4px 10px;
+    font-size: 12px;
+  }
+}
+

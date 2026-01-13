@@ -7,22 +7,29 @@ import { GogoBuyComponent } from './gogo-buy/gogo-buy.component';
 import { PageNotFoundComponent } from './terms/page-not-found/page-not-found.component';
 import { OrdersComponent } from './orders/orders.component';
 import { PersonInfoComponent } from './account/person-info/person-info.component';
+import { authGuard } from './auth.guard';
 import { StoreComponent } from './store/store.component';
 import { WishesComponent } from './wish/wishes/wishes.component';
+import { PersonInfoEditComponent } from './account/person-info-edit/person-info-edit.component';
+import { AuthCallbackComponent } from './auth-callback/auth-callback.component';
 
 export const routes: Routes = [
   // 首頁
   { path: 'gogobuy', component: GogoBuyComponent },
   { path: '', redirectTo: '/gogobuy', pathMatch: 'full' },
-  { path: 'orders', component: OrdersComponent },
 
   // 登入/註冊
   { path: 'login', component: LoginComponent },
+  { path: 'auth-callback', component: AuthCallbackComponent },
 
   // 用戶資料頁面
   { path: 'personInfo', component: PersonInfoComponent },
   // 願望清單
   { path: 'wishes', component: WishesComponent },
+  { path: 'personInfo', component: PersonInfoComponent, canActivate: [authGuard] },
+  { path: 'orders', component: OrdersComponent, canActivate: [authGuard] },
+  { path: 'personInfoEdit', component: PersonInfoEditComponent, canActivate: [authGuard] },
+
 
   // 條款頁面 ------------------------------------------------------------------
   { path: 'problems', component: ProblemsComponent },
