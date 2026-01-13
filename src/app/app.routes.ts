@@ -23,9 +23,9 @@ export const routes: Routes = [
   { path: 'auth-callback', component: AuthCallbackComponent },
 
   // 用戶資料頁面
-  { path: 'personInfo', component: PersonInfoComponent },
-  // 願望清單
   { path: 'personInfo', component: PersonInfoComponent, canActivate: [authGuard] },
+  { path: 'orders', component: OrdersComponent, canActivate: [authGuard]  },
+  { path: 'personInfoEdit', component: PersonInfoEditComponent },
 
   // 願望清單
   { path: 'wishes', component: WishesComponent },

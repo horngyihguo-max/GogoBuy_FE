@@ -201,6 +201,9 @@ footer {
   }
 
   .search-mobile {
+    left: 0;
+    right: 0;
+    width: 100%;
     display: block;
     position: fixed;
     top: 98px;
@@ -209,8 +212,9 @@ footer {
     box-shadow: 0 6px 18px rgba(0, 0, 0, .08);
   }
 
-  input[type="search"] {
-    width: 100vh;
+  .search-mobile input[type="search"] {
+    width: 100%;
+    box-sizing: border-box;
   }
 
   main {

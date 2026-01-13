@@ -68,12 +68,6 @@ export class AuthService {
         console.log('API 回傳原始資料:', res);
         const userData = res;
         localStorage.setItem('user_avatar_url', res.avatarUrl);
-        Swal.fire({
-          title: `歡迎回來，${res.nickname}!`,
-          icon: 'success',
-          showConfirmButton: false,
-          timer: 1000
-        });
         if (userData && (userData.id || userData.userId)) {
           this.setUser(userData);
         }
@@ -89,14 +83,23 @@ export class AuthService {
     this.https.postApi('http://localhost:8080/gogobuy/user/login', payload)
       .subscribe({
         next: (res: any) => {
-          if (res.code === 200) {
+          if (res.code == 200) {
             console.log('登入成功，填寫資料：', payload);
             console.log('登入成功，回傳資料：', res);
             this.user = res;
             this.setUser(res);
-            localStorage.setItem('user_email', payload.email);
             localStorage.setItem('user_id', res.id);
+            localStorage.setItem('user_email', payload.email);
             this.refreshUser();
+            Swal.fire({
+              toast: true,
+              position: 'top',
+              icon: 'success',
+              title: `歡迎回來!`,
+              showConfirmButton: false,
+              timer: 2000,
+              timerProgressBar: true,
+            });
             const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/gogobuy';
             setTimeout(() => {
               this.router.navigateByUrl(returnUrl);
@@ -131,14 +134,16 @@ export class AuthService {
         this.userSubject.next(null);
         // 清除前端紀錄
         localStorage.clear();
+        Swal.fire({
+          toast: true,
+          position: 'top',
+          icon: 'success',
+          title: `已登出!`,
+          showConfirmButton: false,
+          timer: 2000,
+        });
         // 回到首頁
         this.router.navigate(['/gogobuy']);
-        Swal.fire({
-          title: '已登出',
-          icon: 'success',
-          showConfirmButton: false,
-          timer: 1000
-        });
       });
   }
 
