@@ -39,6 +39,7 @@ type Order = {
   templateUrl: './orders.component.html',
   styleUrl: './orders.component.scss'
 })
+
 export class OrdersComponent {
   activeOrders: Order[] = [
     {

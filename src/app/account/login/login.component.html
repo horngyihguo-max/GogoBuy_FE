@@ -1,8 +1,6 @@
 <div class="min-h-screen flex items-center justify-center bg-slate-200 p-4 md:p-10">
-  <div
-    class="w-full max-w-5xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden
-           md:h-[680px] flex flex-col md:flex-row"
-  >
+  <div class="w-full max-w-5xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden
+           md:h-[680px] flex flex-col md:flex-row">
     <!-- 左側品牌卡 -->
     <div class="w-full md:w-5/12 bg-red-900 relative text-white">
       <div class="absolute inset-0 opacity-10 pointer-events-none">
@@ -14,11 +12,8 @@
       <!-- 圖片 -->
       <div class="relative z-10 h-full flex flex-col items-center justify-center p-10 md:p-12 text-center">
         <div class="bg-white/10 p-7 rounded-full shadow-[0_20px_60px_rgba(0,0,0,0.35)]">
-          <img
-            src="https://cdn-icons-png.flaticon.com/512/3500/3500833.png"
-            alt="Delivery"
-            class="w-28 h-28 md:w-32 md:h-32 object-contain"
-          />
+          <img src="https://cdn-icons-png.flaticon.com/512/3500/3500833.png" alt="Delivery"
+            class="w-28 h-28 md:w-32 md:h-32 object-contain" />
         </div>
 
         <!-- 圖片下的標語 -->
@@ -39,14 +34,11 @@
     <!-- 右側表單卡：可捲動 -->
     <div class="w-full md:w-7/12 bg-orange-400 relative overflow-y-auto">
       <!-- 右上切換 -->
-      <div class="sticky top-0 z-20 flex justify-end p-4 md:p-6 bg-gradient-to-b from-orange-400 to-orange-400/40 backdrop-blur">
-        <button
-          type="button"
-          (click)="toggleMode()"
-          class="inline-flex items-center gap-2 px-4 py-2 rounded-full
+      <div
+        class="sticky top-0 z-20 flex justify-end p-4 md:p-6 bg-gradient-to-b from-orange-400 to-orange-400/40 backdrop-blur">
+        <button type="button" (click)="toggleMode()" class="inline-flex items-center gap-2 px-4 py-2 rounded-full
                  bg-white/80 hover:bg-white text-red-950 font-extrabold text-sm
-                 shadow-sm border border-white/60 transition active:scale-[0.98]"
-        >
+                 shadow-sm border border-white/60 transition active:scale-[0.98]">
           <i class="pi pi-refresh text-xs"></i>
           <span>{{ pageMode === 'login' ? '註冊帳號' : '返回登入' }}</span>
         </button>
@@ -67,8 +59,8 @@
                 </h3>
                 <p class="mt-2 text-[15px] text-slate-500">
                   {{ pageMode === 'login'
-                    ? '歡迎回來，請輸入帳號資訊。'
-                    : '只要幾步就能開始團購。' }}
+                  ? '歡迎回來，請輸入帳號資訊。'
+                  : '只要幾步就能開始團購。' }}
                 </p>
               </div>
             </div>
@@ -76,28 +68,22 @@
             <form (ngSubmit)="onSubmit()" #authForm="ngForm" class="mt-8 space-y-4">
               <!-- 名稱 -->
               @if (pageMode === 'register') {
-                <div>
-                  <div class="group border-b border-slate-200 focus-within:border-red-900 transition-colors leading-snug">
-                    <label class="block text-[18px] font-black text-slate-700 uppercase tracking-wider mb-1">
-                      名字 / Name
-                    </label>
-                    <input
-                      type="text"
-                      name="nickname"
-                      [(ngModel)]="user.nickname"
-                      #nickname="ngModel"
-                      required
-                      class="w-full py-2 bg-transparent border-none outline-none text-slate-800 font-semibold placeholder:text-slate-300"
-                      placeholder="怎麼稱呼您？"
-                    />
-                  </div>
-
-                  <!-- 預留一行高度 -->
-                  <p class="min-h-[7px] mt-[5px] text-[13px] font-bold text-red-700"
-                     [class.opacity-0]="!(nickname.invalid && nickname.touched)">
-                    名稱不可為空
-                  </p>
+              <div>
+                <div class="group border-b border-slate-200 focus-within:border-red-900 transition-colors leading-snug">
+                  <label class="block text-[18px] font-black text-slate-700 uppercase tracking-wider mb-1">
+                    名字 / Name
+                  </label>
+                  <input type="text" name="nickname" [(ngModel)]="user.nickname" #nickname="ngModel" required
+                    class="w-full py-2 bg-transparent border-none outline-none text-slate-800 font-semibold placeholder:text-slate-300"
+                    placeholder="怎麼稱呼您？" />
                 </div>
+
+                <!-- 預留一行高度 -->
+                <p class="min-h-[7px] mt-[5px] text-[13px] font-bold text-red-700"
+                  [class.opacity-0]="!(nickname.invalid && nickname.touched)">
+                  名稱不可為空
+                </p>
+              </div>
               }
 
               <!-- 信箱 -->
@@ -106,49 +92,36 @@
                   <label class="block text-[18px] font-black text-slate-700 uppercase tracking-wider mb-1">
                     信箱 / E-mail
                   </label>
-                  <input
-                    type="email"
-                    name="email"
-                    [(ngModel)]="user.email"
-                    #email="ngModel"
-                    required
+                  <input type="email" name="email" [(ngModel)]="user.email" #email="ngModel" required
                     pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
                     class="w-full py-2 bg-transparent border-none outline-none text-slate-800 font-semibold placeholder:text-slate-300"
-                    placeholder="mazo@gmail.com"
-                    value="test2@gmail.com"
-                  />
+                    placeholder="mazo@gmail.com" value="test2@gmail.com" />
                 </div>
 
                 <p class="min-h-[7px] mt-[5px] text-[13px] font-bold text-red-700"
-                   [class.opacity-0]="!(email.invalid && email.touched)">
+                  [class.opacity-0]="!(email.invalid && email.touched)">
                   請輸入正確的 Email 格式
                 </p>
               </div>
 
               <!-- 電話 -->
               @if (pageMode === 'register') {
-                <div>
-                  <div class="group border-b border-slate-200 focus-within:border-red-900 transition-colors">
-                    <label class="block text-[18px] font-black text-slate-700 uppercase tracking-wider mb-1">
-                      電話 / Phone
-                    </label>
-                    <input
-                      type="text"
-                      name="phone"
-                      [(ngModel)]="user.phone"
-                      #phone="ngModel"
-                      required
-                      pattern="^09\d{2}[\s\-]?\d{3}[\s\-]?\d{3}$"
-                      class="w-full py-2 bg-transparent border-none outline-none text-slate-800 font-semibold placeholder:text-slate-300"
-                      placeholder="0912345678"
-                    />
-                  </div>
-
-                  <p class="min-h-[7px] mt-[5px] text-[13px] font-bold text-red-700"
-                     [class.opacity-0]="!(phone.invalid && phone.touched)">
-                    手機號碼格式錯誤（例：0912345678）
-                  </p>
+              <div>
+                <div class="group border-b border-slate-200 focus-within:border-red-900 transition-colors">
+                  <label class="block text-[18px] font-black text-slate-700 uppercase tracking-wider mb-1">
+                    電話 / Phone
+                  </label>
+                  <input type="text" name="phone" [(ngModel)]="user.phone" #phone="ngModel" required
+                    pattern="^09\d{2}[\s\-]?\d{3}[\s\-]?\d{3}$"
+                    class="w-full py-2 bg-transparent border-none outline-none text-slate-800 font-semibold placeholder:text-slate-300"
+                    placeholder="0912345678" />
                 </div>
+
+                <p class="min-h-[7px] mt-[5px] text-[13px] font-bold text-red-700"
+                  [class.opacity-0]="!(phone.invalid && phone.touched)">
+                  手機號碼格式錯誤（例：0912345678）
+                </p>
+              </div>
               }
 
               <!-- 密碼 -->
@@ -158,45 +131,36 @@
                     密碼 / Password
                   </label>
                   <div class="relative">
-                    <input
-                      [type]="showPassword ? 'text' : 'password'"
-                      name="password"
-                      [(ngModel)]="user.password"
-                      #password="ngModel"
-                      required
-                      class="w-full py-2 pr-10 bg-transparent border-none outline-none
+                    <input [type]="showPassword ? 'text' : 'password'" name="password" [(ngModel)]="user.password"
+                      #password="ngModel" required class="w-full py-2 pr-10 bg-transparent border-none outline-none
                             text-slate-800 font-semibold placeholder:text-slate-300"
-                      placeholder="••••••••"
-                      value=""
-                    />
+                      pattern="^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z\d]{8,16}$" placeholder="••••••••" value="" />
 
-                    <button
-                      type="button"
-                      (click)="showPassword = !showPassword"
-                      class="absolute right-0 top-1/2 -translate-y-1/2
-                            text-slate-400 hover:text-red-900 transition"
-                    >
+                    <button type="button" (click)="showPassword = !showPassword" class="absolute right-0 top-1/2 -translate-y-1/2
+                            text-slate-400 hover:text-red-900 transition">
                       <i class="pi" [ngClass]="showPassword ? 'pi-eye' : 'pi-eye-slash'"></i>
                     </button>
                   </div>
                 </div>
 
                 <p class="min-h-[7px] mt-[5px] text-[13px] font-bold text-red-700"
-                   [class.opacity-0]="!(password.invalid && password.touched)">
-                  需包含英文與數字，長度 8–16 碼
+                  [class.opacity-0]="!(password.invalid && password.touched)">
+                  需包含英文與數字，長度 8–16 碼，不包含特殊符號
                 </p>
               </div>
 
               <!-- 送出 -->
-              <button
-                type="submit"
-                [disabled]="!authForm.valid"
-                class="w-full mt-2 bg-red-900 text-white font-black py-4 rounded-2xl
-                       hover:bg-red-950 transition active:scale-[0.99]
-                       shadow-[0_12px_24px_rgba(127,29,29,0.28)]
-                       disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-widest text-[20px]">
-                {{ pageMode === 'login' ? '登入' : '註冊' }}
+              <button type="submit" [disabled]="!authForm.valid" class="w-full mt-2 bg-red-900 text-white font-black py-4 rounded-2xl
+              hover:bg-red-950 transition active:scale-[0.99]
+              shadow-[0_12px_24px_rgba(127,29,29,0.28)]
+              disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-widest text-[20px]">
+                {{ pageMode == 'login' ? '登入' : '註冊' }}
               </button>
+              @if (pageMode == 'login') {
+              <div style="text-align: center;">
+                <a style="cursor: pointer;" (click)="resetPassword()">忘記密碼?</a>
+              </div>
+              }
 
               <!-- 分隔線 -->
               <div class="flex items-center gap-3 pt-4">
@@ -206,17 +170,11 @@
               </div>
 
               <!-- Google -->
-              <button
-                type="button"
-                (click)="loginWithGoogle()"
-                class="w-full flex items-center justify-center gap-3
+              <button type="button" (click)="loginWithGoogle()" class="w-full flex items-center justify-center gap-3
                        bg-slate-50 hover:bg-slate-100 text-slate-900 font-extrabold
                        px-6 py-3 rounded-2xl transition border border-slate-200">
-                <img
-                  src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png"
-                  class="w-8 h-8"
-                  alt="Google"
-                />
+                <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" class="w-8 h-8"
+                  alt="Google" />
                 <span class="text-sm">Continue with Google</span>
               </button>
             </form>

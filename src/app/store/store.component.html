@@ -1,0 +1,277 @@
+<div class="flex flex-col lg:flex-row gap-6 p-5">
+  <!-- 店家資訊 左 -->
+  <div class="w-full lg:w-80 text-center space-y-3">
+    <div class="flex justify-center">
+      <p-image [src]="store.image" alt="store" width="250" class="mx-auto" />
+    </div>
+    <p class="text-2xl font-semibold">{{ store.storesname }}</p>
+    <p class="text-sm text-gray-600">{{ store.memo }}</p>
+
+    <div class="text-sm text-[#662222] space-y-1">
+      <p>{{ store.address }}</p>
+      <p>{{ store.phone }}</p>
+    </div>
+    <button class="rounded-full
+         border border-[#662222] bg-white px-5 py-2
+         text-sm font-medium text-[#662222] transition hover:bg-[#662222]/10" (click)="opendStoreInfo()">詳細資訊
+    </button>
+  </div>
+
+  <!-- 右 -->
+  <div class="flex-1 space-y-4 ">
+
+    <!-- 品項類別選擇 -->
+    <div class="border-b border-[#662222]/20 mb-4">
+      <nav class="flex items-center justify-between">
+        <div class="flex items-center gap-8">
+          @for(menuCategories of store.menuCategoriesVoList; track $index){
+          <button class="group relative pb-3 text-[#662222] font-semibold whitespace-nowrap">
+            {{ menuCategories.name }}
+            <span class="absolute left-0 bottom-0 h-[2px] w-full bg-[#662222]"></span>
+          </button>
+          }
+
+          <div class="pb-3 flex items-center relative">
+            @if (!isAdding) {
+            <button (click)="startAdding($event)"
+              class="flex items-center gap-1 text-[#662222]/60 font-semibold hover:text-[#662222] transition-colors whitespace-nowrap">
+              <i class="pi pi-plus text-xs"></i>
+              <span>新增類別</span>
+            </button>
+            } @else {
+            <input #newCategoryInput type="text" [(ngModel)]="newCategoryName" (blur)="saveCategory()"
+              (keyup.enter)="saveCategory()" (keyup.escape)="cancelAdding()"
+              class="m-0 p-0 border-none bg-transparent text-[#662222] font-semibold outline-none w-24 leading-none" />
+            <span class="absolute bottom-0 h-[2px] w-full bg-[#662222]"></span>
+            }
+          </div>
+        </div>
+
+        <div class="pb-3">
+          <button (click)="onSaveAll()" class="flex items-center gap-2 px-4 py-1.5 bg-[#662222] text-white rounded-full text-sm
+            font-medium hover:bg-[#662222]/90 transition-all shadow-sm active:scale-95">
+            <i class="pi pi-save text-xs"></i>
+            <span>儲存變更</span>
+          </button>
+        </div>
+      </nav>
+    </div>
+
+
+
+    <!-- 品項table -->
+    <div class="overflow-x-auto">
+      <table class="min-w-full border border-gray-200 rounded-lg text-center">
+        <thead class="bg-gray-100">
+          <tr>
+            <th class="px-4 py-2 border-b border-gray-200">商品</th>
+            <th class="px-4 py-2 border-b border-gray-200">圖片</th>
+            <th class="px-4 py-2 border-b border-gray-200">類別</th>
+            <th class="px-4 py-2 border-b border-gray-200">價格</th>
+            <th class="px-4 py-2 border-b border-gray-200">編輯</th>
+            <th class="px-4 py-2 border-b border-gray-200">供應中</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for(product of menu; track $index){
+          <tr class="hover:bg-gray-50">
+            <td class="px-4 py-2 border-b border-gray-200">{{ product.name }}</td>
+            <td class="px-4 py-2 border-b border-gray-200">
+              <img [src]="product.image" [alt]="product.name" class="w-20 h-20 mx-auto rounded" />
+            </td>
+            <td>{{ product.categoryId }}</td>
+            <td class="px-4 py-2 border-b border-gray-200">{{ product.basePrice }}</td>
+            <td class="px-4 py-2 border-b border-gray-200">
+              <button (click)="openEdit(product)" class="text-[#662222] hover:text-[#C1812E]">
+                編輯
+              </button>
+            </td>
+            <!-- <td class="px-4 py-2 border-b border-gray-200">
+                <p-toggleswitch [(ngModel)]="product.isAvailable"></p-toggleswitch>
+                <span class="ml-2">{{ product.isAvailable ? '是' : '否' }}</span>
+              </td> -->
+          </tr>
+          }
+        </tbody>
+      </table>
+      <!-- 新增商品 -->
+      <div class="relative flex justify-center mt-5 group">
+        <button class="h-10 w-15 items-center justify-center
+                   rounded-full bg-[#662222] text-white text-2xl font-bold
+                   shadow-lg  transition hover:bg-[#471717] " (click)="openAdd()">+
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<!-- Dialog -->
+<!-- 新增Dialog -->
+<p-dialog header="新增商品" [(visible)]="displayAddDialog" [modal]="true" [style]="{ width: '90vw', maxWidth: '28rem' }">
+  <div class="col-span-full">
+    <div class="flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
+      <div class="text-center">
+        <svg viewBox="0 0 24 24" fill="currentColor" data-slot="icon" aria-hidden="true"
+          class="mx-auto size-12 text-gray-300">
+          <path
+            d="M1.5 6a2.25 2.25 0 0 1 2.25-2.25h16.5A2.25 2.25 0 0 1 22.5 6v12a2.25 2.25 0 0 1-2.25 2.25H3.75A2.25 2.25 0 0 1 1.5 18V6ZM3 16.06V18c0 .414.336.75.75.75h16.5A.75.75 0 0 0 21 18v-1.94l-2.69-2.689a1.5 1.5 0 0 0-2.12 0l-.88.879.97.97a.75.75 0 1 1-1.06 1.06l-5.16-5.159a1.5 1.5 0 0 0-2.12 0L3 16.061Zm10.125-7.81a1.125 1.125 0 1 1 2.25 0 1.125 1.125 0 0 1-2.25 0Z"
+            clip-rule="evenodd" fill-rule="evenodd" />
+        </svg>
+        <div class="mt-4 flex text-sm/6 text-gray-600">
+          <label for="file-upload"
+            class="relative cursor-pointer rounded-md bg-transparent font-semibold text-indigo-600 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-indigo-600 hover:text-indigo-500">
+            <span>Upload a file</span>
+            <input id="file-upload" type="file" name="file-upload" class="sr-only" />
+          </label>
+          <span class="pl-1">or drag and drop</span>
+        </div>
+        <span class="text-xs/5 text-gray-600">PNG, JPG, GIF up to 10MB</span>
+      </div>
+    </div>
+  </div>
+  <p>商品名稱：<input type="text" placeholder="請輸入品項名稱" class="w-full rounded-md border border-gray-300
+               px-2 py-2 text-gray-800 placeholder-gray-400
+               focus:outline-none
+               focus:ring-2 focus:ring-[#662222]" /></p>
+  <p>商品描述：<input type="textarea" placeholder="請輸入品項描述" class="w-full rounded-md border border-gray-300
+      px-2 py-2 text-gray-800 placeholder-gray-400
+      focus:outline-none focus:ring-2 focus:ring-[#662222]" /></p>
+</p-dialog>
+
+
+<!-- 編輯Dialog -->
+<p-dialog header="編輯品項" [(visible)]="displayEditDialog" [modal]="true" [style]="{ width: '90vw', maxWidth: '28rem' }">
+  @if(selectedProduct){
+  <div class="col-span-full">
+    <div class="flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
+      <div class="text-center">
+        <svg viewBox="0 0 24 24" fill="currentColor" data-slot="icon" aria-hidden="true"
+          class="mx-auto size-12 text-gray-300">
+          <path
+            d="M1.5 6a2.25 2.25 0 0 1 2.25-2.25h16.5A2.25 2.25 0 0 1 22.5 6v12a2.25 2.25 0 0 1-2.25 2.25H3.75A2.25 2.25 0 0 1 1.5 18V6ZM3 16.06V18c0 .414.336.75.75.75h16.5A.75.75 0 0 0 21 18v-1.94l-2.69-2.689a1.5 1.5 0 0 0-2.12 0l-.88.879.97.97a.75.75 0 1 1-1.06 1.06l-5.16-5.159a1.5 1.5 0 0 0-2.12 0L3 16.061Zm10.125-7.81a1.125 1.125 0 1 1 2.25 0 1.125 1.125 0 0 1-2.25 0Z"
+            clip-rule="evenodd" fill-rule="evenodd" />
+        </svg>
+        <div class="mt-4 flex text-sm/6 text-gray-600">
+          <label for="file-upload"
+            class="relative cursor-pointer rounded-md bg-transparent font-semibold text-indigo-600 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-indigo-600 hover:text-indigo-500">
+            <span>Upload a file</span>
+            <input id="file-upload" type="file" name="file-upload" class="sr-only" />
+          </label>
+          <span class="pl-1">or drag and drop</span>
+        </div>
+        <span class="text-xs/5 text-gray-600">PNG, JPG, GIF up to 10MB</span>
+      </div>
+    </div>
+  </div>
+  <p>商品名稱<input type="text" placeholder="請輸入品項名稱" class="w-full rounded-md border border-gray-300
+              px-2 py-2 text-gray-800 placeholder-gray-400
+              focus:outline-none
+              focus:ring-2 focus:ring-[#662222]" [(ngModel)]="selectedProduct.name" /></p>
+  <p>價格：{{ selectedProduct.basePrice }}</p>
+  }
+</p-dialog>
+
+<!-- 詳細資訊Dialog -->
+<p-dialog header="詳細資訊" [(visible)]="displayStoreInfoDialog" [modal]="true" position="left" [draggable]="false"
+  [resizable]="false" styleClass="h-screen max-h-screen m-0 rounded-none shadow-2xl"
+  [style]="{ width: '100vw', maxWidth: '30rem', height: '100vh' }">
+
+  <div class="flex flex-col h-full">
+    <div class="border-b border-[#662222]/20 mb-4">
+      <nav class="flex gap-8">
+
+        <button (click)="storeTab = 'info'"
+          class="group relative pb-3 font-semibold transition-colors flex items-center justify-center gap-2"
+          [ngClass]="storeTab === 'info' ? 'text-[#662222]' : 'text-[#662222]/60 hover:text-[#662222]'">
+
+          <span>店家資訊</span>
+
+          <span (click)="editStore($event)"
+            class="p-1 rounded-md hover:bg-[#662222]/10 transition-colors cursor-pointer"
+            [ngClass]="storeTab === 'info' ? 'visible' : 'invisible w-0 overflow-hidden sm:w-auto'">
+            <i class="pi pi-pencil text-xs"></i>
+          </span>
+
+          <span class="absolute left-0 bottom-0 h-[2px] bg-[#662222] transition-all duration-300"
+            [ngClass]="storeTab === 'info' ? 'w-full' : 'w-0 group-hover:w-full'"></span>
+        </button>
+
+        <button (click)="storeTab = 'orderInfo'"
+          class="group relative pb-3 font-semibold transition-colors flex items-center justify-center gap-2"
+          [ngClass]="storeTab === 'orderInfo' ? 'text-[#662222]' : 'text-[#662222]/60 hover:text-[#662222]'">
+
+          <span>訂購資訊</span>
+
+          <span (click)="editStore($event)"
+            class="p-1 rounded-md hover:bg-[#662222]/10 transition-colors cursor-pointer"
+            [ngClass]="storeTab === 'orderInfo' ? 'visible' : 'invisible w-0 overflow-hidden sm:w-auto'">
+            <i class="pi pi-pencil text-xs"></i>
+          </span>
+
+          <span class="absolute left-0 bottom-0 h-[2px] bg-[#662222] transition-all duration-300"
+            [ngClass]="storeTab === 'orderInfo' ? 'w-full' : 'w-0 group-hover:w-full'"></span>
+        </button>
+
+      </nav>
+    </div>
+
+    <!-- 店家資訊 -->
+    <div class="flex-1 overflow-y-auto">
+      <div *ngIf="storeTab === 'info'" class="py-2">
+        <p class="text-gray-600 ">{{ store.storesname }}</p>
+        <p class="text-gray-600 ">{{ store.type }}</p>
+        <p class="text-gray-600"><i class="pi pi-map-marker mr-2"></i>{{ store.address }}</p>
+        <p class="text-gray-600"><i class="pi pi-phone mr-2"></i>{{ store.phone }}</p>
+        <div class="flex">
+          <i class="pi pi-clock mr-2 mt-1"></i>
+          <div class="m-0">
+            @for(week of store.operatingHoursVoList; track $index){
+            <p class="text-gray-600">@if(week.week == 1 ){星期一}@else if(week.week == 2 ){星期二}
+              @else if(week.week == 3 ){星期三}@else if(week.week == 4 ){星期四}@else if(week.week ==5 ){星期五}
+              @else if(week.week == 6 ){星期六}@else if(week.week == 7 ){星期日}
+              {{ week.openTime }} - {{ week.closeTime }}</p>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- 訂購資訊 -->
+      <div *ngIf="storeTab === 'orderInfo'" class="py-2">
+        <p class="text-gray-600">{{ store.memo }}</p>
+      </div>
+    </div>
+  </div>
+</p-dialog>
+
+
+<!-- 儲存成功Dialog -->
+<p-dialog [(visible)]="displaySaveDialog" [modal]="true" position="left" [draggable]="false" [resizable]="false"
+  styleClass="h-screen max-h-screen m-0 rounded-none shadow-2xl"
+  [style]="{ width: '100vw', maxWidth: '30rem', height: '100vh' }">
+
+  <div class="bg-white px-4 pb-4 pt-5 sm:p-6">
+    <div>
+      <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
+        <svg class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+        </svg>
+      </div>
+
+      <div class="mt-3 text-center sm:mt-5">
+        <h3 class="text-lg font-semibold leading-6 text-gray-900" id="modal-title">儲存成功</h3>
+        <div class="mt-2">
+          <p class="text-sm text-gray-700">店家類別與相關資訊已成功更新。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-5 sm:mt-6">
+      <button type="button" (click)="displaySaveDialog = false" class="inline-flex w-full justify-center rounded-md bg-[#662222] px-3 py-2 text-sm font-semibold
+         text-white shadow-sm hover:bg-[#662222]/90 transition-all active:scale-95 outline-none">
+        確認
+      </button>
+    </div>
+  </div>
+</p-dialog>

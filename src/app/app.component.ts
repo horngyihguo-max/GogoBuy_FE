@@ -37,7 +37,21 @@ export class AppComponent {
   title = 'gogobuy';
 
   // 預設頭像
-  userAvatar = "/Snoopy.jpg";
+  userAvatar: string | null = null;
+  ngOnInit() {
+    this.auth.user$.subscribe(user => {
+      console.log('導覽列收到使用者狀態更新:', user);
+
+      if (user) {
+        this.userAvatar = user.user_avatar_url || user.avatar_url || user.avatarUrl;
+        if (!this.userAvatar) {
+          this.userAvatar = '/Snoopy.jpg';
+        }
+      } else {
+        this.userAvatar = null;
+      }
+    });
+  }
 
   // 用戶頭向下拉選單
   items: MenuItem[] = [
@@ -64,7 +78,7 @@ export class AppComponent {
 
   // 判斷是否已登入
   get isLoggedIn(): boolean {
-    return !!localStorage.getItem('user_session');
+    return !!localStorage.getItem('user_id');
   }
 
   // 使用session判斷選單出現列表
@@ -86,19 +100,18 @@ export class AppComponent {
 
   //登出清除session
   logout() {
-    this.http.postApi('http://localhost:8080/gogobuy/user/logout', { withCredentials: true })
-      .subscribe(() => {
-        // 清除前端紀錄
-        localStorage.removeItem('user_session');
-        // 回到首頁
-        this.router.navigate(['/gogobuy']);
-        Swal.fire({
-          title: '已登出',
-          icon: 'success',
-          showConfirmButton: false,
-          timer: 1000
-        });
-      });
-  }
+    this.auth.logout();
+    // 清除前端紀錄
+    localStorage.clear();
+    // 回到首頁
+    this.router.navigate(['/gogobuy']);
+    Swal.fire({
+      title: '已登出',
+      icon: 'success',
+      showConfirmButton: false,
+      timer: 1000
+    });
+  };
+
 }
 

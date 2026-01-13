@@ -19,9 +19,10 @@ export const appConfig: ApplicationConfig = {
         options: {
           prefix: 'p',
           darkModeSelector: false || 'none',
-          cssLayer: false,
-        },
-      },
+          cssLayer: false
+        }
+      }
     }),
-  ],
+    provideHttpClient(),
+  ]
 };

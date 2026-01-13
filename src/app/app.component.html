@@ -10,8 +10,8 @@
         <i
           class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-lg pointer-events-none disappear"></i>
         <input type="search" placeholder="搜尋店家、地址" class="w-3xl pl-10 pr-4 py-3 rounded-lg border border-gray-300
-             focus:outline-none focus:ring-2 focus:ring-red-300
-             focus:border-red-400 bg-white disappear" />
+              focus:outline-none focus:ring-2 focus:ring-red-300
+              focus:border-red-400 bg-white disappear" />
       </div>
     </div>
     }
@@ -23,8 +23,12 @@
         </li>
         <li><i class="pi pi-cart-plus cursor-pointer" style="color: rgb(255, 255, 255); font-size: 1.5rem"></i></li>
         <li>
-          <img [src]="userAvatar" class="w-9 h-9 rounded-full cursor-pointer" (click)="menu.toggle($event)"
-            alt="avatar">
+          @if (userAvatar) {
+          <img [src]="userAvatar" (error)="userAvatar = 'assets/default-avatar.png'"
+            class="w-9 h-9 rounded-full cursor-pointer" (click)="menu.toggle($event)" alt="avatar">
+          } @else {
+          <i class="pi pi-user cursor-pointer" style="font-size: 1.5rem" (click)="menu.toggle($event)"></i>
+          }
           <p-menu #menu [popup]="true" [model]="items" [model]="filteredItems" appendTo="body"></p-menu>
         </li>
       </ul>
@@ -46,8 +50,8 @@
   <div class=" relative w-full max-w-md">
     <i class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-lg pointer-events-none"></i>
     <input type="search" placeholder="搜尋店家、地址" class="pl-10 pr-4 py-3 rounded-lg border border-gray-300
-               focus:outline-none focus:ring-2 focus:ring-red-300
-               focus:border-red-400 bg-white" />
+                focus:outline-none focus:ring-2 focus:ring-red-300
+                focus:border-red-400 bg-white" />
   </div>
 </div>
 }
