@@ -1,7 +1,5 @@
-import { User } from './../app.component';
 import { Injectable } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { of } from 'rxjs/internal/observable/of';
 import { tap } from 'rxjs/internal/operators/tap';
 import Swal from 'sweetalert2';
 import { HttpService } from './http.service';
@@ -18,6 +16,7 @@ export class AuthService {
     private route: ActivatedRoute,) { }
   // TODO 用戶資料 (正式連接時用這個!)
   user: any = null;
+
   private userSubject = new BehaviorSubject<any>(this.getUserFromStorage());
   user$ = this.userSubject.asObservable();
 
@@ -25,20 +24,6 @@ export class AuthService {
     const saved = localStorage.getItem('user_info');
     return saved ? JSON.parse(saved) : null;
   }
-  // 假資料
-  // user: any = {
-  //   id: '12b7bf42-57af-4e3f-acfc-b9a2ba3342aa',
-  //   nickname: 'test',
-  //   email: 'test3@gmail.com',
-  //   phone: '0912345678',
-  //   avatar_url: null,
-  //   password: '$2a$10$84XlUdt7tG7sYTMx9XsTl.p9qQEHqyOzE.o1dgPAKBpLxGNPugxCW',
-  //   role: 'user',
-  //   created_at: '2026-01-08 12:02:57',
-  //   exp: 120,
-  //   carrier: null,
-  //   times_remaining: 3,
-  // };
 
   // 把最新頭像資料set進user
   setUser(user: any) {
@@ -105,7 +90,6 @@ export class AuthService {
               this.router.navigateByUrl(returnUrl);
             }, 500);
           } else {
-            // 處理後端回傳的錯誤 (如：密碼錯誤)
             Swal.fire({
               title: res.message || '登入失敗',
               icon: 'error',
@@ -115,7 +99,6 @@ export class AuthService {
           }
         },
         error: (err: any) => {
-          // 處理網路或伺服器崩潰 (HTTP 4xx, 5xx)
           Swal.fire({
             title: err.message || '連線伺服器失敗',
             icon: 'error',
@@ -155,12 +138,10 @@ export class AuthService {
       .subscribe({
         next: (res: any) => {
           if (res.code === 200) {
-            // 存入偽裝金鑰 (Base64 Email)
-            // 如果 res.data 有 User 物件就用 res.data.email，沒有就用表單的 email
-            localStorage.setItem('user_session', btoa(this.user.email));
-            const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/gogobuy';
+            localStorage.setItem('user_session', payload.email);
+            const returnUrl = '/gogobuy';
             Swal.fire({
-              title: '註冊成功',
+              title: '註冊成功，請返回登入頁面輸入註冊資訊登入',
               icon: 'success',
               timer: 2000,
             });
@@ -188,6 +169,7 @@ export class AuthService {
     return this.https.patchApi(url, updateDto).pipe(
       tap((res: any) => {
         if (res.code === 200) {
+
           // 取得目前暫存在 localStorage 的完整資料
           const currentUser = JSON.parse(localStorage.getItem('user_info') || '{}');
 
@@ -197,7 +179,7 @@ export class AuthService {
           // 更新 Service 狀態與 localStorage
           this.setUser(updatedUser);
 
-          // 更新個別欄位 (依照你之前的寫法)
+          // 更新個別欄位
           if (updateDto.nickname) localStorage.setItem('user_nickname', updateDto.nickname);
           if (updateDto.avatar_url) localStorage.setItem('user_avatar_url', updateDto.avatarUrl);
           if (updateDto.carrier) localStorage.setItem('user_carrier', updateDto.carrier);
@@ -209,21 +191,11 @@ export class AuthService {
   // 修改密碼
   changePassword(password: any) {
     const userId = this.user?.id;
-    console.log('auth收到:' + userId);
-    console.log('auth收到:' + JSON.stringify(password, null, 2));
-    // TEST =========================================
-    // Swal.fire({
-    //   title: '密碼修改成功',
-    //   icon: 'success',
-    //   timer: 2000,
-    // });
-    // this.router.navigate(['/personInfo']);
-    // TEST =========================================
     this.https
       .postApi(`http://localhost:8080/gogobuy/user/change-password?id=${userId}`, password)
       .subscribe({
         next: (res: any) => {
-          Swal.fire('密碼修改成功');
+          Swal.fire('密碼修改成功，請重新登入');
         },
         error: (err) => {
           Swal.fire(err?.error?.message ?? '修改失敗');
@@ -235,7 +207,7 @@ export class AuthService {
   resetPassword(email: string, otpCode: string, newPassword: string) {
     const req = {
       email: email,
-      otp: otpCode,
+      otpCode: otpCode,
       newPassword: newPassword
     };
 
@@ -283,5 +255,16 @@ export class AuthService {
 
     return this.https.putApi(url, body);
   }
+
+  // 更新手機號碼
+  connectPhone(id: string, phone: string) {
+  const req = {
+    phone: phone
+  };
+
+  const url = `http://localhost:8080/gogobuy/user/connect-phone?id=${id}`;
+
+  return this.https.postApi(url, req.phone);
+}
 
 }

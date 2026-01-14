@@ -7,7 +7,7 @@ import {
 } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
 import { PopoverModule, Popover } from 'primeng/popover';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { SseService } from '../../@service/sse.service';
 import { Observable } from 'rxjs/internal/Observable';
 
@@ -32,15 +32,12 @@ export class NotificationBellComponent {
   unreadCount$: Observable<number> | undefined;
 
   // 呼叫SSE
-  constructor(public sse: SseService) {}
+  constructor(public sse: SseService, private router: Router) {}
   ngOnInit() {
     this.sse.connect();
     this.notifications$ = this.sse.notifications$;
     this.unreadCount$ = this.sse.unreadCount$;
   }
-
-  // 實際使用（之後接後端再換）
-  // notifications: any[] = [];
 
   // 假資料
   // notifications: any[] = [
@@ -67,11 +64,26 @@ export class NotificationBellComponent {
   //   },
   // ];
 
+  // 全部已讀
   markAllRead() {
     this.sse.markAllRead();
   }
 
+  // 點擊通知後已讀，有link就導向
   clickItem(n: any) {
     this.sse.markAsRead(n.id);
+
+    const link = n.link;
+    if (!link) return;
+
+    // 外部連結：http/https 開新分頁（也可以改同分頁）
+    // if (typeof link === 'string' && /^https?:\/\//i.test(link)) {
+    //   window.open(link, '_blank');
+    //   return;
+    // }
+
+    // 站內路由：如果沒有/就補上
+    const internal = link.startsWith('/') ? link : `/${link}`;
+    this.router.navigateByUrl(internal);
   }
 }

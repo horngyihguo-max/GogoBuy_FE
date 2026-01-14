@@ -22,32 +22,25 @@ export class PersonInfoComponent {
     id: '',
     email: ''
   };
+
   ngOnInit() {
-    // 進入時最新資料準備狀態重置為false
-    this.ready = false;
-    // 測試用更新用戶資料
-    // this.auth.refreshUser();
-    // this.editInfo = { ...this.auth.user };
-    // console.log('取得用戶資料:', JSON.stringify(this.editInfo, null, 2));
+    // 1. 訂閱 User 狀態流
+    this.auth.user$.subscribe(user => {
+      if (user) {
+        console.log('接收到用戶資料:', user);
+        this.editInfo = { ...user };
 
-    // TODO 實際串接時請用這個
-    this.auth.refreshUser()
-    console.log(localStorage.getItem('user'));
-    if (this.auth.user) {
-      this.editInfo = { ...this.auth.user };
-      this.editInfo.email = localStorage.getItem('user_email');
-      this.editInfo.avatar_url = localStorage.getItem('user_avatar_url');
-      const savedEmail = localStorage.getItem('user_session');
-      console.log(this.editInfo)
-      if (savedEmail) {
-        this.editInfo.email = savedEmail;
+        // 確保從最新的 user 物件中取得資料，而不是一直讀取 localStorage 的舊 Key
+        this.editInfo.email = user.email || localStorage.getItem('user_email');
+        this.editInfo.avatar_url = user.avatarUrl || user.user_avatar_url;
+
+        this.calculateLevel(user.exp);
+        this.ready = true;
       }
-      this.calculateLevel();
-      this.ready = true;
-    }
+    });
 
-    // 重要! 取得資料後要再呼叫一次等級計算器，否則可能無法反映最新等級
-    this.calculateLevel();
+    // 2. 觸發刷新 (這會讓 AuthService 去跑 API 並推播給上面的訂閱者)
+    this.auth.refreshUser();
   }
 
   // 等級相關屬性 -------------------------------------------------------------------
@@ -57,12 +50,10 @@ export class PersonInfoComponent {
   expPercentage: string = '0%'; // 經驗條顯示%數
 
   // 等級計算器
-  calculateLevel() {
-    if (!this.auth.user || this.auth.user.exp === undefined) return; // 防止資料為空時噴錯
-    const totalExp = this.auth.user.exp; // 取得總經驗值
-    this.level += Math.floor(totalExp / this.expToNextLevel); // 升等(無條件捨去)
-    this.currentExp = totalExp % this.expToNextLevel; // 餘數
-    // ((餘數/多少經驗升等)*100)%
+  calculateLevel(exp: number = 0) {
+    const totalExp = exp || 0;
+    this.level = Math.floor(totalExp / this.expToNextLevel) + 1;
+    this.currentExp = totalExp % this.expToNextLevel;
     this.expPercentage = `${(this.currentExp / this.expToNextLevel) * 100}%`;
   }
 

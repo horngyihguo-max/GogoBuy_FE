@@ -24,33 +24,28 @@ export class PersonInfoEditComponent {
     id: '',
     email: ''
   };
+
+  // 修改用暫存資料 -----------------------------------------------------------------
+  editInfo: any | null = null;
+
   ngOnInit() {
-    // 進入時最新資料準備狀態重置為false
-    this.ready = false;
+    // 1. 訂閱 User 狀態流
+    this.auth.user$.subscribe(user => {
+      if (user) {
+        console.log('接收到用戶資料:', user);
+        this.editInfo = { ...user };
 
-    // 測試用更新用戶資料
-    // this.auth.refreshUser();
-    // this.editInfo = { ...this.auth.user };
-    // console.log('取得用戶資料:', JSON.stringify(this.editInfo, null, 2));
-
-    // TODO 實際串接時請用這個
-    this.auth.refreshUser()
-    console.log(this.auth.user)
-    if (this.auth.user) {
-      this.user = { ...this.auth.user };
-      this.editInfo = { ...this.auth.user };
-      this.editInfo.email = localStorage.getItem('user_email');
-      this.editInfo.avatar_url = localStorage.getItem('user_avatar_url');
-      const savedEmail = localStorage.getItem('user_session');
-      if (savedEmail) {
-        this.editInfo.email = savedEmail;
+        // 確保從最新的 user 物件中取得資料，而不是一直讀取 localStorage 的舊 Key
+        this.editInfo.email = user.email || localStorage.getItem('user_email');
+        this.editInfo.avatar_url = user.avatarUrl || user.user_avatar_url;
+        this.editInfo.provider = user.provider;
+        this.calculateLevel(user.exp);
+        this.ready = true;
       }
-      this.calculateLevel();
-      this.ready = true;
-    }
+    });
 
-    // 重要! 取得資料後要再呼叫一次等級計算器，否則可能無法反映最新等級
-    this.calculateLevel();
+    // 2. 觸發刷新 (這會讓 AuthService 去跑 API 並推播給上面的訂閱者)
+    this.auth.refreshUser();
   }
 
   // 等級相關屬性 -------------------------------------------------------------------
@@ -60,16 +55,14 @@ export class PersonInfoEditComponent {
   expPercentage: string = '0%'; // 經驗條顯示%數
 
   // 等級計算器
-  calculateLevel() {
-    const totalExp = this.auth.user.exp; // 取得總經驗值
+  calculateLevel(exp: number = 0) {
+    const totalExp = exp || 0; // 取得總經驗值
     this.level += Math.floor(totalExp / this.expToNextLevel); // 升等(無條件捨去)
     this.currentExp = totalExp % this.expToNextLevel; // 餘數
     // ((餘數/多少經驗升等)*100)%
     this.expPercentage = `${(this.currentExp / this.expToNextLevel) * 100}%`;
   }
 
-  // 修改用暫存資料 -----------------------------------------------------------------
-  editInfo: any | null = null;
 
   // 頭像上傳
   onAvatarUpload(event: any) {
@@ -85,7 +78,7 @@ export class PersonInfoEditComponent {
   // 修改用戶資料
   updateProfile() {
     console.log('當前頭像資料內容:', this.editInfo.avatar_url);
-  console.log('資料長度:', this.editInfo.avatar_url?.length);
+    console.log('資料長度:', this.editInfo.avatar_url?.length);
     // 檢查是否有變動
     if (JSON.stringify(this.editInfo) == JSON.stringify(this.auth.user)) {
       Swal.fire({
@@ -118,7 +111,7 @@ export class PersonInfoEditComponent {
             timer: 1000,
             showConfirmButton: false
           });
-
+          this.auth.connectPhone(userId, this.editInfo.phone).subscribe();
           this.auth.setUser({ ...this.auth.user, ...payload });
         }
       },
@@ -160,7 +153,6 @@ export class PersonInfoEditComponent {
 
     if (!newEmail) return;
 
-
     Swal.fire({ title: '發送中...', didOpen: () => Swal.showLoading(), allowOutsideClick: false });
 
     const userId = this.editInfo?.id;
@@ -188,7 +180,7 @@ export class PersonInfoEditComponent {
         });
 
         if (otpCode) {
-          this.auth.emailVerify(this.user.id, newEmail, otpCode).subscribe({
+          this.auth.emailVerify(this.editInfo.id, newEmail, otpCode).subscribe({
             next: (res) => {
               Swal.fire('成功', 'Email 已更新', 'success');
               this.user.email = newEmail;
@@ -264,5 +256,10 @@ export class PersonInfoEditComponent {
       this.auth.changePassword({ oldPassword, newPassword }); // 呼叫AuthService
       this.auth.logout();
     })();
+  }
+
+  get isGoogleUser(): boolean {
+    // 直接回傳判斷結果，若 provider 不存在則回傳 false
+    return this.editInfo?.provider === 'GOOGLE';
   }
 }
