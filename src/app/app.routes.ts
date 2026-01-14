@@ -8,7 +8,7 @@ import { PageNotFoundComponent } from './terms/page-not-found/page-not-found.com
 import { OrdersComponent } from './orders/orders.component';
 import { PersonInfoComponent } from './account/person-info/person-info.component';
 import { authGuard } from './auth.guard';
-import { StoreComponent } from './store/store.component';
+import { StoreComponent } from './stores/store/store.component';
 import { PersonInfoEditComponent } from './account/person-info-edit/person-info-edit.component';
 import { AuthCallbackComponent } from './auth-callback/auth-callback.component';
 import { WishesComponent } from './wish/wishes/wishes.component';
