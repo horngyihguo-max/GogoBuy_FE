@@ -19,7 +19,9 @@
     <nav>
       <!-- 右側功能列表 -->
       <ul class="items-center justify-center disappear">
-        <li><i class="pi pi-bell cursor-pointer" style="color: rgb(255, 255, 255); font-size: 1.5rem"></i>
+        <!-- 通知鈴鐺 -->
+        <li>
+          <app-notification-bell></app-notification-bell>
         </li>
         <li><i class="pi pi-cart-plus cursor-pointer" style="color: rgb(255, 255, 255); font-size: 1.5rem"></i></li>
         <li>
@@ -122,13 +124,11 @@
     </div>
   </a>
   <!-- 通知訊息 -->
-  <a routerLink="404">
+  <a routerLink="/notifications" class="flex flex-col items-center">
     <div>
-      <i class="pi pi-bell cursor-pointer" style="font-size: 1.5rem"></i>
+      <app-notification-bell mode="icon"></app-notification-bell>
     </div>
-    <div>
-      訊息
-    </div>
+    <div>通知</div>
   </a>
   <!-- 我的 -->
   <a routerLink="personInfo">

@@ -7,8 +7,12 @@ import { MenuItem } from 'primeng/api';
 import { MenuModule } from 'primeng/menu';
 import { PanelMenuModule } from 'primeng/panelmenu';
 import { InputTextModule } from 'primeng/inputtext';
+<<<<<<< HEAD
 import { AuthService } from './@service/auth.service';
 import { HttpService } from './@service/http.service';
+=======
+import { NotificationBellComponent } from './account/notification-bell/notification-bell.component';
+>>>>>>> origin/Uguisain
 
 export interface User {
   id: string;
@@ -27,7 +31,8 @@ export interface User {
     RouterLinkActive,
     RouterLink,
     MenuModule,
-    CommonModule
+    CommonModule,
+    NotificationBellComponent
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',

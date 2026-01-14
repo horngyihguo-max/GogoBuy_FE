@@ -7,11 +7,17 @@ import { GogoBuyComponent } from './gogo-buy/gogo-buy.component';
 import { PageNotFoundComponent } from './terms/page-not-found/page-not-found.component';
 import { OrdersComponent } from './orders/orders.component';
 import { PersonInfoComponent } from './account/person-info/person-info.component';
+<<<<<<< HEAD
 import { authGuard } from './auth.guard';
 import { StoreComponent } from './store/store.component';
 import { PersonInfoEditComponent } from './account/person-info-edit/person-info-edit.component';
 import { AuthCallbackComponent } from './auth-callback/auth-callback.component';
 import { WishesComponent } from './wish/wishes/wishes.component';
+=======
+import { WishesComponent } from './wish/wishes/wishes.component';
+import { StoreComponent } from './store/store.component';
+import { NotificationsComponent } from './account/notifications/notifications.component';
+>>>>>>> origin/Uguisain
 
 export const routes: Routes = [
   // 首頁
@@ -29,6 +35,8 @@ export const routes: Routes = [
 
   // 願望清單
   { path: 'wishes', component: WishesComponent },
+  // 通知頁面
+  { path: 'notifications', component: NotificationsComponent },
 
   // 條款頁面 ------------------------------------------------------------------
   { path: 'problems', component: ProblemsComponent },
