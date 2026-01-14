@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, RouterLinkActive, RouterLink, Router } from '@angular/router';
 import Swal from 'sweetalert2';
@@ -24,7 +24,6 @@ export interface User {
     ButtonModule,
     PanelMenuModule,
     InputTextModule,
-    RouterLinkActive,
     RouterLink,
     MenuModule,
     CommonModule

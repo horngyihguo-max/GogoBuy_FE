@@ -2,6 +2,15 @@
 @import "tailwindcss";
 @import "primeicons/primeicons.css";
 
+/* 強制鎖定 html 與 body，不准任何動態 Style 改變 padding */
+html,
+body {
+  padding-right: 0 !important;
+  margin-right: 0 !important;
+  overflow: auto !important;
+  /* 或是根據你的需求設為 hidden */
+}
+
 :root {
   --brand-primary: #662222;
   --brand-primary-hover: #8B2F2F;

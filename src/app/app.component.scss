@@ -1,9 +1,8 @@
 /* --- HEADER --- */
 /* 懸浮窗跟隨 */
-.topbar {
-  position: sticky;
-  top: 0;
-  z-index: 1000;
+.topbar,
+.topbar-wrapper {
+  position: static;
 }
 
 /* header背景顏色和排版 */
@@ -11,7 +10,7 @@ header {
   background-color: var(--brand-primary);
   border-bottom: 2px solid var(--brand-primary);
   padding: 0.3rem 2rem;
-  position: sticky;
+  position: relative;
   top: 0;
   z-index: 1000;
   display: flex;
@@ -70,9 +69,8 @@ main {
   background: #f0f0f0;
   border: 1px solid #ccc;
   padding: 10px 0;
-  top: 64px;
   z-index: 999;
-  position: static;
+  position: relative;
 }
 
 
@@ -163,6 +161,8 @@ footer {
 /* RWD: <= 768px (手機) */
 @media (max-width: 768px) {
   header {
+    position: relative;
+    height: auto;
     padding: 0.5rem 0.75rem;
     display: flex;
     justify-content: center;
@@ -201,15 +201,13 @@ footer {
   }
 
   .search-mobile {
-    left: 0;
-    right: 0;
-    width: 100%;
     display: block;
-    position: fixed;
-    top: 98px;
-    z-index: 1;
-    background: #fff;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, .08);
+    position: static;
+    top: 0;
+    z-index: 1001;
+    background-color: #ffffff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    width: 100%;
   }
 
   .search-mobile input[type="search"] {
@@ -222,8 +220,7 @@ footer {
   }
 
   main.main--with-mobile-search {
-    padding-top: 49px;
-    padding-bottom: 52px;
+    padding-top: 10px;
   }
 
   /* 在手機端隱藏footer */
