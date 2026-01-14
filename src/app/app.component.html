@@ -125,9 +125,12 @@
   <!-- 通知訊息 -->
   <a routerLink="/notifications" class="flex flex-col items-center">
     <div>
-      <app-notification-bell mode="icon"></app-notification-bell>
+      <app-notification-bell mode="icon"
+      [ngStyle]="{ 'color': (router.url == '/notifications') ? 'rgba(0, 0, 0)' : '' }"></app-notification-bell>
     </div>
-    <div>通知</div>
+    <div [ngStyle]="{ 'color': (router.url == '/notifications') ? 'rgba(0, 0, 0)' : '' }">
+      通知
+    </div>
   </a>
   <!-- 我的 -->
   <a routerLink="personInfo">

@@ -62,8 +62,8 @@
   (click)="pop.toggle($event)"
 >
   <i
-    class="pi pi-bell"
-    style="color: rgb(255, 255, 255); font-size: 1.5rem"
+    class="pi pi-bell text-white hover:text-red-300"
+    style="font-size: 1.5rem"
   ></i>
 
   @if (unreadCount$ | async; as unreadCount) { @if (unreadCount > 0) {
