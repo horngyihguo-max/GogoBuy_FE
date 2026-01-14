@@ -7,32 +7,22 @@ import { GogoBuyComponent } from './gogo-buy/gogo-buy.component';
 import { PageNotFoundComponent } from './terms/page-not-found/page-not-found.component';
 import { OrdersComponent } from './orders/orders.component';
 import { PersonInfoComponent } from './account/person-info/person-info.component';
-import { authGuard } from './auth.guard';
-import { PersonInfoEditComponent } from './account/person-info-edit/person-info-edit.component';
-import { AuthCallbackComponent } from './auth-callback/auth-callback.component';
+import { StoreComponent } from './store/store.component';
 import { WishesComponent } from './wish/wishes/wishes.component';
-import { StoreComponent } from './stores/store/store.component';
-import { NotificationsComponent } from './account/notifications/notifications.component';
-import { StoreUpsertComponent } from './stores/store-upsert/store-upsert.component';
 
 export const routes: Routes = [
   // 首頁
   { path: 'gogobuy', component: GogoBuyComponent },
   { path: '', redirectTo: '/gogobuy', pathMatch: 'full' },
+  { path: 'orders', component: OrdersComponent },
 
   // 登入/註冊
   { path: 'login', component: LoginComponent },
-  { path: 'auth-callback', component: AuthCallbackComponent },
 
   // 用戶資料頁面
-  { path: 'personInfo', component: PersonInfoComponent, canActivate: [authGuard] },
-  { path: 'orders', component: OrdersComponent, canActivate: [authGuard] },
-  { path: 'personInfoEdit', component: PersonInfoEditComponent },
-
+  { path: 'personInfo', component: PersonInfoComponent },
   // 願望清單
   { path: 'wishes', component: WishesComponent },
-  // 通知頁面
-  { path: 'notifications', component: NotificationsComponent },
 
   // 條款頁面 ------------------------------------------------------------------
   { path: 'problems', component: ProblemsComponent },
@@ -42,7 +32,6 @@ export const routes: Routes = [
 
   //創立店家與品項
   { path: 'store', component: StoreComponent },
-  { path: 'store_upsert', component: StoreUpsertComponent },
   // 錯誤/失效網址
   { path: '404', component: PageNotFoundComponent },
   { path: '**', component: PageNotFoundComponent }

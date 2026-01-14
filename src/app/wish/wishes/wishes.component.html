@@ -1,5 +1,5 @@
 <!-- 這邊目前還只有在構思排版，可以改 -->
-<div class="card">
+<!-- <div class="card">
     <p-tabs value="0">
         <p-tablist>
             <p-tab value="0">Header I</p-tab>
@@ -36,4 +36,46 @@
             </p-tabpanel>
         </p-tabpanels>
     </p-tabs>
+</div> -->
+
+
+
+<!-- 搜尋區 -->
+<div class="area">
+  <label class="w-2/3 flex-row">店家或品項名稱：
+    <input (keyup)="letterSearch()" [(ngModel)]="searchData"
+      class="searchInput"></label>
+</div>
+<div class="area">
+  <table class="w-4/5 table-fixed border-collapse">
+    <thead>
+      <tr>
+        <th class="w-1/10">品項</th>
+        <th class="w-1/10">類型</th>
+        <th class="w-1/5">取貨點</th>
+        <th class="w-1/9">許願者</th>
+        <th class="w-1/30">我要+1</th>
+      </tr>
+    </thead>
+    <tbody class="text-center">
+      @for (item of wishes; track $index) {
+        <tr class="itemTr">
+          <td>{{item?.title}}</td>
+          <td>{{item?.type}}</td>
+          <td>{{item?.location}}</td>
+          @if(item?.nickname==null){
+            <td>***</td>
+          }@else {
+            <td>{{item?.nickname}}</td>
+          }
+          <td>
+            <!-- @if(plusone==false){
+              <button class="plusBtn" (click)="plusOne()" [(ngModel)]="plusone">+1</button>
+            } -->
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+
 </div>
