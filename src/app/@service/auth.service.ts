@@ -142,18 +142,15 @@ export class AuthService {
         next: (res: any) => {
           if (res.code === 200) {
             localStorage.setItem('user_session', payload.email);
-            const returnUrl = '/gogobuy';
+            const returnUrl = '/gogobuy/login';
             Swal.fire({
-              title: '註冊成功，請返回登入頁面輸入註冊資訊登入',
+              title: '註冊成功!<br>請返回登入頁面登入',
               icon: 'success',
-              timer: 2000,
             });
-            setTimeout(() => {
-              this.router.navigateByUrl(returnUrl);
-            }, 500);
           }
         },
         error: (err: any) => {
+          console.log(err.message);
           Swal.fire({
             title: err.message || '註冊失敗',
             icon: 'error',

@@ -25,9 +25,9 @@
         </li>
         <li><i class="pi pi-cart-plus cursor-pointer" style="color: rgb(255, 255, 255); font-size: 1.5rem"></i></li>
         <li>
-          @if (currentUser(); as user) {
-          <img [src]="user.user_avatar_url || 'Snoopy.png'" (click)="menu.toggle($event)"
-            class="w-9 h-9 rounded-full cursor-pointer">
+          @if (userAvatar()) {
+          <img [src]="userAvatar()" alt="User Avatar" class="avatar-style" class="w-9 h-9 rounded-full cursor-pointer"
+            (click)="onUserClick($event, menu)" />
           } @else {
           <i class="pi pi-user cursor-pointer" style=" color: rgb(255, 255, 255); font-size: 1.5rem"
             (click)="menu.toggle($event)"></i>
