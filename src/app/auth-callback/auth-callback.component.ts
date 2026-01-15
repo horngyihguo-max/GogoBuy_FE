@@ -33,18 +33,25 @@ export class AuthCallbackComponent implements OnInit {
           this.authService.setUser(formattedUser);
           localStorage.setItem('user_info', JSON.stringify(formattedUser));
           localStorage.setItem('user_id', formattedUser.id);
-          localStorage.setItem('user_nickname', formattedUser.nickname);
           localStorage.setItem('user_avatar_url', formattedUser.avatar_url);
           localStorage.setItem('user_email', formattedUser.email);
           if (formattedUser.id) {
             this.authService.setUser(formattedUser);
             Swal.fire({
-              title: `Google 登入成功，歡迎 ${res.nickname}!`,
+              toast: true,
+              position: 'top',
               icon: 'success',
-              timer: 1500,
-              showConfirmButton: false
+              title: `歡迎回來!`,
+              showConfirmButton: false,
+              timer: 2000,
+              timerProgressBar: true,
             });
-            this.router.navigate(['/gogobuy']);
+            const savedUrl = sessionStorage.getItem('google_return_url') || '/gogobuy';
+            setTimeout(() => {
+              this.router.navigateByUrl(savedUrl);
+              // 跳轉完後立刻刪除，
+              sessionStorage.removeItem('google_return_url');
+            }, 500);
           } else {
             console.error('抓不到 ID，請檢查後端回傳格式');
             Swal.fire('登入異常', '無法取得用戶識別碼', 'error');

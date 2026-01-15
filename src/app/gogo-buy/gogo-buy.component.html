@@ -2,18 +2,22 @@
 
 
   <!--輪播欄-->
-  <section class="max-w-4xl mx-auto ">
+  <section class="max-w-[1440px] mx-auto mt-6 px-4 md:px-8">
     <!--[numVisible]一次可顯示X個圖片，[numScroll]有幾個滾輪，[circular]圖片是否可重複，[autoplayInterval]自動撥放秒數，
     [showIndicators]是否顯示滾輪，[showNavigators]是否顯示左右翻閱鍵-->
-    <p-carousel [value]="banners" [numVisible]="2" [numScroll]="2" [circular]="true" [autoplayInterval]="4000"
-      [showIndicators]="true" [showNavigators]="true" styleClass="hover-nav-carousel">
+    <p-carousel [value]="banners" [numVisible]="3" [numScroll]="1" [circular]="true" [autoplayInterval]="false"
+      [showIndicators]="true"  [showNavigators]="true" (onPageUpdate)="onPageChange($event)"
+      styleClass="stage-carousel">
       <ng-template pTemplate="item" let-banner>
-        <div class="banner">
-          <!--[src]圖片，[alt]圖片消失時文字-->
-          <img [src]="banner.image" [alt]="banner.title" class="banner-img" />
-          <div class="banner-title">
-            <!-- {{ banner.title }}文字顯示 -->
-            {{ banner.title }}
+        <div class="carousel-item-wrapper px-1">
+          <div class="banner">
+            <!--[src]圖片，[alt]圖片消失時文字-->
+            <img [src]="banner.image" [alt]="banner.title" class="w-full h-full object-cover " />
+            <div class="banner-mask"></div>
+            <div class="banner-title ">
+              <!-- {{ banner.title }}文字顯示 -->
+              {{ banner.title }}
+            </div>
           </div>
         </div>
       </ng-template>
@@ -21,79 +25,36 @@
   </section>
 
   <!--開團中店家-->
-  <section class="max-w-4xl mx-auto">
-    <h2 class="text-2xl font-bold text-slate-900 mb-4 flex items-center">正在開團中</h2>
+  <section class="max-w-[1440px] mx-auto p-4 md:p-8">
+    <h2 class="text-3xl font-black text-slate-900 mb-8 flex items-center gap-3">
+      <span class="w-2 h-8 bg-red-600 rounded-full"></span>
+      正在開團中
+    </h2>
 
-    <!--卡片-->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-8">
-      @for (store of stores; track store.id) {
-      <p-card [style]="{ width: '100%', overflow: 'hidden' }">
+    <!-- 卡片RWD grid-cols-1(手機板一次顯示1個卡片) md:grid-cols-2(平板一次顯示2個卡片) lg:grid-cols-5(電腦版一次顯示5個卡片)
+     gap-6(卡片之間相隔距離) -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
 
-        <!--商家圖片(stores.image)-->
-        <ng-template pTemplate="header">
-          <img alt="store" class="w-full h-[160px] object-cover" [src]="store.image" />
-        </ng-template>
+      @for (store of stores; track store.id;) {
+      <!-- rounded-3xl  -->
+      <div class="group relative overflow-hidden rounded-3xl transition-all duration-300 ' +
+        'col-span-1 min-h-[200px]">
+        <img [src]="store.image"
+          class="absolute inset-0 w-full h-full object-cover transition-transform group-hover:scale-105" />
 
-        <!--商家店名(stores.name)-->
-        <ng-template pTemplate="title">
-          {{ store.name }}
-        </ng-template>
-      </p-card>
+        <div
+          class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent p-6 flex flex-col justify-end">
+          <h3 class="text-lg font-bold text-white">
+            {{ store.name }}
+          </h3>
+
+          <div class="flex items-center justify-between mt-4 opacity-0 group-hover:opacity-100 transition-opacity">
+            <span class="text-white/80 text-xs">查看詳情</span>
+            <i class="pi pi-arrow-right text-white text-xs"></i>
+          </div>
+        </div>
+      </div>
       }
     </div>
   </section>
 </body>
-
-<!-- <body class="bg-slate-50 min-h-svh p-4 md:p-8">
-  <div class="max-w-6xl mx-auto">
-
-    <h2 class="text-3xl font-black text-slate-900 mb-8 flex items-center gap-2">
-      <span class="w-2 h-8 bg-red-900 rounded-full"></span>
-      熱門開團中
-    </h2>
-
-    <div class="grid grid-cols-1 md:grid-cols-4 grid-rows-none md:grid-rows-2 gap-4 auto-rows-[200px]">
-
-      <section class="md:col-span-2 md:row-span-2 bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-100 relative group">
-        <p-carousel [value]="banners" [numVisible]="1" [numScroll]="1" [circular]="true" [autoplayInterval]="4000"
-          [showIndicators]="true" [showNavigators]="false" styleClass="bento-carousel">
-          <ng-template pTemplate="item" let-banner>
-            <div class="relative h-full w-full">
-              <img [src]="banner.image" [alt]="banner.title" class="w-full h-full object-cover" />
-              <div class="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/60 to-transparent text-white">
-                <span class="bg-red-900 text-[12px] px-2 py-1 rounded mb-2 inline-block">HOT EVENT</span>
-                <h3 class="text-xl font-bold">{{ banner.title }}</h3>
-              </div>
-            </div>
-          </ng-template>
-        </p-carousel>
-      </section>
-
-      @for (store of stores; track store.id; let i = $index) {
-        <div
-          [class] ="'relative overflow-hidden rounded-3xl bg-white border border-slate-100 shadow-sm transition-all hover:shadow-md group ' +
-          (i === 0 ? 'md:col-span-2 md:row-span-1' : 'md:col-span-1 md:row-span-1')"
-        >
-          <img [src]="store.image" alt="store" class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-
-          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-5 flex flex-col justify-end">
-            <h3 class="text-white font-bold text-lg leading-tight">{{ store.name }}</h3>
-            <div class="flex items-center justify-between mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
-              <span class="text-white/80 text-xs">查看詳情</span>
-              <i class="pi pi-arrow-right text-white text-xs"></i>
-            </div>
-          </div>
-        </div>
-      }
-
-      <div class="md:col-span-1 md:row-span-1 bg-red-900 rounded-3xl p-6 flex flex-col justify-between text-white">
-        <i class="pi pi-bolt text-3xl"></i>
-        <div>
-          <h4 class="font-bold text-lg">快速揪團</h4>
-          <p class="text-white/70 text-sm">一鍵發起你的外送訂單</p>
-        </div>
-      </div>
-
-    </div>
-  </div>
-</body> -->

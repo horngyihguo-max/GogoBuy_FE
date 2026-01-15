@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpService } from '../../@service/http.service';
 import Swal from 'sweetalert2';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-login',
@@ -12,7 +13,10 @@ import Swal from 'sweetalert2';
   styleUrl: './login.component.scss',
 })
 export class LoginComponent {
-  constructor(private http: HttpService, public auth: AuthService) { }
+  constructor(
+    private http: HttpService,
+    public auth: AuthService,
+    private route: ActivatedRoute,) { }
 
   // 模式: 登入 | 註冊
   pageMode: 'login' | 'register' = 'login';
@@ -57,6 +61,8 @@ export class LoginComponent {
 
   // google登入API
   loginWithGoogle() {
+    const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/gogobuy';
+    sessionStorage.setItem('google_return_url', returnUrl);
     window.location.href = 'http://localhost:8080/oauth2/authorization/google';
   }
 

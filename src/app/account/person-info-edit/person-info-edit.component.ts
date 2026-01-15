@@ -105,14 +105,14 @@ export class PersonInfoEditComponent {
     this.auth.updateProfile(userId, payload).subscribe({
       next: (res: any) => {
         if (res.code === 200) {
+          this.auth.connectPhone(userId, this.editInfo.phone).subscribe();
+          this.auth.setUser({ ...this.auth.user, ...payload });
           Swal.fire({
             title: '儲存成功',
             icon: 'success',
             timer: 1000,
             showConfirmButton: false
           });
-          this.auth.connectPhone(userId, this.editInfo.phone).subscribe();
-          this.auth.setUser({ ...this.auth.user, ...payload });
         }
       },
       error: (err) => {
@@ -261,5 +261,10 @@ export class PersonInfoEditComponent {
   get isGoogleUser(): boolean {
     // 直接回傳判斷結果，若 provider 不存在則回傳 false
     return this.editInfo?.provider === 'GOOGLE';
+  }
+
+  // 返回個人資訊
+  backinfo() {
+    this.router.navigate(['/personInfo']);
   }
 }

@@ -48,6 +48,28 @@ export interface Banner {
   styleUrl: './gogo-buy.component.scss'
 })
 export class GogoBuyComponent {
+  // 1. 定義 products (對應你的資料源，例如 stores 或 products)
+  products: any[] = [];
+
+  // 2. 定義當前頁面索引 (預設為 0)
+  currentPage: number = 0;
+
+  // ... 你的 ngOnInit 和 Service 呼叫
+
+  // 3. 建立處理頁面更新的方法
+  onPageChange(event: any) {
+    // event.page 會回傳目前顯示區域第一張圖的索引
+    this.currentPage = event.page;
+  }
+
+  // 4. 判斷是否為中間卡片的邏輯
+  isCenter(index: number): boolean {
+    if (!this.products) return false;
+
+    // 在 numVisible = 3 的情況下，中間那張的索引是 currentPage + 1
+    // 使用餘數運算 % 確保在無限循環時 index 正確
+    return index === (this.currentPage + 1) % this.products.length;
+  }
   stores: Stores[] = [
     {
       id: 1,

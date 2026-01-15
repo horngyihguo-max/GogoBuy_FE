@@ -101,22 +101,25 @@
             class="w-full border-b border-slate-200 py-2 outline-none focus:border-red-900 transition-colors font-medium text-slate-700" />
         </div>
 
-        <div class="md:col-span-2 pt-6 flex flex-col md:flex-row gap-4">
+        <div class="flex-auto pt-6 flex flex-col md:flex-row gap-4">
           <button type="submit" [disabled]="profileForm.invalid"
-            class="flex-1 bg-red-900 text-white font-bold py-4 rounded-2xl cursor-pointer hover:bg-red-950 transition-all active:scale-95 shadow-[0_4px_6px_rgba(127,29,29,0.2)] disabled:opacity-50 disabled:cursor-not-allowed">
-            儲存所有修改
+            class="flex-auto bg-red-900 text-white font-bold py-4 rounded-2xl cursor-pointer hover:bg-red-950 transition-all active:scale-95 shadow-[0_4px_6px_rgba(127,29,29,0.2)] disabled:opacity-50 disabled:cursor-not-allowed">
+            儲存修改
           </button>
-          <!-- 實驗功能 -->
           @if(!isGoogleUser){
           <button type="button" (click)="changeEmail()"
-            class="md:w-1/3 bg-slate-100 text-slate-600 font-bold py-4 rounded-2xl cursor-pointer hover:bg-slate-200 transition-all">
+            class="flex-auto bg-red-900 text-white font-bold py-4 rounded-2xl cursor-pointer hover:bg-red-950 transition-all active:scale-95 shadow-[0_4px_6px_rgba(127,29,29,0.2)]">
             修改信箱
           </button>
           <button type="button" (click)="changePassword()"
-            class="md:w-1/3 bg-slate-100 text-slate-600 font-bold py-4 rounded-2xl cursor-pointer hover:bg-slate-200 transition-all">
+            class="flex-auto bg-red-900 text-white font-bold py-4 rounded-2xl cursor-pointer hover:bg-red-950 transition-all active:scale-95 shadow-[0_4px_6px_rgba(127,29,29,0.2)]">
             修改密碼
           </button>
           }
+          <button type="button" (click)="backinfo()"
+            class="flex-auto bg-slate-100 text-slate-600 font-bold py-4 rounded-2xl cursor-pointer hover:bg-slate-200 transition-all">
+            取消修改
+          </button>
         </div>
       </form>
     </div>

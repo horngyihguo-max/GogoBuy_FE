@@ -27,10 +27,10 @@
         <li>
           @if (userAvatar) {
           <img [src]="userAvatar" (error)="userAvatar = 'assets/default-avatar.png'"
-            class="w-9 h-9 rounded-full cursor-pointer" (click)="menu.toggle($event)" alt="avatar">
+            class="w-9 h-9 rounded-full cursor-pointer" (click)="onUserClick($event, menu)" alt="avatar">
           } @else {
           <i class="pi pi-user cursor-pointer" style=" color: rgb(255, 255, 255); font-size: 1.5rem"
-            (click)="menu.toggle($event)"></i>
+            (click)="onUserClick($event, menu)"></i>
           }
           <p-menu #menu [popup]="true" [model]="items" [model]="filteredItems" appendTo="body"></p-menu>
         </li>
@@ -140,12 +140,12 @@
   <a routerLink="personInfo">
     <div>
       @if (userAvatar) {
-      <img [src]="userAvatar" (error)="userAvatar = 'assets/default-avatar.png'"
-        class="w-9 h-9 rounded-full cursor-pointer" (click)="menu.toggle($event)" alt="avatar"
+      <img [src]="userAvatar" (error)="userAvatar = 'Snoopy.jpg'"
+        class="w-9 h-9 rounded-full cursor-pointer" (click)="onUserClick($event, menu)" alt="avatar"
         [ngStyle]="{ 'color': (router.url == '/personInfo') ? 'rgba(0, 0, 0)' : '' }">
       } @else {
       <i class="pi pi-user cursor-pointer" style=" color: rgb(255, 255, 255); font-size: 1.5rem"
-        (click)="menu.toggle($event)" [ngStyle]="{ 'color': (router.url == '/personInfo') ? 'rgba(0, 0, 0)' : '' }"></i>
+        (click)="onUserClick($event, menu)" [ngStyle]="{ 'color': (router.url == '/personInfo') ? 'rgba(0, 0, 0)' : '' }"></i>
       }
     </div>
     <div [ngStyle]="{ 'color': (router.url == '/personInfo') ? 'rgba(0, 0, 0)' : '' }">

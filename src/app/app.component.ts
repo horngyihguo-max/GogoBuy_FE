@@ -1,10 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, HostListener, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, RouterLinkActive, RouterLink, Router } from '@angular/router';
 import Swal from 'sweetalert2';
 import { ButtonModule } from 'primeng/button';
 import { MenuItem } from 'primeng/api';
-import { MenuModule } from 'primeng/menu';
+import { Menu, MenuModule } from 'primeng/menu';
 import { PanelMenuModule } from 'primeng/panelmenu';
 import { InputTextModule } from 'primeng/inputtext';
 import { AuthService } from './@service/auth.service';
@@ -36,6 +36,8 @@ export interface User {
 export class AppComponent {
   constructor(public router: Router, private http: HttpService, public auth: AuthService) { }
   title = 'gogobuy';
+  @ViewChild('menu') mainMenu!: Menu;
+  @ViewChild('problemMenu') problemMenu!: Menu;
 
   // 預設頭像
   userAvatar: string | null = null;
@@ -77,24 +79,57 @@ export class AppComponent {
     return this.router.url.startsWith('/gogobuy');
   }
 
+  @HostListener('window:scroll', [])
+  onWindowScroll() {
+    if (this.mainMenu?.visible) {
+      this.mainMenu.hide();
+    }
+    if (this.problemMenu?.visible) {
+      this.problemMenu.hide();
+    }
+  }
+
+  onUserClick(event: any, menu: any) {
+    const items = this.filteredItems;
+    if (items && items.length > 0) {
+      menu.toggle(event);
+    } else {
+      console.log('選單內容為空');
+    }
+  }
+
   // 判斷是否已登入
   get isLoggedIn(): boolean {
     return !!localStorage.getItem('user_id');
   }
 
+  get isMobile(): boolean {
+    return window.innerWidth <= 768;
+  }
+
   // 使用session判斷選單出現列表
   get filteredItems() {
     const loggedIn = this.isLoggedIn;
+    const mobile = this.isMobile;
     return this.items.filter(item => {
       // 如果偵測到session顯示登出
-      if (item.label === '登出') {
+      if (item.label == '登出') {
         return loggedIn;
       }
 
       // 如果沒有偵測到session顯示登入
-      if (item.label === '登入') {
+      if (item.label == '登入') {
         return !loggedIn;
       }
+
+      if (loggedIn && mobile) {
+        return false;
+      }
+
+      if (!loggedIn && mobile) {
+        return false;
+      }
+
       return true;
     });
   }
