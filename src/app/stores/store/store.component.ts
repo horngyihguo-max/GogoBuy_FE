@@ -13,12 +13,14 @@ import { SelectButtonModule } from 'primeng/selectbutton';
 import { DialogModule } from 'primeng/dialog';
 import { HttpService } from '../../@service/http.service';
 import { Router, RouterLink } from "@angular/router";
-import { Category, FeeDescription, MenuCategoriesVoList, MenuVoList, OperatingHoursVoList, ProductOptionGroupsVoList, Stores } from '../../@service/store.service';
+import { Category, FeeDescription, Items, MenuCategoriesVoList, MenuVoList, OperatingHoursVoList, ProductOptionGroupsVoList, Stores } from '../../@service/store.service';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { SelectModule } from 'primeng/select';
+import { IconFieldModule } from 'primeng/iconfield';
+import { InputIconModule } from 'primeng/inputicon';
 
 @Component({
   selector: 'app-store',
@@ -30,36 +32,46 @@ import { SelectModule } from 'primeng/select';
     TableModule, SelectButtonModule, CommonModule,
     DialogModule, ButtonModule, RouterLink,
     InputGroupModule, InputGroupAddonModule, FloatLabelModule,
-    InputNumberModule, SelectModule, InputTextModule
+    InputNumberModule, SelectModule, InputTextModule,
+    IconFieldModule, InputIconModule,
   ],
   templateUrl: './store.component.html',
   styleUrl: './store.component.scss'
 })
-export class StoreComponent implements AfterViewInit {
+export class StoreComponent {
 
   constructor(private http: HttpService, private router: Router) { }
 
+  // 開啟dialog
   displayEditDialog = false;
   displayAddDialog = false;
   displayStoreInfoDialog = false;
   displaySaveDialog = false;
   displaySpecsDialog = false;
+  displayItemDialog = false;
+
   selectedProduct!: MenuVoList;
   selectedCategoryId!: number;
+  selectedIndex: number = -1;
 
-
+  // 店家詳細資訊
   storeTab: 'info' | 'orderInfo' = 'info';
-  selectedIndex = 0;
   indicatorLeft = 0;
   indicatorWidth = 0;
 
-  selectedCategoryName = '';
-  isAdding = false;
+  // 商品分類
+  filteredProducts: MenuVoList[] = [];
   newCategoryName = '';
+
+  searchKeyword: string = '';
+  currentCategoryId: number = -1;
 
   // 暫存新增的商品
   currentProduct: MenuVoList = this.getNewProduct();
   optionGroups: ProductOptionGroupsVoList = this.getNewGroups();
+  currentGroupIndex: number | null = null;
+  currentItemIndex: number | null = null;
+  currentItem: Items = {name: '', extraPrice: 0};
 
   getNewProduct(): MenuVoList {
     return {
@@ -82,7 +94,14 @@ export class StoreComponent implements AfterViewInit {
     }
   };
 
-  // 要postAPI的
+  getNewItem(): Items {
+    return{
+      name: '',
+      extraPrice: 0
+    }
+  }
+
+  // 打包傳進資料庫
   storeData = {
     storesName: '',
     phone: '',
@@ -103,17 +122,13 @@ export class StoreComponent implements AfterViewInit {
   @ViewChildren('tabBtn') tabBtns!: QueryList<ElementRef>;
 
   ngOnInit() {
-    if (this.store.menuCategoriesVoList.length > 0) {
-      this.selectedCategoryName = this.store.menuCategoriesVoList[0].name;
-    }
+    this.filteredProducts = [...this.store.menuVoList];
   }
 
-  ngAfterViewInit() {
-    this.updateIndicator();
-  }
-
-  addStore() {
-    this.router.navigateByUrl('/store_upsert');
+  // 店家資訊
+  opendStoreInfo() {
+    this.storeTab = 'info'
+    this.displayStoreInfoDialog = true;
   }
 
   editStore(event: Event) {
@@ -123,56 +138,64 @@ export class StoreComponent implements AfterViewInit {
   // 新增分類
   startAdding(event: Event) {
     event.stopPropagation();
-    this.isAdding = true;
     this.newCategoryName = '';
     setTimeout(() => {
       document.querySelector<HTMLInputElement>('#newCategoryInput')?.focus();
     }, 0);
   }
 
-  saveProduct() {
-    if (this.currentProduct) {
-      this.storeData.menuVoList.push({ ...this.currentProduct });
-      this.store.menuVoList.push({ ...this.currentProduct }); // 存入假資料
-      this.displayAddDialog = false;
+  // get currentCategoryId(): number {
+  //   const index = this.store.menuCategoriesVoList.findIndex(c => c.name ===
+  //     this.selectedCategoryName);
+  //   return index + 1;
+  // }
+
+  // get filteredProducts() {
+  //   return this.store.menuVoList.filter(item => item.categoryId === this.currentCategoryId);
+  // }
+
+  selectCategory(category: any, catId: number = -1) {
+    this.selectedIndex = catId;
+    this.currentCategoryId = catId;
+    this.applyFilters();
+  }
+
+  applyFilters() {
+    let results = [...this.store.menuVoList];
+    if (this.selectedIndex !== -1) {
+      results = results.filter(p => p.categoryId === (this.selectedIndex + 1));
     }
-  }
 
-  get currentCategoryId(): number {
-    const index = this.store.menuCategoriesVoList.findIndex(c => c.name ===
-      this.selectedCategoryName);
-    return index + 1;
-  }
-
-  get filteredProducts() {
-    return this.store.menuVoList.filter(item => item.categoryId === this.currentCategoryId);
-  }
-
-  selectCategory(name: string, index: number) {
-    this.selectedCategoryName = name;
-    this.selectedIndex = index;
-    setTimeout(() => this.updateIndicator());
-  }
-
-  updateIndicator() {
-    const tab = this.tabBtns.toArray()[this.selectedIndex]?.nativeElement;
-    if (!tab) return;
-
-    this.indicatorLeft = tab.offsetLeft;
-    this.indicatorWidth = tab.offsetWidth;
-  }
-
-  saveCategory() {
-    if (this.newCategoryName.trim()) {
-      this.store.menuCategoriesVoList.push({ name: this.newCategoryName, priceLevel: [] });
-      this.selectCategory(this.newCategoryName, this.store.menuCategoriesVoList.length - 1);
+    const keyword = this.searchKeyword.trim().toLowerCase();
+    if (keyword) {
+      results = results.filter(p => {
+        const nameMatch = p.name?.toLowerCase().includes(keyword);
+        const descMatch = p.description?.toLowerCase().includes(keyword);
+        return nameMatch || descMatch;
+      });
     }
-    this.isAdding = false;
+    this.filteredProducts = results;
   }
 
-  cancelAdding() {
-    this.isAdding = false;
-    this.newCategoryName = '';
+
+
+  // saveCategory() {
+  //   if (this.newCategoryName.trim()) {
+  //     this.store.menuCategoriesVoList.push({ name: this.newCategoryName, priceLevel: [] });
+  //     this.selectCategory(this.newCategoryName, this.store.menuCategoriesVoList.length - 1);
+  //   }
+  //   this.isAdding = false;
+  // }
+
+  // cancelAdding() {
+  //   this.isAdding = false;
+  //   this.newCategoryName = '';
+  // }
+
+  // 新增商品
+  openNewProduct() {
+    this.currentProduct = this.getNewProduct();
+    this.displayAddDialog = true;
   }
 
   selectedFile: File | null = null;
@@ -208,23 +231,54 @@ export class StoreComponent implements AfterViewInit {
 
   }
 
-  openItemDialog(index: number){}
+  openItemDialog(groupIndex: number, itemIndex: number | null = null) {
+    this.currentGroupIndex = groupIndex;
+    this.currentItemIndex = itemIndex;
+    if (itemIndex !== null) {
+      const targetItem = this.storeData.productOptionGroupsVoList[groupIndex].items[itemIndex];
+      this.currentItem = { ...targetItem };
+    } else {
+      this.currentItem = { name: '', extraPrice: 0 };
+    }
+    this.displayItemDialog = true;
+  }
 
-  openEdit(product: MenuVoList) {
+  saveItem() {
+    if (this.currentItem.name && this.currentGroupIndex !== null) {
+      const targetGroup = this.storeData.productOptionGroupsVoList[this.currentGroupIndex];
+
+      if (!targetGroup.items) targetGroup.items = [];
+
+      if (this.currentItemIndex !== null) {
+        // 編輯模式：取代舊有索引位置的資料
+        targetGroup.items[this.currentItemIndex] = { ...this.currentItem };
+      } else {
+        // 新增模式：直接 push
+        targetGroup.items.push({ ...this.currentItem });
+      }
+
+      this.displayItemDialog = false;
+      this.currentGroupIndex = null;
+      this.currentItemIndex = null;
+    }
+  }
+
+  saveProduct() {
+    console.log(this.currentProduct);
+    if (this.currentProduct) {
+      this.storeData.menuVoList.push({ ...this.currentProduct });
+      this.store.menuVoList.push({ ...this.currentProduct }); // 存入假資料
+      this.displayAddDialog = false;
+    }
+  }
+
+  // 修改商品
+  editProduct(product: MenuVoList) {
     this.selectedProduct = product;
     this.displayEditDialog = true;
   }
 
-  openAdd() {
-    this.currentProduct = this.getNewProduct();
-    this.displayAddDialog = true;
-  }
-
-  opendStoreInfo() {
-    this.storeTab = 'info'
-    this.displayStoreInfoDialog = true;
-  }
-
+  // 存資料庫
   onSaveAll() {
     if (this.store.id == 0) {
       this.http.postApi('http://localhost:8080/store/create', this.storeData)
@@ -243,7 +297,7 @@ export class StoreComponent implements AfterViewInit {
   // 假資料
   store: Stores = {
     id: 1,
-    storesname: "可不可 OKORNOT",
+    storesName: "可不可 OKORNOT",
     phone: "0988777666",
     address: "台南市歸仁區中正南路1001號",
     category: "餐飲",
@@ -293,6 +347,7 @@ export class StoreComponent implements AfterViewInit {
     ],
     menuCategoriesVoList: [
       {
+        id: 1,
         name: "純茶",
         priceLevel: [
           { "name": "中杯", "price": 0 },
@@ -300,6 +355,7 @@ export class StoreComponent implements AfterViewInit {
         ]
       },
       {
+        id: 2,
         name: "找拿鐵",
         priceLevel: [
           { "name": "中杯", "price": 0 },
@@ -307,6 +363,7 @@ export class StoreComponent implements AfterViewInit {
         ]
       },
       {
+        id: 3,
         name: "醇奶",
         priceLevel: [
           { "name": "中杯", "price": 0 },

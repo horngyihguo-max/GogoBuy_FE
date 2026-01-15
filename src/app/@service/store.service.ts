@@ -29,21 +29,21 @@ export class StoreService {
 
 }
 export interface Stores {
-  id: number;
-  storesname: string;
+  id?: number;
+  storesName: string;
   phone: string;
   address: string;
-  category: string;
+  category: any;
   type: string;
   memo?: string;
-  image?: string;
+  image?: any;
   isPublic: boolean;
   createdBy: string;
   feeDescription?: FeeDescription[];
   operatingHoursVoList: OperatingHoursVoList[];
   menuVoList: MenuVoList[];
-  menuCategoriesVoList: MenuCategoriesVoList[];
-  productOptionGroupsVoList: ProductOptionGroupsVoList[]
+  menuCategoriesVoList?: MenuCategoriesVoList[];
+  productOptionGroupsVoList?: ProductOptionGroupsVoList[]
 }
 
 export interface FeeDescription {
@@ -68,6 +68,7 @@ export interface MenuVoList {
 }
 
 export interface MenuCategoriesVoList {
+  id: number;
   name: string;
   priceLevel: PriceLevel[];
 }
@@ -89,13 +90,14 @@ export interface Items {
   extraPrice: number;
 }
 
+// 以下是暫存資料的interface ----------------
 export interface Category {
   name: string;
   code: number;
 }
 
 export interface TimeSlotUI {
-  selectedWeeks: number[]; // 例如 [1, 2, 3]
+  selectedWeeks: number[];
   openTime: Date | null;
   closeTime: Date | null;
 }
