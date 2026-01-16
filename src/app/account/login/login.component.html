@@ -18,13 +18,13 @@
 
         <!-- 圖片下的標語 -->
         <h2 class="mt-8 text-[50px] font-black tracking-tight">GogoBuy</h2>
-        <p class="mt-4 text-red-200 text-[25px] leading-relaxed">
+        <p class="mt-4 text-red-200 font-bold text-[25px] leading-relaxed">
           全台最優惠的團購平台<br />
-          每一單，都是驚喜。
+          每一單，都是驚喜！
         </p>
 
         <div class="mt-8 w-full max-w-xs text-left bg-white/10 rounded-2xl p-4">
-          <p class="text-[15px] text-white/90 leading-relaxed">
+          <p class="text-base text-white/90 font-bold leading-relaxed">
             💡 小提示：註冊時請填寫正確信箱與手機，方便後續通知與訂單追蹤。
           </p>
         </div>
@@ -57,7 +57,7 @@
                 <h3 class="mt-2 text-[25px] font-black tracking-tight text-slate-900">
                   {{ pageMode === 'login' ? '登入您的帳號' : '建立新帳號' }}
                 </h3>
-                <p class="mt-2 text-[15px] text-slate-500">
+                <p class="mt-2 text-base font-bold text-slate-500">
                   {{ pageMode === 'login'
                   ? '歡迎回來，請輸入帳號資訊。'
                   : '只要幾步就能開始團購。' }}
@@ -158,14 +158,14 @@
               </button>
               @if (pageMode == 'login') {
               <div style="text-align: center;">
-                <a style="cursor: pointer;" (click)="resetPassword()">忘記密碼?</a>
+                <a class="font-semibold" style="cursor: pointer;" (click)="resetPassword()">忘記密碼?</a>
               </div>
               }
 
               <!-- 分隔線 -->
               <div class="flex items-center gap-3 pt-4">
                 <div class="h-px bg-slate-200 flex-1"></div>
-                <span class="text-[10px] font-bold text-slate-400">OR</span>
+                <span class="text-[10px] font-bold text-slate-700">OR</span>
                 <div class="h-px bg-slate-200 flex-1"></div>
               </div>
 
@@ -181,8 +181,8 @@
           </div>
 
           <!-- 小字提示 -->
-          <p class="mt-4 text-[15px] text-red-950/80 text-center">
-            登入即代表你同意平台的服務條款與隱私政策。
+          <p class="mt-4 text-[15px] font-bold text-red-950/80 text-center">
+            註冊登入即代表你同意平台的服務條款與隱私政策。
           </p>
         </div>
       </div>

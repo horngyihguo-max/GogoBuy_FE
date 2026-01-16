@@ -40,15 +40,15 @@
           </div>
 
           <div class="space-y-2">
-            <div class="flex justify-between text-[15px] font-bold text-slate-400 uppercase tracking-widest">
-              <span>Experience</span>
+            <div class="flex justify-between text-[15px] font-bold uppercase tracking-widest">
+              <span class="font-bold text-base text-slate-700">經驗 / Experience</span>
               <span>{{ currentExp }} / {{ expToNextLevel }}</span>
             </div>
             <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
               <div class="h-full bg-orange-400 transition-all duration-1000 ease-out" [style.width]="expPercentage">
               </div>
             </div>
-            <p class="text-[15px] text-slate-400 italic">
+            <p class="text-[15px] text-slate-700 font-black text-base italic">
               再獲得 {{ expToNextLevel - currentExp }} EXP 即可升級
             </p>
           </div>

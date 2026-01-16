@@ -1,111 +1,110 @@
-  <!-- 確實有讀取到最新資料時才會顯示，否則顯示"載入中..." -->
-  @if (ready && auth.user) {
-  <!-- 這邊是載入完成時的畫面 -->
-  <div class="min-h-screen bg-slate-50 py-12 px-4 antialiased">
-    <div class="max-w-3xl mx-auto">
-      <div class="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 mb-6 relative overflow-hidden">
-        <div class="absolute top-0 right-0 w-32 h-32 bg-red-900/5 rounded-full -mr-16 -mt-16"></div>
+<!-- 確實有讀取到最新資料時才會顯示，否則顯示"載入中..." -->
+@if (ready && auth.user) {
+<!-- 這邊是載入完成時的畫面 -->
+<div class="min-h-screen bg-slate-50 py-12 px-4 antialiased">
+  <div class="max-w-3xl mx-auto">
+    <div class="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 mb-6 relative overflow-hidden">
+      <div class="absolute top-0 right-0 w-32 h-32 bg-red-900/5 rounded-full -mr-16 -mt-16"></div>
 
-        <div class="flex flex-col md:flex-row items-center gap-8 relative z-10">
-          <div class="relative group">
-            <div class="w-32 h-32 rounded-full border-4 border-white shadow-lg overflow-hidden bg-slate-200">
-              <!-- 如果沒有頭像就用名字開頭2字/或是要改成預設頭像也行 -->
-              <img [src]="
+      <div class="flex flex-col md:flex-row items-center gap-8 relative z-10">
+        <div class="relative group">
+          <div class="w-32 h-32 rounded-full border-4 border-white shadow-lg overflow-hidden bg-slate-200">
+            <!-- 如果沒有頭像就用名字開頭2字/或是要改成預設頭像也行 -->
+            <img [src]="
                   editInfo.avatar_url ||
                   'https://ui-avatars.com/api/?name=' +
                     auth.user.nickname +
                     '&background=7f1d1d&color=fff'
                 " class="w-full h-full object-cover" />
-            </div>
+          </div>
+        </div>
+
+        <div class="flex-1 w-full text-center md:text-left">
+          <div class="flex items-center justify-center md:justify-start gap-3 mb-2">
+            <h2 class="text-[30px] font-black text-slate-800">
+              {{ auth.user.nickname }}
+            </h2>
+            <span class="bg-red-900 text-white text-[15px] font-bold px-3 py-1 rounded-full uppercase tracking-tighter">
+              LV. {{ level }}
+            </span>
           </div>
 
-          <div class="flex-1 w-full text-center md:text-left">
-            <div class="flex items-center justify-center md:justify-start gap-3 mb-2">
-              <h2 class="text-[30px] font-black text-slate-800">
-                {{ auth.user.nickname }}
-              </h2>
-              <span class="bg-red-900 text-white text-[15px] font-bold px-3 py-1 rounded-full uppercase tracking-tighter">
-                LV. {{ level }}
-              </span>
+          <div class="space-y-2">
+            <div class="flex justify-between text-[15px] font-bold uppercase tracking-widest">
+              <span class="font-bold text-base text-slate-700">經驗 / Experience</span>
+              <span>{{ currentExp }} / {{ expToNextLevel }}</span>
             </div>
-
-            <div class="space-y-2">
-              <div class="flex justify-between text-[15px] font-bold text-slate-400 uppercase tracking-widest">
-                <span>Experience</span>
-                <span>{{ currentExp }} / {{ expToNextLevel }}</span>
+            <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
+              <div class="h-full bg-orange-400 transition-all duration-1000 ease-out" [style.width]="expPercentage">
               </div>
-              <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
-                <div class="h-full bg-orange-400 transition-all duration-1000 ease-out" [style.width]="expPercentage">
-                </div>
-              </div>
-              <p class="text-[15px] text-slate-400 italic">
-                再獲得 {{ expToNextLevel - currentExp }} EXP 即可升級
-              </p>
             </div>
+            <p class="text-[15px] text-slate-700 font-black text-base italic">
+              再獲得 {{ expToNextLevel - currentExp }} EXP 即可升級
+            </p>
           </div>
         </div>
       </div>
+    </div>
 
-      <div class="bg-white rounded-3xl p-8 shadow-sm border border-slate-100">
-        <h3 class="text-[23px] font-bold text-slate-800 mb-8 flex items-center gap-2">
-          <span class="w-1.5 h-5 bg-red-900 rounded-full"></span>
-          個人資料
-        </h3>
+    <div class="bg-white rounded-3xl p-8 shadow-sm border border-slate-100">
+      <h3 class="text-[23px] font-bold text-slate-800 mb-8 flex items-center gap-2">
+        <span class="w-1.5 h-5 bg-red-900 rounded-full"></span>
+        個人資料
+      </h3>
 
-        <form #profileForm="ngForm" class="flex flex-col md:grid-cols-2 gap-x-8 gap-y-6">
-          <div class="space-y-1">
-            <label class="block text-[18px] font-bold text-slate-500 uppercase tracking-widest">信箱 / E-mail</label>
-            <input type="email" name="email" [(ngModel)]="editInfo.email" placeholder="ex: test123@gmail.com"
-              #email="ngModel" required pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
-              class="w-full border-b border-slate-200 py-2 outline-none focus:border-red-900 transition-colors font-medium text-slate-700 "
-              disabled />
-            @if (email.invalid && email.touched) {
-            <p class="text-[15px] text-red-900 font-bold">Email 格式不正確</p>
-            }
-          </div>
+      <form #profileForm="ngForm" class="flex flex-col md:grid-cols-2 gap-x-8 gap-y-6">
+        <div class="space-y-1">
+          <label class="block text-[18px] font-bold text-slate-500 uppercase tracking-widest">信箱 / E-mail</label>
+          <input type="email" name="email" [(ngModel)]="editInfo.email" placeholder="ex: test123@gmail.com"
+            #email="ngModel" required pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+            class="w-full border-b border-slate-200 py-2 outline-none focus:border-red-900 transition-colors font-medium text-slate-700 "
+            disabled />
+          @if (email.invalid && email.touched) {
+          <p class="text-[15px] text-red-900 font-bold">Email 格式不正確</p>
+          }
+        </div>
 
-          <div class="space-y-1">
-            <label class="block text-[18px] font-bold text-slate-500 uppercase tracking-widest">名字 / Nickname</label>
-            <input type="text" name="nickname" [(ngModel)]="editInfo.nickname" placeholder="ex: Alice" #nickname="ngModel"
-              required
-              class="w-full border-b border-slate-200 py-2 outline-none focus:border-red-900 transition-colors font-medium text-slate-700"
-              disabled />
-            @if (nickname.invalid && nickname.touched) {
-            <p class="text-[15px] text-red-900 font-bold">名稱不可為空</p>
-            }
-          </div>
+        <div class="space-y-1">
+          <label class="block text-[18px] font-bold text-slate-500 uppercase tracking-widest">名字 / Nickname</label>
+          <input type="text" name="nickname" [(ngModel)]="editInfo.nickname" placeholder="ex: Alice" #nickname="ngModel"
+            required
+            class="w-full border-b border-slate-200 py-2 outline-none focus:border-red-900 transition-colors font-medium text-slate-700"
+            disabled />
+          @if (nickname.invalid && nickname.touched) {
+          <p class="text-[15px] text-red-900 font-bold">名稱不可為空</p>
+          }
+        </div>
 
-          <div class="space-y-1">
-            <label class="block text-[18px] font-bold text-slate-500 uppercase tracking-widest">電話 / Phone</label>
-            <input type="text" name="phone" [(ngModel)]="editInfo.phone" placeholder="ex: 0987654321" #phone="ngModel"
-              required pattern="^09\d{2}[\s\-]?\d{3}[\s\-]?\d{3}$"
-              class="w-full border-b border-slate-200 py-2 outline-none focus:border-red-900 transition-colors font-medium text-slate-700"
-              disabled />
-            @if (phone.invalid && phone.touched) {
-            <p class="text-[15px] text-red-900 font-bold">手機格式不正確</p>
-            }
-          </div>
+        <div class="space-y-1">
+          <label class="block text-[18px] font-bold text-slate-500 uppercase tracking-widest">電話 / Phone</label>
+          <input type="text" name="phone" [(ngModel)]="editInfo.phone" placeholder="ex: 0987654321" #phone="ngModel"
+            required pattern="^09\d{2}[\s\-]?\d{3}[\s\-]?\d{3}$"
+            class="w-full border-b border-slate-200 py-2 outline-none focus:border-red-900 transition-colors font-medium text-slate-700"
+            disabled />
+          @if (phone.invalid && phone.touched) {
+          <p class="text-[15px] text-red-900 font-bold">手機格式不正確</p>
+          }
+        </div>
 
-          <div class="space-y-1">
-            <label class="block text-[18px] font-bold text-slate-500 uppercase tracking-widest">電子發票載具 / Carrier</label>
-            <input type="text" name="carrier" [(ngModel)]="editInfo.carrier" placeholder="ex: /ABC1234"
-              class="w-full border-b border-slate-200 py-2 outline-none focus:border-red-900 transition-colors font-medium text-slate-700"
-              disabled />
-          </div>
+        <div class="space-y-1">
+          <label class="block text-[18px] font-bold text-slate-500 uppercase tracking-widest">電子發票載具 / Carrier</label>
+          <input type="text" name="carrier" [(ngModel)]="editInfo.carrier" placeholder="ex: /ABC1234"
+            class="w-full border-b border-slate-200 py-2 outline-none focus:border-red-900 transition-colors font-medium text-slate-700"
+            disabled />
+        </div>
 
-          <div class="md:col-span-2 pt-6 flex flex-col md:flex-row gap-4">
-            <button type="button" (click)="goTOEdit()"
-              class="flex-1 bg-red-900 text-white font-bold py-4 rounded-2xl cursor-pointer hover:bg-red-950 transition-all active:scale-95 shadow-[0_4px_6px_rgba(127,29,29,0.2)] disabled:opacity-50 disabled:cursor-not-allowed">
-              前往修改個人資料設定
-            </button>
-          </div>
-        </form>
-      </div>
+        <div class="md:col-span-2 pt-6 flex flex-col md:flex-row gap-4">
+          <button type="button" (click)="goTOEdit()"
+            class="flex-1 bg-red-900 text-white font-bold py-4 rounded-2xl cursor-pointer hover:bg-red-950 transition-all active:scale-95 shadow-[0_4px_6px_rgba(127,29,29,0.2)] disabled:opacity-50 disabled:cursor-not-allowed">
+            前往修改個人資料設定
+          </button>
+        </div>
+      </form>
     </div>
   </div>
+</div>
 
-  <!-- 以下為尚未載入完成時的畫面 -->
-  } @else {
-  <p>載入中...</p>
-  }
-
+<!-- 以下為尚未載入完成時的畫面 -->
+} @else {
+<p>載入中...</p>
+}

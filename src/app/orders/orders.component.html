@@ -1,5 +1,3 @@
-<!--佔位用訂單，沒有實際作用-->
-
 <body class="bg-slate-50 text-slate-800 antialiased h-svh">
   <div class="max-w-4xl mx-auto py-12 px-6 lg:py-20">
     <p-tabs value="active">
@@ -9,98 +7,61 @@
       </p-tablist>
 
       <p-tabpanels>
-        <!-- 進行中 -->
         <p-tabpanel value="active">
-
-          <p-accordion [(value)]="activeOpenValues" [multiple]="true">
-            <ng-container *ngFor="let o of activeOrders">
-              <p-accordion-panel [value]="o.code">
-                <p-accordion-header>
-                  <div class="order-header">
-                    <div>
-                      <div class="title">#{{ o.code }}｜{{ o.storeName }}</div>
-                      <div class="sub">{{ o.createdAt | date:'yyyy/MM/dd HH:mm' }}</div>
-                    </div>
-                    <p-tag [value]="
-                    o.statusLabel" [severity]="
-                    o.statusLabel === '進行中' ? 'info' :
-                    o.statusLabel === '已完成' ? 'success' :
-                    o.statusLabel === '已取消' ? 'danger' :'warn'">
-                    </p-tag>
-                  </div>
-                </p-accordion-header>
-
-                <p-accordion-content>
-                  <div class="order-body">
-                    <div class="row">
-                      <div>收件人：{{ o.receiverName }}</div>
-                      <div>電話：{{ o.phone }}</div>
-                    </div>
-
-                    <div class="items">
-                      <div class="item" *ngFor="let it of o.items">
-                        <div class="name">{{ it.name }}</div>
-                        <div class="meta">
-                          x{{ it.qty }}｜{{ it.price }} 元
-                          <span *ngIf="it.note">｜備註：{{ it.note }}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div class="total">總計：{{ o.total }} 元</div>
-                  </div>
-                </p-accordion-content>
-              </p-accordion-panel>
-            </ng-container>
-          </p-accordion>
+          <ng-container
+            *ngTemplateOutlet="orderList; context: { $implicit: activeOrders, openValues: activeOpenValues }"></ng-container>
         </p-tabpanel>
 
-        <!-- 歷史 -->
         <p-tabpanel value="history">
-
-          <p-accordion [(value)]="historyOpenValues" [multiple]="true">
-            <ng-container *ngFor="let o of historyOrders">
-              <p-accordion-panel [value]="o.code">
-                <p-accordion-header>
-                  <div class="order-header">
-                    <div>
-                      <div class="title">#{{ o.code }}｜{{ o.storeName }}</div>
-                      <div class="sub">{{ o.createdAt | date:'yyyy/MM/dd HH:mm' }}</div>
-                    </div>
-                    <p-tag [value]="
-                    o.statusLabel" [severity]="
-                    o.statusLabel === '進行中' ? 'info' :
-                    o.statusLabel === '已完成' ? 'success' :
-                    o.statusLabel === '已取消' ? 'danger' :'warn'">
-                    </p-tag>
-                  </div>
-                </p-accordion-header>
-
-                <p-accordion-content>
-                  <div class="order-body">
-                    <div class="row">
-                      <div>收件人：{{ o.receiverName }}</div>
-                      <div>電話：{{ o.phone }}</div>
-                    </div>
-
-                    <div class="items">
-                      <div class="item" *ngFor="let it of o.items">
-                        <div class="name">{{ it.name }}</div>
-                        <div class="meta">
-                          x{{ it.qty }}｜{{ it.price }} 元
-                          <span *ngIf="it.note">｜備註：{{ it.note }}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div class="total">總計：{{ o.total }} 元</div>
-                  </div>
-                </p-accordion-content>
-              </p-accordion-panel>
-            </ng-container>
-          </p-accordion>
+          <ng-container
+            *ngTemplateOutlet="orderList; context: { $implicit: historyOrders, openValues: historyOpenValues }"></ng-container>
         </p-tabpanel>
       </p-tabpanels>
     </p-tabs>
   </div>
 </body>
+
+<ng-template #orderList let-orders let-openValues="openValues">
+  <p-accordion [value]="openValues" [multiple]="true">
+    @for (o of orders; track o.code) {
+    <p-accordion-panel [value]="o.code">
+      <p-accordion-header>
+        <div class="order-header flex justify-between items-center w-full">
+          <div class="flex flex-row gap-6 items-center">
+            <div class="title font-bold">#{{ o.code }}｜{{ o.storeName }}</div>
+            <div class="sub text-base text-slate-700">{{ o.createdAt | date:'yyyy/MM/dd HH:mm' }}</div>
+            <p-tag [value]="o.statusLabel" [severity]="getStatusSeverity(o.statusLabel)" />
+          </div>
+        </div>
+      </p-accordion-header>
+
+      <p-accordion-content>
+        <div class="order-body space-y-4">
+          <div class="grid grid-cols-2 gap-4 border-b pb-2">
+            <div class="font-bold text-base">收件人：{{ o.receiverName }}</div>
+            <div class="font-bold text-base">電話：{{ o.phone }}</div>
+          </div>
+
+          <div class="items space-y-2">
+            @for (it of o.items; track $index) {
+            <div class="item">
+              <div class="font-medium font-bold">{{ it.name }}</div>
+              <div class="text-base font-bold text-slate-600">
+                x{{ it.qty }}｜{{ it.price }} 元
+                @if (it.note) { <span class="text-orange-500">｜備註：{{ it.note }}</span> }
+              </div>
+            </div>
+            }
+          </div>
+
+          <div class="total text-right font-bold text-lg border-t pt-2">
+            總計：{{ o.total }} 元
+          </div>
+        </div>
+      </p-accordion-content>
+    </p-accordion-panel>
+    } @empty {
+    <div class="p-8 text-center font-bold text-lgtext-slate-700">目前沒有訂單</div>
+    }
+  </p-accordion>
+</ng-template>

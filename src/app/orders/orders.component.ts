@@ -51,8 +51,8 @@ export class OrdersComponent {
       receiverName: '王小明',
       phone: '0912-345-678',
       items: [
-        { name: '珍珠奶茶', qty: 1, price: 60 },
-        { name: '烏龍奶茶', qty: 1, price: 60 }
+        { name: '珍珠奶茶', qty: 1, price: 60, note: "去冰" },
+        { name: '烏龍奶茶', qty: 1, price: 60, note: "" }
       ]
     }
   ];
@@ -88,17 +88,13 @@ export class OrdersComponent {
     this.historyOpenValues = [];
   }
 
-  getStatusSeverity(label: string): TagSeverity {
-    switch (label) {
-      case '進行中':
-        return 'info';     // 藍
-      case '已完成':
-        return 'success';  // 綠
-      case '已取消':
-        return 'danger';   // 紅
-      default:
-        return 'warn';     // 黃（未知狀態）
-    }
+  getStatusSeverity(status: string): 'info' | 'success' | 'danger' | 'warn' | undefined {
+    const statusMap: Record<string, 'info' | 'success' | 'danger' | 'warn'> = {
+      '進行中': 'info',
+      '已完成': 'success',
+      '已取消': 'danger'
+    };
+    return statusMap[status] || 'warn';
   }
 
 }
