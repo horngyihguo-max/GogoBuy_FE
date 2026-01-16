@@ -48,6 +48,27 @@ export interface Banner {
   styleUrl: './gogo-buy.component.scss'
 })
 export class GogoBuyComponent {
+
+  numVisible = 3;
+
+  // ✅ 一進來就先指定中間那張 = 1（因為 page 預設從 0 開始，visible=3 中間就是 0+1）
+  centerIndex = 1;
+
+  ngAfterViewInit() {
+    // 保險：確保畫面初次 render 後也會再計算一次
+    this.updateCenterIndex(0);
+  }
+
+  onCarouselPage(event: any) {
+    // event.page = 當前「第一張」的 index  :contentReference[oaicite:1]{index=1}
+    this.updateCenterIndex(event.page);
+  }
+
+  private updateCenterIndex(firstIndex: number) {
+    const middleOffset = Math.floor(this.numVisible / 2); // 3 -> 1
+    this.centerIndex = (firstIndex + middleOffset) % this.banners.length;
+  }
+
   stores: Stores[] = [
     {
       id: 1,
@@ -147,6 +168,10 @@ export class GogoBuyComponent {
   //輪播圖片
   banners: Banner[] = [
     {
+      image: 'fastFood.png',
+      title: '速食限時優惠'
+    },
+    {
       //位置
       image: 'Bubble.png',
       //圖片無法顯示時文字
@@ -159,6 +184,13 @@ export class GogoBuyComponent {
     {
       image: 'fastFood.png',
       title: '速食限時優惠'
+    }
+    ,
+    {
+      //位置
+      image: 'Bubble.png',
+      //圖片無法顯示時文字
+      title: '揪團喝珍奶'
     }
   ];
 }

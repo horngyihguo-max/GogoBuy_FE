@@ -1,0 +1,30 @@
+// focus 時文字(placeholder)在邊框的顏色 (( 輸入文字 type = input
+.p-floatlabel:has(input:focus) label {
+  color: #662222 !important;
+  font-weight: 600;
+}
+
+// focus 時營業、休息時間的邊框
+::ng-deep {
+  .p-datepicker:not(.p-disabled).p-focus > .p-inputtext {
+    border: 1px !important;
+    border-color: #662222 !important;
+    box-shadow: 0 0 0 0.2rem rgba(102, 34, 34) !important;
+  }
+}
+
+// focus 時文字(placeholder)在邊框的顏色 (( 經營類別 type = select
+::ng-deep .p-floatlabel:has(.p-focus) label {
+  color: #662222 !important;
+}
+
+// checkbox css
+::ng-deep {
+  .p-checkbox-checked .p-checkbox-box {
+    background: #662222 !important;
+    border-color: #662222 !important;
+  }
+  .p-checkbox:not(.p-disabled):hover .p-checkbox-box {
+    border-color: #662222 !important;
+  }
+}

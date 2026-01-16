@@ -1,0 +1,46 @@
+/* SweetAlert2 願望詳情樣式 */
+.wish-detail-popup {
+  font-size: 15px !important;
+}
+
+.wish-detail-content {
+  text-align: left !important;
+  padding: 0 !important;
+}
+
+.wish-info {
+  padding: 10px;
+}
+
+.wish-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.wish-title {
+  font-weight: 800;
+  font-size: 20px;
+  color: #7F1D1D;
+}
+
+.wish-status {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #eee;
+}
+
+.wish-field {
+  color: #444;
+  margin-bottom: 6px;
+  font-size: 15px;
+}
+
+.wish-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}

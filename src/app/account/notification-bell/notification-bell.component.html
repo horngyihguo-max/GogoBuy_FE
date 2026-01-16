@@ -1,0 +1,93 @@
+@if (mode === 'dropdown') {
+<p-popover #pop styleClass="w-80">
+  <div class="p-2">
+    <div class="flex items-center justify-between">
+      <div class="text-[20px] font-extrabold text-slate-900">通知</div>
+      <!-- 開發用測試按鈕 -->
+      <button
+        type="button"
+        class="text-[15px] font-bold text-slate-500 hover:underline"
+        (click)="sse.pushTest()"
+      >
+        + 測試通知
+      </button>
+      <!-- 開發用測試按鈕 -->
+      <button
+        type="button"
+        class="text-[15px] font-bold text-slate-500 hover:underline"
+        (click)="markAllRead()"
+      >
+        全部已讀
+      </button>
+    </div>
+
+    <div class="mt-3 space-y-2 max-h-80 overflow-y-auto">
+      @if (notifications$ | async; as notifications) { @if (notifications.length
+      === 0) {
+      <div class="text-[15px] text-slate-500 py-6 text-center">
+        目前沒有通知
+      </div>
+      } @else { @for (n of notifications; track n.id) {
+      <button
+        type="button"
+        class="w-full text-left rounded-xl p-3 border-3 transition hover:bg-slate-50 cursor-pointer"
+        [class.bg-orange-50]="!n.isRead"
+        [class.border-orange-200]="!n.isRead"
+        [class.border-slate-200]="n.isRead"
+        (click)="clickItem(n)"
+      >
+        <div class="font-bold text-[18px] text-slate-900">{{ n.title }}</div>
+        <div class="text-[15px] text-slate-600 mt-0.5">{{ n.message }}</div>
+        <div class="text-[12px] text-slate-500 mt-1">{{ n.createdAt }}</div>
+      </button>
+      } } }
+    </div>
+
+    <div class="mt-3 pt-3 border-t border-slate-200">
+      <button
+        type="button"
+        class="w-full text-[15px] font-extrabold text-red-900 hover:underline"
+        routerLink="/user/notifications"
+        (click)="pop.hide()"
+      >
+        查看全部通知
+      </button>
+    </div>
+  </div>
+</p-popover>
+
+<button
+  type="button"
+  class="relative flex items-center justify-center cursor-pointer"
+  (click)="pop.toggle($event)"
+>
+  <i
+    class="pi pi-bell text-white hover:text-red-300"
+    style="font-size: 1.5rem"
+  ></i>
+
+  @if (unreadCount$ | async; as unreadCount) { @if (unreadCount > 0) {
+  <span
+    class="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-red-600 text-white text-[10px] font-extrabold flex items-center justify-center"
+  >
+    {{ unreadCount }}
+  </span>
+  } }
+</button>
+} @else {
+<!-- icon 模式：只顯示 icon + badge，不控制 overlay，用於手機板 -->
+<button
+  type="button"
+  class="relative flex items-center justify-center cursor-pointer"
+>
+  <i class="pi pi-bell" style="font-size: 1.5rem"></i>
+
+  @if (unreadCount$ | async; as unreadCount) { @if (unreadCount > 0) {
+  <span
+    class="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-red-600 text-white text-[10px] font-extrabold flex items-center justify-center"
+  >
+    {{ unreadCount }}
+  </span>
+  } }
+</button>
+}

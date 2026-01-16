@@ -7,134 +7,43 @@ export class StoreService {
 
   constructor() { }
 
-  store: Stores = {
-    id: 1,
-    storesname: "可不可 OKORNOT",
-    phone: "0988777666",
-    address: "台南市歸仁區中正南路1001號",
-    category: "餐飲",
-    type: "手搖飲",
-    memo: "新鮮水果現切現打，保留原味，清爽不甜膩，安心享用。",
-    image: "okornot.png",
-    feeDescription: [
-      { km: 1.0, fee: 20 },
-      { km: 5.0, fee: 50 }
-    ],
-    isPublic: true,
-    createdBy: "UUID",
+  storeData = {
+    name: '',
+    phone: '',
+    address: '',
+    category: null as Category | null,
+    type: '',
+    memo: '',
+    image: null as Blob | string | null,
+    is_public: false,
+    created_by: 'A01',
     operatingHoursVoList: [
-      { week: 1, openTime: "10:00", closeTime: "22:00" },
-      { week: 2, openTime: "10:00", closeTime: "22:00" },
-      { week: 3, openTime: "10:00", closeTime: "22:00" },
-      { week: 4, openTime: "10:00", closeTime: "22:00" },
-      { week: 5, openTime: "10:00", closeTime: "23:00" }
-    ],
-    menuVoList: [
       {
-        categoryId: 1,
-        name: "經典紅玉",
-        description: "嚴選紅玉紅茶",
-        basePrice: 35,
-        image: "tea_red.jpg",
-        unusual: ["去冰", "微糖"]
-      }
-    ],
-    menuCategoriesVoList: [
-      {
-        name: "純茶類",
-        priceLevel: [
-          { name: "中杯", price: 35 },
-          { name: "大杯", price: 45 }
-        ]
-      }
-    ],
-    productOptionGroupsVoList: [
-      {
-        name: "甜度",
-        isRequired: true,
-        maxSelection: 1,
-        items: [
-          { name: "無糖", extraPrice: 0 },
-          { name: "半糖", extraPrice: 0 },
-          { name: "全糖", extraPrice: 0 }
-        ]
+        week: [null as number | null],
+        openTime: '',
+        closeTime: ''
       },
-      {
-        name: "加配料",
-        isRequired: false,
-        maxSelection: 2,
-        items: [
-          { name: "黑糖珍珠", extraPrice: 10 },
-          { name: "仙草凍", extraPrice: 5 }
-        ]
-      }
-    ]
+    ],
+    fee_description: [] as FeeDescription[]
   }
 
-  operatingHoursVoList: OperatingHoursVoList = {
-    week: 1,
-    openTime: "09:00",
-    closeTime: "21:00",
-  }
-
-  menu: MenuVoList[] = [
-    {
-      categoryId: 2,
-      name: "波霸紅茶拿鐵",
-      basePrice: 45,
-      description: "濃醇紅茶融合香濃鮮奶，搭配Q彈波霸，口感層次豐富、甜而不膩。",
-      image: "blackMilk.jpeg",
-      unusual: []
-    }, {
-      categoryId: 2,
-      name: "阿華田拿鐵",
-      basePrice: 50,
-      description: "香濃阿華田巧克力融合鮮奶，口感滑順，甜而不膩，暖心提神飲品。",
-      image: "chocolate.jpeg",
-      unusual: []
-    }
-  ]
-
-  menu_categories: MenuCategoriesVoList[] = [
-    {
-      name: "純茶",
-      priceLevel: [
-        { "name": "中杯", "price": 0 },
-        { "name": "大杯", "price": 10 }
-      ]
-    },
-    {
-      name: "找拿鐵",
-      priceLevel: [
-        { "name": "中杯", "price": 0 },
-        { "name": "大杯", "price": 15 }
-      ]
-    },
-    {
-      name: "醇奶",
-      priceLevel: [
-        { "name": "中杯", "price": 0 },
-        { "name": "大杯", "price": 10 }
-      ]
-    }
-  ]
 }
 export interface Stores {
-  id: number;
-  storesname: string;
+  id?: number;
+  storesName: string;
   phone: string;
   address: string;
-  category: string;
+  category: any;
   type: string;
-  memo: string;
-  image: string;
+  memo?: string;
+  image?: any;
   isPublic: boolean;
   createdBy: string;
-  feeDescription: FeeDescription[];
+  feeDescription?: FeeDescription[];
   operatingHoursVoList: OperatingHoursVoList[];
   menuVoList: MenuVoList[];
-  menuCategoriesVoList: MenuCategoriesVoList[];
-  productOptionGroupsVoList: ProductOptionGroupsVoList[]
+  menuCategoriesVoList?: MenuCategoriesVoList[];
+  productOptionGroupsVoList?: ProductOptionGroupsVoList[]
 }
 
 export interface FeeDescription {
@@ -151,13 +60,15 @@ export interface OperatingHoursVoList {
 export interface MenuVoList {
   categoryId: number;
   name: string;
-  description: string;
+  description?: string;
   basePrice: number;
-  image: string;
-  unusual: string[];
+  isAvailable: boolean;
+  image?: string;
+  unusual?: string[];
 }
 
 export interface MenuCategoriesVoList {
+  id: number;
   name: string;
   priceLevel: PriceLevel[];
 }
@@ -177,4 +88,21 @@ export interface ProductOptionGroupsVoList {
 export interface Items {
   name: string;
   extraPrice: number;
+}
+
+// 以下是暫存資料的interface ----------------
+export interface Category {
+  name: string;
+  code: number;
+}
+
+export interface TimeSlotUI {
+  selectedWeeks: number[];
+  openTime: Date | null;
+  closeTime: Date | null;
+}
+
+export interface FeeDescription {
+  km: number;
+  fee: number;
 }

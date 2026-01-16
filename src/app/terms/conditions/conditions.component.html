@@ -1,97 +1,110 @@
 <div class="max-w-4xl mx-auto py-12 px-6 lg:py-20 antialiased">
-    <header class="mb-12 border-b border-slate-200 pb-8">
-        <div class="flex items-center gap-2 mb-2">
-            <span class="bg-red-900 text-white text-xs font-bold px-2 py-1 rounded">GogoBuy</span>
-            <span class="text-slate-400 text-sm">Official Terms</span>
-        </div>
-        <h1 class="text-4xl font-extrabold text-slate-900 mb-4 tracking-tight">服務條款</h1>
-        <p class="text-slate-500 italic">最後更新日期：2026年1月7日</p>
-    </header>
+  <header class="mb-12 border-b border-slate-200 pb-8">
+    <div class="flex items-center gap-2 mb-2">
+      <span class="bg-red-900 text-white text-xs font-bold px-2 py-1 rounded">GogoBuy</span>
+      <span class="text-slate-700 text-sm font-semibold">Official Terms</span>
+    </div>
+    <h1 class="text-4xl font-extrabold text-slate-900 mb-4 tracking-tight">服務條款</h1>
+    <p class="text-slate-500 italic font-semibold">最後更新日期：2026年1月7日</p>
+  </header>
 
-    <nav class="top-6 z-10 mb-12 bg-white/90 backdrop-blur-md p-6 rounded-2xl shadow-sm border border-slate-100 ring-1 ring-slate-900/5">
-        <h2 class="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4">條款目錄</h2>
-        <ul class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 text-sm font-semibold text-blue-600">
-            <li><button (click)="scrollTo('membership')" class="cursor-pointer hover:text-blue-800 transition-colors border-none bg-transparent p-0">01 會員註冊與帳號安全</button></li>
-            <li><button (click)="scrollTo('ordering')" class="cursor-pointer hover:text-blue-800 transition-colors border-none bg-transparent p-0">02 團購成立與契約義務</button></li>
-            <li><button (click)="scrollTo('payment')" class="cursor-pointer hover:text-blue-800 transition-colors border-none bg-transparent p-0">03 金流支付與交易安全</button></li>
-            <li><button (click)="scrollTo('shipping')" class="cursor-pointer hover:text-blue-800 transition-colors border-none bg-transparent p-0">04 配送與收貨須知</button></li>
-            <li><button (click)="scrollTo('returns')" class="cursor-pointer hover:text-blue-800 transition-colors border-none bg-transparent p-0">05 退貨與解約義務</button></li>
-            <li><button (click)="scrollTo('disclaimer')" class="cursor-pointer hover:text-blue-800 transition-colors border-none bg-transparent p-0">06 免責聲明</button></li>
+  <nav
+    class="top-6 z-10 mb-12 bg-white/90 backdrop-blur-md p-6 rounded-2xl shadow-sm border border-slate-100 ring-1 ring-slate-900/5">
+    <h2 class="text-lg font-bold uppercase tracking-widest text-slate-700 mb-4">條款目錄</h2>
+    <ul class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 text-base font-semibold text-blue-600">
+      <li><button (click)="scrollTo('membership')"
+          class="cursor-pointer hover:text-blue-800 transition-colors border-none bg-transparent p-0">01
+          會員註冊與帳號安全</button></li>
+      <li><button (click)="scrollTo('ordering')"
+          class="cursor-pointer hover:text-blue-800 transition-colors border-none bg-transparent p-0">02
+          團購成立與契約義務</button></li>
+      <li><button (click)="scrollTo('payment')"
+          class="cursor-pointer hover:text-blue-800 transition-colors border-none bg-transparent p-0">03
+          金流支付與交易安全</button></li>
+      <li><button (click)="scrollTo('shipping')"
+          class="cursor-pointer hover:text-blue-800 transition-colors border-none bg-transparent p-0">04
+          配送與收貨須知</button></li>
+      <li><button (click)="scrollTo('returns')"
+          class="cursor-pointer hover:text-blue-800 transition-colors border-none bg-transparent p-0">05
+          退貨與解約義務</button></li>
+      <li><button (click)="scrollTo('disclaimer')"
+          class="cursor-pointer hover:text-blue-800 transition-colors border-none bg-transparent p-0">06 免責聲明</button>
+      </li>
+    </ul>
+  </nav>
+
+  <main class="space-y-16">
+
+    <section id="membership" class="scroll-mt-32">
+      <h2 class="text-2xl font-bold text-slate-900 mb-6 flex items-center">
+        <span class="w-8 h-8 bg-red-900 text-white rounded-full flex items-center justify-center text-sm mr-3">01</span>
+        會員註冊與帳號安全
+      </h2>
+      <div class="space-y-4 text-slate-600 font-semibold leading-relaxed">
+        <p>歡迎使用 GogoBuy 團購平台服務。當您完成會員註冊程序，即代表您已閱讀、理解並同意接受本服務條款之所有內容。</p>
+        <ul class="list-disc ml-6 space-y-2">
+          <li>使用者保證提供之註冊資料均為真實、正確且完整。</li>
+          <li>帳號密碼請妥善保管，任何經由該帳號所進行的行為，將視為該會員本人之行為。</li>
         </ul>
-    </nav>
+      </div>
+    </section>
 
-    <main class="space-y-16">
+    <section id="ordering" class="scroll-mt-32">
+      <h2 class="text-2xl font-bold text-slate-900 mb-6 flex items-center">
+        <span class="w-8 h-8 bg-red-900 text-white rounded-full flex items-center justify-center text-sm mr-3">02</span>
+        團購成立與契約義務
+      </h2>
+      <div class="bg-blue-50 font-semibold border-l-4 border-blue-500 p-6 rounded-r-xl">
+        <p class="text-blue-900 font-bold text-lg mb-2">【重要】團購特別約定：</p>
+        <p class="text-blue-800 text-base leading-relaxed">
+          團購商品通常設有「最低成團數量」。若該團購於截止時間前未達門檻，GogoBuy 有權取消訂單並全額退款，您同意本平台不負額外賠償責任。
+        </p>
+      </div>
+      <p class="mt-4 text-slate-600 font-bold leading-relaxed">
+        訂單完成支付後，契約即視為成立。GogoBuy 僅作為媒介平台，商品品質與保固由各供應商直接負責。
+      </p>
+    </section>
 
-        <section id="membership" class="scroll-mt-32">
-            <h2 class="text-2xl font-bold text-slate-900 mb-6 flex items-center">
-                <span class="w-8 h-8 bg-red-900 text-white rounded-full flex items-center justify-center text-sm mr-3">01</span>
-                會員註冊與帳號安全
-            </h2>
-            <div class="space-y-4 text-slate-600 leading-relaxed">
-                <p>歡迎使用 GogoBuy 團購平台服務。當您完成會員註冊程序，即代表您已閱讀、理解並同意接受本服務條款之所有內容。</p>
-                <ul class="list-disc ml-6 space-y-2">
-                    <li>使用者保證提供之註冊資料均為真實、正確且完整。</li>
-                    <li>帳號密碼請妥善保管，任何經由該帳號所進行的行為，將視為該會員本人之行為。</li>
-                </ul>
-            </div>
-        </section>
+    <section id="payment" class="scroll-mt-32">
+      <h2 class="text-2xl font-bold text-slate-900 mb-6 flex items-center">
+        <span class="w-8 h-8 bg-red-900 text-white rounded-full flex items-center justify-center text-sm mr-3">03</span>
+        金流支付與交易安全
+      </h2>
+      <p class="text-slate-600 font-bold leading-relaxed">
+        本平台提供信用卡、ATM 轉帳、超商繳費等多種支付方式。所有金流均透過第三方支付網關進行加密處理，GogoBuy 不會儲存您的完整信用卡卡號。
+      </p>
+    </section>
 
-        <section id="ordering" class="scroll-mt-32">
-            <h2 class="text-2xl font-bold text-slate-900 mb-6 flex items-center">
-                <span class="w-8 h-8 bg-red-900 text-white rounded-full flex items-center justify-center text-sm mr-3">02</span>
-                團購成立與契約義務
-            </h2>
-            <div class="bg-blue-50 border-l-4 border-blue-500 p-6 rounded-r-xl">
-                <p class="text-blue-900 font-medium mb-2">【重要】團購特別約定：</p>
-                <p class="text-blue-800 text-sm leading-relaxed">
-                    團購商品通常設有「最低成團數量」。若該團購於截止時間前未達門檻，GogoBuy 有權取消訂單並全額退款，您同意本平台不負額外賠償責任。
-                </p>
-            </div>
-            <p class="mt-4 text-slate-600 leading-relaxed">
-                訂單完成支付後，契約即視為成立。GogoBuy 僅作為媒介平台，商品品質與保固由各供應商直接負責。
-            </p>
-        </section>
+    <section id="shipping" class="scroll-mt-32">
+      <h2 class="text-2xl font-bold text-slate-900 mb-6 flex items-center">
+        <span class="w-8 h-8 bg-red-900 text-white rounded-full flex items-center justify-center text-sm mr-3">04</span>
+        配送與收貨須知
+      </h2>
+      <p class="text-slate-600 font-bold leading-relaxed">
+        團購商品之配送時間視供應商庫存及成團日而定。若因不可抗力因素（如天災、物流塞車、原材料短缺）導致延遲，我們將儘速公告。請務必提供正確收件資料，若因資料錯誤導致退件，相關補寄費用須由使用者負擔。
+      </p>
+    </section>
 
-        <section id="payment" class="scroll-mt-32">
-            <h2 class="text-2xl font-bold text-slate-900 mb-6 flex items-center">
-                <span class="w-8 h-8 bg-red-900 text-white rounded-full flex items-center justify-center text-sm mr-3">03</span>
-                金流支付與交易安全
-            </h2>
-            <p class="text-slate-600 leading-relaxed">
-                本平台提供信用卡、ATM 轉帳、超商繳費等多種支付方式。所有金流均透過第三方支付網關進行加密處理，GogoBuy 不會儲存您的完整信用卡卡號。
-            </p>
-        </section>
+    <section id="returns" class="scroll-mt-32">
+      <h2 class="text-2xl font-bold text-slate-900 mb-6 flex items-center">
+        <span class="w-8 h-8 bg-red-900 text-white rounded-full flex items-center justify-center text-sm mr-3">05</span>
+        退貨與解約義務
+      </h2>
+      <div class="prose prose-slate text-slate-600 space-y-4">
+        <p class="font-bold text-base">依據《消費者保護法》，通訊交易享有商品到貨後 <strong>七天鑑賞期</strong>（非試用期）。</p>
+        <p class="text-red-600 font-bold text-base">※ 注意：食品、消耗品、個人衛生用品及客製化商品，除商品瑕疵外，不適用七天鑑賞期。</p>
+      </div>
+    </section>
 
-        <section id="shipping" class="scroll-mt-32">
-            <h2 class="text-2xl font-bold text-slate-900 mb-6 flex items-center">
-                <span class="w-8 h-8 bg-red-900 text-white rounded-full flex items-center justify-center text-sm mr-3">04</span>
-                配送與收貨須知
-            </h2>
-            <p class="text-slate-600 leading-relaxed">
-                團購商品之配送時間視供應商庫存及成團日而定。若因不可抗力因素（如天災、物流塞車、原材料短缺）導致延遲，我們將儘速公告。請務必提供正確收件資料，若因資料錯誤導致退件，相關補寄費用須由使用者負擔。
-            </p>
-        </section>
+    <section id="disclaimer" class="scroll-mt-32">
+      <h2 class="text-2xl font-bold text-slate-900 mb-6 flex items-center">
+        <span class="w-8 h-8 bg-red-900 text-white rounded-full flex items-center justify-center text-sm mr-3">06</span>
+        免責聲明
+      </h2>
+      <p class="text-slate-500 font-bold text-base leading-relaxed">
+        GogoBuy 盡力確保網站資訊之正確性，但不保證所有圖片、規格描述皆精準無誤，最終以實際到貨商品為主。如因網路故障、駭客攻擊等不可歸責於本站之事由導致資料遺失，我們將盡力恢復，但不承擔賠償責任。
+      </p>
+    </section>
 
-        <section id="returns" class="scroll-mt-32">
-            <h2 class="text-2xl font-bold text-slate-900 mb-6 flex items-center">
-                <span class="w-8 h-8 bg-red-900 text-white rounded-full flex items-center justify-center text-sm mr-3">05</span>
-                退貨與解約義務
-            </h2>
-            <div class="prose prose-slate text-slate-600 space-y-4">
-                <p>依據《消費者保護法》，通訊交易享有商品到貨後 <strong>七天鑑賞期</strong>（非試用期）。</p>
-                <p class="text-red-600 text-sm">※ 注意：食品、消耗品、個人衛生用品及客製化商品，除商品瑕疵外，不適用七天鑑賞期。</p>
-            </div>
-        </section>
-
-        <section id="disclaimer" class="scroll-mt-32">
-            <h2 class="text-2xl font-bold text-slate-900 mb-6 flex items-center">
-                <span class="w-8 h-8 bg-red-900 text-white rounded-full flex items-center justify-center text-sm mr-3">06</span>
-                免責聲明
-            </h2>
-            <p class="text-slate-500 text-sm leading-relaxed">
-                GogoBuy 盡力確保網站資訊之正確性，但不保證所有圖片、規格描述皆精準無誤，最終以實際到貨商品為主。如因網路故障、駭客攻擊等不可歸責於本站之事由導致資料遺失，我們將盡力恢復，但不承擔賠償責任。
-            </p>
-        </section>
-
-    </main>
+  </main>
 </div>

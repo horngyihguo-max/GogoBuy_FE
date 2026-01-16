@@ -1,0 +1,511 @@
+<p-toast></p-toast>
+
+<!-- 淡底背景 + 內層卡片容器（避免全白刺眼） -->
+<div class="min-h-screen bg-[#F4E7E1]">
+  <div class="max-w-[1700px] mx-auto px-4 md:px-8 py-6 md:py-10">
+    <!-- 主容器卡片感 -->
+    <div class="bg-white/70 backdrop-blur rounded-[28px] border border-white/60 shadow-sm p-5 md:p-8">
+      <!-- Header -->
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-[37px] md:text-[42px] font-extrabold tracking-tight text-red-900">
+            許願池
+          </h2>
+          <p class="text-[18px] md:text-[16px] text-gray-600 mt-1">
+            在這裡許下你的願望，或是跟隨別人的腳步！
+          </p>
+        </div>
+
+        <!-- 右上：我要許願 -->
+        <div class="flex flex-col items-end gap-2">
+          <button
+            (click)="onCreateWish()"
+            [disabled]="!userId || timesRemaining === 0"
+            class="flex items-center gap-2 px-5 md:px-6 py-3 rounded-full font-bold shadow-lg transition-all duration-200
+                   text-[15px]
+                   enabled:bg-red-900 enabled:text-white enabled:hover:bg-red-950 enabled:active:scale-95
+                   disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed">
+            <i class="pi pi-plus-circle"></i>
+            <span>我要許願</span>
+            <span class="ml-1 px-2 py-0.5 rounded-full bg-white/20 text-[12px]">
+              剩餘 {{ timesRemaining }} 次
+            </span>
+          </button>
+
+          @if (timesRemaining === 0) {
+            <div class="text-[12px] font-semibold text-[#D5451B]">
+              本月許願次數已達上限
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Loading -->
+      @if (isLoading) {
+        <div class="mt-10 text-center text-gray-600 text-[16px]">
+          載入願望中...
+        </div>
+      } @else {
+        <!-- Tabs -->
+        <p-tabs [(value)]="activeTab" class="mt-6">
+          <p-tablist>
+            <p-tab [value]="0">
+              <i class="pi pi-globe mr-2"></i>大家的願望
+            </p-tab>
+            <p-tab [value]="1">
+              <i class="pi pi-heart mr-2"></i>我跟的願望
+            </p-tab>
+            <p-tab [value]="2">
+              <i class="pi pi-user mr-2"></i>我許的願望
+            </p-tab>
+          </p-tablist>
+
+          <p-tabpanels>
+            <!-- ===================== -->
+            <!-- 大家的願望 -->
+            <!-- ===================== -->
+            <p-tabpanel [value]="0">
+              <div class="mt-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
+                <div class="text-[15px] text-gray-700 font-semibold">
+                  {{ getRangeText('all') }}
+                </div>
+              </div>
+
+              <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-5 gap-4 md:gap-6">
+                @for (wish of getPagedList('all'); track wish.id) {
+                  <div
+                    (click)="onOpenDetail('all', wish)"
+                    class="relative rounded-[22px] border p-5 md:p-6 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg cursor-pointer
+                           flex flex-col justify-between h-[280px]"
+                    [ngClass]="getCardClass(wish)"
+                  >
+                    <!-- type badge -->
+                    <div class="flex items-start justify-between gap-3">
+                      <span
+                        class="text-[12px] font-extrabold px-3 py-1 rounded-full"
+                        [ngClass]="getTypeBadgeClass(wish)"
+                      >
+                        # {{ wish.type }}
+                      </span>
+
+                      <!-- follow heart -->
+                      <button
+                        (click)="$event.stopPropagation(); onToggleFollow(wish)"
+                        [disabled]="isMine(wish)"
+                        class="disabled:opacity-30 disabled:cursor-not-allowed active:scale-110 transition"
+                        aria-label="follow"
+                      >
+                        <i
+                          class="pi text-[22px]"
+                          [ngClass]="isFollowedByMe(wish) ? 'pi-heart-fill text-pink-600' : 'pi-heart text-gray-400'"
+                        ></i>
+                      </button>
+                    </div>
+
+                    <!-- title -->
+                    <div class="mt-3">
+                      <div
+                        class="text-[22px] font-black text-red-950 truncate"
+                        [attr.title]="wish.title"
+                      >
+                        {{ wish.title }}
+                      </div>
+
+                      <!-- nickname -->
+                      <div class="mt-3 flex items-center gap-2 text-gray-700 text-[15px]">
+                        <span class="w-7 h-7 rounded-full bg-red-900/10 text-red-900 flex items-center justify-center text-[12px]">
+                          <i class="pi pi-user"></i>
+                        </span>
+                        <span class="font-semibold">
+                          {{ getDisplayName(wish) }}
+                        </span>
+                      </div>
+
+                      <!-- location + date -->
+                      <div class="mt-3 space-y-2 text-[15px] text-gray-700">
+                        <div class="flex items-center gap-2">
+                          <i class="pi pi-map-marker text-red-900"></i>
+                          <span class="truncate" [attr.title]="wish.location">{{ wish.location }}</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                          <i class="pi pi-calendar text-red-900"></i>
+                          <span>{{ wish.buildDate }}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- footer -->
+                    <div class="mt-4 pt-4 border-t border-black/5 flex items-center justify-between">
+                      <div class="flex items-center gap-2 text-red-900">
+                        <i class="pi pi-users"></i>
+                        <span class="text-[15px] font-extrabold">
+                          {{ wish.followers?.length || 0 }} 人跟願
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                } @empty {
+                  <div class="col-span-full py-14 rounded-[22px] border border-dashed border-gray-300 bg-white/60 text-center">
+                    <div class="text-gray-500 text-[16px] font-semibold">
+                      目前還沒有願望喔，快去許一個吧！
+                    </div>
+                  </div>
+                }
+              </div>
+
+              <!-- paginator -->
+              <div class="mt-6 flex flex-col items-center gap-2">
+                <p-paginator
+                  [rows]="pageSize"
+                  [totalRecords]="getTotal('all')"
+                  [first]="pageAll * pageSize"
+                  (onPageChange)="onPageChange('all', $event)"
+                ></p-paginator>
+              </div>
+            </p-tabpanel>
+
+            <!-- ===================== -->
+            <!-- 我跟的願望 -->
+            <!-- ===================== -->
+            <p-tabpanel [value]="1">
+              <div class="mt-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
+                <div class="text-[15px] text-gray-700 font-semibold">
+                  {{ getRangeText('followed') }}
+                </div>
+              </div>
+
+              <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-5 gap-4 md:gap-6">
+                @for (wish of getPagedList('followed'); track wish.id) {
+                  <div
+                    (click)="onOpenDetail('followed', wish)"
+                    class="relative rounded-[22px] border p-5 md:p-6 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg cursor-pointer
+                           flex flex-col justify-between h-[280px]"
+                    [ngClass]="getCardClass(wish)"
+                  >
+                    <!-- status label -->
+                    @if (getStatusLabel(wish)) {
+                      <div class="absolute top-3 left-3 text-[12px] font-extrabold px-3 py-1 rounded-full bg-white/70 border border-white">
+                        {{ getStatusLabel(wish) }}
+                      </div>
+                    }
+
+                    <div class="flex items-start justify-between gap-3">
+                      <span
+                        class="text-[12px] font-extrabold px-3 py-1 rounded-full"
+                        [ngClass]="getTypeBadgeClass(wish)"
+                      >
+                        # {{ wish.type }}
+                      </span>
+
+                      <!-- followed tab：也能取消跟願 -->
+                      <button
+                        (click)="$event.stopPropagation(); onToggleFollow(wish)"
+                        class="active:scale-110 transition"
+                        aria-label="follow"
+                      >
+                        <i
+                          class="pi text-[22px]"
+                          [ngClass]="isFollowedByMe(wish) ? 'pi-heart-fill text-pink-600' : 'pi-heart text-gray-400'"
+                        ></i>
+                      </button>
+                    </div>
+
+                    <div class="mt-3">
+                      <div class="text-[22px] font-black text-red-950 truncate" [attr.title]="wish.title">
+                        {{ wish.title }}
+                      </div>
+
+                      <div class="mt-3 flex items-center gap-2 text-gray-700 text-[15px]">
+                        <span class="w-7 h-7 rounded-full bg-red-900/10 text-red-900 flex items-center justify-center text-[12px]">
+                          <i class="pi pi-user"></i>
+                        </span>
+                        <span class="font-semibold">
+                          {{ getDisplayName(wish) }}
+                        </span>
+                      </div>
+
+                      <div class="mt-3 space-y-2 text-[15px] text-gray-700">
+                        <div class="flex items-center gap-2">
+                          <i class="pi pi-map-marker text-red-900"></i>
+                          <span class="truncate" [attr.title]="wish.location">{{ wish.location }}</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                          <i class="pi pi-calendar text-red-900"></i>
+                          <span>{{ wish.buildDate }}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="mt-4 pt-4 border-t border-black/5 flex items-center justify-between">
+                      <div class="flex items-center gap-2 text-red-900">
+                        <i class="pi pi-users"></i>
+                        <span class="text-[15px] font-extrabold">
+                          {{ wish.followers?.length || 0 }} 人跟願
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                } @empty {
+                  <div class="col-span-full py-14 rounded-[22px] border border-dashed border-gray-300 bg-white/60 text-center">
+                    <div class="text-gray-500 text-[16px] font-semibold">
+                      你目前還沒有跟任何願望喔
+                    </div>
+                  </div>
+                }
+              </div>
+
+              <div class="mt-6 flex flex-col items-center gap-2">
+                <p-paginator
+                  [rows]="pageSize"
+                  [totalRecords]="getTotal('followed')"
+                  [first]="pageFollowed * pageSize"
+                  (onPageChange)="onPageChange('followed', $event)"
+                ></p-paginator>
+              </div>
+            </p-tabpanel>
+
+            <!-- ===================== -->
+            <!-- 我許的願望 -->
+            <!-- ===================== -->
+            <p-tabpanel [value]="2">
+              <!-- 上方 filter -->
+              <div class="mt-4 flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+                <div class="flex flex-wrap gap-2">
+                  <button
+                    (click)="setMyFilter('all')"
+                    class="px-4 py-2 rounded-full text-[15px] font-extrabold border transition"
+                    [ngClass]="myFilter === 'all' ? 'bg-red-900 text-white border-red-900' : 'bg-white/70 text-red-900 border-white'"
+                  >
+                    全部
+                  </button>
+
+                  <button
+                    (click)="setMyFilter('active')"
+                    class="px-4 py-2 rounded-full text-[15px] font-extrabold border transition"
+                    [ngClass]="myFilter === 'active' ? 'bg-red-900 text-white border-red-900' : 'bg-white/70 text-red-900 border-white'"
+                  >
+                    進行中
+                  </button>
+
+                  <button
+                    (click)="setMyFilter('finished')"
+                    class="px-4 py-2 rounded-full text-[15px] font-extrabold border transition"
+                    [ngClass]="myFilter === 'finished' ? 'bg-red-900 text-white border-red-900' : 'bg-white/70 text-red-900 border-white'"
+                  >
+                    已實現
+                  </button>
+
+                  <button
+                    (click)="setMyFilter('expired')"
+                    class="px-4 py-2 rounded-full text-[15px] font-extrabold border transition"
+                    [ngClass]="myFilter === 'expired' ? 'bg-red-900 text-white border-red-900' : 'bg-white/70 text-red-900 border-white'"
+                  >
+                    已失效
+                  </button>
+                </div>
+
+                <div class="text-[15px] text-gray-700 font-semibold">
+                  {{ getRangeText('mine') }}
+                </div>
+              </div>
+
+              <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-5 gap-4 md:gap-6">
+                @for (wish of getPagedList('mine'); track wish.id) {
+                  <div
+                    (click)="onOpenDetail('mine', wish)"
+                    class="relative rounded-[22px] border p-5 md:p-6 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg cursor-pointer
+                           flex flex-col justify-between h-[280px]"
+                    [ngClass]="getCardClass(wish)"
+                  >
+                    @if (getStatusLabel(wish)) {
+                      <div class="absolute top-3 left-3 text-[12px] font-extrabold px-3 py-1 rounded-full bg-white/70 border border-white">
+                        {{ getStatusLabel(wish) }}
+                      </div>
+                    }
+
+                    <div class="flex items-start justify-between gap-3">
+                      <span
+                        class="text-[12px] font-extrabold px-3 py-1 rounded-full"
+                        [ngClass]="getTypeBadgeClass(wish)"
+                      >
+                        # {{ wish.type }}
+                      </span>
+
+                      <!-- 我許的願望：不顯示愛心 -->
+                      <span class="text-[12px] font-bold text-gray-500">
+                        MY
+                      </span>
+                    </div>
+
+                    <div class="mt-3">
+                      <div class="text-[22px] font-black text-red-950 truncate" [attr.title]="wish.title">
+                        {{ wish.title }}
+                      </div>
+
+                      <div class="mt-3 flex items-center gap-2 text-gray-700 text-[15px]">
+                        <span class="w-7 h-7 rounded-full bg-red-900/10 text-red-900 flex items-center justify-center text-[12px]">
+                          <i class="pi pi-user"></i>
+                        </span>
+                        <span class="font-semibold">
+                          {{ getDisplayName(wish) }}
+                        </span>
+                      </div>
+
+                      <div class="mt-3 space-y-2 text-[15px] text-gray-700">
+                        <div class="flex items-center gap-2">
+                          <i class="pi pi-map-marker text-red-900"></i>
+                          <span class="truncate" [attr.title]="wish.location">{{ wish.location }}</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                          <i class="pi pi-calendar text-red-900"></i>
+                          <span>{{ wish.buildDate }}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="mt-4 pt-4 border-t border-black/5 flex items-center justify-between">
+                      <div class="flex items-center gap-2 text-red-900">
+                        <i class="pi pi-users"></i>
+                        <span class="text-[15px] font-extrabold">
+                          {{ wish.followers?.length || 0 }} 人跟願
+                        </span>
+                      </div>
+
+                      @if (getStatusLabel(wish) === '已失效') {
+                        <span class="text-[12px] font-extrabold text-[#D5451B]">
+                          點擊可再許一次
+                        </span>
+                      }
+                    </div>
+                  </div>
+                } @empty {
+                  <div class="col-span-full py-14 rounded-[22px] border border-dashed border-gray-300 bg-white/60 text-center">
+                    <div class="text-gray-500 text-[16px] font-semibold">
+                      這個條件下沒有願望
+                    </div>
+                  </div>
+                }
+              </div>
+
+              <div class="mt-6 flex flex-col items-center gap-2">
+                <p-paginator
+                  [rows]="pageSize"
+                  [totalRecords]="getTotal('mine')"
+                  [first]="pageMine * pageSize"
+                  (onPageChange)="onPageChange('mine', $event)"
+                ></p-paginator>
+              </div>
+            </p-tabpanel>
+          </p-tabpanels>
+        </p-tabs>
+      }
+    </div>
+  </div>
+</div>
+
+<p-dialog
+  [(visible)]="detailVisible"
+  [modal]="true"
+  [dismissableMask]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: 'min(480px, 92vw)' }"
+  [contentStyle]="{ padding: '0' }"
+>
+  <ng-template pTemplate="header">
+    <div class="flex items-center justify-between w-full">
+      <div class="text-[21px] md:text-[20px] font-extrabold text-red-900">
+        願望詳情
+      </div>
+
+      @if (detailStatusLabel) {
+        <span class="text-[15px] font-extrabold px-3 py-1 rounded-full bg-black/5">
+          {{ detailStatusLabel }}
+        </span>
+      }
+    </div>
+  </ng-template>
+
+  <div class="p-5 md:p-6 bg-[#FFF9F6]">
+    @if (!selectedWish) {
+      <div class="text-[18px] text-gray-600">載入中...</div>
+    } @else {
+      <div class="text-[25px] md:text-[27px] font-black text-red-950 break-words">
+        {{ selectedWish.title }}
+      </div>
+
+      <div class="mt-4 space-y-3 text-[18px] text-gray-800">
+        <div class="flex items-center gap-2">
+          <i class="pi pi-user text-red-900"></i>
+          <span class="font-semibold">{{ detailDisplayName }}</span>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <i class="pi pi-tag text-red-900"></i>
+          <span class="font-semibold">類型：</span>
+          <span>{{ selectedWish.type }}</span>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <i class="pi pi-map-marker text-red-900"></i>
+          <span class="font-semibold">地點：</span>
+          <span class="break-words">{{ selectedWish.location }}</span>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <i class="pi pi-calendar text-red-900"></i>
+          <span class="font-semibold">日期：</span>
+          <span>{{ selectedWish.buildDate }}</span>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <i class="pi pi-heart-fill text-pink-600"></i>
+          <span class="font-semibold">跟願人數：</span>
+          <span>{{ detailFollowerCount }} 人</span>
+        </div>
+      </div>
+
+      <div class="mt-6 flex flex-wrap gap-3">
+        @if (showStartGroupBtn) {
+          <button
+            (click)="startGroupFromWish()"
+            [disabled]="disableStartGroupBtn"
+            class="px-4 py-3 rounded-xl font-extrabold text-[15px] shadow
+                   enabled:bg-red-900 enabled:text-white enabled:hover:bg-red-950 enabled:active:scale-95
+                   disabled:bg-gray-300 disabled:text-gray-600 disabled:cursor-not-allowed"
+          >
+            以此願望開團
+          </button>
+        }
+
+        @if (showReWishBtn) {
+          <button
+            (click)="onReWish(selectedWish)"
+            class="px-4 py-3 rounded-xl font-extrabold text-[15px] shadow
+                   bg-[#FF9B45] text-[#3b1a0a] hover:brightness-95 active:scale-95"
+          >
+            再許一次
+          </button>
+        }
+
+        @if (showDeleteBtn) {
+          <button
+            (click)="onDeleteWish(selectedWish)"
+            class="px-4 py-3 rounded-xl font-extrabold text-[15px] shadow
+                   bg-[#D5451B] text-white hover:brightness-95 active:scale-95"
+          >
+            刪除願望
+          </button>
+        }
+
+        <button
+          (click)="closeDetail()"
+          class="ml-auto px-4 py-3 rounded-xl font-extrabold text-[15px]
+                 bg-white/80 text-red-900 border border-red-900/20 hover:bg-white"
+        >
+          關閉
+        </button>
+      </div>
+    }
+  </div>
+</p-dialog>

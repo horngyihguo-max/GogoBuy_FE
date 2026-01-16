@@ -1,3 +1,20 @@
+.banner-mask {
+  opacity: 1;
+  transition: opacity 0.4s ease-in-out;
+}
+
+:host ::ng-deep .p-carousel-item.p-carousel-item-active+.p-carousel-item.p-carousel-item-active .banner-mask {
+  opacity: 0;
+}
+
+:host ::ng-deep .p-carousel-item.p-carousel-item-active+.p-carousel-item.p-carousel-item-active+.p-carousel-item.p-carousel-item-active .banner-mask {
+  opacity: 1;
+}
+
+.banner.is-center .banner-mask {
+  opacity: 0;
+}
+
 .banner {
   position: relative;
   width: 100%;
@@ -8,6 +25,7 @@
   height: auto;
   max-height: 250px;
 }
+
 
 .banner-img {
   width: 100%;
@@ -26,7 +44,16 @@
   font-size: 1rem;
 }
 
-.ng-star-inserted:hover{
+.ng-star-inserted:hover {
   cursor: pointer;
   transform: scale(1.01);
+}
+
+@media (max-width: 768px) {
+  .banner-title {
+    bottom: 2px;
+    left: 2px;
+    padding: 4px 10px;
+    font-size: 12px;
+  }
 }

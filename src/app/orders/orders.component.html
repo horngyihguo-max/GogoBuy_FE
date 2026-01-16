@@ -1,4 +1,5 @@
 <!--佔位用訂單，沒有實際作用-->
+
 <body class="bg-slate-50 text-slate-800 antialiased h-svh">
   <div class="max-w-4xl mx-auto py-12 px-6 lg:py-20">
     <p-tabs value="active">
@@ -10,10 +11,6 @@
       <p-tabpanels>
         <!-- 進行中 -->
         <p-tabpanel value="active">
-          <div class="actions">
-            <button pButton label="展開全部" (click)="expandAllActive()"></button>
-            <button pButton label="收合全部" (click)="collapseAllActive()"></button>
-          </div>
 
           <p-accordion [(value)]="activeOpenValues" [multiple]="true">
             <ng-container *ngFor="let o of activeOrders">
@@ -60,10 +57,6 @@
 
         <!-- 歷史 -->
         <p-tabpanel value="history">
-          <div class="actions">
-            <button pButton label="展開全部" (click)="expandAllHistory()"></button>
-            <button pButton label="收合全部" (click)="collapseAllHistory()"></button>
-          </div>
 
           <p-accordion [(value)]="historyOpenValues" [multiple]="true">
             <ng-container *ngFor="let o of historyOrders">
