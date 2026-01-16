@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { Subscription } from 'rxjs/internal/Subscription';
+import { Injectable, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { tap } from 'rxjs/internal/operators/tap';
 import Swal from 'sweetalert2';
@@ -14,6 +15,8 @@ export class AuthService {
     private https: HttpService,
     private router: Router,
     private route: ActivatedRoute,) { }
+
+  store = signal<{ id: number; name: string; type: string; address: string }[]>([]);
   // TODO 用戶資料 (正式連接時用這個!)
   user: any = null;
 
@@ -142,18 +145,15 @@ export class AuthService {
         next: (res: any) => {
           if (res.code === 200) {
             localStorage.setItem('user_session', payload.email);
-            const returnUrl = '/gogobuy';
+            const returnUrl = '/gogobuy/login';
             Swal.fire({
-              title: '註冊成功，請返回登入頁面輸入註冊資訊登入',
+              title: '註冊成功!<br>請返回登入頁面登入',
               icon: 'success',
-              timer: 2000,
             });
-            setTimeout(() => {
-              this.router.navigateByUrl(returnUrl);
-            }, 500);
           }
         },
         error: (err: any) => {
+          console.log(err.message);
           Swal.fire({
             title: err.message || '註冊失敗',
             icon: 'error',
@@ -261,13 +261,24 @@ export class AuthService {
 
   // 更新手機號碼
   connectPhone(id: string, phone: string) {
-  const req = {
-    phone: phone
-  };
+    const req = {
+      phone: phone
+    };
 
-  const url = `http://localhost:8080/gogobuy/user/connect-phone?id=${id}`;
+    const url = `http://localhost:8080/gogobuy/user/connect-phone?id=${id}`;
 
-  return this.https.postApi(url, req.phone);
-}
+    return this.https.postApi(url, req.phone);
+  }
+
+  // 取得全部店家
+  getallstore() {
+    return this.https.getApi(`http://localhost:8080/gogobuy/store/all`);
+  }
+
+  // 搜尋店家
+  searchStores(name: string) {
+    const encodedName = encodeURIComponent(name);
+    return this.https.getApi(`http://localhost:8080/gogobuy/store/searchName?name=${encodedName}`);
+  }
 
 }

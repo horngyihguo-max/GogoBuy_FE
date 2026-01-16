@@ -1,7 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { CarouselModule } from 'primeng/carousel';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
+import { AuthService } from '../@service/auth.service';
+import { HttpService } from '../@service/http.service';
 
 export type Stores = {
   id: number;
@@ -48,11 +50,46 @@ export interface Banner {
   styleUrl: './gogo-buy.component.scss'
 })
 export class GogoBuyComponent {
-
+  constructor(private https: HttpService, public auths: AuthService) {
+  }
   numVisible = 3;
 
   // ✅ 一進來就先指定中間那張 = 1（因為 page 預設從 0 開始，visible=3 中間就是 0+1）
   centerIndex = 1;
+
+  // 取得店家
+  store = signal<{ id: number; name: string; type: string; address: string; image: string}[]>([]);
+
+  private handleResponse(res: any) {
+    console.log('API 回傳資料:', res);
+    if (res && res.storeList) {
+      this.store.set(res.storeList);
+    } else {
+      this.store.set([]);
+    }
+  }
+
+  onSearch(name: string) {
+    const searchName = name.trim();
+
+    // 取得對應的 Observable
+    const apiCall = searchName
+      ? this.auths.searchStores(searchName)
+      : this.auths.getallstore();
+
+    // 執行訂閱並處理結果
+    apiCall.subscribe({
+      next: (res: any) => {
+        this.handleResponse(res);
+      },
+      error: (err: any) => console.error('API 錯誤:', err)
+    });
+  }
+
+  ngOnInit(): void {
+    // 初始化時執行一次空搜尋，自動抓取全部店家
+    this.onSearch('');
+  }
 
   ngAfterViewInit() {
     // 保險：確保畫面初次 render 後也會再計算一次
