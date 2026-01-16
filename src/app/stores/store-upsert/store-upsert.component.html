@@ -33,7 +33,7 @@
           <i class="pi pi-objects-column"></i>
         </p-inputgroup-addon>
         <p-floatlabel class="w-full md:w-56" variant="on">
-          <p-select [(ngModel)]="storeData.category" id="on_label" [options]="category" optionLabel="name"/>
+          <p-select [(ngModel)]="storeData.category" id="on_label" [options]="category" optionLabel="name" />
           <label for="on_label" class="text-gray-500">經營類別</label>
         </p-floatlabel>
       </p-inputgroup>
@@ -45,8 +45,8 @@
           <i class="pi pi-tag"></i>
         </p-inputgroup-addon>
         <p-floatlabel variant="on" class="w-full">
-          <p-select [(ngModel)]="storeData.type" id="type" [options]="groupedType" [group]="true"
-            optionLabel="label" optionValue="value" class="w-full" styleClass="w-full border border-gray-300
+          <p-select [(ngModel)]="storeData.type" id="type" [options]="groupedType" [group]="true" optionLabel="label"
+            optionValue="value" class="w-full" styleClass="w-full border border-gray-300
             border-l-0 focus:!border-[#662222] focus:!ring-0 outline-none rounded-r-xl transition-all h-11
             flex items-center">
             <ng-template #group let-group>
@@ -107,7 +107,7 @@
           <div class="flex flex-wrap gap-2">
             @for(week of weeks; track week.key) {
             <div class="flex items-center px-3 py-2 bg-white rounded-lg border border-gray-200">
-              <p-checkbox [id]="'slot-' + i + '-' + week.key" [value]="week.key" [(ngModel)]="slot.selectedWeeks"/>
+              <p-checkbox [id]="'slot-' + i + '-' + week.key" [value]="week.key" [(ngModel)]="slot.selectedWeeks" />
               <label [for]="'slot-' + i + '-' + week.key" class="ml-2 text-sm cursor-pointer text-gray-700 font-medium">
                 {{ week.name }}
               </label>
@@ -116,7 +116,7 @@
           </div>
         </div>
 
-        <div class="flex flex-wrap md:flex-nowrap items-center gap-4">
+        <div class="flex flex-wrap lg:flex-nowrap items-center gap-4">
           <div class="flex-1 min-w-[150px]">
             <label class="block mb-1 text-xs font-bold text-gray-400 uppercase">開始營業</label>
             <p-datepicker [(ngModel)]="slot.openTime" [timeOnly]="true" hourFormat="24" [showIcon]="true"
@@ -127,7 +127,7 @@
             </p-datepicker>
           </div>
 
-          <div class="pt-5 text-gray-300 hidden md:block">—</div>
+          <div class="pt-5 text-gray-300 hidden lg:block">—</div>
 
           <div class="flex-1 min-w-[150px]">
             <label class="block mb-1 text-xs font-bold text-gray-400 uppercase">打烊時間</label>
@@ -166,11 +166,11 @@
         </div>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div class="grid grid-cols-1 gap-6">
         @for(shippingFee of storeData.fee_description; track $index; let i = $index) {
         <div class="relative p-5 rounded-2xl bg-gray-50 border border-gray-100 flex flex-col gap-4">
 
-          @if(storeData.fee_description.length > 1) {
+          @if(storeData.fee_description.length >= 1) {
           <button (click)="removeFeeRow(i)"
             class="absolute -top-2 -right-2 w-8 h-8 bg-white border border-red-100 text-red-500 rounded-full shadow-sm hover:bg-red-50 transition-colors z-10">
             <i class="pi pi-trash"></i>
@@ -180,21 +180,28 @@
             <span class="block text-sm font-bold text-gray-600">級距設定 ({{i + 1}})</span>
 
             <div class="flex flex-wrap md:flex-nowrap items-center gap-4">
-              <div class="flex-1 min-w-[120px]">
-                <label class="block mb-1 text-xs font-bold text-gray-400 uppercase tracking-wider">公里數 (KM)</label>
-                <p-inputnumber (ngModel)]="shippingFee.km" [minFractionDigits]="1" [maxFractionDigits]="2"
-                  suffix=" km" styleClass="w-full" inputStyleClass="w-full h-11 border border-gray-300 rounded-lg
-                  px-3 focus:!border-[#662222] outline-none" placeholder="1.0" />
+              <div class="flex items-center gap-4 mb-3">
+
+                <div class="flex-1 min-w-[120px]">
+                  <label class="block mb-1 text-xs font-bold text-gray-400 uppercase tracking-wider">公里數 (KM)</label>
+                  <p-inputnumber [(ngModel)]="shippingFee.km" [minFractionDigits]="1" [maxFractionDigits]="2"
+                    suffix=" km" styleClass="w-full" inputStyleClass="w-full h-11 border border-gray-300 rounded-lg
+                      px-3 focus:!border-[#662222] outline-none" placeholder="1.0" />
+                </div>
+
+                <div class="pt-5 text-gray-300 hidden md:block">
+                  <i class="pi pi-arrow-right text-xs"></i>
+                </div>
+
+                <div class="flex-1 min-w-[120px]">
+                  <label class="block mb-1 text-xs font-bold text-gray-400 uppercase tracking-wider">運費金額</label>
+                  <p-inputnumber [(ngModel)]="shippingFee.fee" inputId="integeronly" styleClass="w-full"
+                    inputStyleClass="w-full h-11 border border-gray-300 rounded-lg px-3
+                      focus:!border-[#662222] outline-none" />
+                </div>
+
               </div>
-              <div class="pt-5 text-gray-300 hidden md:block">
-                <i class="pi pi-arrow-right text-xs"></i>
-              </div>
-              <div class="flex-1 min-w-[120px]">
-                <label class="block mb-1 text-xs font-bold text-gray-400 uppercase tracking-wider">運費金額</label>
-                <p-inputnumber [(ngModel)]="shippingFee.fee" mode="currency" currency="TWD" [min]="0" locale="zh-TW"
-                  styleClass="w-full" inputStyleClass="w-full h-11 border border-gray-300 rounded-lg px-3
-                  focus:!border-[#662222] outline-none"/>
-              </div>
+
             </div>
           </div>
         </div>
@@ -205,23 +212,23 @@
 
     <div class="flex flex-col gap-3 md:col-span-1">
       <label class="text-sm font-bold text-gray-700">店家圖片</label>
-    <div class="w-full max-w-xs space-y-3">
-      <div class="relative group mx-auto border-2 border border-gray-300 rounded-2xl
+      <div class="w-full max-w-xs space-y-3">
+        <div class="relative group mx-auto border-2 border border-gray-300 rounded-2xl
       overflow-hidden bg-gray-50 hover:border-[#662222] transition-all">
-        @if (storeData.image) {
+          @if (storeData.image) {
           <img [src]="storeData.image" class="w-full h-full" />
-          <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <div
+            class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
             <div class="text-white text-center">
               <i class="pi pi-camera text-2xl mb-1"></i>
               <p class="text-xs font-medium">更換照片</p>
             </div>
           </div>
-          <button (click)="removeImage($event)"
-            class="absolute top-2 right-2 p-1.5 bg-[#662222] text-white rounded-full shadow-lg hover:bg-[#662222]/70
+          <button (click)="removeImage($event)" class="absolute top-2 right-2 p-1.5 bg-[#662222] text-white rounded-full shadow-lg hover:bg-[#662222]/70
             transition-transform scale-0 group-hover:scale-100 z-10">
             <i class="pi pi-times text-[10px]"></i>
           </button>
-        } @else {
+          } @else {
           <div class="flex flex-col items-center justify-center h-full space-y-2 p-5">
             <div class="p-4 bg-[#662222]/10 rounded-full">
               <i class="pi pi-image text-[#662222] text-3xl"></i>
@@ -231,14 +238,12 @@
               <p class="text-[10px] text-gray-400">建議尺寸 800x800 (PNG, JPG)</p>
             </div>
           </div>
-        }
-        <input type="file"
-          class="absolute inset-0 opacity-0 cursor-pointer"
-          accept="image/*"
-          (change)="onFileSelected($event)" />
+          }
+          <input type="file" class="absolute inset-0 opacity-0 cursor-pointer" accept="image/*"
+            (change)="onFileSelected($event)" />
+        </div>
       </div>
     </div>
-  </div>
 
     <div class="flex flex-col gap-2 md:col-span-2 mt-2">
       <label class="text-sm font-bold text-gray-700">關於店家的備註</label>

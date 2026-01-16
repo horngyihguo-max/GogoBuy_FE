@@ -110,7 +110,7 @@ export class StoreUpsertComponent {
       ]
     },
     {
-      label: '8. 運動與休閒娛樂', // 額外補充
+      label: '8. 運動與休閒娛樂',
       items: [
         { label: '運動器材', value: '運動器材' },
         { label: '戶外露營', value: '戶外露營' },

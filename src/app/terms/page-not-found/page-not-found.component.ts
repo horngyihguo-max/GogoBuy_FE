@@ -8,7 +8,7 @@ import { Router } from '@angular/router';
   styleUrl: './page-not-found.component.scss'
 })
 export class PageNotFoundComponent {
-  constructor(private router: Router) {}
+  constructor(private router: Router) { }
 
   // 導向首頁
   goHome() {
@@ -17,6 +17,6 @@ export class PageNotFoundComponent {
 
   // 導向 FAQ 頁面
   goSupport() {
-    this.router.navigate(['/problems']);
+    this.router.navigate(['/support/faq']);
   }
 }
