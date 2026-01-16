@@ -5,10 +5,11 @@ import { FormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
 import { HttpService } from '../../@service/http.service';
 import { Router } from '@angular/router';
+import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-person-info',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterOutlet],
   templateUrl: './person-info.component.html',
   styleUrl: './person-info.component.scss',
 })
@@ -59,7 +60,7 @@ export class PersonInfoComponent {
 
   // 前往修改個人資料頁面
   goTOEdit() {
-    this.router.navigate(['/personInfoEdit']);
+    this.router.navigate(['/user/profile/edit']);
   }
 
 }

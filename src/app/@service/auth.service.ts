@@ -31,6 +31,9 @@ export class AuthService {
       ...user,
       user_avatar_url: user.user_avatar_url || user.avatar_url || user.avatarUrl
     };
+    console.log(user.user_avatar_url)
+    console.log(user.avatar_url)
+    console.log(user.avatarUrl)
     this.user = formattedUser;
     localStorage.setItem('user_info', JSON.stringify(formattedUser));
     this.userSubject.next(formattedUser);

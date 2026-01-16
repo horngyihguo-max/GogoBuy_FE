@@ -1,61 +1,18 @@
-::ng-deep .hover-nav-carousel {
+.banner-mask {
+  opacity: 1;
+  transition: opacity 0.4s ease-in-out;
+}
 
-  /* 讓導航按鈕永遠在最上層 */
-  .p-carousel-prev,
-  .p-carousel-next {
-    z-index: 50 !important;
-  }
+:host ::ng-deep .p-carousel-item.p-carousel-item-active+.p-carousel-item.p-carousel-item-active .banner-mask {
+  opacity: 0;
+}
 
-  /* 針對畫面上活動的 3 張圖進行處理 */
-  .p-carousel-item-active {
+:host ::ng-deep .p-carousel-item.p-carousel-item-active+.p-carousel-item.p-carousel-item-active+.p-carousel-item.p-carousel-item-active .banner-mask {
+  opacity: 1;
+}
 
-    // 確保這裡一定要有 relative，否則 ::after 會失效
-    .banner {
-      position: relative !important;
-      overflow: hidden;
-      border-radius: 1.5rem;
-
-      /* 1. 先讓 3 張 active 的圖都蓋上遮罩 */
-      &::after {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: rgba(0, 0, 0, 0.65); // 遮罩顏色
-        z-index: 20; // 確保在圖片上面
-        transition: opacity 0.4s ease;
-        pointer-events: none;
-      }
-    }
-  }
-
-  /* 2. 重點：點亮中間那張 (序列中的第 2 個 active) */
-  /* 利用 CSS 選擇器：選取一個 active 且前面緊跟著另一個 active */
-  .p-carousel-item-active+.p-carousel-item-active {
-    .banner::after {
-      opacity: 0; // 點亮 (移除遮罩)
-    }
-
-    .banner {
-      transform: scale(1.05); // 中間稍微放大增加焦點感
-      z-index: 30; // 放大時確保不被兩邊壓住
-    }
-  }
-
-  /* 3. 恢復第 3 張的遮罩 (避免點亮後面的所有 active) */
-  /* 選取前面有連續兩個 active 的那個 active */
-  .p-carousel-item-active+.p-carousel-item-active+.p-carousel-item-active {
-    .banner::after {
-      opacity: 1; // 重新遮住
-    }
-
-    .banner {
-      transform: scale(1); // 恢復縮放
-      z-index: 20;
-    }
-  }
+.banner.is-center .banner-mask {
+  opacity: 0;
 }
 
 .banner {

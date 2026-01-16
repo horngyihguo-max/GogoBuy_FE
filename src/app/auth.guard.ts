@@ -14,7 +14,7 @@ export const authGuard: CanActivateFn = (route, state) => {
   } else {
     // 未登入，強制導向登入頁面
     // 可以順便把原本想去的網址傳過去，登入後再跳回來
-    router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
+    router.navigate(['/gogobuy/login'], { queryParams: { returnUrl: state.url } });
     return false;
   }
 };

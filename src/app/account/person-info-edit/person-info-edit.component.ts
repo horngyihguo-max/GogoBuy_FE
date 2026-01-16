@@ -107,6 +107,7 @@ export class PersonInfoEditComponent {
         if (res.code === 200) {
           this.auth.connectPhone(userId, this.editInfo.phone).subscribe();
           this.auth.setUser({ ...this.auth.user, ...payload });
+          this.auth.refreshUser();
           Swal.fire({
             title: '儲存成功',
             icon: 'success',
@@ -265,6 +266,6 @@ export class PersonInfoEditComponent {
 
   // 返回個人資訊
   backinfo() {
-    this.router.navigate(['/personInfo']);
+    this.router.navigate(['/user/profile']);
   }
 }

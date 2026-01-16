@@ -46,6 +46,7 @@ export class AuthCallbackComponent implements OnInit {
               timer: 2000,
               timerProgressBar: true,
             });
+            this.authService.refreshUser();
             const savedUrl = sessionStorage.getItem('google_return_url') || '/gogobuy';
             setTimeout(() => {
               this.router.navigateByUrl(savedUrl);

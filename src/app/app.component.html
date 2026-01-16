@@ -25,12 +25,12 @@
         </li>
         <li><i class="pi pi-cart-plus cursor-pointer" style="color: rgb(255, 255, 255); font-size: 1.5rem"></i></li>
         <li>
-          @if (userAvatar) {
-          <img [src]="userAvatar" (error)="userAvatar = 'assets/default-avatar.png'"
-            class="w-9 h-9 rounded-full cursor-pointer" (click)="onUserClick($event, menu)" alt="avatar">
+          @if (currentUser(); as user) {
+          <img [src]="user.user_avatar_url || 'Snoopy.png'" (click)="menu.toggle($event)"
+            class="w-9 h-9 rounded-full cursor-pointer">
           } @else {
           <i class="pi pi-user cursor-pointer" style=" color: rgb(255, 255, 255); font-size: 1.5rem"
-            (click)="onUserClick($event, menu)"></i>
+            (click)="menu.toggle($event)"></i>
           }
           <p-menu #menu [popup]="true" [model]="items" [model]="filteredItems" appendTo="body"></p-menu>
         </li>
@@ -75,11 +75,11 @@
       <p class="font-bold">電話：(06) 303 2550</p>
     </div>
     <div class="footer-links">
-      <a class="font-bold" href="privacyPolicy">隱私政策</a>
+      <a class="font-bold" href="/support/privacy">隱私政策</a>
       <a class="font-bold"> | </a>
-      <a class="font-bold" href="conditions">服務條款</a>
+      <a class="font-bold" href="/support/conditions">服務條款</a>
       <a class="font-bold"> | </a>
-      <a class="font-bold" href="problems">常見問題</a>
+      <a class="font-bold" href="/support/faq">常見問題</a>
     </div>
   </div>
   <div class="footer-bottom">
@@ -98,12 +98,12 @@
 <!-- 手機板footer -->
 <div class="footer-mobile">
   <!-- 首頁 -->
-  <a routerLink="gogobuy">
+  <a routerLink="gogobuy/home">
     <div>
       <i class="pi pi-home cursor-pointer" style="font-size: 1.5rem"
-        [ngStyle]="{ 'color': (router.url == '/gogobuy') ? 'rgba(0, 0, 0)' : '' }"></i>
+        [ngStyle]="{ 'color': (router.url == '/gogobuy/home') ? 'rgba(0, 0, 0)' : '' }"></i>
     </div>
-    <div [ngStyle]="{ 'color': (router.url == '/gogobuy') ? 'rgba(0, 0, 0)' : '' }">
+    <div [ngStyle]="{ 'color': (router.url == '/gogobuy/home') ? 'rgba(0, 0, 0)' : '' }">
       訂購
     </div>
   </a>
@@ -117,38 +117,39 @@
     </div>
   </a>
   <!-- 訂單 -->
-  <a routerLink="orders">
+  <a routerLink="/user/orders">
     <div>
       <i class="pi pi-receipt cursor-pointer" style="font-size: 1.5rem"
-        [ngStyle]="{ 'color': (router.url == '/orders') ? 'rgba(0, 0, 0)' : '' }"></i>
+        [ngStyle]="{ 'color': (router.url == '/user/orders') ? 'rgba(0, 0, 0)' : '' }"></i>
     </div>
-    <div [ngStyle]="{ 'color': (router.url == '/orders') ? 'rgba(0, 0, 0)' : '' }">
+    <div [ngStyle]="{ 'color': (router.url == '/user/orders') ? 'rgba(0, 0, 0)' : '' }">
       訂單
     </div>
   </a>
   <!-- 通知訊息 -->
-  <a routerLink="/notifications" class="flex flex-col items-center">
+  <a routerLink="/user/notifications" class="flex flex-col items-center">
     <div>
       <app-notification-bell mode="icon"
-      [ngStyle]="{ 'color': (router.url == '/notifications') ? 'rgba(0, 0, 0)' : '' }"></app-notification-bell>
+        [ngStyle]="{ 'color': (router.url == '/user/notifications') ? 'rgba(0, 0, 0)' : '' }"></app-notification-bell>
     </div>
-    <div [ngStyle]="{ 'color': (router.url == '/notifications') ? 'rgba(0, 0, 0)' : '' }">
+    <div [ngStyle]="{ 'color': (router.url == '/user/notifications') ? 'rgba(0, 0, 0)' : '' }">
       通知
     </div>
   </a>
   <!-- 我的 -->
-  <a routerLink="personInfo">
+  <a routerLink="/user/profile">
     <div>
-      @if (userAvatar) {
-      <img [src]="userAvatar" (error)="userAvatar = 'Snoopy.jpg'"
-        class="w-9 h-9 rounded-full cursor-pointer" (click)="onUserClick($event, menu)" alt="avatar"
-        [ngStyle]="{ 'color': (router.url == '/personInfo') ? 'rgba(0, 0, 0)' : '' }">
+      @if (userAvatar()) {
+      <img [src]="userAvatar()" alt="User Avatar" class="avatar-style" class="w-9 h-9 rounded-full cursor-pointer"
+        (click)="onUserClick($event, menu)" />
       } @else {
       <i class="pi pi-user cursor-pointer" style=" color: rgb(255, 255, 255); font-size: 1.5rem"
-        (click)="onUserClick($event, menu)" [ngStyle]="{ 'color': (router.url == '/personInfo') ? 'rgba(0, 0, 0)' : '' }"></i>
+        (click)="onUserClick($event, menu)"
+        [ngStyle]="{ 'color': (router.url == '/user/profile'||router.url =='/user/profile/edit') ? 'rgba(0, 0, 0)' : '' }"></i>
       }
     </div>
-    <div [ngStyle]="{ 'color': (router.url == '/personInfo') ? 'rgba(0, 0, 0)' : '' }">
+    <div
+      [ngStyle]="{ 'color': (router.url == '/user/profile'||router.url =='/user/profile/edit') ? 'rgba(0, 0, 0)' : '' }">
       我的
     </div>
   </a>

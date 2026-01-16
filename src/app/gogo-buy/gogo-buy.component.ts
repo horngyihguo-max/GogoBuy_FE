@@ -48,28 +48,27 @@ export interface Banner {
   styleUrl: './gogo-buy.component.scss'
 })
 export class GogoBuyComponent {
-  // 1. 定義 products (對應你的資料源，例如 stores 或 products)
-  products: any[] = [];
 
-  // 2. 定義當前頁面索引 (預設為 0)
-  currentPage: number = 0;
+  numVisible = 3;
 
-  // ... 你的 ngOnInit 和 Service 呼叫
+  // ✅ 一進來就先指定中間那張 = 1（因為 page 預設從 0 開始，visible=3 中間就是 0+1）
+  centerIndex = 1;
 
-  // 3. 建立處理頁面更新的方法
-  onPageChange(event: any) {
-    // event.page 會回傳目前顯示區域第一張圖的索引
-    this.currentPage = event.page;
+  ngAfterViewInit() {
+    // 保險：確保畫面初次 render 後也會再計算一次
+    this.updateCenterIndex(0);
   }
 
-  // 4. 判斷是否為中間卡片的邏輯
-  isCenter(index: number): boolean {
-    if (!this.products) return false;
-
-    // 在 numVisible = 3 的情況下，中間那張的索引是 currentPage + 1
-    // 使用餘數運算 % 確保在無限循環時 index 正確
-    return index === (this.currentPage + 1) % this.products.length;
+  onCarouselPage(event: any) {
+    // event.page = 當前「第一張」的 index  :contentReference[oaicite:1]{index=1}
+    this.updateCenterIndex(event.page);
   }
+
+  private updateCenterIndex(firstIndex: number) {
+    const middleOffset = Math.floor(this.numVisible / 2); // 3 -> 1
+    this.centerIndex = (firstIndex + middleOffset) % this.banners.length;
+  }
+
   stores: Stores[] = [
     {
       id: 1,
@@ -169,6 +168,10 @@ export class GogoBuyComponent {
   //輪播圖片
   banners: Banner[] = [
     {
+      image: 'fastFood.png',
+      title: '速食限時優惠'
+    },
+    {
       //位置
       image: 'Bubble.png',
       //圖片無法顯示時文字
@@ -181,6 +184,13 @@ export class GogoBuyComponent {
     {
       image: 'fastFood.png',
       title: '速食限時優惠'
+    }
+    ,
+    {
+      //位置
+      image: 'Bubble.png',
+      //圖片無法顯示時文字
+      title: '揪團喝珍奶'
     }
   ];
 }
