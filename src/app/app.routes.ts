@@ -80,11 +80,10 @@ export const routes: Routes = [
   // 3. 店家/管理頁面
   {
     path: 'management',
-    data: { breadcrumb: '管理後台' },
+    data: { breadcrumb: '後台管理' },
     children: [
-      { path: 'store', component: StoreComponent, title: '店家管理', data: { breadcrumb: '我的店家' } },
-      //創立店家與品項
-      { path: 'store_upsert', component: StoreUpsertComponent },
+      { path: 'store', component: StoreComponent, title: '店家管理', data: { breadcrumb: '店家資料' } },
+      { path: 'store_upsert', component: StoreUpsertComponent, title: '店家管理', data: { breadcrumb: '編輯店家' } },
       // 未來可以擴充例如：{ path: 'menu-edit', component: MenuEditComponent }
     ]
   },

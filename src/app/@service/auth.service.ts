@@ -281,4 +281,9 @@ export class AuthService {
     return this.https.getApi(`http://localhost:8080/gogobuy/store/searchName?name=${encodedName}`);
   }
 
+  //查詢全部開團
+  getallevent() {
+    return this.https.getApi(`http://localhost:8080/gogobuy/getAll`);
+  }
+
 }

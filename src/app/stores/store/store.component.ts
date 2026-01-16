@@ -135,7 +135,7 @@ export class StoreComponent {
     event.stopPropagation();
   }
 
-  // 新增分類
+  // 商品分類
   startAdding(event: Event) {
     event.stopPropagation();
     this.newCategoryName = '';
@@ -143,16 +143,6 @@ export class StoreComponent {
       document.querySelector<HTMLInputElement>('#newCategoryInput')?.focus();
     }, 0);
   }
-
-  // get currentCategoryId(): number {
-  //   const index = this.store.menuCategoriesVoList.findIndex(c => c.name ===
-  //     this.selectedCategoryName);
-  //   return index + 1;
-  // }
-
-  // get filteredProducts() {
-  //   return this.store.menuVoList.filter(item => item.categoryId === this.currentCategoryId);
-  // }
 
   selectCategory(category: any, catId: number = -1) {
     this.selectedIndex = catId;
@@ -176,21 +166,6 @@ export class StoreComponent {
     }
     this.filteredProducts = results;
   }
-
-
-
-  // saveCategory() {
-  //   if (this.newCategoryName.trim()) {
-  //     this.store.menuCategoriesVoList.push({ name: this.newCategoryName, priceLevel: [] });
-  //     this.selectCategory(this.newCategoryName, this.store.menuCategoriesVoList.length - 1);
-  //   }
-  //   this.isAdding = false;
-  // }
-
-  // cancelAdding() {
-  //   this.isAdding = false;
-  //   this.newCategoryName = '';
-  // }
 
   // 新增商品
   openNewProduct() {
@@ -219,6 +194,7 @@ export class StoreComponent {
     this.selectedFile = null;
   }
 
+  // 店家規格
   addSpecs(){
     this.storeData.productOptionGroupsVoList.push({
       isRequired: false,
@@ -250,10 +226,8 @@ export class StoreComponent {
       if (!targetGroup.items) targetGroup.items = [];
 
       if (this.currentItemIndex !== null) {
-        // 編輯模式：取代舊有索引位置的資料
         targetGroup.items[this.currentItemIndex] = { ...this.currentItem };
       } else {
-        // 新增模式：直接 push
         targetGroup.items.push({ ...this.currentItem });
       }
 
@@ -280,17 +254,17 @@ export class StoreComponent {
 
   // 存資料庫
   onSaveAll() {
-    if (this.store.id == 0) {
-      this.http.postApi('http://localhost:8080/store/create', this.storeData)
-        .subscribe((res: any) => {
-          console.log("crest store:" + res);
-        });
-    } else {
-      this.http.postApi('http://localhost:8080/store/update', this.storeData)
-        .subscribe((res: any) => {
-          console.log("update store:" + res);
-        });
-    }
+    // if (this.store.id == 0) {
+    //   this.http.postApi('http://localhost:8080/store/create', this.storeData)
+    //     .subscribe((res: any) => {
+    //       console.log("crest store:" + res);
+    //     });
+    // } else {
+    //   this.http.postApi('http://localhost:8080/store/update', this.storeData)
+    //     .subscribe((res: any) => {
+    //       console.log("update store:" + res);
+    //     });
+    // }
     this.displaySaveDialog = true;
   }
 
