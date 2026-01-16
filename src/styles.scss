@@ -32,3 +32,52 @@ body {
   --footer-bg: #7A2E2E;
   --footer-text: #F4EAEA;
 }
+
+
+/* 針對 Chrome, Edge, Safari */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-section);
+  /* 增加一點點內陰影，讓軌道看起來像凹進去的 */
+  box-shadow: inset 0 0 5px rgba(58, 31, 31, 0.05);
+}
+
+::-webkit-scrollbar-thumb {
+  /* 使用品牌色到懸停色的漸層 */
+  background: linear-gradient(180deg, var(--brand-primary) 0%, var(--brand-primary-hover) 100%);
+  border-radius: 10px;
+  /* 增加邊界讓滑塊看起來像浮在軌道中央 */
+  border: 3px solid var(--bg-section);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  /* 懸停時稍微加亮或改變漸層方向 */
+  background: var(--brand-primary-hover);
+}
+
+/* 針對行動端 Webkit 瀏覽器 (Chrome, Safari, Android Browser) */
+@media (max-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 4px;
+    /* 手機端寬度縮小，避免佔據內容空間 */
+    height: 4px;
+    /* 橫向捲軸高度 */
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+    /* 軌道透明，讓視覺更乾淨 */
+  }
+
+  ::-webkit-scrollbar-thumb {
+    /* 使用品牌色，但加入透明度 (約 60%) 讓它更輕盈 */
+    background-color: rgba(102, 34, 34, 0.6);
+    border-radius: 10px;
+
+    /* 這裡不需要像桌面端一樣加 border，因為 4px 已經很細了 */
+  }
+
+}

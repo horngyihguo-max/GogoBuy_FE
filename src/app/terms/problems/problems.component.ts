@@ -18,7 +18,11 @@ export class ProblemsComponent {
     {
       category: '付款問題',
       question: 'GogoBuy 支援哪些付款方式？',
-      answer: '我們支援：1. 信用卡線上刷卡（支援各大銀行） 2. LINE Pay 3. ATM 轉帳 4. 超商代碼繳費。',
+      answer: `我們支援：
+      1. 信用卡線上刷卡（支援各大銀行）
+      2. LINE Pay
+      3. ATM 轉帳
+      4. 超商代碼繳費。`,
       isOpen: false
     },
     {
