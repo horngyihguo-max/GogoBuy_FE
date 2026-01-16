@@ -40,6 +40,7 @@ export const routes: Routes = [
 
   //創立店家與品項
   { path: 'store', component: StoreComponent },
+  { path: 'store_upsert', component: StoreUpsertComponent},
   // 錯誤/失效網址
   { path: '404', component: PageNotFoundComponent },
   { path: '**', component: PageNotFoundComponent }
