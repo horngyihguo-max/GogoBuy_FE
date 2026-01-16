@@ -1,6 +1,6 @@
 import { Component, computed, HostListener, ViewChild } from '@angular/core';
-import { CommonModule, AsyncPipe } from '@angular/common';
-import { RouterOutlet, RouterLinkActive, RouterLink, Router } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { RouterOutlet, RouterLink, Router } from '@angular/router';
 import Swal from 'sweetalert2';
 import { ButtonModule } from 'primeng/button';
 import { MenuItem } from 'primeng/api';
@@ -32,7 +32,7 @@ export interface User {
     MenuModule,
     CommonModule,
     NotificationBellComponent,
-    AsyncPipe
+
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',

@@ -5,11 +5,10 @@ import { FormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
 import { HttpService } from '../../@service/http.service';
 import { Router } from '@angular/router';
-import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-person-info',
-  imports: [CommonModule, FormsModule, RouterOutlet],
+  imports: [CommonModule, FormsModule],
   templateUrl: './person-info.component.html',
   styleUrl: './person-info.component.scss',
 })

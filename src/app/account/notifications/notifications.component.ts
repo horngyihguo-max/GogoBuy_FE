@@ -1,14 +1,12 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { SseService } from '../../@service/sse.service';
-import { Observable } from 'rxjs/internal/Observable';
-import { AsyncPipe } from '@angular/common';
 import { Paginator, PaginatorModule } from 'primeng/paginator';
 import { Subscription } from 'rxjs/internal/Subscription';
 import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-notifications',
-  imports: [AsyncPipe, Paginator, PaginatorModule],
+  imports: [Paginator, PaginatorModule],
   templateUrl: './notifications.component.html',
   styleUrl: './notifications.component.scss',
 })
