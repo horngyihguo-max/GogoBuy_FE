@@ -57,56 +57,43 @@ export class GogoBuyComponent {
   // ✅ 一進來就先指定中間那張 = 1（因為 page 預設從 0 開始，visible=3 中間就是 0+1）
   centerIndex = 1;
 
-  // 取得店家
-  store = signal<{ id: number; name: string; type: string; address: string; image: string }[]>([]);
-
-  private handleResponse(res: any) {
-    console.log('API 回傳資料:', res);
-    if (res && res.storeList) {
-      this.store.set(res.storeList);
-    } else {
-      this.store.set([]);
-    }
-  }
-
-  onSearch(name: string) {
-    const searchName = name.trim();
-
-    // 取得對應的 Observable
-    const apiCall = searchName
-      ? this.auths.searchStores(searchName)
-      : this.auths.getallstore();
-
-    // 執行訂閱並處理結果
-    apiCall.subscribe({
-      next: (res: any) => {
-        this.handleResponse(res);
-      },
-      error: (err: any) => console.error('API 錯誤:', err)
-    });
-  }
-
   // 取得開團中
   events = signal<any[]>([]);
 
   loadAllEvents() {
     this.auths.getallevent().subscribe({
       next: (res: any) => {
-        console.log('開團事件資料:', res);
-        this.events.set(res.groupbuyEvents || []);
+        // 準備一組給開團用的假圖 (可以跟店家的不同，增加多樣性)
+        const eventDemoImages = [
+          'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800', // 烤肉
+          // 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800', // 披薩
+          // 'https://images.unsplash.com/photo-1473093226795-af9932fe5856?w=800', // 義大利麵
+        ];
+
+        const processedEvents = (res.groupbuyEvents || []).map((event: any, i: number) => ({
+          ...event,
+          // 如果沒有活動圖，就隨機給一張
+          image: event.image || eventDemoImages[i % eventDemoImages.length]
+        }));
+
+        console.log('處理後的開團資料:', processedEvents);
+        this.events.set(processedEvents);
       },
       error: (err: any) => console.error('抓取開團失敗', err)
     });
   }
-
   ngOnInit(): void {
-    // 進入頁面自動抓取全部店家、開團中
-    this.onSearch('');
+    // 1. 抓取開團中
     this.loadAllEvents();
+
+    // 2. 如果 Service 沒資料，抓取店家
+    if (this.auths.store().length === 0) {
+      this.auths.performSearch('');
+    }
   }
 
   ngAfterViewInit() {
-    // 保險：確保畫面初次 render 後也會再計算一次
+    // Carousel 相關的 UI 計算保留在這裡
     this.updateCenterIndex(0);
   }
 

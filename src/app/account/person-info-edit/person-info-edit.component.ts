@@ -59,11 +59,11 @@ export class PersonInfoEditComponent {
     const totalExp = exp || 0; // 取得總經驗值
     this.level = Math.floor(totalExp / this.expToNextLevel) + 1; // 升等(無條件捨去)
     this.currentExp = totalExp % this.expToNextLevel; // 餘數
-    // ((餘數/多少經驗升等)*100)%
-    this.expPercentage = `${(this.currentExp / this.expToNextLevel) * 100}%`;
+    this.expPercentage = `${(this.currentExp / this.expToNextLevel) * 100}%`; // ((餘數/多少經驗升等)*100)%
   }
 
 
+  //　TODO 限制頭像大小
   // 頭像上傳
   onAvatarUpload(event: any) {
     const file = event.target.files[0];

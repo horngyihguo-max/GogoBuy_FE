@@ -1,17 +1,23 @@
 <div class="topbar-wrapper">
-  <header>
+  <header class="flex items-center justify-between px-4">
     <!-- LOGO -->
-    <img routerLink="gogobuy" src="ggb3.png" class="logo cursor-pointer h-13">
-
+    <div class="flex-none">
+      <img routerLink="gogobuy" src="ggb3.png" class="logo cursor-pointer h-13">
+    </div>
     <!-- 搜尋欄，@if (showSearch)讓搜尋欄只在route:gogobuy出現 -->
+    <!-- TODO 可搜尋店家名稱(已連接商家，未連接開團，需要用id連接)、團長姓名(需要用nicknaem查詢[getuser反查詢id])、
+      開團團名(待新建欄位)、需要作選擇器(找團、找店、找人名)
+      -->
     @if (showSearch) {
-    <div class="max-w-4xl me-90 disappear">
-      <div class="ml-10 relative w-full max-w-md disappear">
-        <i
-          class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-lg pointer-events-none disappear"></i>
-        <input type="search" placeholder="搜尋開團" class="w-3xl pl-10 pr-4 py-3 rounded-lg border border-gray-300
-              focus:outline-none focus:ring-2 focus:ring-red-300
-              focus:border-red-400 bg-white disappear" />
+    <div class="flex-1 flex justify-center disappear px-4">
+      <div class="relative flex items-center w-full md:w-96 group">
+        <i class="pi pi-search absolute left-4 text-slate-400 group-focus-within:text-red-600 transition-colors"></i>
+        <input #searchInput type="text" placeholder="搜尋店名" (keyup.enter)="onSearch(searchInput.value)"
+          class="w-full pl-11 pr-24 py-3 bg-white border-none rounded-2xl shadow-sm focus:ring-2 focus:ring-red-600/20 outline-none transition-all placeholder:text-slate-400" />
+        <button (click)="onSearch(searchInput.value)"
+          class="absolute right-2 bg-red-600 text-white px-5 py-1.5 rounded-xl text-sm font-bold hover:bg-red-700 transition-colors shadow-lg shadow-red-600/20">
+          搜尋
+        </button>
       </div>
     </div>
     }
@@ -96,9 +102,9 @@
   <a routerLink="gogobuy/home">
     <div>
       <i class="pi pi-home cursor-pointer" style="font-size: 1.5rem"
-        [ngStyle]="{ 'color': (router.url == '/gogobuy/home') ? 'rgba(0, 0, 0)' : '' }"></i>
+        [ngStyle]="{ 'color': (router.url == '/gogobuy/home') ? 'rgb(252, 165, 165)' : '' }"></i>
     </div>
-    <div [ngStyle]="{ 'color': (router.url == '/gogobuy/home') ? 'rgba(0, 0, 0)' : '' }">
+    <div [ngStyle]="{ 'color': (router.url == '/gogobuy/home') ? 'rgb(252, 165, 165)' : '' }">
       訂購
     </div>
   </a>
@@ -115,19 +121,19 @@
   <a routerLink="/user/orders">
     <div>
       <i class="pi pi-receipt cursor-pointer" style="font-size: 1.5rem"
-        [ngStyle]="{ 'color': (router.url == '/user/orders') ? 'rgba(0, 0, 0)' : '' }"></i>
+        [ngStyle]="{ 'color': (router.url == '/user/orders') ? 'rgb(252, 165, 165)' : '' }"></i>
     </div>
-    <div [ngStyle]="{ 'color': (router.url == '/user/orders') ? 'rgba(0, 0, 0)' : '' }">
+    <div [ngStyle]="{ 'color': (router.url == '/user/orders') ? 'rgb(252, 165, 165)' : '' }">
       訂單
     </div>
   </a>
   <!-- 通知訊息 -->
   <a routerLink="/user/notifications" class="flex flex-col items-center">
     <div>
-      <app-notification-bell mode="icon"
-        [ngStyle]="{ 'color': (router.url == '/user/notifications') ? 'rgba(0, 0, 0)' : '' }"></app-notification-bell>
+      <i class="pi pi-receipt cursor-pointer" style="font-size: 1.5rem"
+        [ngStyle]="{ 'color': (router.url == '/user/notifications') ? 'rgb(252, 165, 165)' : '' }"></i>
     </div>
-    <div [ngStyle]="{ 'color': (router.url == '/user/notifications') ? 'rgba(0, 0, 0)' : '' }">
+    <div [ngStyle]="{ 'color': (router.url == '/user/notifications') ? 'rgb(252, 165, 165)' : '' }">
       通知
     </div>
   </a>
@@ -136,10 +142,10 @@
     <div>
       <i class="pi pi-user cursor-pointer" style=" color: rgb(255, 255, 255); font-size: 1.5rem"
         (click)="onUserClick($event, menu)"
-        [ngStyle]="{ 'color': (router.url == '/user/profile'||router.url =='/user/profile/edit') ? 'rgba(0, 0, 0)' : '' }"></i>
+        [ngStyle]="{ 'color': (router.url == '/user/profile'||router.url =='/user/profile/edit') ? 'rgb(252, 165, 165)' : '' }"></i>
     </div>
     <div
-      [ngStyle]="{ 'color': (router.url == '/user/profile'||router.url =='/user/profile/edit') ? 'rgba(0, 0, 0)' : '' }">
+      [ngStyle]="{ 'color': (router.url == '/user/profile'||router.url =='/user/profile/edit') ? 'rgb(252, 165, 165)' : '' }">
       我的
     </div>
   </a>

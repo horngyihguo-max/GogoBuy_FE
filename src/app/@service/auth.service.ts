@@ -16,7 +16,6 @@ export class AuthService {
     private router: Router,
     private route: ActivatedRoute,) { }
 
-  store = signal<{ id: number; name: string; type: string; address: string }[]>([]);
   // TODO 用戶資料 (正式連接時用這個!)
   user: any = null;
 
@@ -268,6 +267,36 @@ export class AuthService {
     const url = `http://localhost:8080/gogobuy/user/connect-phone?id=${id}`;
 
     return this.https.postApi(url, req.phone);
+  }
+
+  // 全域可用(因為要從AppComponent輸入，GogoBuyComponent更新資訊)
+  store = signal<{ id: number; name: string; type: string; address: string; image: string; }[]>([]);
+
+  performSearch(name: string) {
+    const searchName = name.trim();
+    const apiCall = searchName
+      ? this.searchStores(searchName)
+      : this.getallstore();
+    apiCall.subscribe({
+      next: (res: any) => {
+        const demoImages = [
+          'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800', // 餐廳內裝
+          'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800', // 牛排
+          'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800', // 披薩
+          'https://images.unsplash.com/photo-1544148103-0773bf10d330?w=800'  // 飲品
+        ];
+
+        const processedList = (res.storeList || []).map((store: any, i: number) => ({
+          ...store,
+          // 如果 API 回傳的 image 是 null，就從陣列輪流拿圖
+          image: store.image || demoImages[i % demoImages.length]
+        }));
+        // 更新 Service 裡的 Signal
+        this.store.set(processedList);
+        console.log('API 資料已成功存入 Signal:', this.store());
+      },
+      error: (err: any) => console.error('API 錯誤:', err)
+    });
   }
 
   // 取得全部店家
