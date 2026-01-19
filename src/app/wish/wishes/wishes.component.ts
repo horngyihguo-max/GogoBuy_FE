@@ -46,12 +46,12 @@ export class WishesComponent implements OnInit {
   // TODO 測試暫用：未登入也給假 userId (在ngOnInit)
   // =========================
   userId: string = '';
-  timesRemaining = 3; // 測試應急用願望次數
+  timesRemaining = 0; // 測試應急用願望次數
 
   // =========================
   // UI 狀態
   // =========================
-  isLoading = true;
+  isLoading = true; // 這是判斷 "是否還在讀取中"
   activeTab = 0; // 0: all, 1: followed, 2: mine
   myFilter: MyFilter = 'all';
   foFilter: FoFilter = 'all';
@@ -93,15 +93,17 @@ export class WishesComponent implements OnInit {
     '鸚鵡',
   ];
 
-  // 三種 type 固定（新增願望 select 也用這個）
+  // 三種 type 固定（新增願望 select 也是用這個）
   typeOptions: WishType[] = ['手搖店', '餐廳', '生鮮雜貨'];
 
   ngOnInit(): void {
     // 先刷新用戶資料
     // this.auth.refreshUser();
-    // TODO 確保有 userId（沒有就先用假資料）
+    // TODO 確保有 user（沒有就先用假資料）
     // this.userId = this.auth.user?.id || '';
     this.userId = this.auth.user?.id || '12b7bf42-57af-4e3f-acfc-b9a2ba3342aa';
+    // this.timesRemaining = this.auth.user?.timesRemaining || 0;
+    this.timesRemaining = this.auth.user?.timesRemaining || 3;
 
     // 先用假資料（後端上線再換成 GET）
     this.loadWishes();
@@ -208,12 +210,14 @@ export class WishesComponent implements OnInit {
     // 這邊實際上線時記得要刪掉
   }
 
+  // 讀取完資料後的整理小工具
   private afterLoad(): void {
     this.setRandomNicknamesOnce();
     this.resetPages();
     this.isLoading = false;
   }
 
+  // 頁面重置
   private resetPages(): void {
     this.pageAll = 0;
     this.pageFollowed = 0;
@@ -295,10 +299,10 @@ export class WishesComponent implements OnInit {
     const finished = this.isFinished(wish);
 
     if (expired) return 'bg-gray-200 text-gray-600';
-    if (finished) return 'bg-[#FF9B45]/20 text-[#8A3A10]';
+    if (finished) return 'bg-amber-100 text-amber-600';
 
     const type: WishType = wish.type;
-    if (type === '手搖店') return 'bg-red-900/10 text-red-900';
+    if (type === '手搖店') return 'bg-blue-900/10 text-blue-800';
     if (type === '餐廳') return 'bg-[#D5451B]/10 text-[#D5451B]';
     return 'bg-emerald-700/10 text-emerald-800';
   }
@@ -317,7 +321,7 @@ export class WishesComponent implements OnInit {
   }
 
   // =========================
-  // 三個 tab 的資料（先在 TS 篩好）
+  // 三個 tab 的資料
   // =========================
   // 大家的願望：
   // - 不顯示 expired
@@ -349,8 +353,7 @@ export class WishesComponent implements OnInit {
   }
 
   // 我許的願望：
-  // - user_id == 我
-  // - 上方 filter：全部 / 進行中 / 已實現 / 已失效
+  // - user_id == 我(全部)
   getMineTabList(): any[] {
     const list = this.wishes.filter((w) => this.isMine(w));
 
@@ -460,7 +463,7 @@ export class WishesComponent implements OnInit {
 
     const wishId = this.pendingWishId;
 
-    // 3. 等畫面 render（很關鍵）
+    // 3. 等畫面 render（關鍵）
     setTimeout(() => {
       const el = document.getElementById(this.getWishDomId(wishId));
       if (!el) return;
@@ -484,7 +487,22 @@ export class WishesComponent implements OnInit {
       }
     }, 2000);
   }
-  // ==================================================================
+
+  /*
+    許願池路由使用方法:
+    tab = all(大家的願望), followed(我跟的願望), mine(我許的願望) | (沒寫就是all)
+    filter = active(進行中), finished(已實現), expired(已失效) | (沒寫就是全部)
+    wishId = 願望id
+
+    找不到不會報錯，但就是只會導到指定位置不會有卡片高光。
+
+    注意:
+    tab 的 all 只有進行中的願望，篩選、已實現、已失效的願望導到這什麼都不會發生。
+
+    範例:
+    /user/wishes?tab=mine&filter=expired&wishId=5
+    ▲ 將導到"我許的願望"、篩選在"已失效"、捲到id為5的卡片並出現2秒高光。
+  */
 
   // =========================
   // Create Wish Dialog (創建願望)
@@ -719,7 +737,7 @@ export class WishesComponent implements OnInit {
   }
 
   // =========================
-  // TODO 我許的願望：刪除（需接 API）
+  // TODO 刪除願望（需接 API）
   // =========================
   onDeleteWish(wish: any): void {
     if (!this.userId) {
@@ -873,29 +891,39 @@ export class WishesComponent implements OnInit {
       .replaceAll("'", '&#039;');
   }
 
+  // 這邊是防止 dialog 開啟但畫面可滾 ----------------------------
   disableScroll() {
-  // 1. 取得當前滾動位置，防止畫面跳動
-  const scrollY = window.scrollY;
-  const body = document.body;
+    const scrollY = window.scrollY;
+    const body = document.body;
+    const scrollbarWidth =
+      window.innerWidth - document.documentElement.clientWidth;
 
-  // 2. 將 body 固定住
-  body.style.position = 'fixed';
-  body.style.top = `-${scrollY}px`;
-  body.style.width = '100%';
-  body.style.overflowY = 'hidden';
-}
+    console.log('scrollbarWidth:', scrollbarWidth);
 
-enableScroll() {
-  const body = document.body;
-  const scrollY = body.style.top;
+    // 設定 CSS variable
+    document.documentElement.style.setProperty(
+      '--scrollbar-offset',
+      `${scrollbarWidth}px`
+    );
 
-  // 3. 還原 body 樣式
-  body.style.position = '';
-  body.style.top = '';
-  body.style.width = '';
-  body.style.overflowY = '';
+    body.style.position = 'fixed';
+    body.style.top = `-${scrollY}px`;
+    body.style.width = '100%';
+    body.style.overflowY = 'hidden';
+  }
 
-  // 4. 滾動回原本位置
-  window.scrollTo(0, parseInt(scrollY || '0') -1);
-}
+  enableScroll() {
+    const body = document.body;
+    const scrollY = body.style.top;
+
+    // 清除 CSS variable
+    document.documentElement.style.setProperty('--scrollbar-offset', '0px');
+
+    body.style.position = '';
+    body.style.top = '';
+    body.style.width = '';
+    body.style.overflowY = '';
+
+    window.scrollTo(0, -parseInt(scrollY || '0'));
+  }
 }

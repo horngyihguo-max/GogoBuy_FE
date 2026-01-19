@@ -1,0 +1,41 @@
+/* ✅ 避免固定 footer 蓋住內容：給整頁底部留空間 */
+.login-page {
+  /* 如果 header/footer 是 fixed 時使用 */
+  // padding-top: 64px;   /* header 高度 */
+  // padding-bottom: 72px;/* footer 高度 */
+
+  /* 讓內容區的 min-height 不會被 footer 吃掉 */
+  min-height: calc(100vh - 64px - 72px);
+}
+
+/* 📱 Mobile layout */
+@media (max-width: 768px) {
+  .login-page {
+    /* 手機不要那麼厚的外邊距 */
+    padding-left: 16px;
+    padding-right: 16px;
+
+    /* 背景可以更柔和（你也可用 #F4E7E1） */
+    background: #f4e7e1;
+  }
+
+  /* 把內層大卡片「去掉固定高度 + 大圓角」，比較像手機原生頁 */
+  .login-page .max-w-5xl {
+    border-radius: 20px !important;
+  }
+
+  /* 你內層容器目前 md:h-[680px]，手機時會造成「卡住/溢出行為怪」 */
+  .login-page .md\:h-\[680px\] {
+    height: auto !important;
+  }
+
+  /* 右側原本 overflow-y-auto，手機通常會變成雙重滾動，體驗很差 */
+  .login-page .overflow-y-auto {
+    overflow: visible !important;
+  }
+
+  /* sticky 的切換按鈕區：手機可以改成一般區塊，避免佔視窗高度 */
+  .login-page .sticky {
+    position: static !important;
+  }
+}
