@@ -1,9 +1,11 @@
-p{
+p {
   margin: 10px 0px;
 }
-.editIcon{
+
+.editIcon {
   background-color: rgb(55, 76, 69);
 }
+
 .custom-dialog .p-dialog-header {
   background-color: #662222;
   color: #ffffff;
@@ -16,4 +18,8 @@ p{
 body.p-overflow-hidden {
   overflow: hidden !important;
   touch-action: none;
+}
+
+.custom-addon {
+  --p-inputgroup-addon-color: #ff5733;
 }
