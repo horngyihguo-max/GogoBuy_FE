@@ -44,3 +44,13 @@
   flex-wrap: wrap;
   margin-top: 12px;
 }
+
+body.p-overflow-hidden {
+    overflow: hidden !important;
+    touch-action: none;
+    -ms-touch-action: none;
+}
+
+body.p-overflow-hidden main {
+    overflow: hidden !important;
+}

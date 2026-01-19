@@ -118,6 +118,7 @@ export class AppComponent {
 items: MenuItem[] = [
   { label: '用戶首頁', icon: 'pi pi-user', routerLink: '/user/profile' },
   { label: '我的訂單', icon: 'pi pi-receipt', routerLink: '/user/orders' },
+  { label: '許願池', icon: 'pi pi-sparkles', routerLink: '/user/wishes' },
   { label: '登入', icon: 'pi pi-sign-in', routerLink: '/gogobuy/login' },
   { label: '登出', icon: 'pi pi-sign-out', command: () => { this.logout(); } }
 ];

@@ -12,26 +12,25 @@ body {
 
 :root {
   --brand-primary: #662222;
-  --brand-primary-hover: #8B2F2F;
+  --brand-primary-hover: #8b2f2f;
 
-  --bg-main: #F7EDEB;
-  --bg-section: #FAF3F1;
-  --bg-card: #FFFFFF;
+  --bg-main: #f7edeb;
+  --bg-section: #faf3f1;
+  --bg-card: #ffffff;
 
-  --accent-orange: #E07A3F;
-  --accent-soft: #F2B8A0;
+  --accent-orange: #e07a3f;
+  --accent-soft: #f2b8a0;
 
-  --text-title: #3A1F1F;
-  --text-body: #5C3A3A;
-  --text-muted: #8A6A6A;
-  --text-disabled: #BFA5A5;
+  --text-title: #3a1f1f;
+  --text-body: #5c3a3a;
+  --text-muted: #8a6a6a;
+  --text-disabled: #bfa5a5;
 
-  --border-light: #E6D2CF;
+  --border-light: #e6d2cf;
 
-  --footer-bg: #7A2E2E;
-  --footer-text: #F4EAEA;
+  --footer-bg: #7a2e2e;
+  --footer-text: #f4eaea;
 }
-
 
 /* 針對 Chrome, Edge, Safari */
 ::-webkit-scrollbar {
@@ -46,7 +45,11 @@ body {
 
 ::-webkit-scrollbar-thumb {
   /* 使用品牌色到懸停色的漸層 */
-  background: linear-gradient(180deg, var(--brand-primary) 0%, var(--brand-primary-hover) 100%);
+  background: linear-gradient(
+    180deg,
+    var(--brand-primary) 0%,
+    var(--brand-primary-hover) 100%
+  );
   border-radius: 10px;
   /* 增加邊界讓滑塊看起來像浮在軌道中央 */
   border: 3px solid var(--bg-section);
@@ -78,5 +81,4 @@ body {
 
     /* 這裡不需要像桌面端一樣加 border，因為 4px 已經很細了 */
   }
-
 }

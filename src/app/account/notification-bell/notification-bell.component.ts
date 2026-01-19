@@ -77,13 +77,17 @@ export class NotificationBellComponent {
     if (!link) return;
 
     // 外部連結：http/https 開新分頁（也可以改同分頁）
-    // if (typeof link === 'string' && /^https?:\/\//i.test(link)) {
-    //   window.open(link, '_blank');
-    //   return;
-    // }
+    if (typeof link === 'string' && /^https?:\/\//i.test(link)) {
+      window.open(link, '_blank');
+      return;
+    }
 
     // 站內路由：如果沒有/就補上
     const internal = link.startsWith('/') ? link : `/${link}`;
-    this.router.navigateByUrl(internal);
+    this.router.navigateByUrl(internal).then((success) => {
+      if (success) {
+        window.location.reload();
+      }
+    });
   }
 }

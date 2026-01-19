@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 
 import { TabsModule } from 'primeng/tabs';
 import { PaginatorModule } from 'primeng/paginator';
@@ -15,11 +16,19 @@ import { AuthService } from '../../@service/auth.service';
 
 type WishType = '手搖店' | '餐廳' | '生鮮雜貨';
 type MyFilter = 'all' | 'active' | 'finished' | 'expired';
+type FoFilter = 'all' | 'active' | 'finished' | 'expired';
 
 @Component({
   selector: 'app-wishes',
   standalone: true,
-  imports: [CommonModule, FormsModule, TabsModule, PaginatorModule, ToastModule, DialogModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    TabsModule,
+    PaginatorModule,
+    ToastModule,
+    DialogModule,
+  ],
   templateUrl: './wishes.component.html',
   styleUrl: './wishes.component.scss',
   providers: [MessageService],
@@ -28,11 +37,13 @@ export class WishesComponent implements OnInit {
   constructor(
     private http: HttpService,
     public auth: AuthService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private route: ActivatedRoute,
+    private router: Router
   ) {}
 
   // =========================
-  // TODO 測試暫用：未登入也給假 userId
+  // TODO 測試暫用：未登入也給假 userId (在ngOnInit)
   // =========================
   userId: string = '';
   timesRemaining = 3; // 測試應急用願望次數
@@ -43,9 +54,10 @@ export class WishesComponent implements OnInit {
   isLoading = true;
   activeTab = 0; // 0: all, 1: followed, 2: mine
   myFilter: MyFilter = 'all';
+  foFilter: FoFilter = 'all';
 
   // 分頁（每個 tab 各自一套，避免互相干擾）
-  pageSize = 20; // 可自行調
+  pageSize = 10; // 可自行調
   pageAll = 0;
   pageFollowed = 0;
   pageMine = 0;
@@ -56,14 +68,39 @@ export class WishesComponent implements OnInit {
   wishes: any[] = [];
 
   // 隨機名稱池（匿名顯示用）
-  private adjectives = ['可愛的', '閃亮的', '神祕的', '飢餓的', '開心的', '暴躁的', '溫柔的', '厭世的', '七彩的', '酷酷的'];
-  private animals = ['貓咪', '狗勾', '羊駝', '企鵝', '長頸鹿', '熊寶', '小狐狸', '兔兔', '鴨鴨', '鸚鵡'];
+  private adjectives = [
+    '可愛的',
+    '閃亮的',
+    '神祕的',
+    '飢餓的',
+    '開心的',
+    '暴躁的',
+    '溫柔的',
+    '厭世的',
+    '七彩的',
+    '酷酷的',
+  ];
+  private animals = [
+    '貓咪',
+    '狗勾',
+    '羊駝',
+    '企鵝',
+    '長頸鹿',
+    '熊寶',
+    '小狐狸',
+    '兔兔',
+    '鴨鴨',
+    '鸚鵡',
+  ];
 
   // 三種 type 固定（新增願望 select 也用這個）
   typeOptions: WishType[] = ['手搖店', '餐廳', '生鮮雜貨'];
 
   ngOnInit(): void {
+    // 先刷新用戶資料
+    // this.auth.refreshUser();
     // TODO 確保有 userId（沒有就先用假資料）
+    // this.userId = this.auth.user?.id || '';
     this.userId = this.auth.user?.id || '12b7bf42-57af-4e3f-acfc-b9a2ba3342aa';
 
     // 先用假資料（後端上線再換成 GET）
@@ -76,10 +113,32 @@ export class WishesComponent implements OnInit {
   loadWishes(): void {
     this.isLoading = true;
 
+    // 路由定位特定卡片 =========================
+    this.route.queryParamMap.subscribe((qp) => {
+      const tab = qp.get('tab');
+      const filter = qp.get('filter');
+      const wishIdStr = qp.get('wishId');
+
+      this.pendingTab =
+        tab === 'all' || tab === 'followed' || tab === 'mine' ? tab : null;
+
+      this.pendingFilter =
+        filter === 'all' ||
+        filter === 'active' ||
+        filter === 'finished' ||
+        filter === 'expired'
+          ? filter
+          : null;
+
+      this.pendingWishId = wishIdStr ? Number(wishIdStr) : null;
+    });
+    // ========================================
+
     // 後端上線後使用：
     // this.http.getApi('http://localhost:8080/gogobuy/all_wishes').subscribe((res: any) => {
     //   this.wishes = res.allWish || [];
     //   this.afterLoad();
+    //   this.applyScrollAndHighlight();
     // });
 
     // 假資料
@@ -96,7 +155,7 @@ export class WishesComponent implements OnInit {
         finished: false,
         type: '手搖店',
         buildDate: '2026-01-09',
-        location: '資安大樓（這邊也做很長測~~~~~~~~~~~~~~~~~~~~~~試）',
+        location: '資安大樓（這邊也做很長測測測測測測測測測試）',
       },
       {
         id: 2,
@@ -145,6 +204,8 @@ export class WishesComponent implements OnInit {
     ];
 
     this.afterLoad();
+    this.applyScrollAndHighlight();
+    // 這邊實際上線時記得要刪掉
   }
 
   private afterLoad(): void {
@@ -165,8 +226,10 @@ export class WishesComponent implements OnInit {
   private setRandomNicknamesOnce(): void {
     this.wishes.forEach((wish) => {
       if (!wish.nickname && !wish.tempNickname) {
-        const adj = this.adjectives[Math.floor(Math.random() * this.adjectives.length)];
-        const ani = this.animals[Math.floor(Math.random() * this.animals.length)];
+        const adj =
+          this.adjectives[Math.floor(Math.random() * this.adjectives.length)];
+        const ani =
+          this.animals[Math.floor(Math.random() * this.animals.length)];
         wish.tempNickname = `${adj}${ani}`;
       }
     });
@@ -215,9 +278,9 @@ export class WishesComponent implements OnInit {
       return 'bg-gray-100 border-gray-200 text-gray-600';
     }
 
-    // 已實現：偏暖橘（但不要太刺眼）
+    // 已實現：黃
     if (finished) {
-      return 'bg-[#FFE8D6] border-[#FFD2B1] text-[#5A2A16]';
+      return 'bg-yellow-50 border-yellow-200 text-[#5A2A16]';
     }
 
     // 進行中：依 type 三色淡底
@@ -260,14 +323,29 @@ export class WishesComponent implements OnInit {
   // - 不顯示 expired
   // - 不顯示 finished=true
   getAllTabList(): any[] {
-    return this.wishes.filter((w) => !this.isExpired(w.buildDate) && !this.isFinished(w));
+    return this.wishes.filter(
+      (w) => !this.isExpired(w.buildDate) && !this.isFinished(w)
+    );
   }
 
   // 我跟的願望：
   // - followers 有自己就顯示
   // - expired / finished 也要顯示（但點開只能看資訊）
   getFollowedTabList(): any[] {
-    return this.wishes.filter((w) => this.isFollowedByMe(w));
+    // 先找我跟的
+    let list = this.wishes.filter((w) => this.isFollowedByMe(w));
+
+    // 再依 foFilter 篩選
+    if (this.foFilter === 'active') {
+      list = list.filter((w) => this.getStatusTag(w) === 'active');
+    } else if (this.foFilter === 'finished') {
+      list = list.filter((w) => this.getStatusTag(w) === 'finished');
+    } else if (this.foFilter === 'expired') {
+      list = list.filter((w) => this.getStatusTag(w) === 'expired');
+    }
+    // foFilter === 'all' → 不動
+
+    return list;
   }
 
   // 我許的願望：
@@ -278,7 +356,9 @@ export class WishesComponent implements OnInit {
 
     if (this.myFilter === 'all') return list;
     if (this.myFilter === 'active') {
-      return list.filter((w) => !this.isExpired(w.buildDate) && !this.isFinished(w));
+      return list.filter(
+        (w) => !this.isExpired(w.buildDate) && !this.isFinished(w)
+      );
     }
     if (this.myFilter === 'finished') {
       return list.filter((w) => this.isFinished(w));
@@ -295,10 +375,15 @@ export class WishesComponent implements OnInit {
       mode === 'all'
         ? this.getAllTabList()
         : mode === 'followed'
-          ? this.getFollowedTabList()
-          : this.getMineTabList();
+        ? this.getFollowedTabList()
+        : this.getMineTabList();
 
-    const page = mode === 'all' ? this.pageAll : mode === 'followed' ? this.pageFollowed : this.pageMine;
+    const page =
+      mode === 'all'
+        ? this.pageAll
+        : mode === 'followed'
+        ? this.pageFollowed
+        : this.pageMine;
     const start = page * this.pageSize;
     const end = start + this.pageSize;
     return list.slice(start, end);
@@ -314,7 +399,12 @@ export class WishesComponent implements OnInit {
     const total = this.getTotal(mode);
     if (total === 0) return '第 0 至 0 條，共 0 條';
 
-    const page = mode === 'all' ? this.pageAll : mode === 'followed' ? this.pageFollowed : this.pageMine;
+    const page =
+      mode === 'all'
+        ? this.pageAll
+        : mode === 'followed'
+        ? this.pageFollowed
+        : this.pageMine;
     const start = page * this.pageSize + 1;
 
     const end = Math.min((page + 1) * this.pageSize, total);
@@ -334,6 +424,82 @@ export class WishesComponent implements OnInit {
     this.pageMine = 0;
   }
 
+  // 我跟的願望：切 filter 時重置分頁
+  setFoFilter(filter: FoFilter): void {
+    this.foFilter = filter;
+    this.pageFollowed = 0;
+  }
+
+  // 這邊是專門用來路由導向特定卡片 ======================================
+  // 有一部分在ngOnInt
+  // Deep-link 定位用
+  pendingWishId: number | null = null;
+  pendingTab: 'all' | 'followed' | 'mine' | null = null;
+  pendingFilter: 'all' | 'active' | 'finished' | 'expired' | null = null;
+
+  // 特定卡片暫時高光
+  highlightWishId: number | null = null;
+
+  applyScrollAndHighlight(): void {
+    if (!this.pendingWishId) return;
+
+    // 1️. 切 tab（如果有指定）
+    if (this.pendingTab === 'all') this.activeTab = 0;
+    if (this.pendingTab === 'followed') this.activeTab = 1;
+    if (this.pendingTab === 'mine') this.activeTab = 2;
+
+    // 2️. 套 filter（該 tab 有支援才套）
+    if (this.pendingFilter) {
+      if (this.pendingTab === 'mine') {
+        this.setMyFilter(this.pendingFilter as any);
+      }
+      if (this.pendingTab === 'followed') {
+        this.setFoFilter(this.pendingFilter as any);
+      }
+    }
+
+    const wishId = this.pendingWishId;
+
+    // 3. 等畫面 render（很關鍵）
+    setTimeout(() => {
+      const el = document.getElementById(this.getWishDomId(wishId));
+      if (!el) return;
+
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      this.flashHighlight(wishId);
+    }, 0);
+  }
+
+  // 定位小工具
+  getWishDomId(wishId: number): string {
+    return `wish-card-${wishId}`;
+  }
+
+  flashHighlight(wishId: number): void {
+    this.highlightWishId = wishId;
+
+    setTimeout(() => {
+      if (this.highlightWishId === wishId) {
+        this.highlightWishId = null;
+      }
+    }, 2000);
+  }
+  // ==================================================================
+
+  // =========================
+  // Create Wish Dialog (創建願望)
+  // =========================
+  createVisible = false;
+  // 表單資料（先用最小可行）
+  createForm = {
+    title: '',
+    type: '手搖店' as WishType,
+    location: '',
+    anonymous: false,
+  };
+  // optional：送出中（避免連點）
+  isCreating = false;
+
   // =========================
   // TODO 右上角「我要許願」
   // =========================
@@ -349,98 +515,93 @@ export class WishesComponent implements OnInit {
       return;
     }
 
-    // SweetAlert2：一次收集 title / type / location / anonymous
-    Swal.fire({
-      title: '我要許願',
-      html: `
-        <div style="text-align:left; font-size: 15px;">
-          <div style="margin-bottom:10px;">
-            <div style="margin-bottom:6px;">願望標題</div>
-            <input id="sw_title" class="swal2-input" placeholder="例如：五十嵐" style="margin:0;">
-          </div>
+    // 打開 PrimeNG Dialog
+    this.openCreateDialog();
+  }
 
-          <div style="margin-bottom:10px;">
-            <div style="margin-bottom:6px;">類型</div>
-            <select id="sw_type" class="swal2-select" style="width:100%; padding:10px; border-radius:10px;">
-              <option value="手搖店">手搖店</option>
-              <option value="餐廳">餐廳</option>
-              <option value="生鮮雜貨">生鮮雜貨</option>
-            </select>
-          </div>
+  // 開啟 dialog（每次開啟先重置表單）
+  openCreateDialog(): void {
+    this.createForm = {
+      title: '',
+      type: '手搖店',
+      location: '',
+      anonymous: false,
+    };
+    this.createVisible = true;
+    this.disableScroll();
+  }
 
-          <div style="margin-bottom:10px;">
-            <div style="margin-bottom:6px;">地點</div>
-            <input id="sw_location" class="swal2-input" placeholder="例如：資安大樓" style="margin:0;">
-          </div>
+  // 關閉 dialog
+  closeCreateDialog(): void {
+    this.createVisible = false;
+    this.isCreating = false;
+  }
 
-          <label style="display:flex; align-items:center; gap:8px; margin-top:6px;">
-            <input id="sw_anonymous" type="checkbox" />
-            <span>匿名</span>
-          </label>
-        </div>
-      `,
-      showCancelButton: true,
-      confirmButtonColor: '#7F1D1D', // red-900
-      confirmButtonText: '送出',
-      cancelButtonText: '取消',
-      preConfirm: () => {
-        const title = (document.getElementById('sw_title') as HTMLInputElement)?.value?.trim();
-        const type = (document.getElementById('sw_type') as HTMLSelectElement)?.value as WishType;
-        const location = (document.getElementById('sw_location') as HTMLInputElement)?.value?.trim();
-        const anonymous = (document.getElementById('sw_anonymous') as HTMLInputElement)?.checked;
+  // 送出（dialog 的送出按鈕呼叫）
+  submitCreateWish(): void {
+    if (this.isCreating) return;
 
-        if (!title) {
-          Swal.showValidationMessage('請輸入願望標題');
-          return;
-        }
-        if (!location) {
-          Swal.showValidationMessage('請輸入地點');
-          return;
-        }
-        return { title, type, location, anonymous };
-      },
-    }).then((result) => {
-      if (!result.isConfirmed) return;
+    const title = this.createForm.title?.trim();
+    const location = this.createForm.location?.trim();
+    const type = this.createForm.type;
+    const anonymous = this.createForm.anonymous;
 
-      const payload = {
-        userId: this.userId,
-        title: result.value.title,
-        anonymous: String(result.value.anonymous),
-        type: result.value.type,
-        location: result.value.location,
-      };
+    if (!title) {
+      this.toastWarn('提醒', '請輸入願望標題');
+      return;
+    }
+    if (!location) {
+      this.toastWarn('提醒', '請輸入地點');
+      return;
+    }
 
-      // 後端上線後使用（成功再刷新/更新畫面）
-      // this.http.postApi('http://localhost:8080/gogobuy/add_wishes', payload).subscribe((res: any) => {
-      //   if (res?.code === 200) {
-      //     this.toastSuccess('成功', '創建成功');
-      //     this.timesRemaining -= 1;
-      //     this.loadWishes(); // 重新抓一次
-      //   } else {
-      //     this.toastWarn('失敗', res?.message || '創建失敗');
-      //   }
-      // });
+    const payload = {
+      userId: this.userId,
+      title,
+      anonymous: String(anonymous),
+      type,
+      location,
+    };
 
-      // ✅ 測試：直接前端新增
-      const newWish = {
-        id: Date.now(),
-        user_id: this.userId,
-        nickname: payload.anonymous === 'true' ? null : (this.auth.user?.nickname ?? null),
-        title: payload.title,
-        followers: [],
-        finished: false,
-        type: payload.type,
-        buildDate: new Date().toISOString().slice(0, 10),
-        location: payload.location,
-      };
+    this.isCreating = true;
+    console.log('送出新增資料：' + JSON.stringify(payload, null, 2));
 
-      this.wishes = [newWish, ...this.wishes];
-      this.setRandomNicknamesOnce();
-      this.timesRemaining -= 1;
+    // 後端上線後使用（成功再刷新/更新畫面）
+    // this.http.postApi('http://localhost:8080/gogobuy/add_wishes', payload).subscribe((res: any) => {
+    //   this.isCreating = false;
+    //   if (res?.code === 200) {
+    //     this.toastSuccess('成功', '創建成功');
+    //     this.timesRemaining -= 1;
+    //     this.closeCreateDialog();
+    //     this.loadWishes(); // 重新抓一次
+    //   } else {
+    //     this.toastWarn('失敗', res?.message || '創建失敗');
+    //   }
+    // });
 
-      this.toastSuccess('成功', '創建成功');
-      this.resetPages();
-    });
+    // 測試：直接前端新增
+    const newWish = {
+      id: Date.now(),
+      user_id: this.userId,
+      nickname:
+        payload.anonymous === 'true' ? null : this.auth.user?.nickname ?? null,
+      title: payload.title,
+      followers: [],
+      finished: false,
+      type: payload.type,
+      buildDate: new Date().toISOString().slice(0, 10),
+      location: payload.location,
+    };
+
+    this.wishes = [newWish, ...this.wishes];
+    this.setRandomNicknamesOnce();
+    this.timesRemaining -= 1;
+
+    this.toastSuccess('成功', '創建成功');
+    this.resetPages();
+
+    this.isCreating = false;
+    this.closeCreateDialog();
   }
 
   // =========================
@@ -457,13 +618,23 @@ export class WishesComponent implements OnInit {
       return;
     }
 
-    // 後端上線後使用：
-    // const url = `http://localhost:8080/gogobuy/follow?id=${wish.id}&user_id=${this.userId}`;
+    // 後端上線後使用：(if (idx > -1)那邊需要測試)
+    // const url = `http://localhost:8080/gogobuy/follow_wish?id=${wish.id}&userId=${this.userId}`;
     // this.http.postApi(url, {}).subscribe((res: any) => {
-    //   if (res?.code === 200) { ... } else { ... }
+    //   if (res?.code === 200) {
+    //     if (idx > -1) {
+    //       followers.splice(idx, 1);
+    //       this.toastInfo('已取消', '已取消跟願');
+    //     } else {
+    //       followers.push(this.userId);
+    //       this.toastSuccess('成功', '跟願成功！');
+    //     }
+    //   } else {
+    //     this.toastWarn('失敗', res?.message || '請重新操作');
+    //   }
     // });
 
-    // ✅ 測試：前端直接切換
+    // 測試：前端直接切換
     const followers: string[] = wish.followers || [];
     const idx = followers.indexOf(this.userId);
 
@@ -476,7 +647,7 @@ export class WishesComponent implements OnInit {
     }
   }
 
-  // dialog用變數 ----------------------------
+  // p-dialog用變數 ----------------------------
   detailVisible = false;
   selectedWish: any = null;
 
@@ -493,59 +664,59 @@ export class WishesComponent implements OnInit {
   // =========================
   // 卡片點擊：顯示詳情（PrimeNG Dialog）
   // =========================
-
-
   onOpenDetail(mode: 'all' | 'followed' | 'mine', wish: any): void {
-  const status = this.getStatusTag(wish); // 'active' | 'expired' | 'finished'
-  const statusLabel = this.getStatusLabel(wish);
+    const status = this.getStatusTag(wish); // 'active' | 'expired' | 'finished'
+    const statusLabel = this.getStatusLabel(wish);
 
-  // 這兩個狀態在「我跟的願望」要限制：只能看資訊
-  const isReadOnlyInFollowed = mode === 'followed' && (status === 'expired' || status === 'finished');
-  // 「我許的願望」：已實現只能看資訊
-  const isReadOnlyInMine = mode === 'mine' && status === 'finished';
+    // 這兩個狀態在「我跟的願望」要限制：只能看資訊
+    const isReadOnlyInFollowed =
+      mode === 'followed' && (status === 'expired' || status === 'finished');
+    // 「我許的願望」：已實現只能看資訊
+    const isReadOnlyInMine = mode === 'mine' && status === 'finished';
 
-  // 顯示資訊（template 不做計算）
-  this.selectedWish = wish;
-  this.detailStatusLabel = statusLabel;
-  this.detailFollowerCount = (wish.followers || []).length;
-  this.detailDisplayName = this.getDisplayName(wish);
+    // 顯示資訊（template 不做計算）
+    this.selectedWish = wish;
+    this.detailStatusLabel = statusLabel;
+    this.detailFollowerCount = (wish.followers || []).length;
+    this.detailDisplayName = this.getDisplayName(wish);
 
-  // 是否允許開團（依你原本邏輯）
-  const canStartGroup =
-    !!this.userId &&
-    !isReadOnlyInFollowed &&
-    !isReadOnlyInMine &&
-    !(mode === 'mine' && status === 'expired');
+    // 是否允許開團（依你原本邏輯）
+    const canStartGroup =
+      !!this.userId &&
+      !isReadOnlyInFollowed &&
+      !isReadOnlyInMine &&
+      !(mode === 'mine' && status === 'expired');
 
-  this.showStartGroupBtn = canStartGroup;
-  this.disableStartGroupBtn = !this.userId;
+    this.showStartGroupBtn = canStartGroup;
+    this.disableStartGroupBtn = !this.userId;
 
-  // 是否顯示「再許一次」
-  this.showReWishBtn = mode === 'mine' && status === 'expired';
+    // 是否顯示「再許一次」
+    this.showReWishBtn = mode === 'mine' && status === 'expired';
 
-  // 是否顯示刪除
-  this.showDeleteBtn = mode === 'mine' && status === 'active';
+    // 是否顯示刪除
+    this.showDeleteBtn = mode === 'mine' && status === 'active';
 
-  this.detailVisible = true;
-}
-
-closeDetail(): void {
-  this.detailVisible = false;
-  this.selectedWish = null;
-}
-
-startGroupFromWish(): void {
-  if (!this.selectedWish) return;
-
-  if (!this.userId) {
-    this.toastWarn('請先登入', '登入後才可以開團');
-    return;
+    this.detailVisible = true;
   }
 
-  const wishId = this.selectedWish.id;
-  const wishTitle = encodeURIComponent(this.selectedWish.title || '');
-  window.location.href = `/store_upsert?wish_id=${wishId}&wish_title=${wishTitle}`;
-}
+  // 關閉p-dialog
+  closeDetail(): void {
+    this.detailVisible = false;
+    this.selectedWish = null;
+  }
+
+  startGroupFromWish(): void {
+    if (!this.selectedWish) return;
+
+    if (!this.userId) {
+      this.toastWarn('請先登入', '登入後才可以開團');
+      return;
+    }
+
+    const wishId = this.selectedWish.id;
+    const wishTitle = encodeURIComponent(this.selectedWish.title || '');
+    window.location.href = `/management/store_upsert?wish_id=${wishId}&wish_title=${wishTitle}`;
+  }
 
   // =========================
   // TODO 我許的願望：刪除（需接 API）
@@ -564,19 +735,33 @@ startGroupFromWish(): void {
       confirmButtonColor: '#D5451B',
       confirmButtonText: '刪除',
       cancelButtonText: '取消',
+      didOpen: () => {
+        const container = document.querySelector(
+          '.swal2-container'
+        ) as HTMLElement | null;
+        if (container) container.style.zIndex = '20000';
+      },
     }).then((r) => {
       if (!r.isConfirmed) return;
 
       // 後端上線後使用：
-      // const url = `http://localhost:8080/gogobuy/delete?id=${wish.id}&user_id=${this.userId}`;
+      // const url = `http://localhost:8080/gogobuy/delete_wish?id=${wish.id}&userId=${this.userId}`;
       // this.http.postApi(url, {}).subscribe((res: any) => {
-      //   if (res?.code === 200) { ... } else { ... }
+      //   if (res?.code === 200) {
+      //     this.toastSuccess('成功', '刪除成功');
+      //     this.closeDetail();
+      //     this.loadWishes();
+      //   } else {
+      //     this.toastWarn('失敗', res?.message || '刪除失敗');
+      //   }
       // });
 
       // 測試：直接刪
       this.wishes = this.wishes.filter((w) => w.id !== wish.id);
       this.toastSuccess('成功', '刪除成功');
       this.resetPages();
+      // 關掉p-dialog
+      this.closeDetail();
       Swal.close();
     });
   }
@@ -599,21 +784,41 @@ startGroupFromWish(): void {
       confirmButtonColor: '#7F1D1D',
       confirmButtonText: '確定',
       cancelButtonText: '取消',
+      didOpen: () => {
+        const container = document.querySelector(
+          '.swal2-container'
+        ) as HTMLElement | null;
+        if (container) container.style.zIndex = '20000';
+      },
     }).then((r) => {
       if (!r.isConfirmed) return;
 
       // 後端上線後使用（先新增成功 -> 再刪除原本）
       // 新增願望
-      // const addPayload = { userId:this.userId, title:wish.title, anonymous:'false', type:wish.type, location:wish.location };
-      // this.http.postApi('http://localhost:8080/gogobuy/add_wishes', addPayload).subscribe((res:any)=>{
-      //   if(res?.code===200){
-      //     // 刪除原願望
-      //     const delUrl = `http://localhost:8080/gogobuy/delete?id=${wish.id}&user_id=${this.userId}`;
-      //     this.http.postApi(delUrl, {}).subscribe((del:any)=>{
-      //       if(del?.code===200){ ... }
-      //     });
-      //   }
-      // });
+      // const addPayload = {
+      //   userId: this.userId,
+      //   title: wish.title,
+      //   anonymous: 'false',
+      //   type: wish.type,
+      //   location: wish.location,
+      // };
+      // this.http
+      //   .postApi('http://localhost:8080/gogobuy/add_wishes', addPayload)
+      //   .subscribe((res: any) => {
+      //     if (res?.code === 200) {
+      //       // 刪除原願望
+      //       const delUrl = `http://localhost:8080/gogobuy/delete_wish?id=${wish.id}&userId=${this.userId}`;
+      //       this.http.postApi(delUrl, {}).subscribe((del: any) => {
+      //         if (res?.code === 200) {
+      //           this.toastSuccess('成功', '已刪除原願望');
+      //           this.closeDetail();
+      //           this.loadWishes();
+      //         } else {
+      //           this.toastWarn('失敗', res?.message || '原願望刪除失敗');
+      //         }
+      //       });
+      //     }
+      //   });
 
       // 測試：前端直接模擬「新增 + 刪除」
       const cloned = {
@@ -638,6 +843,7 @@ startGroupFromWish(): void {
       this.timesRemaining -= 1;
       this.toastSuccess('成功', '已重新發起願望！');
       this.resetPages();
+      this.closeDetail();
       Swal.close();
     });
   }
@@ -666,4 +872,30 @@ startGroupFromWish(): void {
       .replaceAll('"', '&quot;')
       .replaceAll("'", '&#039;');
   }
+
+  disableScroll() {
+  // 1. 取得當前滾動位置，防止畫面跳動
+  const scrollY = window.scrollY;
+  const body = document.body;
+
+  // 2. 將 body 固定住
+  body.style.position = 'fixed';
+  body.style.top = `-${scrollY}px`;
+  body.style.width = '100%';
+  body.style.overflowY = 'hidden';
+}
+
+enableScroll() {
+  const body = document.body;
+  const scrollY = body.style.top;
+
+  // 3. 還原 body 樣式
+  body.style.position = '';
+  body.style.top = '';
+  body.style.width = '';
+  body.style.overflowY = '';
+
+  // 4. 滾動回原本位置
+  window.scrollTo(0, parseInt(scrollY || '0') -1);
+}
 }
