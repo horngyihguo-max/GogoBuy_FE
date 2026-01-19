@@ -128,11 +128,7 @@ export class AppComponent {
 
     // 團長搜尋用使用API
     if (mode == 'host') {
-      const qq = q.toLowerCase();
-      const base = this.auths.eventsAll();
-      this.auths.events.set(
-        base.filter(e => (e.hostNickname ?? '').toLowerCase().includes(qq))
-      );
+      this.auths.performEventSearch(q);
       return;
     }
 
