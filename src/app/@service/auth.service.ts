@@ -77,8 +77,10 @@ export class AuthService {
   setUser(user: any) {
     const formattedUser = {
       ...user,
-      user_avatar_url: user.user_avatar_url || user.avatar_url || user.avatarUrl
+      user_avatar_url: user.avatar_url || user.avatarUrl
     };
+    console.log("user.avatar_url" + user.avatar_url);
+    console.log("user.avatarUrl" + user.avatarUrl);
     this.user = formattedUser;
     localStorage.setItem('user_info', JSON.stringify(formattedUser));
     this.userSubject.next(formattedUser);
@@ -225,7 +227,7 @@ export class AuthService {
 
           // 更新個別欄位
           if (updateDto.nickname) localStorage.setItem('user_nickname', updateDto.nickname);
-          if (updateDto.avatar_url) localStorage.setItem('user_avatar_url', updateDto.avatarUrl);
+          if (updateDto.avatar_url) localStorage.setItem('user_avatar_url', updateDto.avatar_url);
           if (updateDto.carrier) localStorage.setItem('user_carrier', updateDto.carrier);
         }
       })
@@ -411,5 +413,10 @@ export class AuthService {
     return this.https.getApi(`http://localhost:8080/gogobuy/getAll`);
   }
 
+
+  // 上傳圖床
+  upAvatarIHS() {
+
+  }
 
 }

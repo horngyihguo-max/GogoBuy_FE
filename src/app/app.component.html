@@ -13,7 +13,6 @@
       <div class="relative flex items-center w-full md:w-[560px] group">
 
         <!-- 搜尋類型選單 -->
-        <!-- select 絕對定位在 input 上方，所以 input 需要 pl-[95px] 預留左側空間 -->
         <select class="absolute left-3 h-10 px-3 pr-8 bg-white text-slate-700 text-sm rounded-xl shadow-sm
         border border-slate-200 outline-none focus:ring-2 focus:ring-red-600/20 appearance-none cursor-pointer"
           [value]="searchMode()" (change)="onSearchModeChange($event)">
