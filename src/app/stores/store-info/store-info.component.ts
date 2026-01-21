@@ -20,7 +20,7 @@ type TabMode = 'info' | 'order';
     TabsModule,
     PaginatorModule,
     TabViewModule,
-    TooltipModule
+    TooltipModule,
   ],
   templateUrl: './store-info.component.html',
   styleUrl: './store-info.component.scss',
@@ -73,8 +73,9 @@ export class StoreInfoComponent implements OnInit {
 
   ngOnInit(): void {
     // userId（測試塞假id）
-    this.userId = this.auth.user?.id || '12b7bf42-57af-4e3f-acfc-b9a2ba3342aa';
-    // this.userId = this.auth.user?.id || '';
+    // this.userId = this.auth.user?.id || '12b7bf42-57af-4e3f-acfc-b9a2ba3342aa';
+    this.userId = String(localStorage.getItem('user_id'));
+    console.log(this.userId);
 
     // 取路由 id
     const idStr = this.route.snapshot.paramMap.get('id');
@@ -88,6 +89,16 @@ export class StoreInfoComponent implements OnInit {
 
     // 載入資料
     this.loadStoreById(this.storeId);
+  }
+
+  category: any[] = [
+    { name: '團購代購', value: 'slow' },
+    { name: '外送', value: 'fast' },
+  ];
+
+  getCategoryName(value: string): string {
+    const item = this.category.find((c) => c.value === value);
+    return item ? item.name : value;
   }
 
   // =========================
@@ -303,6 +314,7 @@ export class StoreInfoComponent implements OnInit {
     this.router.navigate(['/management/store_upsert', this.storeId]);
   }
 
+  // 開團按鈕目前只有鎖 未登入 || 今日公休 (如果要改休息/打烊都不行，就要寫邏輯)
   goStartGroup(): void {
     if (!this.userId) return;
     if (this.isForceClosed) {
@@ -580,7 +592,7 @@ export class StoreInfoComponent implements OnInit {
     // 設定 CSS variable
     document.documentElement.style.setProperty(
       '--scrollbar-offset',
-      `${scrollbarWidth}px`
+      `${scrollbarWidth}px`,
     );
 
     body.style.position = 'fixed';
@@ -617,7 +629,7 @@ export class StoreInfoComponent implements OnInit {
           name: '微醺之夜餐酒館 (Vibe Night)',
           phone: '0423218888',
           address: '台中市西區公益路二段99號',
-          category: '餐廳',
+          category: 'fast',
           type: '異國料理',
           memo: '本館提供頂級松露料理與特調調酒，週五六提供深夜駐唱。',
           image:
@@ -710,7 +722,7 @@ export class StoreInfoComponent implements OnInit {
           unusual: {
             status: '限時供應',
             tag: 'HOT',
-            is_sold_out: 'true',
+            is_sold_out: 'false',
             alcohol_content: '0%',
             spicy_level: 'none',
           },
@@ -720,7 +732,8 @@ export class StoreInfoComponent implements OnInit {
           storesId: 40,
           categoryId: 1,
           name: '紐奧良辣味雞翅翅翅翅翅翅翅',
-          description: '獨家秘製辛香料，鮮嫩多汁。獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁',
+          description:
+            '獨家秘製辛香料，鮮嫩多汁。獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁',
           basePrice: 280,
           image:
             'aHR0cHM6Ly9pbWFnZS1jZG4tZmxhcmUucWRtLmNsb3VkL3E2MDgxYzRmODFmMDFhL2ltYWdlL2RhdGEvJUU1JTk1JTg2JUU1JTkzJTgxJUU3JTg1JUE3JUU3JTg5JTg3LzEyXyVFNyVCNCU5MCVFNSVBNSVBNyVFOCU4OSVBRiVFOCVCRSVBMyVFNyVCRiU4NS8qJUU3JTk0JUEyJUU1JTkzJTgxJUU1JTlDJTk2LSVFNyVCNCU5MCVFNSVBNSVBNyVFOCU4OSVBRiVFOSU5QiU5RSVFNyVCRiU4NTAzLmpwZw==',

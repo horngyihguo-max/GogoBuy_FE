@@ -67,25 +67,37 @@
                 <div class="flex items-center gap-2">
                   <button
                     (click)="openDetail()"
-                    class="px-4 py-2 rounded-full text-[15px] font-extrabold border transition bg-white/70 text-red-900 border-white hover:bg-white"
+                    class="cursor-pointer px-5 py-2 rounded-full text-[17px] font-extrabold border transition bg-white text-red-900 border-red-900 hover:brightness-95"
                   >
-                    <i class="pi pi-info-circle mr-2"></i>詳細資訊
+                    <i class="pi pi-info-circle"></i>
+                    <div class="text-center leading-tight">
+                      <span class="inline">詳細</span>
+                      <span class="hidden sm:inline">資訊</span>
+                    </div>
                   </button>
 
                   <button
                     (click)="goEdit()"
                     [disabled]="!userId"
-                    class="px-4 py-2 rounded-full text-[15px] font-extrabold border transition disabled:opacity-50 disabled:cursor-not-allowed bg-white text-red-900 border-red-900 hover:bg-red-50"
+                    class="cursor-pointer px-5 py-2 rounded-full text-[17px] font-extrabold border transition disabled:opacity-50 disabled:cursor-not-allowed bg-white text-red-900 border-red-900 hover:bg-red-50"
                   >
-                    <i class="pi pi-pencil mr-2"></i>修改資訊
+                    <i class="pi pi-pencil"></i>
+                    <div class="text-center leading-tight">
+                      <span class="inline">修改</span>
+                      <span class="hidden sm:inline">資訊</span>
+                    </div>
                   </button>
 
                   <button
                     (click)="goStartGroup()"
                     [disabled]="!userId || isForceClosed"
-                    class="px-4 py-2 rounded-full text-[15px] font-extrabold transition disabled:opacity-50 disabled:cursor-not-allowed bg-red-900 text-white hover:brightness-110"
+                    class="cursor-pointer px-5 py-2 rounded-full text-[17px] font-extrabold transition disabled:opacity-50 disabled:cursor-not-allowed bg-red-900 text-white hover:brightness-110"
                   >
-                    <i class="pi pi-bolt mr-2"></i>以此店家開團
+                    <i class="pi pi-bolt"></i>
+                    <div class="text-center leading-tight">
+                      <span class="hidden sm:inline">以此店家</span>
+                      <span class="inline">開團</span>
+                    </div>
                   </button>
                 </div>
               </div>
@@ -99,8 +111,8 @@
                     # {{ store?.type || "未知類型" }}
                   </span>
                   @if (store?.category) {
-                    <div class="text-[17px] font-semibold text-gray-700">
-                      分類：{{ store?.category }}
+                    <div class="text-[17px] font-semibold px-3 py-1 rounded-full bg-sky-300/30 text-sky-800">
+                      {{ getCategoryName(store?.category) }}
                     </div>
                   }
                 </div>
@@ -199,7 +211,7 @@
 
                         @if (p.description) {
                           <div
-                            class="mt-2 text-[15px] text-gray-700 line-clamp-2"
+                            class="mt-2 text-[15px] text-gray-700 line-clamp-2 font-normal"
                             pTooltip="{{ p.description }}"
                             tooltipPosition="right"
                           >
@@ -215,14 +227,14 @@
                         <div class="mt-3 flex flex-wrap gap-2">
                           @if (p?.unusual?.tag) {
                             <span
-                              class="text-[12px] font-extrabold px-3 py-1 rounded-full bg-[#FF9B45]/20 text-[#7a3a08]"
+                              class="text-[15px] font-extrabold px-3 py-1 rounded-full bg-[#FF9B45]/20 text-[#7a3a08]"
                             >
                               {{ p.unusual.tag }}
                             </span>
                           }
                           @if (p?.unusual?.status) {
                             <span
-                              class="text-[12px] font-extrabold px-3 py-1 rounded-full bg-white/70 border border-white text-gray-700"
+                              class="text-[15px] font-extrabold px-3 py-1 rounded-full bg-white/70 border border-white text-gray-700"
                             >
                               {{ p.unusual.status }}
                             </span>
@@ -413,7 +425,7 @@
               </div>
 
               @if (selectedProduct.description) {
-                <div class="mt-2 text-[15px] text-gray-700">
+                <div class="mt-2 md:text-[18px] text-[15px] text-gray-700">
                   {{ selectedProduct.description }}
                 </div>
               }
@@ -421,14 +433,14 @@
 
             <div class="text-right shrink-0">
               <div
-                class="text-[18px] md:text-[20px] font-extrabold text-red-900"
+                class="text-[20px] md:text-[22px] font-extrabold text-red-900"
               >
                 ${{ selectedProduct.basePrice }}
               </div>
 
-              @if (isSoldOut(selectedProduct)) {
+              @if (isSoldOut(selectedProduct) || selectedProduct.available) {
                 <div
-                  class="mt-2 inline-flex items-center text-[12px] font-extrabold px-3 py-1 rounded-full bg-gray-800 text-white"
+                  class="mt-2 inline-flex items-center text-[15px] font-extrabold px-3 py-1 rounded-full bg-gray-800 text-white"
                 >
                   已售完
                 </div>
@@ -443,7 +455,7 @@
         <div class="mt-4 grow pr-1">
           <!-- 選項（冰塊甜度）」 -->
           <div class="mb-5">
-            <div class="text-gray-500 font-semibold text-[15px] mb-2">
+            <div class="text-gray-500 font-semibold text-[17px] mb-2">
               可選項目
             </div>
 
@@ -454,10 +466,10 @@
                     class="bg-white/70 border border-zinc-200 rounded-[16px] p-4"
                   >
                     <div class="flex items-center justify-between">
-                      <div class="font-extrabold text-red-900 text-[16px]">
+                      <div class="font-extrabold text-red-900 text-[18px]">
                         {{ g.name }}
                       </div>
-                      <div class="text-[12px] font-semibold text-gray-600">
+                      <div class="text-[14px] font-semibold text-gray-600">
                         {{ g.required ? "必選" : "可選" }} · 最多
                         {{ g.maxSelection || 1 }} 項
                       </div>
@@ -466,7 +478,7 @@
                     <div class="mt-3 flex flex-wrap gap-2">
                       @for (it of g.items; track it.id) {
                         <span
-                          class="px-3 py-2 rounded-full bg-white border border-black/20 text-[15px] font-semibold"
+                          class="px-3 py-2 rounded-full bg-white border border-black/20 text-[17px] font-semibold"
                         >
                           {{ it.name }}
                           @if (it.extraPrice && it.extraPrice > 0) {
@@ -487,9 +499,9 @@
             }
           </div>
 
-          <!-- unusual：友善顯示 -->
+          <!-- unusual -->
           <div>
-            <div class="text-gray-500 font-semibold text-[15px] mb-2">
+            <div class="text-gray-500 font-semibold text-[17px] mb-2">
               其他資訊
             </div>
 
