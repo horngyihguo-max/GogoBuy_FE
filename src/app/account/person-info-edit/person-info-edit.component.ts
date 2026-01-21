@@ -5,7 +5,6 @@ import { FormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
 import { HttpService } from '../../@service/http.service';
 import { Router } from '@angular/router';
-import { AppComponent } from '../../app.component';
 
 @Component({
   selector: 'app-person-info-edit',
@@ -24,6 +23,9 @@ export class PersonInfoEditComponent {
     id: '',
     email: ''
   };
+
+  // 限制頭像上傳大小
+  readonly MAX_AVATAR_SIZE = 2000000;
 
   // 修改用暫存資料 -----------------------------------------------------------------
   editInfo: any | null = null;
@@ -62,23 +64,58 @@ export class PersonInfoEditComponent {
     this.expPercentage = `${(this.currentExp / this.expToNextLevel) * 100}%`; // ((餘數/多少經驗升等)*100)%
   }
 
-
-  //　TODO 限制頭像大小
   // 頭像上傳
   onAvatarUpload(event: any) {
+
+    // TypeScript 型別轉換，用來使用input.'...'屬性
+    const input = event.target as HTMLInputElement;
+
+    // 抓取第一張圖片
     const file = event.target.files[0];
-    if (file) {
-      // 上傳後的頭像暫時用 Base64 預覽
-      const reader = new FileReader();
-      reader.onload = (e: any) => (this.editInfo.avatar_url = e.target.result);
-      reader.readAsDataURL(file);
+
+    // 沒有圖片就返回
+    if (!file) return;
+
+    // 非圖片檔案，傳送提示給使用者
+    if (!file.type.startsWith('image/')) {
+      Swal.fire({
+        toast: true,
+        position: 'top',
+        icon: 'error',
+        title: `只能上傳圖片檔喔!`,
+        showConfirmButton: false,
+        timer: 2000,
+      });
+      input.value = '';
+      return;
     }
+
+    // 檔案大小超過 2MB 提示使用者更換圖片上傳
+    if (file.size > this.MAX_AVATAR_SIZE) {
+      const sizeMB = (file.size / 1024 / 1024).toFixed(2);
+      Swal.fire({
+        toast: true,
+        position: 'top',
+        icon: 'error',
+        title: `圖片太大了(${sizeMB}MB)，請上傳 2MB 以下的圖片!`,
+        showConfirmButton: false,
+        timer: 2000,
+      });
+      input.value = '';
+      return;
+    }
+
+    // 立即預覽頭像
+    const reader = new FileReader();
+    reader.onload = (e: any) => (this.editInfo.avatar_url = e.target.result);
+    reader.readAsDataURL(file);
   }
 
   // 修改用戶資料
   updateProfile() {
     console.log('當前頭像資料內容:', this.editInfo.avatar_url);
     console.log('資料長度:', this.editInfo.avatar_url?.length);
+
     // 檢查是否有變動
     if (JSON.stringify(this.editInfo) == JSON.stringify(this.auth.user)) {
       Swal.fire({
@@ -261,7 +298,7 @@ export class PersonInfoEditComponent {
 
   get isGoogleUser(): boolean {
     // 直接回傳判斷結果，若 provider 不存在則回傳 false
-    return this.editInfo?.provider === 'GOOGLE';
+    return this.editInfo?.provider == 'GOOGLE';
   }
 
   // 返回個人資訊

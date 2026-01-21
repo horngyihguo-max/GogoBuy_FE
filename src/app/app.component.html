@@ -4,23 +4,37 @@
     <div class="flex-none">
       <img routerLink="gogobuy" src="ggb3.png" class="logo cursor-pointer h-13">
     </div>
+
     <!-- 搜尋欄，@if (showSearch)讓搜尋欄只在route:gogobuy出現 -->
     <!-- TODO 可搜尋店家名稱(已連接商家，未連接開團，需要用id連接)、團長姓名(需要用nicknaem查詢[getuser反查詢id])、
       開團團名(待新建欄位)、需要作選擇器(找團、找店、找人名)
       -->
     @if (showSearch) {
     <div class="flex-1 flex justify-center disappear px-4">
-      <div class="relative flex items-center w-full md:w-96 group">
-        <i class="pi pi-search absolute left-4 text-slate-400 group-focus-within:text-red-600 transition-colors"></i>
-        <input #searchInput type="text" placeholder="搜尋店名" (keyup.enter)="onSearch(searchInput.value)"
-          class="w-full pl-11 pr-24 py-3 bg-white border-none rounded-2xl shadow-sm focus:ring-2 focus:ring-red-600/20 outline-none transition-all placeholder:text-slate-400" />
-        <button (click)="onSearch(searchInput.value)"
-          class="absolute right-2 bg-red-600 text-white px-5 py-1.5 rounded-xl text-sm font-bold hover:bg-red-700 transition-colors shadow-lg shadow-red-600/20">
+      <div class="relative flex items-center w-full md:w-[560px] group">
+
+        <!-- 搜尋類型選單 -->
+        <select class="absolute left-3 h-10 px-3 pr-8 bg-white text-slate-700 text-sm rounded-xl shadow-sm
+        border border-slate-200 outline-none focus:ring-2 focus:ring-red-600/20 appearance-none cursor-pointer"
+          [value]="searchMode()" (change)="onSearchModeChange($event)">
+          <option value="store">店家</option>
+          <option value="host">團長</option>
+          <option value="event">團名</option>
+        </select>
+        <i class="pi pi-angle-down absolute left-[60px] text-slate-400 pointer-events-none text-sm"></i>
+
+        <!-- 輸入框-->
+        <input #searchInput type="text" [placeholder]="searchPlaceholder()" (keyup.enter)="onSearch(searchInput.value)"
+          class="w-full pl-[95px] pr-24 py-3 bg-white border-none rounded-2xl shadow-sm
+               focus:ring-2 focus:ring-red-600/20 outline-none transition-all placeholder:text-slate-400" />
+        <button (click)="onSearch(searchInput.value)" class="absolute right-2 bg-red-600 text-white px-5 py-1.5 rounded-xl text-sm font-bold
+               hover:bg-red-700 transition-colors shadow-lg shadow-red-600/20">
           搜尋
         </button>
       </div>
     </div>
     }
+
 
     <nav>
       <!-- 右側功能列表 -->
@@ -70,19 +84,10 @@
 
 <!-- footer -->
 <footer>
-  <div class="footer-container">
-    <div class="footer-info">
+  <div class="footer-container footer-info">
       <h4 class="font-bold">聯繫我們</h4>
       <p class="font-bold">地址：台南市歸仁區歸仁十三路一段6號</p>
       <p class="font-bold">電話：(06) 303 2550</p>
-    </div>
-    <div class="footer-links">
-      <a class="font-bold" href="/support/privacy">隱私政策</a>
-      <a class="font-bold"> | </a>
-      <a class="font-bold" href="/support/conditions">服務條款</a>
-      <a class="font-bold"> | </a>
-      <a class="font-bold" href="/support/faq">常見問題</a>
-    </div>
   </div>
   <div class="footer-bottom">
     <a class="font-bold text-base">&copy; 2026 GogoBuy</a>

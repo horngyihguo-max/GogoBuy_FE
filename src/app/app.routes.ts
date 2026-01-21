@@ -73,7 +73,7 @@ export const routes: Routes = [
       { path: 'profile/edit', component: PersonInfoEditComponent, title: '修改個人資料', data: { breadcrumb: '修改個人資料' } },
       { path: 'orders', component: OrdersComponent, title: '我的訂單', data: { breadcrumb: '訂單紀錄' }, canActivate: [authGuard] },
       { path: 'wishes', component: WishesComponent, title: '願望清單', data: { breadcrumb: '許願池' } },
-      { path: 'notifications', component: NotificationsComponent, title: '通知中心', data: { breadcrumb: '通知' } },
+      { path: 'notifications', component: NotificationsComponent, title: '通知中心', data: { breadcrumb: '通知' }, canActivate: [authGuard] },
     ]
   },
 

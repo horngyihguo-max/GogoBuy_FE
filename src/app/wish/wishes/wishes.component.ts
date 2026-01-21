@@ -100,8 +100,8 @@ export class WishesComponent implements OnInit {
     // 先刷新用戶資料
     // this.auth.refreshUser();
     // TODO 確保有 userId（沒有就先用假資料）
-    // this.userId = this.auth.user?.id || '';
-    this.userId = this.auth.user?.id || '12b7bf42-57af-4e3f-acfc-b9a2ba3342aa';
+    this.userId = this.auth.user?.id || '';
+    // this.userId = this.auth.user?.id || '12b7bf42-57af-4e3f-acfc-b9a2ba3342aa';
 
     // 先用假資料（後端上線再換成 GET）
     this.loadWishes();

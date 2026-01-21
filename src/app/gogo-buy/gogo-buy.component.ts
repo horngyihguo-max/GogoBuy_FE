@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, computed, HostListener, signal } from '@angular/core';
 import { CarouselModule } from 'primeng/carousel';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
@@ -57,40 +57,38 @@ export class GogoBuyComponent {
   // ✅ 一進來就先指定中間那張 = 1（因為 page 預設從 0 開始，visible=3 中間就是 0+1）
   centerIndex = 1;
 
-  // 取得開團中
-  events = signal<any[]>([]);
+  // 手機板輪播修改設定
+  responsiveOptions = [
+    {
+      breakpoint: '1024px',
+      numVisible: 3,
+      numScroll: 1
+    },
+    {
+      breakpoint: '560px',
+      numVisible: 1,
+      numScroll: 1
+    }
+  ];
 
-  loadAllEvents() {
-    this.auths.getallevent().subscribe({
-      next: (res: any) => {
-        // 準備一組給開團用的假圖 (可以跟店家的不同，增加多樣性)
-        const eventDemoImages = [
-          'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800', // 烤肉
-          // 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800', // 披薩
-          // 'https://images.unsplash.com/photo-1473093226795-af9932fe5856?w=800', // 義大利麵
-        ];
+  isMobile = window.innerWidth <= 560;
 
-        const processedEvents = (res.groupbuyEvents || []).map((event: any, i: number) => ({
-          ...event,
-          // 如果沒有活動圖，就隨機給一張
-          image: event.image || eventDemoImages[i % eventDemoImages.length]
-        }));
-
-        console.log('處理後的開團資料:', processedEvents);
-        this.events.set(processedEvents);
-      },
-      error: (err: any) => console.error('抓取開團失敗', err)
-    });
+  @HostListener('window:resize')
+  onResize() {
+    this.isMobile = window.innerWidth <= 560;
   }
-  ngOnInit(): void {
-    // 1. 抓取開團中
-    this.loadAllEvents();
 
-    // 2. 如果 Service 沒資料，抓取店家
-    if (this.auths.store().length === 0) {
+  ngOnInit(): void {
+    // 全部開團
+    this.auths.loadAllEventsOnce();
+    this.auths.performEventSearch('');
+
+    // 店家
+    if (this.auths.store().length == 0) {
       this.auths.performSearch('');
     }
   }
+
 
   ngAfterViewInit() {
     // Carousel 相關的 UI 計算保留在這裡
@@ -106,6 +104,26 @@ export class GogoBuyComponent {
     const middleOffset = Math.floor(this.numVisible / 2); // 3 -> 1
     this.centerIndex = (firstIndex + middleOffset) % this.banners.length;
   }
+
+  eventCards = computed(() => {
+    const stores = this.auths.store();
+    const storeMap = new Map(stores.map(s => [s.id, s]));
+
+    return this.auths.events().map(e => {
+      const sid = Number(e.storeId ?? e.storesId);
+      const s = storeMap.get(sid);
+
+      return {
+        ...e,
+        store: s,
+        storeName: s?.name ?? e.storeName ?? '未知店家',
+        storeType: s?.type ?? '',
+        storeAddress: s?.address ?? '',
+        // 如果你想事件圖優先，沒有就用店家圖
+        displayImage: e.image || s?.image || '',
+      };
+    });
+  });
 
   // 假資料
   // stores: Stores[] = [

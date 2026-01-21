@@ -1,6 +1,6 @@
-import { Component, computed, HostListener, signal, ViewChild } from '@angular/core';
+import { Component, computed, HostListener, signal, ViewChild, inject, ElementRef } from '@angular/core';
 import { CommonModule, AsyncPipe } from '@angular/common';
-import { RouterOutlet, RouterLinkActive, RouterLink, Router } from '@angular/router';
+import { RouterOutlet, RouterLink, Router } from '@angular/router';
 import Swal from 'sweetalert2';
 import { ButtonModule } from 'primeng/button';
 import { MenuItem } from 'primeng/api';
@@ -11,9 +11,10 @@ import { AuthService } from './@service/auth.service';
 import { HttpService } from './@service/http.service';
 import { NotificationBellComponent } from './account/notification-bell/notification-bell.component';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { inject } from '@angular/core';
 
 
+// 選擇欄位
+type SearchMode = 'store' | 'host' | 'event';
 export interface User {
   id: string;
   nickname: string;
@@ -32,7 +33,6 @@ export interface User {
     MenuModule,
     CommonModule,
     NotificationBellComponent,
-    AsyncPipe
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
@@ -42,8 +42,11 @@ export class AppComponent {
   constructor(public router: Router, private http: HttpService, public auths: AuthService) {
   }
   title = 'gogobuy';
+
+
   @ViewChild('menu') mainMenu!: Menu;
   @ViewChild('problemMenu') problemMenu!: Menu;
+  @ViewChild('searchInput') searchInput!: ElementRef<HTMLInputElement>;
 
   // 1. 注入 Service (建議用 inject 寫法，比較現代)
   private auth = inject(AuthService);
@@ -68,142 +71,194 @@ export class AppComponent {
 
   // 4. ngOnInit 現在不需要處理頭像邏輯了
 
-  onSearch(name: string) {
-    // 呼叫 Service 的方法
-    this.auths.performSearch(name);
-  }
-
   ngOnInit(): void {
     // 初始載入
     this.auths.performSearch('');
   }
 
+  searchMode = signal<SearchMode>('store');
 
-// 預設頭像
-// userAvatar: string | null = null;
-// ngOnInit() {
-//   this.auth.user$.subscribe(user => {
-//     console.log('導覽列收到使用者狀態更新:', user);
+  onSearchModeChange(event: Event) {
+    const select = event.target as HTMLSelectElement;
+    this.searchMode.set(select.value as SearchMode);
+    this.resetSearch();
+  }
+  private resetSearch() {
+    // 清空 input
+    if (this.searchInput?.nativeElement) {
+      this.searchInput.nativeElement.value = '';
+    }
 
-//     if (user) {
-//       this.userAvatar = user.user_avatar_url || user.avatar_url || user.avatarUrl;
-//       if (!this.userAvatar) {
-//         this.userAvatar = '/Snoopy.jpg';
-//       }
-//     } else {
-//       this.userAvatar = null;
-//     }
-//   });
-//   // this.auth.refreshUser();
-// }
+    // 重置結果
+    this.auths.performSearch('');        // 全部店家
+    this.auths.loadAllEventsOnce();      // 全部開團 (同時塞 eventsAll/events)
+  }
 
-// ngAfterViewInit() {
-//   // 在這裡主動判斷資料是否有變更 (判斷 Angular 所無法判斷的部分)
-//   if (!this.userAvatar || '/Snoopy.jpg' == this.userAvatar || 'assets/default-avatar.png' == this.userAvatar) {
-//     this.auth.user$.subscribe(user => {
+  searchPlaceholder = computed(() => {
+    switch (this.searchMode()) {
+      case 'store': return '輸入店家名稱...';
+      case 'host': return '輸入團長暱稱...';
+      case 'event': return '輸入團名...';
+      default: return '搜尋...';
+    }
+  });
 
-//       if (user) {
-//         const newUserAvatar = user.user_avatar_url || user.avatar_url || user.avatarUrl || 'Snoopy.jpg';
-//         if (this.userAvatar != newUserAvatar) {
-//           this.userAvatar = newUserAvatar;
-//         }
-//       } else {
-//         this.userAvatar = null;
-//       }
-//     });
-//   }
-// }
+  onSearch(keyword: string) {
+    const q = keyword.trim();
+    const mode = this.searchMode();
 
-// 用戶頭向下拉選單
-items: MenuItem[] = [
-  { label: '用戶首頁', icon: 'pi pi-user', routerLink: '/user/profile' },
-  { label: '我的訂單', icon: 'pi pi-receipt', routerLink: '/user/orders' },
-  { label: '許願池', icon: 'pi pi-sparkles', routerLink: '/user/wishes' },
-  { label: '登入', icon: 'pi pi-sign-in', routerLink: '/gogobuy/login' },
-  { label: '登出', icon: 'pi pi-sign-out', command: () => { this.logout(); } }
-];
+    // 空白搜尋：全部店家 + 全部開團
+    if (!q) {
+      this.auths.performSearch('');
+      this.auths.performEventSearch('');
+      return;
+    }
 
-// 手機端常見問題選單
-problems: MenuItem[] = [
-  { label: '隱私政策', icon: 'pi pi-shield', routerLink: '/support/privacy' },
-  { label: '服務條款', icon: 'pi pi-book', routerLink: '/support/conditions' },
-  { label: '常見問題', icon: 'pi pi-headphones', routerLink: '/support/faq' },
-];
+    // 店家搜尋
+    if (mode == 'store') {
+      this.auths.performSearch(q);
+      this.auths.performEventSearch('');
+      return;
+    }
+
+    // 團長搜尋
+    if (mode == 'host') {
+      this.auths.performEventSearch(q);
+      return;
+    }
+
+    // 團名搜尋
+    if (mode == 'event') {
+      this.auths.filterEventsByName(q);
+      return;
+    }
+  }
+
+  // 預設頭像
+  // userAvatar: string | null = null;
+  // ngOnInit() {
+  //   this.auth.user$.subscribe(user => {
+  //     console.log('導覽列收到使用者狀態更新:', user);
+
+  //     if (user) {
+  //       this.userAvatar = user.user_avatar_url || user.avatar_url || user.avatarUrl;
+  //       if (!this.userAvatar) {
+  //         this.userAvatar = '/Snoopy.jpg';
+  //       }
+  //     } else {
+  //       this.userAvatar = null;
+  //     }
+  //   });
+  //   // this.auth.refreshUser();
+  // }
+
+  // ngAfterViewInit() {
+  //   // 在這裡主動判斷資料是否有變更 (判斷 Angular 所無法判斷的部分)
+  //   if (!this.userAvatar || '/Snoopy.jpg' == this.userAvatar || 'assets/default-avatar.png' == this.userAvatar) {
+  //     this.auth.user$.subscribe(user => {
+
+  //       if (user) {
+  //         const newUserAvatar = user.user_avatar_url || user.avatar_url || user.avatarUrl || 'Snoopy.jpg';
+  //         if (this.userAvatar != newUserAvatar) {
+  //           this.userAvatar = newUserAvatar;
+  //         }
+  //       } else {
+  //         this.userAvatar = null;
+  //       }
+  //     });
+  //   }
+  // }
+
+  // 用戶頭向下拉選單
+  items: MenuItem[] = [
+    { label: '用戶首頁', icon: 'pi pi-user', routerLink: '/user/profile' },
+    { label: '我的訂單', icon: 'pi pi-receipt', routerLink: '/user/orders' },
+    { label: '許願池', icon: 'pi pi-sparkles', routerLink: '/user/wishes' },
+    { label: '登入', icon: 'pi pi-sign-in', routerLink: '/gogobuy/login' },
+    { label: '登出', icon: 'pi pi-sign-out', command: () => { this.logout(); } }
+  ];
+
+  // 手機端常見問題選單
+  problems: MenuItem[] = [
+    { label: '隱私政策', icon: 'pi pi-shield', routerLink: '/support/privacy' },
+    { label: '服務條款', icon: 'pi pi-book', routerLink: '/support/conditions' },
+    { label: '常見問題', icon: 'pi pi-headphones', routerLink: '/support/faq' },
+  ];
 
   // 判斷是否在/gogobuy/home路徑
   get showSearch(): boolean {
-  return this.router.url.startsWith('/gogobuy/home');
-}
+    return this.router.url.startsWith('/gogobuy/home');
+  }
 
-@HostListener('window:scroll', [])
-onWindowScroll() {
-  if (this.mainMenu?.visible) {
-    this.mainMenu.hide();
+  @HostListener('window:scroll', [])
+  onWindowScroll() {
+    if (this.mainMenu?.visible) {
+      this.mainMenu.hide();
+    }
+    if (this.problemMenu?.visible) {
+      this.problemMenu.hide();
+    }
   }
-  if (this.problemMenu?.visible) {
-    this.problemMenu.hide();
-  }
-}
 
-onUserClick(event: any, menu: any) {
-  const items = this.filteredItems;
-  if (items && items.length > 0) {
-    menu.toggle(event);
-  } else {
-    console.log('選單內容為空');
+  onUserClick(event: any, menu: any) {
+    const items = this.filteredItems;
+    if (items && items.length > 0) {
+      menu.toggle(event);
+    } else {
+      console.log('選單內容為空');
+    }
   }
-}
 
   // 判斷是否已登入
   get isLoggedIn(): boolean {
-  return !!localStorage.getItem('user_id');
-}
+    return !!localStorage.getItem('user_id');
+  }
 
   get isMobile(): boolean {
-  return window.innerWidth <= 768;
-}
+    return window.innerWidth <= 768;
+  }
 
   // 使用session判斷選單出現列表
   get filteredItems() {
-  const loggedIn = this.isLoggedIn;
-  const mobile = this.isMobile;
-  return this.items.filter(item => {
-    // 如果偵測到session顯示登出
-    if (item.label == '登出') {
-      return loggedIn;
-    }
+    const loggedIn = this.isLoggedIn;
+    const mobile = this.isMobile;
+    return this.items.filter(item => {
+      // 如果偵測到session顯示登出
+      if (item.label == '登出') {
+        return loggedIn;
+      }
 
-    // 如果沒有偵測到session顯示登入
-    if (item.label == '登入') {
-      return !loggedIn;
-    }
+      // 如果沒有偵測到session顯示登入
+      if (item.label == '登入') {
+        return !loggedIn;
+      }
 
-    if (loggedIn && mobile) {
-      return false;
-    }
+      if (loggedIn && mobile) {
+        return false;
+      }
 
-    if (!loggedIn && mobile) {
-      return false;
-    }
+      if (!loggedIn && mobile) {
+        return false;
+      }
 
-    return true;
-  });
-}
+      return true;
+    });
+  }
 
-//登出清除session
-logout() {
-  this.auth.logout();
-  // 清除前端紀錄
-  localStorage.clear();
-  // 回到首頁
-  this.router.navigate(['/gogobuy']);
-  Swal.fire({
-    title: '已登出',
-    icon: 'success',
-    showConfirmButton: false,
-    timer: 1000
-  });
-};
+  //登出清除session
+  logout() {
+    this.auth.logout();
+    // 清除前端紀錄
+    localStorage.clear();
+    // 回到首頁
+    this.router.navigate(['/gogobuy']);
+    Swal.fire({
+      title: '已登出',
+      icon: 'success',
+      showConfirmButton: false,
+      timer: 1000
+    });
+  };
 
 }
 

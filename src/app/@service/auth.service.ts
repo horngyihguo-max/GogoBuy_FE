@@ -1,10 +1,11 @@
-import { Subscription } from 'rxjs/internal/Subscription';
 import { Injectable, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { tap } from 'rxjs/internal/operators/tap';
 import Swal from 'sweetalert2';
 import { HttpService } from './http.service';
 import { BehaviorSubject } from 'rxjs';
+
+
 
 @Injectable({
   providedIn: 'root',
@@ -22,6 +23,51 @@ export class AuthService {
   private userSubject = new BehaviorSubject<any>(this.getUserFromStorage());
   user$ = this.userSubject.asObservable();
 
+  private eventDemoImages = [
+    'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800',
+    'https://images.unsplash.com/photo-1544148103-0773bf10d330?w=800',
+  ];
+
+  private normalizeEvents(res: any) {
+    const raw = Array.isArray(res)
+      ? res
+      : (res.groupsSearchViewList ??
+        res.groupbuyEvents ??
+        res.eventList ??
+        res.events ??
+        res.data?.groupbuyEvents ??
+        []);
+
+    return (raw || []).map((e: any, i: number) => ({
+      ...e,
+      id: e.id ?? e.eventId,
+      storeId: e.storesId ?? e.storeId,
+      status: e.status ?? e.eventStatus,
+      type: e.type ?? e.eventType,
+      eventName: e.eventName ?? '',
+      announcement: e.announcement ?? '',
+      recommendDescription: e.recommendDescription ?? '',
+      image: e.image || this.eventDemoImages[i % this.eventDemoImages.length],
+    }));
+  }
+
+  private fetchEvents(apiCall: any, saveAll = false) {
+    apiCall.subscribe({
+      next: (res: any) => {
+        const list = this.normalizeEvents(res);
+        this.events.set(list);
+        if (saveAll) this.eventsAll.set(list);
+        console.log('events 更新後:', this.events());
+      },
+      error: (err: any) => {
+        console.error('抓取開團失敗', err);
+        this.events.set([]);
+        if (saveAll) this.eventsAll.set([]);
+      }
+    });
+  }
+
+
   private getUserFromStorage() {
     const saved = localStorage.getItem('user_info');
     return saved ? JSON.parse(saved) : null;
@@ -33,9 +79,6 @@ export class AuthService {
       ...user,
       user_avatar_url: user.user_avatar_url || user.avatar_url || user.avatarUrl
     };
-    console.log(user.user_avatar_url)
-    console.log(user.avatar_url)
-    console.log(user.avatarUrl)
     this.user = formattedUser;
     localStorage.setItem('user_info', JSON.stringify(formattedUser));
     this.userSubject.next(formattedUser);
@@ -137,14 +180,12 @@ export class AuthService {
 
   // 註冊API
   register(payload: any) {
-    // TEST =========================================
     this.https
       .postApi('http://localhost:8080/gogobuy/user/registration', payload)
       .subscribe({
         next: (res: any) => {
           if (res.code === 200) {
             localStorage.setItem('user_session', payload.email);
-            const returnUrl = '/gogobuy/login';
             Swal.fire({
               title: '註冊成功!<br>請返回登入頁面登入',
               icon: 'success',
@@ -271,6 +312,9 @@ export class AuthService {
 
   // 全域可用(因為要從AppComponent輸入，GogoBuyComponent更新資訊)
   store = signal<{ id: number; name: string; type: string; address: string; image: string; }[]>([]);
+  eventsAll = signal<any[]>([]);
+  events = signal<any[]>([]);
+
 
   performSearch(name: string) {
     const searchName = name.trim();
@@ -293,11 +337,54 @@ export class AuthService {
         }));
         // 更新 Service 裡的 Signal
         this.store.set(processedList);
+        if (!searchName) {
+          this.events.set(this.eventsAll()); // 回到全部
+        } else {
+          this.filterEventsByStoreIds(processedList.map((s: { id: any; }) => s.id));
+        }
+        if (processedList.length == 0) {
+          this.events.set([]);
+          return;
+        }
+        this.filterEventsByStoreIds(processedList.map((s: { id: any; }) => s.id));
         console.log('API 資料已成功存入 Signal:', this.store());
       },
       error: (err: any) => console.error('API 錯誤:', err)
     });
   }
+
+  performEventSearch(hostNickname: string) {
+    const q = hostNickname.trim();
+    const apiCall = q ? this.getGroupbuyEventByName(q) : this.getallevent();
+    this.fetchEvents(apiCall, !q);
+  }
+
+  // 依店家 id 篩開團
+  filterEventsByStoreIds(storeIds: number[]) {
+    const idSet = new Set(storeIds.map(Number));
+    const base = this.eventsAll();
+
+    this.events.set(
+      base.filter(e => idSet.has(Number(e.storeId ?? e.storesId ?? e.storeId)))
+    );
+  }
+
+  // 只需要在首頁一開始呼叫一次
+  loadAllEventsOnce() {
+    this.fetchEvents(this.getallevent(), true);
+  }
+
+  // 團名搜尋：只 filter
+  filterEventsByName(keyword: string) {
+    const q = keyword.trim().toLowerCase();
+    const base = this.eventsAll();
+
+    this.events.set(!q
+      ? base
+      : base.filter(e => (e.eventName || '').toLowerCase().includes(q))
+    );
+  }
+
 
   // 取得全部店家
   getallstore() {
@@ -310,9 +397,18 @@ export class AuthService {
     return this.https.getApi(`http://localhost:8080/gogobuy/store/searchName?name=${encodedName}`);
   }
 
-  //查詢全部開團
+  // 查詢開團者暱稱搜尋團
+  getGroupbuyEventByName(hostNickname: string) {
+    const encoded = encodeURIComponent(hostNickname);
+    return this.https.getApi(
+      `http://localhost:8080/gogobuy/getGroupbuyEventByStoresName?host_nickname=${encoded}`
+    );
+  }
+
+  // 查詢全部開團
   getallevent() {
     return this.https.getApi(`http://localhost:8080/gogobuy/getAll`);
   }
+
 
 }

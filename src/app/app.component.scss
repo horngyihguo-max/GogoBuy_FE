@@ -134,6 +134,8 @@ footer {
 }
 
 .footer-bottom {
+  display: flex;
+  justify-content: center;
   text-align: center;
   margin-top: 10px;
   padding-top: 20px;
