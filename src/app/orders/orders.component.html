@@ -44,7 +44,7 @@
             <div class="sub text-base text-slate-700">{{ o.createdAt | date:'yyyy/MM/dd HH:mm' }}</div>
 
             <!-- 狀態標籤：顏色由 getStatusSeverity() 控制 -->
-            <p-tag [value]="o.statusLabel" [severity]="getStatusSeverity(o.statusLabel)" />
+            <p-tag class="break-keep! mr-2" [value]="o.statusLabel" [severity]="getStatusSeverity(o.statusLabel)" />
           </div>
         </div>
       </p-accordion-header>
