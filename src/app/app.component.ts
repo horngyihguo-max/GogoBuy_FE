@@ -43,9 +43,11 @@ export class AppComponent {
   }
   title = 'gogobuy';
 
-
+  // 即時監測pmenu
   @ViewChild('menu') mainMenu!: Menu;
   @ViewChild('problemMenu') problemMenu!: Menu;
+
+  // 即時監測搜尋欄位
   @ViewChild('searchInput') searchInput!: ElementRef<HTMLInputElement>;
 
   // 1. 注入 Service (建議用 inject 寫法，比較現代)
@@ -74,15 +76,18 @@ export class AppComponent {
   ngOnInit(): void {
     // 初始載入
     this.auths.performSearch('');
+    this.auths.loadAllEventsOnce();
   }
 
+  // 切換搜尋模式
   searchMode = signal<SearchMode>('store');
-
   onSearchModeChange(event: Event) {
     const select = event.target as HTMLSelectElement;
     this.searchMode.set(select.value as SearchMode);
     this.resetSearch();
   }
+
+  // 切換搜尋類型時清空輸入(回到「全部店家 / 全部開團」狀態)，避免不同模式結果混在一起
   private resetSearch() {
     // 清空 input
     if (this.searchInput?.nativeElement) {
@@ -91,7 +96,7 @@ export class AppComponent {
 
     // 重置結果
     this.auths.performSearch('');        // 全部店家
-    this.auths.loadAllEventsOnce();      // 全部開團 (同時塞 eventsAll/events)
+    this.auths.events.set(this.auths.eventsAll());
   }
 
   searchPlaceholder = computed(() => {
@@ -103,6 +108,7 @@ export class AppComponent {
     }
   });
 
+  // 搜尋
   onSearch(keyword: string) {
     const q = keyword.trim();
     const mode = this.searchMode();
@@ -110,24 +116,27 @@ export class AppComponent {
     // 空白搜尋：全部店家 + 全部開團
     if (!q) {
       this.auths.performSearch('');
-      this.auths.performEventSearch('');
+      this.auths.events.set(this.auths.eventsAll());
       return;
     }
 
     // 店家搜尋
     if (mode == 'store') {
       this.auths.performSearch(q);
-      this.auths.performEventSearch('');
       return;
     }
 
-    // 團長搜尋
+    // 團長搜尋用使用API
     if (mode == 'host') {
-      this.auths.performEventSearch(q);
+      const qq = q.toLowerCase();
+      const base = this.auths.eventsAll();
+      this.auths.events.set(
+        base.filter(e => (e.hostNickname ?? '').toLowerCase().includes(qq))
+      );
       return;
     }
 
-    // 團名搜尋
+    // 團名搜尋用 eventsAll 在前端 filter（不用 API
     if (mode == 'event') {
       this.auths.filterEventsByName(q);
       return;
@@ -185,11 +194,12 @@ export class AppComponent {
     { label: '常見問題', icon: 'pi pi-headphones', routerLink: '/support/faq' },
   ];
 
-  // 判斷是否在/gogobuy/home路徑
+  // startsWith：讓 /gogobuy/home 及其子路由都顯示搜尋欄
   get showSearch(): boolean {
     return this.router.url.startsWith('/gogobuy/home');
   }
 
+  // 滾動時收起 PrimeNG Menu，避免遮擋內容與定位錯亂
   @HostListener('window:scroll', [])
   onWindowScroll() {
     if (this.mainMenu?.visible) {
@@ -214,11 +224,14 @@ export class AppComponent {
     return !!localStorage.getItem('user_id');
   }
 
+  // 判斷是否為手機
   get isMobile(): boolean {
     return window.innerWidth <= 768;
   }
 
   // 使用session判斷選單出現列表
+  // 手機版：只顯示登入/登出(排除個人資訊、訂單)
+  // 桌機版：依登入狀態顯示登入或登出
   get filteredItems() {
     const loggedIn = this.isLoggedIn;
     const mobile = this.isMobile;

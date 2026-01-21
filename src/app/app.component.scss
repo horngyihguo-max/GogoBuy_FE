@@ -54,6 +54,7 @@ nav img:hover {
   transition: all 0.5s;
 }
 
+/* 手機搜尋欄桌機隱藏，小於768px 才顯示（搭配 .disappear 隱藏桌機搜尋） */
 .search-mobile {
   display: none;
 }
@@ -99,7 +100,7 @@ main {
   }
 
   to {
-    transform: translateX(-100%);
+    transform: translateX(-25vw);
   }
 }
 
@@ -155,7 +156,7 @@ footer {
   display: none
 }
 
-/*problems*/
+/* 問號浮動按鈕 + tooltip */
 .question {
   display: block;
   position: fixed;
@@ -253,10 +254,6 @@ footer {
     max-width: 100%;
   }
 
-  nav {
-    width: 30%;
-  }
-
   nav ul {
     justify-content: flex-end;
   }
@@ -285,6 +282,7 @@ footer {
     box-sizing: border-box;
   }
 
+  /* 手機固定 footer 高度 69px：main 需 padding-bottom 避免內容被遮住 */
   main {
     padding-bottom: 69px;
   }

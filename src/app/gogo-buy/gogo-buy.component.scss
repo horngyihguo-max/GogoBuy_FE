@@ -1,8 +1,11 @@
+/* banner-mask：預設有遮罩，做淡入淡出動畫 */
 .banner-mask {
   opacity: 1;
   transition: opacity 0.4s ease-in-out;
 }
 
+
+/* 覆蓋 PrimeNG Carousel 需要 ::ng-deep），讓「中間那張」的遮罩透明 */
 :host ::ng-deep .p-carousel-item.p-carousel-item-active+.p-carousel-item.p-carousel-item-active .banner-mask {
   opacity: 0;
 }
@@ -15,6 +18,7 @@
   opacity: 0;
 }
 
+/* banner 尺寸維持比例，並限制最大高度（避免過高） */
 .banner {
   position: relative;
   width: 100%;
@@ -43,11 +47,6 @@
   border-radius: 12px;
   font-size: 1rem;
 }
-
-// .ng-star-inserted:hover {
-//   cursor: pointer;
-//   transform: scale(1.01);
-// }
 
 @media (max-width: 768px) {
   .banner-title {

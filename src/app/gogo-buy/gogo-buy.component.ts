@@ -52,9 +52,11 @@ export interface Banner {
 export class GogoBuyComponent {
   constructor(private https: HttpService, public auths: AuthService) {
   }
+
+  // 計算遮罩用
   numVisible = 3;
 
-  // ✅ 一進來就先指定中間那張 = 1（因為 page 預設從 0 開始，visible=3 中間就是 0+1）
+  // 一進來就先指定中間那張 = 1（因為 page 預設從 0 開始，visible=3 中間就是 0+1）
   centerIndex = 1;
 
   // 手機板輪播修改設定
@@ -81,7 +83,7 @@ export class GogoBuyComponent {
   ngOnInit(): void {
     // 全部開團
     this.auths.loadAllEventsOnce();
-    this.auths.performEventSearch('');
+    // this.auths.performEventSearch('');
 
     // 店家
     if (this.auths.store().length == 0) {
@@ -89,12 +91,12 @@ export class GogoBuyComponent {
     }
   }
 
-
+  // Carousel 初始後，設定中心卡片
   ngAfterViewInit() {
-    // Carousel 相關的 UI 計算保留在這裡
     this.updateCenterIndex(0);
   }
 
+  // event.page 是頁數d
   onCarouselPage(event: any) {
     // event.page = 當前「第一張」的 index  :contentReference[oaicite:1]{index=1}
     this.updateCenterIndex(event.page);
@@ -105,6 +107,8 @@ export class GogoBuyComponent {
     this.centerIndex = (firstIndex + middleOffset) % this.banners.length;
   }
 
+  // eventCards：把 events 依 storeId join 到 store 清單，補上 storeName/type/address + displayImage fallback
+  // 注意：store 尚未載入時，storeName 會 fallback（避免 undefined）
   eventCards = computed(() => {
     const stores = this.auths.store();
     const storeMap = new Map(stores.map(s => [s.id, s]));
@@ -119,7 +123,6 @@ export class GogoBuyComponent {
         storeName: s?.name ?? e.storeName ?? '未知店家',
         storeType: s?.type ?? '',
         storeAddress: s?.address ?? '',
-        // 如果你想事件圖優先，沒有就用店家圖
         displayImage: e.image || s?.image || '',
       };
     });

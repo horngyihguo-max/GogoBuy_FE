@@ -5,18 +5,20 @@
       <img routerLink="gogobuy" src="ggb3.png" class="logo cursor-pointer h-13">
     </div>
 
-    <!-- 搜尋欄，@if (showSearch)讓搜尋欄只在route:gogobuy出現 -->
-    <!-- TODO 可搜尋店家名稱(已連接商家，未連接開團，需要用id連接)、團長姓名(需要用nicknaem查詢[getuser反查詢id])、
-      開團團名(待新建欄位)、需要作選擇器(找團、找店、找人名)
-      -->
+    <!-- 搜尋欄，@if (showSearch)讓搜尋欄只在 /gogobuy/home 出現 -->
     @if (showSearch) {
+
+    <!-- disappear桌機顯示/手機隱藏），避免跟 search-mobile 重複 -->
     <div class="flex-1 flex justify-center disappear px-4">
       <div class="relative flex items-center w-full md:w-[560px] group">
 
         <!-- 搜尋類型選單 -->
+        <!-- select 絕對定位在 input 上方，所以 input 需要 pl-[95px] 預留左側空間 -->
         <select class="absolute left-3 h-10 px-3 pr-8 bg-white text-slate-700 text-sm rounded-xl shadow-sm
         border border-slate-200 outline-none focus:ring-2 focus:ring-red-600/20 appearance-none cursor-pointer"
           [value]="searchMode()" (change)="onSearchModeChange($event)">
+
+          <!-- 切換搜尋類型時會清空輸入並重置列表（onSearchModeChange 內處理） -->
           <option value="store">店家</option>
           <option value="host">團長</option>
           <option value="event">團名</option>
@@ -47,7 +49,9 @@
         <li>
           <i class="pi pi-user cursor-pointer" style=" color: rgb(255, 255, 255); font-size: 1.5rem"
             (click)="menu.toggle($event)"></i>
-          <p-menu #menu [popup]="true" [model]="items" [model]="filteredItems" appendTo="body"></p-menu>
+
+          <!-- appendTo="body" 避免 menu 被 header/overflow 裁切 -->
+          <p-menu #menu [popup]="true" [model]="filteredItems" appendTo="body"></p-menu>
         </li>
       </ul>
     </nav>
@@ -78,16 +82,16 @@
 
 
 <!-- main(顯示頁面，其他網頁主要修改) -->
-<main [class.main--with-mobile-search]="showSearch">
+<main >
   <router-outlet></router-outlet>
 </main>
 
 <!-- footer -->
 <footer>
   <div class="footer-container footer-info">
-      <h4 class="font-bold">聯繫我們</h4>
-      <p class="font-bold">地址：台南市歸仁區歸仁十三路一段6號</p>
-      <p class="font-bold">電話：(06) 303 2550</p>
+    <h4 class="font-bold">聯繫我們</h4>
+    <p class="font-bold">地址：台南市歸仁區歸仁十三路一段6號</p>
+    <p class="font-bold">電話：(06) 303 2550</p>
   </div>
   <div class="footer-bottom">
     <a class="font-bold text-base">&copy; 2026 GogoBuy</a>
@@ -102,7 +106,7 @@
 </button>
 <p-menu #problemMenu [popup]="true" [model]="problems"></p-menu>
 
-<!-- 手機板footer -->
+<!-- 手機 footer 依 router.url 判斷目前頁籤並高亮 -->
 <div class="footer-mobile">
   <!-- 首頁 -->
   <a routerLink="gogobuy/home">
