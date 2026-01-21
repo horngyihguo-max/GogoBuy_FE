@@ -187,7 +187,7 @@
                 <div class="mt-3">
                   <div
                     class="text-[22px] font-black text-red-950 truncate"
-                    [attr.title]="wish.title"
+                    pTooltip="{{ wish.title }}"
                   >
                     {{ wish.title }}
                   </div>
@@ -212,7 +212,7 @@
                   >
                     <div class="flex items-center gap-2">
                       <i class="pi pi-map-marker text-red-900"></i>
-                      <span class="truncate" [attr.title]="wish.location">{{
+                      <span class="truncate" pTooltip="{{ wish.location }}">{{
                         wish.location
                       }}</span>
                     </div>

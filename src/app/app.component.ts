@@ -206,12 +206,12 @@ export class AppComponent {
     { label: '登出', icon: 'pi pi-sign-out', command: () => { this.logout(); } }
   ];
 
-  // 手機端常見問題選單
-  problems: MenuItem[] = [
-    { label: '隱私政策', icon: 'pi pi-shield', routerLink: '/support/privacy' },
-    { label: '服務條款', icon: 'pi pi-book', routerLink: '/support/conditions' },
-    { label: '常見問題', icon: 'pi pi-headphones', routerLink: '/support/faq' },
-  ];
+    // 手機端常見問題選單
+    problems: MenuItem[] = [
+      { label: '隱私政策', icon: 'pi pi-shield', routerLink: '/support/privacy' },
+      { label: '服務條款', icon: 'pi pi-book', routerLink: '/support/conditions' },
+      { label: '常見問題', icon: 'pi pi-headphones', routerLink: '/support/faq' },
+    ];
 
   // startsWith：讓 /gogobuy/home 及其子路由都顯示搜尋欄
   get showSearch(): boolean {
@@ -261,22 +261,22 @@ export class AppComponent {
         return loggedIn;
       }
 
-      // 如果沒有偵測到session顯示登入
-      if (item.label == '登入') {
-        return !loggedIn;
-      }
+    // 如果沒有偵測到session顯示登入
+    if (item.label == '登入') {
+      return !loggedIn;
+    }
 
-      if (loggedIn && mobile) {
-        return false;
-      }
+        if (loggedIn && mobile) {
+          return false;
+        }
 
-      if (!loggedIn && mobile) {
-        return false;
-      }
+        if (!loggedIn && mobile) {
+          return false;
+        }
 
-      return true;
-    });
-  }
+        return true;
+      });
+    }
 
   //登出清除session
   logout() {
@@ -294,5 +294,3 @@ export class AppComponent {
   };
 
 }
-
-
