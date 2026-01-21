@@ -63,7 +63,6 @@
       </h3>
 
       <form #profileForm="ngForm" (ngSubmit)="updateProfile()" class="flex flex-col md:grid-cols-2 gap-x-8 gap-y-6">
-        <!-- 因後端OTP認證，要單獨一個EMAIL修改頁面 -->
         <div class="space-y-1">
           <label class="block text-[18px] font-bold text-slate-500 uppercase tracking-widest">信箱 / E-mail</label>
           <input type="email" name="email" [(ngModel)]="editInfo.email" placeholder="ex: test123@gmail.com"

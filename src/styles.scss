@@ -6,8 +6,7 @@ html,
 body {
   padding-right: var(--scrollbar-offset, 0px) !important;
   margin-right: 0 !important;
-  overflow: auto !important;
-  /* 或是根據你的需求設為 hidden */
+    /* 或是根據你的需求設為 hidden */
 }
 
 :root {
@@ -45,11 +44,9 @@ body {
 
 ::-webkit-scrollbar-thumb {
   /* 使用品牌色到懸停色的漸層 */
-  background: linear-gradient(
-    180deg,
-    var(--brand-primary) 0%,
-    var(--brand-primary-hover) 100%
-  );
+  background: linear-gradient(180deg,
+      var(--brand-primary) 0%,
+      var(--brand-primary-hover) 100%);
   border-radius: 10px;
   /* 增加邊界讓滑塊看起來像浮在軌道中央 */
   border: 3px solid var(--bg-section);

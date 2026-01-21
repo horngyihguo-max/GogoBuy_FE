@@ -172,6 +172,7 @@ export class AuthService {
           title: `已登出!`,
           showConfirmButton: false,
           timer: 2000,
+          timerProgressBar: true,
         });
         // 回到首頁
         this.router.navigate(['/gogobuy']);

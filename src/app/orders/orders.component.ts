@@ -1,4 +1,4 @@
-//佔位用訂單，沒有實際作用
+//佔位用訂單，沒有實際作用(未來接訂單API要重寫，因為欄位是假的)
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TabsModule } from 'primeng/tabs';
@@ -6,8 +6,10 @@ import { AccordionModule } from 'primeng/accordion';
 import { TagModule } from 'primeng/tag';
 import { ButtonModule } from 'primeng/button';
 
+/* PrimeNG <p-tag> 支援的 severity 類型 */
 type TagSeverity = 'info' | 'success' | 'warn' | 'danger' | 'primary' | 'contrast';
 
+/* 假資料格式 */
 type OrderItem = {
   name: string;
   qty: number;
@@ -15,6 +17,7 @@ type OrderItem = {
   note?: string;
 };
 
+/* 假資料格式 */
 type Order = {
   code: string;
   storeName: string;
@@ -40,6 +43,7 @@ type Order = {
   styleUrl: './orders.component.scss'
 })
 
+/* 假資料 */
 export class OrdersComponent {
   activeOrders: Order[] = [
     {
@@ -74,20 +78,7 @@ export class OrdersComponent {
   activeOpenValues: string[] = [];
   historyOpenValues: string[] = [];
 
-  expandAllActive() {
-    this.activeOpenValues = this.activeOrders.map(o => o.code);
-  }
-  collapseAllActive() {
-    this.activeOpenValues = [];
-  }
-
-  expandAllHistory() {
-    this.historyOpenValues = this.historyOrders.map(o => o.code);
-  }
-  collapseAllHistory() {
-    this.historyOpenValues = [];
-  }
-
+  /* 用來控制狀態標籤的顏色 */
   getStatusSeverity(status: string): 'info' | 'success' | 'danger' | 'warn' | undefined {
     const statusMap: Record<string, 'info' | 'success' | 'danger' | 'warn'> = {
       '進行中': 'info',

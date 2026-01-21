@@ -1,13 +1,20 @@
 <body class="bg-slate-50 text-slate-800 antialiased h-svh">
+  <!-- 訂單 -->
+
   <div class="max-w-4xl mx-auto py-12 px-6 lg:py-20">
     <p-tabs value="active">
+
+      <!-- 訂單分頁名稱 -->
       <p-tablist>
         <p-tab value="active">進行中訂單</p-tab>
         <p-tab value="history">歷史訂單</p-tab>
       </p-tablist>
 
+      <!-- 切換到該value，顯示對應畫面 -->
       <p-tabpanels>
         <p-tabpanel value="active">
+
+          <!-- orderList 是訂單共用模板，$implicit代表 orders ， openValues 用來控制展開狀態 -->
           <ng-container
             *ngTemplateOutlet="orderList; context: { $implicit: activeOrders, openValues: activeOpenValues }"></ng-container>
         </p-tabpanel>
@@ -21,6 +28,7 @@
   </div>
 </body>
 
+<!--  -->
 <ng-template #orderList let-orders let-openValues="openValues">
   <p-accordion [value]="openValues" [multiple]="true">
     @for (o of orders; track o.code) {
@@ -28,32 +36,45 @@
       <p-accordion-header>
         <div class="order-header flex justify-between items-center w-full">
           <div class="flex flex-row gap-6 items-center">
+
+            <!-- 訂單編號 + 店家名稱 -->
             <div class="title font-bold">#{{ o.code }}｜{{ o.storeName }}</div>
+
+            <!-- 建立時間 -->
             <div class="sub text-base text-slate-700">{{ o.createdAt | date:'yyyy/MM/dd HH:mm' }}</div>
+
+            <!-- 狀態標籤：顏色由 getStatusSeverity() 控制 -->
             <p-tag [value]="o.statusLabel" [severity]="getStatusSeverity(o.statusLabel)" />
           </div>
         </div>
       </p-accordion-header>
 
+      <!-- 顯示訂單詳細內容 -->
       <p-accordion-content>
         <div class="order-body space-y-4">
+
+          <!-- 收件資訊 -->
           <div class="grid grid-cols-2 gap-4 border-b pb-2">
             <div class="font-bold text-base">收件人：{{ o.receiverName }}</div>
             <div class="font-bold text-base">電話：{{ o.phone }}</div>
           </div>
 
+          <!-- 訂單品項 -->
           <div class="items space-y-2">
             @for (it of o.items; track $index) {
             <div class="item">
               <div class="font-medium font-bold">{{ it.name }}</div>
               <div class="text-base font-bold text-slate-600">
                 x{{ it.qty }}｜{{ it.price }} 元
+
+                <!-- 只有有備註才顯示 -->
                 @if (it.note) { <span class="text-orange-500">｜備註：{{ it.note }}</span> }
               </div>
             </div>
             }
           </div>
 
+          <!-- 金額總計 -->
           <div class="total text-right font-bold text-lg border-t pt-2">
             總計：{{ o.total }} 元
           </div>
@@ -61,6 +82,8 @@
       </p-accordion-content>
     </p-accordion-panel>
     } @empty {
+
+    <!-- 當 orders 為空時顯示 -->
     <div class="p-8 text-center font-bold text-lgtext-slate-700">目前沒有訂單</div>
     }
   </p-accordion>

@@ -8,7 +8,7 @@
     <!-- 搜尋欄，@if (showSearch)讓搜尋欄只在 /gogobuy/home 出現 -->
     @if (showSearch) {
 
-    <!-- disappear桌機顯示/手機隱藏），避免跟 search-mobile 重複 -->
+    <!-- disappear桌機顯示/手機隱藏 -->
     <div class="flex-1 flex justify-center disappear px-4">
       <div class="relative flex items-center w-full md:w-[560px] group">
 
@@ -65,24 +65,41 @@
       </div>
     </div>
   </div>
-
-  <!-- 手機板搜尋欄，class="search-mobile"讓搜尋欄只在手機板出現 -->
-  @if (showSearch) {
-  <div class="search-mobile">
-    <div class="relative w-full max-w-md">
-      <i class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-lg pointer-events-none"></i>
-      <input type="search" placeholder="搜尋店家、地址" class="pl-10 pr-4 py-3 rounded-lg border border-gray-300
-                  focus:outline-none focus:ring-2 focus:ring-red-300
-                  focus:border-red-400 bg-white" />
-    </div>
-  </div>
-  }
-
 </div>
+
+<!-- 手機板搜尋欄，class="search-mobile"讓搜尋欄只在手機板出現 -->
+@if (showSearch) {
+<div class="search-mobile">
+  <div class="relative flex items-center w-full md:w-[560px] group">
+
+    <!-- 搜尋類型選單 -->
+    <!-- select 絕對定位在 input 上方，所以 input 需要 pl-[95px] 預留左側空間 -->
+    <select class="absolute left-3 h-10 px-3 pr-8 bg-white text-slate-700 text-sm rounded-xl shadow-sm
+      border border-slate-200 outline-none focus:ring-2 focus:ring-red-600/20 appearance-none cursor-pointer"
+      [value]="searchMode()" (change)="onSearchModeChange($event)">
+
+      <!-- 切換搜尋類型時會清空輸入並重置列表（onSearchModeChange 內處理） -->
+      <option value="store">店家</option>
+      <option value="host">團長</option>
+      <option value="event">團名</option>
+    </select>
+    <i class="pi pi-angle-down absolute left-[60px] text-slate-400 pointer-events-none text-sm"></i>
+
+    <!-- 輸入框-->
+    <input #searchInput type="text" [placeholder]="searchPlaceholder()" (keyup.enter)="onSearch(searchInput.value)"
+      class="w-full pl-[95px] pr-24 py-3 bg-white border-none rounded-2xl shadow-sm
+             focus:ring-2 focus:ring-red-600/20 outline-none transition-all placeholder:text-slate-400" />
+    <button (click)="onSearch(searchInput.value)" class="absolute right-2 bg-red-600 text-white px-5 py-1.5 rounded-xl text-sm font-bold
+             hover:bg-red-700 transition-colors shadow-lg shadow-red-600/20">
+      搜尋
+    </button>
+  </div>
+</div>
+}
 
 
 <!-- main(顯示頁面，其他網頁主要修改) -->
-<main >
+<main>
   <router-outlet></router-outlet>
 </main>
 
@@ -140,7 +157,7 @@
   <!-- 通知訊息 -->
   <a routerLink="/user/notifications" class="flex flex-col items-center">
     <div>
-      <i class="pi pi-receipt cursor-pointer" style="font-size: 1.5rem"
+      <i class="pi pi-bell cursor-pointer" style="font-size: 1.5rem"
         [ngStyle]="{ 'color': (router.url == '/user/notifications') ? 'rgb(252, 165, 165)' : '' }"></i>
     </div>
     <div [ngStyle]="{ 'color': (router.url == '/user/notifications') ? 'rgb(252, 165, 165)' : '' }">

@@ -1,10 +1,16 @@
-// auth-callback.component.ts
 import { Component, OnInit } from '@angular/core';
-import { AuthService } from '../@service/auth.service'; // 引用你的 Service
+import { AuthService } from '../@service/auth.service';
 import { HttpService } from '../@service/http.service';
 import { Router } from '@angular/router';
 import Swal from 'sweetalert2';
 
+/**
+ * Google OAuth Callback 頁面
+ * 用途：
+ * 使用者完成 Google 登入後會跳轉到這裡
+ * 前端在此呼叫後端 API 取得使用者資料
+ * 存入 AuthService / localStorage 後導回原頁面
+ */
 @Component({ selector: 'app-auth-callback', template: '<p>正在同步 Google 資料...</p>' })
 export class AuthCallbackComponent implements OnInit {
   constructor(
@@ -14,6 +20,7 @@ export class AuthCallbackComponent implements OnInit {
   ) { }
 
   ngOnInit() {
+
     // 呼叫後端拿 Google 資料的 API
     this.http.getApi('http://localhost:8080/gogobuy/user/oauth').subscribe({
       next: (res: any) => {
@@ -29,14 +36,14 @@ export class AuthCallbackComponent implements OnInit {
           role: res.role || 'user'
         };
         if (res) {
-          // 存入 AuthService (內部會執行 localStorage.setItem('user', ...))
+
+          // 存入 localStorage（供其他頁面快速取用）
           this.authService.setUser(formattedUser);
           localStorage.setItem('user_info', JSON.stringify(formattedUser));
           localStorage.setItem('user_id', formattedUser.id);
           localStorage.setItem('user_avatar_url', formattedUser.avatar_url);
           localStorage.setItem('user_email', formattedUser.email);
           if (formattedUser.id) {
-            this.authService.setUser(formattedUser);
             Swal.fire({
               toast: true,
               position: 'top',
@@ -46,6 +53,8 @@ export class AuthCallbackComponent implements OnInit {
               timer: 2000,
               timerProgressBar: true,
             });
+
+            // 刷新使用者狀態
             this.authService.refreshUser();
             const savedUrl = sessionStorage.getItem('google_return_url') || '/gogobuy';
             setTimeout(() => {

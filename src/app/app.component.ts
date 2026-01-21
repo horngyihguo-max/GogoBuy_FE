@@ -99,6 +99,7 @@ export class AppComponent {
     this.auths.events.set(this.auths.eventsAll());
   }
 
+  // 切換類型時，input對應類型顯示內容
   searchPlaceholder = computed(() => {
     switch (this.searchMode()) {
       case 'store': return '輸入店家名稱...';
@@ -206,6 +207,7 @@ export class AppComponent {
     }
   }
 
+  // 手機板我的選單
   onUserClick(event: any, menu: any) {
     const items = this.filteredItems;
     if (items && items.length > 0) {
