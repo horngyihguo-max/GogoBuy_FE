@@ -27,10 +27,23 @@
 
   <!--開團中店家-->
   <section class="max-w-[1440px] mx-auto p-4 md:p-8">
-    <h2 class="text-3xl font-black text-slate-900 mb-8 flex items-center gap-3">
-      <span class="w-2 h-8 bg-red-600 rounded-full"></span>
-      正在開團中
-    </h2>
+    <div class="flex">
+      <span class="text-3xl font-black text-slate-900 mb-8 flex items-center gap-3">
+        <span class="w-2 h-8 bg-red-600 rounded-full"></span>
+        正在開團中
+      </span>
+      <button (click)="showDialog()" title="開新團"
+              class="
+                /* 1. 手機版基礎樣式 (Mobile First) */
+                bg-red-700 text-white font-bold ml-[100px]
+                w-full max-w-[100px] h-[50px] text-[16px] rounded mb-4
+                /* 2. 電腦版樣式 (md: 768px 以上) */
+                md:w-[120px] md:h-[45px] md:ml-[5vw] md:mb-0 md:text-[15px]
+                /* 3. 互動效果 */
+                hover:bg-white hover:text-red-700 hover:border hover:border-red-700 hover:scale-[1.05]
+                active:bg-red-100 active:scale-[0.95]">+ 開新團
+      </button>
+    </div>
 
     <!-- 卡片RWD grid-cols-1(手機板一次顯示1個卡片) md:grid-cols-2(平板一次顯示2個卡片) lg:grid-cols-5(電腦版一次顯示5個卡片)
      gap-6(卡片之間相隔距離) -->
@@ -59,3 +72,121 @@
     </div>
   </section>
 </body>
+
+
+
+<p-dialog header="選擇開團店家" [modal]="true" [(visible)]="visible"
+  [style]="{ width: '900px', height:'700px' }"
+  [breakpoints]="{ '960px': '90vw', '640px': '95vw' }"
+  [draggable]="false" [resizable]="false"
+  [blockScroll]="true" appendTo="body"
+  (onShow)="disableScroll()" (onHide)="enableScroll()"
+  contentStyleClass="flex flex-col overflow-hidden"
+>
+  <div class="flex-none flex flex-col gap-2 mt-[1vh] pb-2">
+    <p-inputgroup>
+      <p-inputgroup-addon>
+        <i class="pi pi-search"></i>
+      </p-inputgroup-addon>
+      <p-floatlabel variant="on" autocomplete="off">
+        <input type="search" [(ngModel)]="storeSearch" (keyup)="letterSearch()" (search)="letterSearch()" [class.p-filled]="!!storeSearch"
+                class="border border-gray-300 focus:!border-2 focus:!border-[#662222] focus:!shadow-none outline-none w-full p-2 pl-3 rounded-r-xl transition-all" />
+        <label>店家名稱</label>
+      </p-floatlabel>
+    </p-inputgroup>
+  </div>
+  <p-tabs [(value)]="activeTab" #storeTabs class="flex flex-col flex-1 overflow-hidden">
+    <div class="flex-none bg-white z-10">
+      <p-tablist class="w-full flex-nowrap overflow-x-auto whitespace-nowrap custom-scrollbar hide-scrollbar">
+        <p-tab value="allstores">全部店家</p-tab>
+        @for (cate of uniqueTabs; track $index) {
+          <p-tab [value]="cate">{{ cate }}</p-tab>
+        }
+      </p-tablist>
+    </div>
+
+    <div class="flex-1 overflow-y-auto pt-2 pb-4 px-4 custom-scrollbar">
+      <p-tabpanel [value]="activeTab">
+        @if(storeList.length<=0){
+          <p class="mt-[20px] text-2xl text-center font-bold">目前尚無相關店家資料</p>
+        }@else {
+          @for (store of openStoreList; track $index) {
+            @if(activeTab=="allstores" || activeTab==store.category){
+              <div class="w-full bg-rose-50 rounded-xl border border-gray-100 overflow-hidden mt-4
+                          hover:border-2 hover:border-[#662222] hover:scale-[1.01] transition duration-200
+                          active:scale-[0.98]">
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center">
+                  <div class="shrink-0 w-full aspect-[4/3] sm:w-[200px] sm:h-[150px] bg-gray-100 relative overflow-hidden sm:m-4 sm:rounded-lg">
+                    <img [src]="store.image" class="absolute inset-0 w-full h-full object-cover" />
+                  </div>
+                  <div class="flex-1 min-w-0 p-4 sm:pr-6 sm:py-4">
+                    <div class="flex items-center justify-between mb-2">
+                      <p class="text-2xl font-bold text-gray-800 truncate m-0" [innerHTML]="highlight(store.name)">{{ store.name }}</p>
+                      <span class="shrink-0 ml-2 px-2 py-0.5 rounded text-base bg-red-100 text-red-700">
+                        {{store.type}}
+                      </span>
+                    </div>
+                    <div class="text-sm sm:text-base text-gray-600 space-y-1.5">
+                      <p class="m-0 truncate">📞電話：{{store.phone}}</p>
+                      <p class="m-0 truncate">📍地址：{{store.address}}</p>
+                      <p class="m-0 font-bold text-[#662222]">🚚外送費：{{store.feeDescription}}</p>
+                      @if(store.memo){
+                        <p class="m-0 text-sm text-gray-400 italic truncate">備註：{{store.memo}}</p>
+                      }
+                    </div>
+                  </div>
+                </div>
+              </div>
+            }
+          }
+          @for (store of closeStoreList; track $index) {
+            @if(activeTab === 'allstores' || activeTab === store.category) {
+              <div class="relative w-full rounded-xl overflow-hidden bg-slate-300 border border-gray-200 mt-4
+                          hover:border-2 hover:border-[#4F4F4F] hover:scale-[1.01] transition duration-200
+                          active:scale-[0.98]">
+                <div class="w-full rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                  <div class="flex flex-col sm:flex-row items-stretch sm:items-center">
+                    <div class="shrink-0 w-full aspect-[4/3] sm:w-[200px] sm:h-[150px] bg-gray-100 relative overflow-hidden sm:m-4 sm:rounded-lg">
+                      <img [src]="store.image" class="absolute inset-0 w-full h-full object-cover" />
+                      <div class="absolute inset-0 z-10 flex items-center justify-center bg-black/50">
+                        <div class="text-white text-2xl sm:text-xl font-bold tracking-[4px] sm:tracking-[2px]
+                                    px-4 py-1 border-2 border-white -rotate-12 whitespace-nowrap">
+                          未營業
+                        </div>
+                      </div>
+                    </div>
+                    <div class="flex-1 min-w-0 p-4 sm:pr-6 sm:py-4">
+                      <div class="flex items-center justify-between mb-2">
+                        <p class="text-2xl font-bold text-gray-800 truncate m-0" [innerHTML]="highlight(store.name)">{{ store.name }}</p>
+                        <span class="shrink-0 ml-2 px-2 py-0.5 rounded text-base bg-slate-100 text-slate-700">
+                          {{store.type}}
+                        </span>
+                      </div>
+                      <div class="text-sm sm:text-base text-gray-600 space-y-1.5">
+                        <p class="m-0 truncate">📞電話：{{store.phone}}</p>
+                        <p class="m-0 truncate">📍地址：{{store.address}}</p>
+                        <p class="m-0 font-bold text-[#662222]">🚚外送費：{{store.feeDescription}}</p>
+                        @if(store.memo){
+                          <p class="m-0 text-sm text-gray-400 italic truncate">備註：{{store.memo}}</p>
+                        }
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            }
+          }
+        }
+      </p-tabpanel>
+    </div>
+  </p-tabs>
+
+  <button pTooltip="找不到店家嗎?" severity="secondary" tooltipPosition="top" (click)="addStore()"
+          class="fixed md:absolute right-4 bottom-4 md:right-[2rem] md:bottom-[2rem]
+                 px-4 py-2 md:w-[150px] md:h-[50px]
+                 bg-[#E07A3F] z-30 rounded-full md:rounded-sm shadow-lg
+                 hover:bg-red-700 text-white font-bold transition-all">
+    <span class="hidden md:inline">新增店家 ➜</span>
+    <span class="md:hidden">＋ 新增</span>
+  </button>
+</p-dialog>

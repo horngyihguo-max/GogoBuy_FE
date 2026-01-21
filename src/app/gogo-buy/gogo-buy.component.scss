@@ -57,3 +57,48 @@
     font-size: 12px;
   }
 }
+
+
+// focus 時文字(placeholder)在邊框的顏色 (( 輸入文字 type = input
+.p-floatlabel:has(input:focus) label {
+  color: #662222 !important;
+  font-weight: 600;
+}
+// focus 時文字(placeholder)在邊框的顏色 (( 經營類別 type = select
+::ng-deep .p-floatlabel:has(.p-focus) label {
+  color: #662222 !important;
+}
+
+/* 當 Dialog 開啟時，鎖死所有可能的容器 */
+.p-overflow-hidden,
+.p-overflow-hidden body,
+.p-overflow-hidden .topbar-wrapper,
+.p-overflow-hidden main {
+  overflow: hidden !important;
+  height: 100vh !important;
+}
+/* 建立一個自定義類別 */
+.hide-scrollbar {
+  /* 針對 IE, Edge */
+  -ms-overflow-style: none;
+  /* 針對 Firefox */
+  scrollbar-width: none;
+  /* 針對 Chrome, Safari, Opera */
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #662222;
+}

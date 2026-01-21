@@ -58,6 +58,30 @@ body {
   background: var(--brand-primary-hover);
 }
 
+/* 直接針對全域的 p-dialog-mask 設定 */
+.p-dialog-mask {
+  backdrop-filter: blur(3px) !important;
+  -webkit-backdrop-filter: blur(3px) !important; /* 確保 Chrome/Edge/Safari 都看得到 */
+  background: rgba(0, 0, 0, 0.498) !important;
+}
+/* 全域覆蓋，不使用 :host */
+.p-tab[data-p-active="true"] {
+  color: #662222 !important;
+  border-color: #662222 !important;
+}
+.p-tab[data-p-active="true"] .p-tab-label {
+  color: #662222 !important;
+}
+/* 修改底部移動橫條 (Ink Bar) 的顏色 */
+.p-tablist-active-bar {
+  background: #662222 !important;
+  height: 2px !important; /* 如果覺得線太細，可以調整這裡，預設通常是 2px */
+}
+/* 確保橫條在 Hover 或切換時不會變回原本的顏色 */
+.p-tablist-tab-list .p-tablist-active-bar {
+  background-color: #662222 !important;
+}
+
 /* 針對行動端 Webkit 瀏覽器 (Chrome, Safari, Android Browser) */
 @media (max-width: 768px) {
   ::-webkit-scrollbar {

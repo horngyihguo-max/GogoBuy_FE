@@ -71,131 +71,129 @@ export class AppComponent {
   // 4. ngOnInit 現在不需要處理頭像邏輯了
 
 
-// 預設頭像
-// userAvatar: string | null = null;
-// ngOnInit() {
-//   this.auth.user$.subscribe(user => {
-//     console.log('導覽列收到使用者狀態更新:', user);
+  // 預設頭像
+  // userAvatar: string | null = null;
 
-//     if (user) {
-//       this.userAvatar = user.user_avatar_url || user.avatar_url || user.avatarUrl;
-//       if (!this.userAvatar) {
-//         this.userAvatar = '/Snoopy.jpg';
-//       }
-//     } else {
-//       this.userAvatar = null;
-//     }
-//   });
-//   // this.auth.refreshUser();
-// }
+  ngOnInit() {
+  //   this.auth.user$.subscribe(user => {
+  //     console.log('導覽列收到使用者狀態更新:', user);
 
-// ngAfterViewInit() {
-//   // 在這裡主動判斷資料是否有變更 (判斷 Angular 所無法判斷的部分)
-//   if (!this.userAvatar || '/Snoopy.jpg' == this.userAvatar || 'assets/default-avatar.png' == this.userAvatar) {
-//     this.auth.user$.subscribe(user => {
-
-//       if (user) {
-//         const newUserAvatar = user.user_avatar_url || user.avatar_url || user.avatarUrl || 'Snoopy.jpg';
-//         if (this.userAvatar != newUserAvatar) {
-//           this.userAvatar = newUserAvatar;
-//         }
-//       } else {
-//         this.userAvatar = null;
-//       }
-//     });
-//   }
-// }
-
-// 用戶頭向下拉選單
-items: MenuItem[] = [
-  { label: '用戶首頁', icon: 'pi pi-user', routerLink: '/user/profile' },
-  { label: '我的訂單', icon: 'pi pi-receipt', routerLink: '/user/orders' },
-  { label: '登入', icon: 'pi pi-sign-in', routerLink: '/gogobuy/login' },
-  { label: '登出', icon: 'pi pi-sign-out', command: () => { this.logout(); } }
-];
-
-// 手機端常見問題選單
-problems: MenuItem[] = [
-  { label: '隱私政策', icon: 'pi pi-shield', routerLink: '/support/privacy' },
-  { label: '服務條款', icon: 'pi pi-book', routerLink: '/support/conditions' },
-  { label: '常見問題', icon: 'pi pi-headphones', routerLink: '/support/faq' },
-];
-
-  // 判斷是否在/gogobuy/home路徑
-  get showSearch(): boolean {
-  return this.router.url.startsWith('/gogobuy/home');
-}
-
-@HostListener('window:scroll', [])
-onWindowScroll() {
-  if (this.mainMenu?.visible) {
-    this.mainMenu.hide();
+  //     if (user) {
+  //       this.userAvatar = user.user_avatar_url || user.avatar_url || user.avatarUrl;
+  //       if (!this.userAvatar) {
+  //         this.userAvatar = '/Snoopy.jpg';
+  //       }
+  //     } else {
+  //       this.userAvatar = null;
+  //     }
+  //   });
+  //   // this.auth.refreshUser();
   }
-  if (this.problemMenu?.visible) {
-    this.problemMenu.hide();
+
+  ngAfterViewInit() {
+  //   // 在這裡主動判斷資料是否有變更 (判斷 Angular 所無法判斷的部分)
+  //   if (!this.userAvatar || '/Snoopy.jpg' == this.userAvatar || 'assets/default-avatar.png' == this.userAvatar) {
+  //     this.auth.user$.subscribe(user => {
+
+  //       if (user) {
+  //         const newUserAvatar = user.user_avatar_url || user.avatar_url || user.avatarUrl || 'Snoopy.jpg';
+  //         if (this.userAvatar != newUserAvatar) {
+  //           this.userAvatar = newUserAvatar;
+  //         }
+  //       } else {
+  //         this.userAvatar = null;
+  //       }
+  //     });
+  //   }
   }
-}
 
-onUserClick(event: any, menu: any) {
-  const items = this.filteredItems;
-  if (items && items.length > 0) {
-    menu.toggle(event);
-  } else {
-    console.log('選單內容為空');
+  // 用戶頭向下拉選單
+  items: MenuItem[] = [
+    { label: '用戶首頁', icon: 'pi pi-user', routerLink: '/user/profile' },
+    { label: '我的訂單', icon: 'pi pi-receipt', routerLink: '/user/orders' },
+    { label: '登入', icon: 'pi pi-sign-in', routerLink: '/gogobuy/login' },
+    { label: '登出', icon: 'pi pi-sign-out', command: () => { this.logout(); } }
+  ];
+
+  // 手機端常見問題選單
+  problems: MenuItem[] = [
+    { label: '隱私政策', icon: 'pi pi-shield', routerLink: '/support/privacy' },
+    { label: '服務條款', icon: 'pi pi-book', routerLink: '/support/conditions' },
+    { label: '常見問題', icon: 'pi pi-headphones', routerLink: '/support/faq' },
+  ];
+
+    // 判斷是否在/gogobuy/home路徑
+    get showSearch(): boolean {
+    return this.router.url.startsWith('/gogobuy/home');
   }
-}
 
-  // 判斷是否已登入
-  get isLoggedIn(): boolean {
-  return !!localStorage.getItem('user_id');
-}
-
-  get isMobile(): boolean {
-  return window.innerWidth <= 768;
-}
-
-  // 使用session判斷選單出現列表
-  get filteredItems() {
-  const loggedIn = this.isLoggedIn;
-  const mobile = this.isMobile;
-  return this.items.filter(item => {
-    // 如果偵測到session顯示登出
-    if (item.label == '登出') {
-      return loggedIn;
+  @HostListener('window:scroll', [])
+  onWindowScroll() {
+    if (this.mainMenu?.visible) {
+      this.mainMenu.hide();
     }
-
-    // 如果沒有偵測到session顯示登入
-    if (item.label == '登入') {
-      return !loggedIn;
+    if (this.problemMenu?.visible) {
+      this.problemMenu.hide();
     }
+  }
 
-    if (loggedIn && mobile) {
-      return false;
+  onUserClick(event: any, menu: any) {
+    const items = this.filteredItems;
+    if (items && items.length > 0) {
+      menu.toggle(event);
+    } else {
+      console.log('選單內容為空');
     }
+  }
 
-    if (!loggedIn && mobile) {
-      return false;
-    }
+    // 判斷是否已登入
+    get isLoggedIn(): boolean {
+    return !!localStorage.getItem('user_id');
+  }
 
-    return true;
-  });
+    get isMobile(): boolean {
+    return window.innerWidth <= 768;
+  }
+
+    // 使用session判斷選單出現列表
+    get filteredItems() {
+    const loggedIn = this.isLoggedIn;
+    const mobile = this.isMobile;
+    return this.items.filter(item => {
+      // 如果偵測到session顯示登出
+      if (item.label == '登出') {
+        return loggedIn;
+      }
+
+      // 如果沒有偵測到session顯示登入
+      if (item.label == '登入') {
+        return !loggedIn;
+      }
+
+      if (loggedIn && mobile) {
+        return false;
+      }
+
+      if (!loggedIn && mobile) {
+        return false;
+      }
+
+      return true;
+    });
+  }
+
+  //登出清除session
+  logout() {
+    this.auth.logout();
+    // 清除前端紀錄
+    localStorage.clear();
+    // 回到首頁
+    this.router.navigate(['/gogobuy']);
+    Swal.fire({
+      title: '已登出',
+      icon: 'success',
+      showConfirmButton: false,
+      timer: 1000
+    });
+  };
 }
-
-//登出清除session
-logout() {
-  this.auth.logout();
-  // 清除前端紀錄
-  localStorage.clear();
-  // 回到首頁
-  this.router.navigate(['/gogobuy']);
-  Swal.fire({
-    title: '已登出',
-    icon: 'success',
-    showConfirmButton: false,
-    timer: 1000
-  });
-};
-
-}
-
-
