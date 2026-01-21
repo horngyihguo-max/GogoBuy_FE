@@ -8,6 +8,7 @@ import { PaginatorModule } from 'primeng/paginator';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { DialogModule } from 'primeng/dialog';
+import { TooltipModule } from 'primeng/tooltip';
 
 import Swal from 'sweetalert2';
 
@@ -28,6 +29,7 @@ type FoFilter = 'all' | 'active' | 'finished' | 'expired';
     PaginatorModule,
     ToastModule,
     DialogModule,
+    TooltipModule
   ],
   templateUrl: './wishes.component.html',
   styleUrl: './wishes.component.scss',

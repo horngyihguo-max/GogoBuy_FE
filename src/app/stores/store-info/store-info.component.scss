@@ -1,0 +1,19 @@
+:host ::ng-deep .store-detail-dialog {
+  .p-dialog {
+    margin-left: 16px;          // 不貼齊左邊
+    border-radius: 22px;
+    animation: slideInFromLeft 0.25s ease-out;
+  }
+}
+
+/* 左側滑入動畫 */
+@keyframes slideInFromLeft {
+  from {
+    transform: translateX(-40px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
