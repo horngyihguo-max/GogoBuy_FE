@@ -2,24 +2,58 @@ p {
   margin: 10px 0px;
 }
 
-.editIcon {
-  background-color: rgb(55, 76, 69);
-}
+// .custom-dialog .p-dialog-header {
+//   background-color: #662222;
+//   color: #ffffff;
+// }
 
-.custom-dialog .p-dialog-header {
-  background-color: #662222;
-  color: #ffffff;
-}
-
-.custom-dialog .p-dialog-header-icon {
-  color: #ffffff;
-}
+// .custom-dialog .p-dialog-header-icon {
+//   color: #ffffff;
+// }
 
 body.p-overflow-hidden {
   overflow: hidden !important;
   touch-action: none;
 }
 
-.custom-addon {
-  --p-inputgroup-addon-color: #ff5733;
+// focus 輸入文字邊框 -----------------------------------------------------------------
+input {
+  &:focus {
+    border: 1px solid #662222 !important;
+  }
+}
+
+// focus 輸入數字邊框 -----------------------------------------------------------------
+:host ::ng-deep .p-inputnumber input:focus {
+  outline: none !important;
+  border: 1px solid #662222 !important;
+  box-shadow: none !important;
+}
+
+:host ::ng-deep .p-inputnumber input {
+  transition: border-color 0.2s, border-width 0.1s;
+}
+
+// checkbox -----------------------------------------------------------------
+:host ::ng-deep .p-checkbox-checked .p-checkbox-box {
+  background: #6622227b !important;
+  border-color: #66222227 !important;
+}
+
+:host ::ng-deep .p-checkbox .p-checkbox-box {
+  background: white;
+}
+
+// toggleswitch -----------------------------------------------------------------
+:host ::ng-deep .p-toggleswitch-checked .p-toggleswitch-slider {
+  background: #662222 !important;
+  border-color: #662222 !important;
+}
+
+:host ::ng-deep .p-toggleswitch-checked:not(.p-toggleswitch-disabled):hover .p-toggleswitch-slider {
+  background: #551c1c !important;
+}
+
+:host ::ng-deep .p-toggleswitch:not(.p-toggleswitch-disabled).p-focus .p-toggleswitch-slider {
+  box-shadow: 0 0 0 0.2rem rgba(102, 34, 34, 0.2) !important;
 }
