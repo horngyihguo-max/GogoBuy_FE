@@ -4,30 +4,11 @@
   transition: opacity 0.4s ease-in-out;
 }
 
-
-/* 覆蓋 PrimeNG Carousel 需要 ::ng-deep），讓「中間那張」的遮罩透明 */
-:host ::ng-deep .p-carousel-item.p-carousel-item-active+.p-carousel-item.p-carousel-item-active .banner-mask {
-  opacity: 0;
-}
-
-:host ::ng-deep .p-carousel-item.p-carousel-item-active+.p-carousel-item.p-carousel-item-active+.p-carousel-item.p-carousel-item-active .banner-mask {
-  opacity: 1;
-}
-
-.banner.is-center .banner-mask {
-  opacity: 0;
-}
-
 /* banner 尺寸維持比例，並限制最大高度（避免過高） */
 .banner {
   position: relative;
-  width: 100%;
-  height: 320px;
   overflow: hidden;
-  border-radius: 16px;
-  aspect-ratio: 16 / 9;
-  height: auto;
-  max-height: 250px;
+  // border-radius: 16px;
 }
 
 
@@ -96,8 +77,169 @@
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
   background: #ccc;
-  border-radius: 10px;
+  // border-radius: 10px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #662222;
+}
+
+/* ===== hero-carousel 最終版：中間大、左右不重疊、1/5不露出 ===== */
+
+/* 0) content-container 的 overflow:auto 會搞事，壓掉 */
+:host ::ng-deep .hero-carousel .p-carousel-content-container {
+  overflow: hidden;
+}
+
+/* 1) viewport 內做 5% 空白，並裁切 */
+:host ::ng-deep .hero-carousel .p-carousel-viewport {
+  position: relative;
+  padding-inline: 5%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* 2) 允許中間跨格（但最終仍被 viewport 裁切在輪播區內） */
+:host ::ng-deep .hero-carousel .p-carousel-item-list,
+:host ::ng-deep .hero-carousel .p-carousel-item {
+  overflow: visible;
+}
+
+/* 3) 這兩片「簾子」專門蓋掉 padding(5%) 區域，讓第1/第5不會露出
+   背景色請跟你的頁面背景一致（你看起來是 Tailwind 的 bg-slate-50） */
+:host ::ng-deep .hero-carousel .p-carousel-viewport::before,
+:host ::ng-deep .hero-carousel .p-carousel-viewport::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 5%;
+  background: #f8fafc; /* ←如果你背景不是這色，改成你的背景色 */
+  z-index: 20;
+  pointer-events: none;
+}
+:host ::ng-deep .hero-carousel .p-carousel-viewport::before { left: 0; }
+:host ::ng-deep .hero-carousel .p-carousel-viewport::after  { right: 0; }
+
+/* 4) wrapper 對齊：左右縮圖靠外側，中間置中
+   這是「不重疊」的關鍵！ */
+:host ::ng-deep .hero-carousel .carousel-item-wrapper {
+  display: flex;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+:host ::ng-deep .hero-carousel
+.p-carousel-item-active.p-carousel-item-start .carousel-item-wrapper {
+  justify-content: flex-start;   /* 左圖靠左（外側） */
+}
+
+:host ::ng-deep .hero-carousel
+.p-carousel-item-active.p-carousel-item-end .carousel-item-wrapper {
+  justify-content: flex-end;     /* 右圖靠右（外側） */
+}
+
+:host ::ng-deep .hero-carousel
+.p-carousel-item-active:not(.p-carousel-item-start):not(.p-carousel-item-end) .carousel-item-wrapper {
+  justify-content: center;       /* 中間置中 */
+}
+
+/* 5) 縮放比例（你目前是 padding 5% → 內容區每格 30%，所以 0.5 / 2 剛好 15/60/15） */
+:host ::ng-deep .hero-carousel .banner {
+  width: 100% !important;
+  transform-origin: center;
+  transition: transform 0.35s ease;
+  position: relative;
+  z-index: 2;
+}
+
+/* 左右縮圖：15% */
+:host ::ng-deep .hero-carousel
+.p-carousel-item-active.p-carousel-item-start .banner {
+  transform: scaleX(0.75);
+  transform-origin: left center;   /* 往外側縮 */
+}
+
+:host ::ng-deep .hero-carousel
+.p-carousel-item-active.p-carousel-item-end .banner {
+  transform: scaleX(0.75);
+  transform-origin: right center;  /* 往外側縮 */
+}
+
+/* 中間放大：60% */
+:host ::ng-deep .hero-carousel
+.p-carousel-item-active:not(.p-carousel-item-start):not(.p-carousel-item-end) .banner {
+  transform: scaleX(1.5) scaleY(1.25);
+  transform-origin: center;
+  z-index: 5; /* 中間仍在上層（但因為左右靠外，不會互蓋） */
+}
+
+/* 6) 遮罩：中間透明（更穩的 selector） */
+:host ::ng-deep .hero-carousel .banner-mask {
+  opacity: 1;
+  transition: opacity 0.4s ease-in-out;
+}
+:host ::ng-deep .hero-carousel
+.p-carousel-item-active:not(.p-carousel-item-start):not(.p-carousel-item-end) .banner-mask {
+  opacity: 0;
+}
+
+/* 7) 手機 numVisible=1：回滿版 */
+@media (max-width: 560px) {
+  :host ::ng-deep .hero-carousel .p-carousel-viewport {
+    padding-inline: 0;
+  }
+  :host ::ng-deep .hero-carousel .p-carousel-viewport::before,
+  :host ::ng-deep .hero-carousel .p-carousel-viewport::after {
+    display: none;
+  }
+  :host ::ng-deep .hero-carousel .banner {
+    transform: none !important;
+  }
+  :host ::ng-deep .hero-carousel .carousel-item-wrapper {
+    justify-content: center !important;
+  }
+}
+
+/* 左右（有遮罩那兩張）隱藏文字，只保留中間 */
+:host ::ng-deep .hero-carousel
+.p-carousel-item-active.p-carousel-item-start .banner-title,
+:host ::ng-deep .hero-carousel
+.p-carousel-item-active.p-carousel-item-end .banner-title {
+  display: none !important;
+}
+
+/* 中間卡片 scaleX(2)，把 title 反向 scaleX(0.5) 抵消掉 */
+:host ::ng-deep .hero-carousel
+.p-carousel-item-active:not(.p-carousel-item-start):not(.p-carousel-item-end) .banner-title {
+  transform: scaleX(0.5);
+  transform-origin: left bottom;
+
+  /* 因為父層放大後 left/bottom 也被放大，這裡一起校正回來 */
+  left: 0.5rem !important;   /* 原本 left-4 = 1rem，放大會變 2rem，所以設 0.5rem 抵消 */
+  bottom: 0.5rem !important; /* 同理 */
+}
+
+:host ::ng-deep .hero-carousel {
+  /* 1. 最外層容器：給予足夠的上下 padding 讓放大後的圖片有空間 */
+  .p-carousel-content {
+    padding: 40px 0; /* 數值取決於你 scaleY 放大的比例 */
+    overflow: visible !important;
+  }
+
+  /* 2. 視口容器：PrimeNG 限制範圍最嚴格的地方 */
+  .p-carousel-viewport {
+    overflow: visible !important;
+  }
+
+  /* 3. 列表與格子：確保每個 item 都不會裁切內容 */
+  .p-carousel-item-list,
+  .p-carousel-item {
+    overflow: visible !important;
+  }
+
+  /* 4. 你的內容封裝層：也要確保可溢出 */
+  .carousel-item-wrapper {
+    overflow: visible !important;
+  }
 }

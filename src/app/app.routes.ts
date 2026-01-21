@@ -14,7 +14,6 @@ import { AuthCallbackComponent } from './auth-callback/auth-callback.component';
 import { WishesComponent } from './wish/wishes/wishes.component';
 import { NotificationsComponent } from './account/notifications/notifications.component';
 import { StoreUpsertComponent } from './stores/store-upsert/store-upsert.component';
-import { StoreListComponent } from './store-list/store-list.component';
 import { StoreInfoComponent } from './stores/store-info/store-info.component';
 
 // export const routes: Routes = [
@@ -63,7 +62,6 @@ export const routes: Routes = [
       { path: '', redirectTo: 'home', pathMatch: 'full' },
       { path: 'home', component: GogoBuyComponent, data: { breadcrumb: '首頁' } },
       { path: 'login', component: LoginComponent, title: '登入', data: { breadcrumb: '登入' } },
-      { path: 'storeslist', component: StoreListComponent, title: '商店列表', data: { breadcrumb: '商店列表' } },
     ]
   },
 
