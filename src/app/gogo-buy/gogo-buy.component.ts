@@ -17,6 +17,7 @@ import { Router } from '@angular/router';
 import { PanelModule } from 'primeng/panel';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { AuthService } from '../@service/auth.service';
+import { SelectModule } from 'primeng/select';
 
 
 export type Stores = {
@@ -85,6 +86,7 @@ export interface Store {
     TabsModule,
     TooltipModule,
     PanelModule,
+    SelectModule,
   ],
   templateUrl: './gogo-buy.component.html',
   styleUrl: './gogo-buy.component.scss'
@@ -554,4 +556,48 @@ export class GogoBuyComponent {
     this.enableScroll();
     this.router.navigate(['/management/store_info', storeId]);
   }
+
+  /* 開團 TYPE filtered */
+  // 在 p-select 改值，這個 signal 就會更新，進而觸發下面的 computed 重新計算(正在開團中的TYPE)
+  readonly selectedType = signal<string>('ALL');
+
+  // 取 type 的工具(.trim()避免後端塞空白造成「看起來一樣、其實字串不同」)
+  private getEventType(e: any): string {
+    return (e.type).trim();
+  }
+
+  // p-select 的 options
+  readonly eventTypeOptions = computed(() => {
+
+    // 從 events 抽出每筆的 type
+    const types = this.auths.events().map(e => this.getEventType(e));
+
+    // 統計各 type 出現次數
+    const count = new Map<string, number>();
+    for (const t of types) count.set(t, (count.get(t) ?? 0) + 1);
+
+    // 變成 p-select 要的 [{label, value}] 格式
+    const unique = Array.from(count.keys()).sort((a, b) => a.localeCompare(b, 'zh-Hant'));
+
+    // 額外加一個「全部」
+    return [
+      { label: `全部 (${types.length})`, value: 'ALL' },
+      ...unique.map(t => ({ label: `${t} (${count.get(t)})`, value: t })),
+    ];
+  });
+
+
+  // 篩選開團
+  readonly filteredEventCards = computed(() => {
+
+    // 使用者選到的類別
+    const t = this.selectedType();
+
+    // 你已經 join 店家後的卡片資料
+    const cards = this.eventCards();
+
+    if (t == 'ALL') return cards;
+    return cards.filter(c => this.getEventType(c) == t);
+  });
+
 }

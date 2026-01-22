@@ -1,4 +1,4 @@
-<body class="bg-slate-50 min-h-svh">
+<body class="bg-[#F8FAFC] min-h-svh">
 
   <!--輪播欄-->
   <section class="max-w-[1440px] mx-auto mt-6 ">
@@ -30,33 +30,46 @@
   <!--開團中店家-->
 
   <section class="max-w-[1440px] mx-auto p-4 md:p-4">
-    <div class="flex">
+    <div class="flex flex-col gap-3 md:flex-row md:items-left">
       <span class="text-3xl font-black text-slate-900 mb-8 flex items-center gap-3">
         <span class="w-2 h-8 bg-red-600 rounded-full"></span>
         正在開團中
       </span>
+
+      <!-- 開團TYPE選擇 -->
+      <div class="font-bold w-[150px] h-[50px] text-[16px] ml-[5px]
+                  md:w-[170px] md:h-[45px] md:ml-[1vw] md:text-[15px]">
+        <p-floatlabel variant="on">
+          <p-select inputId="event_type" [options]="eventTypeOptions()" optionLabel="label" optionValue="value"
+            [ngModel]="selectedType()" (ngModelChange)="selectedType.set($event ?? 'ALL')" [filter]="true"
+            [showClear]="true" placeholder="全部" styleClass="w-full"></p-select>
+        </p-floatlabel>
+      </div>
+
       <button (click)="showDialog()" title="開新團" class="
-                /* 1. 手機版基礎樣式 (Mobile First) */
-                bg-red-700 text-white font-bold ml-[100px]
-                w-full max-w-[100px] h-[50px] text-[16px] rounded mb-4
-                /* 2. 電腦版樣式 (md: 768px 以上) */
-                md:w-[120px] md:h-[45px] md:ml-[5vw] md:mb-0 md:text-[15px]
-                /* 3. 互動效果 */
-                hover:bg-white hover:text-red-700 hover:border hover:border-red-700 hover:scale-[1.05]
-                active:bg-red-100 active:scale-[0.95]">+ 開新團
+      /* 1. 手機版基礎樣式 (Mobile First) */
+      bg-red-700 text-white font-bold ml-[5px]
+      w-full max-w-[100px] h-[50px] text-[16px] rounded mb-4
+      /* 2. 電腦版樣式 (md: 768px 以上) */
+      md:w-[120px] md:h-[45px] md:ml-[5vw] md:mb-0 md:text-[15px]
+      /* 3. 互動效果 */
+      hover:bg-white hover:text-red-700 hover:border hover:border-red-700 hover:scale-[1.05]
+      active:bg-red-100 active:scale-[0.95]">+ 開新團
       </button>
+
     </div>
   </section>
 
   <!-- eventCards() = events + store 依 storeId 做連動(商家可查詢) -->
-  @if (eventCards().length > 0) {
+  @if (filteredEventCards().length > 0) {
 
   <!-- 卡片RWD grid-cols-1(手機板一次顯示1個卡片) md:grid-cols-2(平板一次顯示2個卡片) lg:grid-cols-5(電腦版一次顯示5個卡片)
      gap-6(卡片之間相隔距離) -->
   <section class="max-w-[1440px] mx-auto p-4 md:p-4">
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
-      @for (event of eventCards(); track event.id;) {
+      @for (event of filteredEventCards(); track event.id;) {
+
 
       <!-- group(放大) relative(讓內部圖片/遮罩以卡片為定位基準) overflow-hidden(圖片 hover 放大不會超出圓角)
        rounded-3xl(圓角) overflow-hidden(放大時隱藏超出範圍部分、避免破圖) transition-all duration-300(動畫平滑化)
@@ -65,10 +78,10 @@
         col-span-1 min-h-[200px] cursor-pointer">
 
         <!-- 若 event 沒有圖片暫時用文字替代 -->
-        @if(event.image){
+        @if(event.displayImage){
 
         <!-- 圖片滿版鋪底(absolute + inset-0 讓圖片貼齊四邊，object-cover 維持比例並裁切) -->
-        <img [src]="event.image"
+        <img [src]="event.displayImage"
           class="absolute inset-0 w-full h-full object-cover transition-transform group-hover:scale-105" />
         } @else {
         <br>
