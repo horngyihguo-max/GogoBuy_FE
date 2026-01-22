@@ -404,19 +404,13 @@ export class AuthService {
   getGroupbuyEventByName(hostNickname: string) {
     const encoded = encodeURIComponent(hostNickname);
     return this.https.getApi(
-      `http://localhost:8080/gogobuy/getGroupbuyEventByStoresName?host_nickname=${encoded}`
+      `http://localhost:8080/gogobuy/getGroupbuyEventByNickName?host_nickname=${encoded}`
     );
   }
 
   // 查詢全部開團
   getallevent() {
     return this.https.getApi(`http://localhost:8080/gogobuy/getAll`);
-  }
-
-
-  // 上傳圖床
-  upAvatarIHS() {
-
   }
 
 }

@@ -44,6 +44,7 @@
   color: #662222 !important;
   font-weight: 600;
 }
+
 // focus 時文字(placeholder)在邊框的顏色 (( 經營類別 type = select
 ::ng-deep .p-floatlabel:has(.p-focus) label {
   color: #662222 !important;
@@ -57,12 +58,14 @@
   overflow: hidden !important;
   height: 100vh !important;
 }
+
 /* 建立一個自定義類別 */
 .hide-scrollbar {
   /* 針對 IE, Edge */
   -ms-overflow-style: none;
   /* 針對 Firefox */
   scrollbar-width: none;
+
   /* 針對 Chrome, Safari, Opera */
   &::-webkit-scrollbar {
     display: none;
@@ -72,13 +75,16 @@
 .custom-scrollbar::-webkit-scrollbar {
   width: 10px;
 }
+
 .custom-scrollbar::-webkit-scrollbar-track {
   background: transparent;
 }
+
 .custom-scrollbar::-webkit-scrollbar-thumb {
   background: #ccc;
   // border-radius: 10px;
 }
+
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #662222;
 }
@@ -113,12 +119,19 @@
   top: 0;
   bottom: 0;
   width: 5%;
-  background: #f8fafc; /* ←如果你背景不是這色，改成你的背景色 */
+  background: #f8fafc;
+  /* ←如果你背景不是這色，改成你的背景色 */
   z-index: 20;
   pointer-events: none;
 }
-:host ::ng-deep .hero-carousel .p-carousel-viewport::before { left: 0; }
-:host ::ng-deep .hero-carousel .p-carousel-viewport::after  { right: 0; }
+
+:host ::ng-deep .hero-carousel .p-carousel-viewport::before {
+  left: 0;
+}
+
+:host ::ng-deep .hero-carousel .p-carousel-viewport::after {
+  right: 0;
+}
 
 /* 4) wrapper 對齊：左右縮圖靠外側，中間置中
    這是「不重疊」的關鍵！ */
@@ -129,19 +142,19 @@
   z-index: 1;
 }
 
-:host ::ng-deep .hero-carousel
-.p-carousel-item-active.p-carousel-item-start .carousel-item-wrapper {
-  justify-content: flex-start;   /* 左圖靠左（外側） */
+:host ::ng-deep .hero-carousel .p-carousel-item-active.p-carousel-item-start .carousel-item-wrapper {
+  justify-content: flex-start;
+  /* 左圖靠左（外側） */
 }
 
-:host ::ng-deep .hero-carousel
-.p-carousel-item-active.p-carousel-item-end .carousel-item-wrapper {
-  justify-content: flex-end;     /* 右圖靠右（外側） */
+:host ::ng-deep .hero-carousel .p-carousel-item-active.p-carousel-item-end .carousel-item-wrapper {
+  justify-content: flex-end;
+  /* 右圖靠右（外側） */
 }
 
-:host ::ng-deep .hero-carousel
-.p-carousel-item-active:not(.p-carousel-item-start):not(.p-carousel-item-end) .carousel-item-wrapper {
-  justify-content: center;       /* 中間置中 */
+:host ::ng-deep .hero-carousel .p-carousel-item-active:not(.p-carousel-item-start):not(.p-carousel-item-end) .carousel-item-wrapper {
+  justify-content: center;
+  /* 中間置中 */
 }
 
 /* 5) 縮放比例（你目前是 padding 5% → 內容區每格 30%，所以 0.5 / 2 剛好 15/60/15） */
@@ -154,24 +167,24 @@
 }
 
 /* 左右縮圖：15% */
-:host ::ng-deep .hero-carousel
-.p-carousel-item-active.p-carousel-item-start .banner {
+:host ::ng-deep .hero-carousel .p-carousel-item-active.p-carousel-item-start .banner {
   transform: scaleX(0.75);
-  transform-origin: left center;   /* 往外側縮 */
+  transform-origin: left center;
+  /* 往外側縮 */
 }
 
-:host ::ng-deep .hero-carousel
-.p-carousel-item-active.p-carousel-item-end .banner {
+:host ::ng-deep .hero-carousel .p-carousel-item-active.p-carousel-item-end .banner {
   transform: scaleX(0.75);
-  transform-origin: right center;  /* 往外側縮 */
+  transform-origin: right center;
+  /* 往外側縮 */
 }
 
 /* 中間放大：60% */
-:host ::ng-deep .hero-carousel
-.p-carousel-item-active:not(.p-carousel-item-start):not(.p-carousel-item-end) .banner {
+:host ::ng-deep .hero-carousel .p-carousel-item-active:not(.p-carousel-item-start):not(.p-carousel-item-end) .banner {
   transform: scaleX(1.5) scaleY(1.25);
   transform-origin: center;
-  z-index: 5; /* 中間仍在上層（但因為左右靠外，不會互蓋） */
+  z-index: 5;
+  /* 中間仍在上層（但因為左右靠外，不會互蓋） */
 }
 
 /* 6) 遮罩：中間透明（更穩的 selector） */
@@ -179,8 +192,8 @@
   opacity: 1;
   transition: opacity 0.4s ease-in-out;
 }
-:host ::ng-deep .hero-carousel
-.p-carousel-item-active:not(.p-carousel-item-start):not(.p-carousel-item-end) .banner-mask {
+
+:host ::ng-deep .hero-carousel .p-carousel-item-active:not(.p-carousel-item-start):not(.p-carousel-item-end) .banner-mask {
   opacity: 0;
 }
 
@@ -189,41 +202,45 @@
   :host ::ng-deep .hero-carousel .p-carousel-viewport {
     padding-inline: 0;
   }
+
   :host ::ng-deep .hero-carousel .p-carousel-viewport::before,
   :host ::ng-deep .hero-carousel .p-carousel-viewport::after {
     display: none;
   }
+
   :host ::ng-deep .hero-carousel .banner {
     transform: none !important;
   }
+
   :host ::ng-deep .hero-carousel .carousel-item-wrapper {
     justify-content: center !important;
   }
 }
 
 /* 左右（有遮罩那兩張）隱藏文字，只保留中間 */
-:host ::ng-deep .hero-carousel
-.p-carousel-item-active.p-carousel-item-start .banner-title,
-:host ::ng-deep .hero-carousel
-.p-carousel-item-active.p-carousel-item-end .banner-title {
+:host ::ng-deep .hero-carousel .p-carousel-item-active.p-carousel-item-start .banner-title,
+:host ::ng-deep .hero-carousel .p-carousel-item-active.p-carousel-item-end .banner-title {
   display: none !important;
 }
 
 /* 中間卡片 scaleX(2)，把 title 反向 scaleX(0.5) 抵消掉 */
-:host ::ng-deep .hero-carousel
-.p-carousel-item-active:not(.p-carousel-item-start):not(.p-carousel-item-end) .banner-title {
+:host ::ng-deep .hero-carousel .p-carousel-item-active:not(.p-carousel-item-start):not(.p-carousel-item-end) .banner-title {
   transform: scaleX(0.7) scaleY(0.8);
   transform-origin: left bottom;
 
   /* 因為父層放大後 left/bottom 也被放大，這裡一起校正回來 */
-  left: 0.5rem !important;   /* 原本 left-4 = 1rem，放大會變 2rem，所以設 0.5rem 抵消 */
-  bottom: 0.5rem !important; /* 同理 */
+  left: 0.5rem !important;
+  /* 原本 left-4 = 1rem，放大會變 2rem，所以設 0.5rem 抵消 */
+  bottom: 0.5rem !important;
+  /* 同理 */
 }
 
 :host ::ng-deep .hero-carousel {
+
   /* 1. 最外層容器：給予足夠的上下 padding 讓放大後的圖片有空間 */
   .p-carousel-content {
-    padding: 40px 0; /* 數值取決於你 scaleY 放大的比例 */
+    padding: 40px 0;
+    /* 數值取決於你 scaleY 放大的比例 */
     overflow: visible !important;
   }
 
@@ -243,3 +260,16 @@
     overflow: visible !important;
   }
 }
+
+/* ✅ 非 active 的 item，一律不顯示 title（含第1/第5張偷露出的情況） */
+:host ::ng-deep .hero-carousel .p-carousel-item:not(.p-carousel-item-active) .banner-title {
+  display: none !important;
+}
+
+@media (max-width: 560px) {
+  :host ::ng-deep .hero-carousel
+  .p-carousel-item-active .banner-title {
+    display: block !important;
+  }
+}
+
