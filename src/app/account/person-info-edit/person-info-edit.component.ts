@@ -7,6 +7,7 @@ import { HttpService } from '../../@service/http.service';
 import { Router } from '@angular/router';
 import { ImageService, ImageType } from '../../@service/image.service';
 import { FileUploadModule } from 'primeng/fileupload';
+import { finalize } from 'rxjs/operators';
 
 @Component({
   selector: 'app-person-info-edit',
@@ -226,18 +227,26 @@ export class PersonInfoEditComponent {
     });
   }
 
-  // 修改信箱
-  async changeEmail() {
+  private normalizeEmail(email: string) {
+    return (email ?? '').trim().toLowerCase();
+  }
 
-    if (!this.editInfo || !this.editInfo.id) {
+
+  // 修改信箱
+  async changeEmail(e?: Event) {
+    e?.preventDefault();
+    e?.stopPropagation();
+
+    if (!this.editInfo?.id) {
       Swal.fire({
         icon: 'error',
         title: '操作失敗',
         text: '無法取得您的使用者資訊，請嘗試重新登入。',
         confirmButtonText: '確定'
       });
-      return; // 直接中斷，不執行後續邏輯
+      return;
     }
+
     const { value: newEmail } = await Swal.fire({
       title: '修改電子郵件',
       input: 'email',
@@ -247,24 +256,43 @@ export class PersonInfoEditComponent {
       confirmButtonText: '發送驗證碼',
       preConfirm: (value) => {
         if (!value) return Swal.showValidationMessage('請輸入有效的 Email');
-        if (value == this.user?.email) return Swal.showValidationMessage('新信箱不可與目前信箱相同');
-        return value;
+
+        const inputEmail = value.trim().toLowerCase();
+        const currentEmail = (this.user?.email || this.editInfo?.email || '').trim().toLowerCase();
+
+        if (inputEmail === currentEmail) {
+          return Swal.showValidationMessage('新信箱不可與目前信箱相同');
+        }
+        return inputEmail;
       }
     });
 
     if (!newEmail) return;
 
-    Swal.fire({ title: '發送中...', didOpen: () => Swal.showLoading(), allowOutsideClick: false });
+    Swal.fire({
+      title: '發送中...',
+      didOpen: () => Swal.showLoading(),
+      allowOutsideClick: false
+    });
 
-    const userId = this.editInfo?.id;
-    if (!userId) {
-      console.error("ID 遺失");
-      return;
-    }
+    const userId = this.editInfo.id;
+
     const sendOtpUrl = `http://localhost:8080/gogobuy/user/send-otp?id=${userId}`;
 
     this.http.postApi(sendOtpUrl, { email: newEmail }).subscribe({
-      next: async () => {
+      next: async (res: any) => {
+        Swal.close();
+
+        if (res?.code && res.code !== 200) {
+          Swal.fire({
+            icon: 'error',
+            title: '發送失敗',
+            text: res.message || '該信箱已被使用',
+            confirmButtonText: '確定'
+          });
+          return;
+        }
+
         const { value: otpCode } = await Swal.fire({
           title: '驗證您的新信箱',
           text: `驗證碼已寄送到 ${newEmail}`,
@@ -273,31 +301,54 @@ export class PersonInfoEditComponent {
           confirmButtonText: '驗證並修改',
           showCancelButton: true,
           allowOutsideClick: false,
-          cancelButtonText: '取消',
           preConfirm: (value) => {
             if (!value) return Swal.showValidationMessage('請輸入驗證碼');
             return value;
           }
         });
 
-        if (otpCode) {
-          this.auth.emailVerify(this.editInfo.id, newEmail, otpCode).subscribe({
-            next: (res) => {
-              Swal.fire('成功', 'Email 已更新', 'success');
-              this.user.email = newEmail;
-              this.auth.logout();
-            },
-            error: (err) => {
-              Swal.fire('失敗', err.error?.message || '驗證失敗', 'error');
+        if (!otpCode) return;
+
+        this.auth.emailVerify(userId, newEmail, otpCode).subscribe({
+          next: async (res: any) => {
+
+            if (res?.code !== 200) {
+              Swal.fire({
+                icon: 'error',
+                title: '修改失敗',
+                text: res?.message || '驗證失敗',
+              });
+              return;
             }
-          });
-        }
-      },
-      error: (err) => {
-        Swal.fire('發送失敗', '無法發送驗證碼，請稍後再試', 'error');
+
+            await Swal.fire({
+              icon: 'success',
+              title: '成功',
+              text: 'Email 已更新，請重新登入',
+              showConfirmButton: false,
+              timer: 2000,
+              timerProgressBar: true,
+            });
+
+            this.user.email = newEmail;
+            this.editInfo.email = newEmail;
+            this.auth.logout();
+          },
+
+          error: (err) => {
+            Swal.fire({
+              icon: 'error',
+              title: '修改失敗',
+              text: err?.error?.message || '驗證失敗',
+            });
+          }
+        });
+
       }
     });
   }
+
+
 
   // 修改密碼 sweetAlert
   changePassword() {
