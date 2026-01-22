@@ -17,6 +17,7 @@ import { Router } from '@angular/router';
 import { PanelModule } from 'primeng/panel';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { AuthService } from '../@service/auth.service';
+import { SelectModule } from 'primeng/select';
 
 
 export type Stores = {
@@ -54,7 +55,7 @@ export interface Banner {
 }
 
 
-export interface Store{
+export interface Store {
   "id": number,
   "name": string,
   "phone": string,
@@ -85,6 +86,7 @@ export interface Store{
     TabsModule,
     TooltipModule,
     PanelModule,
+    SelectModule,
   ],
   templateUrl: './gogo-buy.component.html',
   styleUrl: './gogo-buy.component.scss'
@@ -95,7 +97,7 @@ export class GogoBuyComponent {
     private http: HttpService,
     private sanitizer: DomSanitizer,
     public auths: AuthService
-  ) {}
+  ) { }
 
   readonly storeStage = signal<0 | 1>(0);
   readonly storeInitial = 5;   // 初始顯示
@@ -119,14 +121,14 @@ export class GogoBuyComponent {
   // 一進來就先指定中間那張 = 1（因為 page 預設從 0 開始，visible=3 中間就是 0+1）
   centerIndex = 1;
 
-  activeTab:any="allstores";  // tab 預設值
+  activeTab: any = "allstores";  // tab 預設值
   @ViewChild(Tooltip) tooltip!: Tooltip;
-  storeList:Store[]=[];
-  openStoreList:Store[]=[];
-  closeStoreList:Store[]=[];
-  private idleTimer:any;
+  storeList: Store[] = [];
+  openStoreList: Store[] = [];
+  closeStoreList: Store[] = [];
+  private idleTimer: any;
   visibleTooltip: boolean = true;
-  storeSearch!:string;
+  storeSearch!: string;
   allStoresBackup: Store[] = []; // 備份完整清單
 
 
@@ -236,10 +238,10 @@ export class GogoBuyComponent {
         deleted: false, publish: true, force_closed: false, created_by: "e1d2c3b4-a5f6-4a7b-8c9d-0e1f2a3b4c5d"
       }
     ];
-    this.storeList=this.storeList.filter(store=>!store.deleted&&store.publish);
-    this.allStoresBackup=this.storeList;
-    this.openStoreList=this.storeList.filter(store=>!store.force_closed);
-    this.closeStoreList=this.storeList.filter(store=>store.force_closed);
+    this.storeList = this.storeList.filter(store => !store.deleted && store.publish);
+    this.allStoresBackup = this.storeList;
+    this.openStoreList = this.storeList.filter(store => !store.force_closed);
+    this.closeStoreList = this.storeList.filter(store => store.force_closed);
   }
 
   // 監聽全域滑鼠移動
@@ -456,11 +458,11 @@ export class GogoBuyComponent {
   ];
 
 
-  visible:boolean = false;
+  visible: boolean = false;
   showDialog() {
     this.visible = true;
     this.disableScroll();
-    this.storeSearch="";  // 搜尋初始化
+    this.storeSearch = "";  // 搜尋初始化
     this.letterSearch();  // 資料回整
   }
   disableScroll() {
@@ -495,8 +497,8 @@ export class GogoBuyComponent {
     const searchKey = this.storeSearch.toLowerCase().trim();
     if (!searchKey) {  // 搜尋資料不存在，還原成完整清單
       this.storeList = [...this.allStoresBackup];
-      this.openStoreList=this.storeList.filter(store=>!store.force_closed);
-      this.closeStoreList=this.storeList.filter(store=>store.force_closed);
+      this.openStoreList = this.storeList.filter(store => !store.force_closed);
+      this.closeStoreList = this.storeList.filter(store => store.force_closed);
       this.activeTab = 'allstores';
     }
     if (searchKey && searchKey.length > 0) {  // 有搜尋資料，tab回到"全部店家"
@@ -507,8 +509,8 @@ export class GogoBuyComponent {
       const storeName = store.name.toLowerCase();
       return eachLetter.every(char => storeName.includes(char));
     });
-    this.openStoreList=this.storeList.filter(store=>!store.force_closed);
-    this.closeStoreList=this.storeList.filter(store=>store.force_closed);
+    this.openStoreList = this.storeList.filter(store => !store.force_closed);
+    this.closeStoreList = this.storeList.filter(store => store.force_closed);
   }
   highlight(text: string): SafeHtml {
     // 1. 如果沒有搜尋字串、沒有內容，或是搜尋字串全是空白，直接回傳原文字
@@ -532,7 +534,7 @@ export class GogoBuyComponent {
     return this.sanitizer.bypassSecurityTrustHtml(result);
   }
 
-  addStore(){
+  addStore() {
     // 跳轉前手動銷毀 Tooltip，防止文字殘留
     if (this.tooltip) {
       this.tooltip.deactivate();
@@ -543,7 +545,7 @@ export class GogoBuyComponent {
     this.enableScroll();
     this.router.navigate(['/management/store_upsert']);
   }
-  goStoreInfo(storeId:number){
+  goStoreInfo(storeId: number) {
     // 跳轉前手動銷毀 Tooltip，防止文字殘留
     if (this.tooltip) {
       this.tooltip.deactivate();
@@ -554,6 +556,50 @@ export class GogoBuyComponent {
     this.enableScroll();
     this.router.navigate(['/management/store_info', storeId]);
   }
+
+  /* 開團 TYPE filtered */
+  // 在 p-select 改值，這個 signal 就會更新，進而觸發下面的 computed 重新計算(正在開團中的TYPE)
+  readonly selectedType = signal<string>('ALL');
+
+  // 取 type 的工具(.trim()避免後端塞空白造成「看起來一樣、其實字串不同」)
+  private getEventType(e: any): string {
+    return (e.type).trim();
+  }
+
+  // p-select 的 options
+  readonly eventTypeOptions = computed(() => {
+
+    // 從 events 抽出每筆的 type
+    const types = this.auths.events().map(e => this.getEventType(e));
+
+    // 統計各 type 出現次數
+    const count = new Map<string, number>();
+    for (const t of types) count.set(t, (count.get(t) ?? 0) + 1);
+
+    // 變成 p-select 要的 [{label, value}] 格式
+    const unique = Array.from(count.keys()).sort((a, b) => a.localeCompare(b, 'zh-Hant'));
+
+    // 額外加一個「全部」
+    return [
+      { label: `全部 (${types.length})`, value: 'ALL' },
+      ...unique.map(t => ({ label: `${t} (${count.get(t)})`, value: t })),
+    ];
+  });
+
+
+  // 篩選開團
+  readonly filteredEventCards = computed(() => {
+
+    // 使用者選到的類別
+    const t = this.selectedType();
+
+    // 你已經 join 店家後的卡片資料
+    const cards = this.eventCards();
+
+    if (t == 'ALL') return cards;
+    return cards.filter(c => this.getEventType(c) == t);
+  });
+
 }
 
 

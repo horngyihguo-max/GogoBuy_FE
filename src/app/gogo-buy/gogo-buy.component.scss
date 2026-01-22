@@ -212,7 +212,7 @@
 /* 中間卡片 scaleX(2)，把 title 反向 scaleX(0.5) 抵消掉 */
 :host ::ng-deep .hero-carousel
 .p-carousel-item-active:not(.p-carousel-item-start):not(.p-carousel-item-end) .banner-title {
-  transform: scaleX(0.5);
+  transform: scaleX(0.7) scaleY(0.8);
   transform-origin: left bottom;
 
   /* 因為父層放大後 left/bottom 也被放大，這裡一起校正回來 */
