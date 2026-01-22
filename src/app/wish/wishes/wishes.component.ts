@@ -99,13 +99,19 @@ export class WishesComponent implements OnInit {
   typeOptions: WishType[] = ['手搖店', '餐廳', '生鮮雜貨'];
 
   ngOnInit(): void {
-    // 先刷新用戶資料
-    // this.auth.refreshUser();
-    // TODO 確保有 user（沒有就先用假資料）
-    // this.userId = this.auth.user?.id || '';
-    this.userId = this.auth.user?.id || '12b7bf42-57af-4e3f-acfc-b9a2ba3342aa';
-    // this.timesRemaining = this.auth.user?.timesRemaining || 0;
-    this.timesRemaining = this.auth.user?.timesRemaining || 3;
+    // 訂閱 User 狀態流
+    this.auth.user$.subscribe(user => {
+      if (user) {
+        console.log('接收到用戶資料:', user);
+        this.userId = user.id;
+        this.timesRemaining = user.timesRemaining;
+      }
+    });
+    // 刷新資料
+    this.auth.refreshUser();
+
+    console.log("用戶id : "+this.userId)
+    console.log("許願次數 : "+this.timesRemaining)
 
     // 先用假資料（後端上線再換成 GET）
     this.loadWishes();
