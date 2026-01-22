@@ -76,6 +76,8 @@ export class StoreInfoComponent implements OnInit {
     // this.userId = this.auth.user?.id || '12b7bf42-57af-4e3f-acfc-b9a2ba3342aa';
     this.userId = String(localStorage.getItem('user_id'));
     console.log(this.userId);
+    // 刷新用戶資料
+    this.auth.refreshUser();
 
     // 取路由 id
     const idStr = this.route.snapshot.paramMap.get('id');
@@ -163,7 +165,7 @@ export class StoreInfoComponent implements OnInit {
   // 進入時回上一頁
   // =========================
   goBack(): void {
-    // 你也可以換成 router.navigate 到列表頁
+    // 也可以換成 router.navigate 到列表頁
     window.history.back();
   }
 
@@ -614,6 +616,14 @@ export class StoreInfoComponent implements OnInit {
     body.style.overflowY = '';
 
     window.scrollTo(0, -parseInt(scrollY || '0'));
+  }
+
+  // 地址帶入GoogleMap ==========================================================
+  getMap(address: string | undefined){
+    if (!address) return '#';
+    const gmap = "https://www.google.com/maps/search/?api=1&query=";
+    let mapUrl = gmap + encodeURIComponent(address);
+    return mapUrl;
   }
 
   // =========================

@@ -45,10 +45,10 @@ export class WishesComponent implements OnInit {
   ) {}
 
   // =========================
-  // TODO 測試暫用：未登入也給假 userId (在ngOnInit)
+  // 用戶資料(ngOnInt注入)
   // =========================
   userId: string = '';
-  timesRemaining = 0; // 測試應急用願望次數
+  timesRemaining = 0;
 
   // =========================
   // UI 狀態

@@ -111,7 +111,9 @@
                     # {{ store?.type || "未知類型" }}
                   </span>
                   @if (store?.category) {
-                    <div class="text-[17px] font-semibold px-3 py-1 rounded-full bg-sky-300/30 text-sky-800">
+                    <div
+                      class="text-[17px] font-semibold px-3 py-1 rounded-full bg-sky-300/30 text-sky-800"
+                    >
                       {{ getCategoryName(store?.category) }}
                     </div>
                   }
@@ -119,9 +121,12 @@
 
                 <div class="flex items-center gap-2">
                   <i class="pi pi-map-marker text-red-900"></i>
-                  <span class="font-semibold text-[17px]">{{
-                    store?.address || "—"
-                  }}</span>
+                  <a
+                    class="font-semibold text-[17px] hover:underline cursor-pointer text-teal-700"
+                    target="_blank"
+                    [href]="getMap(store?.address)"
+                    >{{ store?.address || "—" }}</a
+                  >
                 </div>
 
                 <div class="flex items-center gap-2">
