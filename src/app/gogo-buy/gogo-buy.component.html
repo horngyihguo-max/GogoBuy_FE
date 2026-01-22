@@ -42,7 +42,7 @@
         <p-floatlabel variant="on">
           <p-select inputId="event_type" [options]="eventTypeOptions()" optionLabel="label" optionValue="value"
             [ngModel]="selectedType()" (ngModelChange)="selectedType.set($event ?? 'ALL')" [filter]="true"
-            [showClear]="true" placeholder="全部" styleClass="w-full"></p-select>
+            [showClear]="false" placeholder="全部" styleClass="w-full"></p-select>
         </p-floatlabel>
       </div>
 
