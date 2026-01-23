@@ -98,7 +98,9 @@ export class AppComponent {
     // 初始載入
     this.auths.performSearch('');
     this.auths.loadAllEventsOnce();
+
   }
+
 
   // 切換搜尋模式
   searchMode = signal<SearchMode>('store');

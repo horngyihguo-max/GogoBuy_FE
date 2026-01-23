@@ -312,7 +312,7 @@ export class PersonInfoEditComponent {
         this.auth.emailVerify(userId, newEmail, otpCode).subscribe({
           next: async (res: any) => {
 
-            if (res?.code !== 200) {
+            if (res?.code != 200) {
               Swal.fire({
                 icon: 'error',
                 title: '修改失敗',

@@ -36,15 +36,27 @@
         正在開團中
       </span>
 
-      <!-- 開團TYPE選擇 -->
-      <div class="font-bold w-[150px] h-[50px] text-[16px] ml-[5px]
-                  md:w-[170px] md:h-[45px] md:ml-[1vw] md:text-[15px]">
-        <p-floatlabel variant="on">
-          <p-select inputId="event_type" [options]="eventTypeOptions()" optionLabel="label" optionValue="value"
-            [ngModel]="selectedType()" (ngModelChange)="selectedType.set($event ?? 'ALL')" [filter]="true"
-            [showClear]="false" placeholder="全部" styleClass="w-full"></p-select>
-        </p-floatlabel>
+      <!-- TYPE：外部搜尋 + 漏斗開啟多選面板 -->
+      <!-- 固定一個 50x50 的錨點區塊 -->
+      <div class="relative h-[50px] w-[50px] md:h-[45px] md:w-[45px]">
+
+        <!-- 漏斗 icon -->
+        <button type="button" class="h-full w-full rounded-xl border border-slate-200 bg-white
+           flex items-center justify-center hover:border-slate-300 active:scale-[0.98]"
+          (click)="toggleTypePanel($event)" aria-label="開啟類別篩選">
+          <i class="pi pi-filter text-slate-700"></i>
+        </button>
+
+        <!-- p-multiselect：疊在同一格，當定位錨點用（不吃點擊） -->
+        <p-multiselect [options]="eventTypeOptionsFiltered()" optionLabel="label" optionValue="value"
+          [ngModel]="selectedTypes()" (ngModelChange)="selectedTypes.set($event ?? [])" [filter]="true"
+          [showToggleAll]="true" [showClear]="false" display="chip" appendTo="body" [overlayVisible]="typePanelOpen()"
+          (onPanelHide)="typePanelOpen.set(false)" [panelStyle]="{ 'min-width': '240px', 'margin-top': '8px' }"
+          styleClass="type-ms-anchor"></p-multiselect>
+
       </div>
+
+
 
       <button (click)="showDialog()" title="開新團" class="
       /* 1. 手機版基礎樣式 (Mobile First) */
@@ -104,7 +116,7 @@
           </h3>
           <div class="flex items-center justify-between mt-4 opacity-0 group-hover:opacity-100 transition-opacity">
             <span class="text-white/80 text-xs">開團者：{{ event.nickname }} <br> 結束時間：{{ formatDateTime(event.endTime) }}
-</span>
+            </span>
             <i class="pi pi-arrow-right text-white text-xs"></i>
           </div>
         </div>
@@ -135,7 +147,8 @@
 
       @for (item of visibleStores(); track item.id;) {
       <div class="group relative overflow-hidden rounded-3xl bg-slate-200 min-h-[200px] w-full shadow-md
-      hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 cursor-pointer ">
+      hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 cursor-pointer "
+        (click)="goStoreInfo(item.id)">
         <img [src]="item.image" (error)="item.image = 'https://picsum.photos/800/600?random=' + item.id"
           class="absolute inset-0 w-full h-full object-cover transition-transform group-hover:scale-105" />
         <div

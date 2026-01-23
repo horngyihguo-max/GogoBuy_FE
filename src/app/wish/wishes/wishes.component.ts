@@ -15,7 +15,6 @@ import Swal from 'sweetalert2';
 import { HttpService } from '../../@service/http.service';
 import { AuthService } from '../../@service/auth.service';
 
-type WishType = '手搖店' | '餐廳' | '生鮮雜貨';
 type MyFilter = 'all' | 'active' | 'finished' | 'expired';
 type FoFilter = 'all' | 'active' | 'finished' | 'expired';
 
@@ -96,7 +95,7 @@ export class WishesComponent implements OnInit {
   ];
 
   // 三種 type 固定（新增願望 select 也是用這個）
-  typeOptions: WishType[] = ['手搖店', '餐廳', '生鮮雜貨'];
+  typeOptions: any[] = ['手搖店', '餐廳', '生鮮雜貨'];
 
   ngOnInit(): void {
     // 訂閱 User 狀態流
@@ -113,12 +112,11 @@ export class WishesComponent implements OnInit {
     console.log("用戶id : "+this.userId)
     console.log("許願次數 : "+this.timesRemaining)
 
-    // 先用假資料（後端上線再換成 GET）
     this.loadWishes();
   }
 
   // =========================
-  // TODO 載入願望（假資料 / 後續改接 API）
+  // 載入願望
   // =========================
   loadWishes(): void {
     this.isLoading = true;
@@ -145,76 +143,76 @@ export class WishesComponent implements OnInit {
     // ========================================
 
     // 後端上線後使用：
-    // this.http.getApi('http://localhost:8080/gogobuy/all_wishes').subscribe((res: any) => {
-    //   this.wishes = res.allWish || [];
-    //   this.afterLoad();
-    //   this.applyScrollAndHighlight();
-    // });
+    this.http.getApi('http://localhost:8080/gogobuy/wish/all_wishes').subscribe((res: any) => {
+      this.wishes = res.allWish || [];
+      this.afterLoad();
+      this.applyScrollAndHighlight();
+    });
 
     // 假資料
-    this.wishes = [
-      {
-        id: 1,
-        user_id: '5274e1a0-40cd-4e2b-9528-a3779e2f84a6',
-        nickname: '小林',
-        title: '喝不喝五十嵐（這邊故意做很長很長用來測試省略）',
-        followers: [
-          '74db5f21-f331-4824-853b-0be13d633c80',
-          '12b7bf42-57af-4e3f-acfc-b9a2ba3342aa',
-        ],
-        finished: false,
-        type: '手搖店',
-        buildDate: '2026-01-09',
-        location: '資安大樓（這邊也做很長測測測測測測測測測試）',
-      },
-      {
-        id: 2,
-        user_id: '12b7bf42-57af-4e3f-acfc-b9a2ba3342aa',
-        nickname: null,
-        title: '全聯火鍋吃起來',
-        followers: [],
-        finished: false,
-        type: '生鮮雜貨',
-        buildDate: '2026-01-06',
-        location: '台南市歸仁區',
-      },
-      {
-        id: 3,
-        user_id: '74db5f21-f331-4824-853b-0be13d633c80',
-        nickname: null,
-        title: '大祥燒臘',
-        followers: ['12b7bf42-57af-4e3f-acfc-b9a2ba3342aa'],
-        finished: false,
-        type: '餐廳',
-        buildDate: '2026-01-01',
-        location: '資安大樓',
-      },
-      {
-        id: 4,
-        user_id: '12b7bf42-57af-4e3f-acfc-b9a2ba3342aa',
-        nickname: null,
-        title: '我好想喝迷克夏',
-        followers: ['74db5f21-f331-4824-853b-0be13d633c80'],
-        finished: true,
-        type: '手搖店',
-        buildDate: '2026-01-05',
-        location: '高雄小港',
-      },
-      {
-        id: 5,
-        user_id: '12b7bf42-57af-4e3f-acfc-b9a2ba3342aa',
-        nickname: null,
-        title: '可不可要不要',
-        followers: ['74db5f21-f331-4824-853b-0be13d633c80'],
-        finished: false,
-        type: '餐廳',
-        buildDate: '2025-10-01',
-        location: '資安大樓',
-      },
-    ];
+    // this.wishes = [
+    //   {
+    //     id: 1,
+    //     user_id: '5274e1a0-40cd-4e2b-9528-a3779e2f84a6',
+    //     nickname: '小林',
+    //     title: '喝不喝五十嵐（這邊故意做很長很長用來測試省略）',
+    //     followers: [
+    //       '74db5f21-f331-4824-853b-0be13d633c80',
+    //       '12b7bf42-57af-4e3f-acfc-b9a2ba3342aa',
+    //     ],
+    //     finished: false,
+    //     type: '手搖店',
+    //     buildDate: '2026-01-09',
+    //     location: '資安大樓（這邊也做很長測測測測測測測測測試）',
+    //   },
+    //   {
+    //     id: 2,
+    //     user_id: '12b7bf42-57af-4e3f-acfc-b9a2ba3342aa',
+    //     nickname: null,
+    //     title: '全聯火鍋吃起來',
+    //     followers: [],
+    //     finished: false,
+    //     type: '生鮮雜貨',
+    //     buildDate: '2026-01-06',
+    //     location: '台南市歸仁區',
+    //   },
+    //   {
+    //     id: 3,
+    //     user_id: '74db5f21-f331-4824-853b-0be13d633c80',
+    //     nickname: null,
+    //     title: '大祥燒臘',
+    //     followers: ['12b7bf42-57af-4e3f-acfc-b9a2ba3342aa'],
+    //     finished: false,
+    //     type: '餐廳',
+    //     buildDate: '2026-01-01',
+    //     location: '資安大樓',
+    //   },
+    //   {
+    //     id: 4,
+    //     user_id: '12b7bf42-57af-4e3f-acfc-b9a2ba3342aa',
+    //     nickname: null,
+    //     title: '我好想喝迷克夏',
+    //     followers: ['74db5f21-f331-4824-853b-0be13d633c80'],
+    //     finished: true,
+    //     type: '手搖店',
+    //     buildDate: '2026-01-05',
+    //     location: '高雄小港',
+    //   },
+    //   {
+    //     id: 5,
+    //     user_id: '12b7bf42-57af-4e3f-acfc-b9a2ba3342aa',
+    //     nickname: null,
+    //     title: '可不可要不要',
+    //     followers: ['74db5f21-f331-4824-853b-0be13d633c80'],
+    //     finished: false,
+    //     type: '餐廳',
+    //     buildDate: '2025-10-01',
+    //     location: '資安大樓',
+    //   },
+    // ];
 
-    this.afterLoad();
-    this.applyScrollAndHighlight();
+    // this.afterLoad();
+    // this.applyScrollAndHighlight();
     // 這邊實際上線時記得要刪掉
   }
 
@@ -281,6 +279,17 @@ export class WishesComponent implements OnInit {
   // =========================
   // 三種 type 顏色 + 狀態顏色
   // =========================
+  // 把英文轉成中文顯示
+  typeforHtml(type: string) {
+    if(type === "beverage"){
+      return "手搖店";
+    }
+    if(type === "restaurant"){
+      return "餐廳";
+    }
+    return "生鮮雜貨";
+  }
+
   getCardClass(wish: any): string {
     const expired = this.isExpired(wish.buildDate);
     const finished = this.isFinished(wish);
@@ -296,9 +305,9 @@ export class WishesComponent implements OnInit {
     }
 
     // 進行中：依 type 三色淡底
-    const type: WishType = wish.type;
-    if (type === '手搖店') return 'bg-sky-100 border-sky-200 text-red-900';
-    if (type === '餐廳') return 'bg-[#FFF1E6] border-[#FFD9C2] text-red-900';
+    const type = wish.type;
+    if (type === 'beverage') return 'bg-sky-100 border-sky-200 text-red-900';
+    if (type === 'restaurant') return 'bg-[#FFF1E6] border-[#FFD9C2] text-red-900';
     return 'bg-[#EAF6EF] border-[#CFE9DA] text-red-900'; // 生鮮雜貨
   }
 
@@ -309,9 +318,9 @@ export class WishesComponent implements OnInit {
     if (expired) return 'bg-gray-200 text-gray-600';
     if (finished) return 'bg-amber-100 text-amber-600';
 
-    const type: WishType = wish.type;
-    if (type === '手搖店') return 'bg-blue-900/10 text-blue-800';
-    if (type === '餐廳') return 'bg-[#D5451B]/10 text-[#D5451B]';
+    const type = wish.type;
+    if (type === 'beverage') return 'bg-blue-900/10 text-blue-800';
+    if (type === 'restaurant') return 'bg-[#D5451B]/10 text-[#D5451B]';
     return 'bg-emerald-700/10 text-emerald-800';
   }
 
@@ -519,7 +528,7 @@ export class WishesComponent implements OnInit {
   // 表單資料（先用最小可行）
   createForm = {
     title: '',
-    type: '手搖店' as WishType,
+    type: '手搖店',
     location: '',
     anonymous: false,
   };
@@ -527,7 +536,7 @@ export class WishesComponent implements OnInit {
   isCreating = false;
 
   // =========================
-  // TODO 右上角「我要許願」
+  // 右上角「我要許願」
   // =========================
   onCreateWish(): void {
     // 未登入防呆（目前測試會有假 userId，所以通常不會觸發）
@@ -563,13 +572,23 @@ export class WishesComponent implements OnInit {
     this.isCreating = false;
   }
 
+  typeChange(type: string) {
+    if(type === "手搖店"){
+      return "beverage";
+    }
+    if(type === "餐廳"){
+      return "restaurant";
+    }
+    return "groceries";
+  }
+
   // 送出（dialog 的送出按鈕呼叫）
   submitCreateWish(): void {
     if (this.isCreating) return;
 
     const title = this.createForm.title?.trim();
     const location = this.createForm.location?.trim();
-    const type = this.createForm.type;
+    const type = this.typeChange(this.createForm.type);
     const anonymous = this.createForm.anonymous;
 
     if (!title) {
@@ -580,6 +599,7 @@ export class WishesComponent implements OnInit {
       this.toastWarn('提醒', '請輸入地點');
       return;
     }
+
 
     const payload = {
       userId: this.userId,
@@ -593,45 +613,45 @@ export class WishesComponent implements OnInit {
     console.log('送出新增資料：' + JSON.stringify(payload, null, 2));
 
     // 後端上線後使用（成功再刷新/更新畫面）
-    // this.http.postApi('http://localhost:8080/gogobuy/add_wishes', payload).subscribe((res: any) => {
-    //   this.isCreating = false;
-    //   if (res?.code === 200) {
-    //     this.toastSuccess('成功', '創建成功');
-    //     this.timesRemaining -= 1;
-    //     this.closeCreateDialog();
-    //     this.loadWishes(); // 重新抓一次
-    //   } else {
-    //     this.toastWarn('失敗', res?.message || '創建失敗');
-    //   }
-    // });
+    this.http.postApi('http://localhost:8080/gogobuy/wish/add_wishes', payload).subscribe((res: any) => {
+      this.isCreating = false;
+      if (res?.code === 200) {
+        this.toastSuccess('成功', '創建成功');
+        this.timesRemaining -= 1;
+        this.closeCreateDialog();
+        this.loadWishes(); // 重新抓一次
+      } else {
+        this.toastWarn('失敗', res?.message || '創建失敗');
+      }
+    });
 
     // 測試：直接前端新增
-    const newWish = {
-      id: Date.now(),
-      user_id: this.userId,
-      nickname:
-        payload.anonymous === 'true' ? null : this.auth.user?.nickname ?? null,
-      title: payload.title,
-      followers: [],
-      finished: false,
-      type: payload.type,
-      buildDate: new Date().toISOString().slice(0, 10),
-      location: payload.location,
-    };
+    // const newWish = {
+    //   id: Date.now(),
+    //   user_id: this.userId,
+    //   nickname:
+    //     payload.anonymous === 'true' ? null : this.auth.user?.nickname ?? null,
+    //   title: payload.title,
+    //   followers: [],
+    //   finished: false,
+    //   type: payload.type,
+    //   buildDate: new Date().toISOString().slice(0, 10),
+    //   location: payload.location,
+    // };
 
-    this.wishes = [newWish, ...this.wishes];
-    this.setRandomNicknamesOnce();
-    this.timesRemaining -= 1;
+    // this.wishes = [newWish, ...this.wishes];
+    // this.setRandomNicknamesOnce();
+    // this.timesRemaining -= 1;
 
-    this.toastSuccess('成功', '創建成功');
-    this.resetPages();
+    // this.toastSuccess('成功', '創建成功');
+    // this.resetPages();
 
-    this.isCreating = false;
-    this.closeCreateDialog();
+    // this.isCreating = false;
+    // this.closeCreateDialog();
   }
 
   // =========================
-  // TODO 跟願 / 取消跟願（同 API）
+  // 跟願 / 取消跟願（同 API）
   // =========================
   onToggleFollow(wish: any): void {
     if (!this.userId) {
@@ -645,32 +665,32 @@ export class WishesComponent implements OnInit {
     }
 
     // 後端上線後使用：(if (idx > -1)那邊需要測試)
-    // const url = `http://localhost:8080/gogobuy/follow_wish?id=${wish.id}&userId=${this.userId}`;
-    // this.http.postApi(url, {}).subscribe((res: any) => {
-    //   if (res?.code === 200) {
-    //     if (idx > -1) {
-    //       followers.splice(idx, 1);
-    //       this.toastInfo('已取消', '已取消跟願');
-    //     } else {
-    //       followers.push(this.userId);
-    //       this.toastSuccess('成功', '跟願成功！');
-    //     }
-    //   } else {
-    //     this.toastWarn('失敗', res?.message || '請重新操作');
-    //   }
-    // });
+    const url = `http://localhost:8080/gogobuy/wish/follow_wish?id=${wish.id}&userId=${this.userId}`;
+    this.http.postApi(url, {}).subscribe((res: any) => {
+      if (res?.code === 200) {
+        if (idx > -1) {
+          followers.splice(idx, 1);
+          this.toastInfo('已取消', '已取消跟願');
+        } else {
+          followers.push(this.userId);
+          this.toastSuccess('成功', '跟願成功！');
+        }
+      } else {
+        this.toastWarn('失敗', res?.message || '請重新操作');
+      }
+    });
 
     // 測試：前端直接切換
     const followers: string[] = wish.followers || [];
     const idx = followers.indexOf(this.userId);
 
-    if (idx > -1) {
-      followers.splice(idx, 1);
-      this.toastInfo('已取消', '已取消跟願');
-    } else {
-      followers.push(this.userId);
-      this.toastSuccess('成功', '跟願成功！');
-    }
+    // if (idx > -1) {
+    //   followers.splice(idx, 1);
+    //   this.toastInfo('已取消', '已取消跟願');
+    // } else {
+    //   followers.push(this.userId);
+    //   this.toastSuccess('成功', '跟願成功！');
+    // }
   }
 
   // p-dialog用變數 ----------------------------
@@ -745,7 +765,7 @@ export class WishesComponent implements OnInit {
   }
 
   // =========================
-  // TODO 刪除願望（需接 API）
+  // 刪除願望
   // =========================
   onDeleteWish(wish: any): void {
     if (!this.userId) {
@@ -771,24 +791,24 @@ export class WishesComponent implements OnInit {
       if (!r.isConfirmed) return;
 
       // 後端上線後使用：
-      // const url = `http://localhost:8080/gogobuy/delete_wish?id=${wish.id}&userId=${this.userId}`;
-      // this.http.postApi(url, {}).subscribe((res: any) => {
-      //   if (res?.code === 200) {
-      //     this.toastSuccess('成功', '刪除成功');
-      //     this.closeDetail();
-      //     this.loadWishes();
-      //   } else {
-      //     this.toastWarn('失敗', res?.message || '刪除失敗');
-      //   }
-      // });
+      const url = `http://localhost:8080/gogobuy/wish/delete_wish?id=${wish.id}&userId=${this.userId}`;
+      this.http.postApi(url, {}).subscribe((res: any) => {
+        if (res?.code === 200) {
+          this.toastSuccess('成功', '刪除成功');
+          this.closeDetail();
+          this.loadWishes();
+        } else {
+          this.toastWarn('失敗', res?.message || '刪除失敗');
+        }
+      });
 
       // 測試：直接刪
-      this.wishes = this.wishes.filter((w) => w.id !== wish.id);
-      this.toastSuccess('成功', '刪除成功');
-      this.resetPages();
-      // 關掉p-dialog
-      this.closeDetail();
-      Swal.close();
+      // this.wishes = this.wishes.filter((w) => w.id !== wish.id);
+      // this.toastSuccess('成功', '刪除成功');
+      // this.resetPages();
+      // // 關掉p-dialog
+      // this.closeDetail();
+      // Swal.close();
     });
   }
 

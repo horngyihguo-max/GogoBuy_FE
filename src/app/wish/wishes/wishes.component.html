@@ -27,450 +27,594 @@
             </span>
           </button>
 
-          @if (timesRemaining === 0) {
-          <div class="text-[12px] font-semibold text-[#D5451B]">
-            本月許願次數已達上限
-          </div>
+          @if(!userId){
+            <div class="text-[15px] font-semibold text-[#D5451B]">
+              登入後即可許願
+            </div>
+          } @else if (timesRemaining === 0) {
+            <div class="text-[15px] font-semibold text-[#D5451B]">
+              本月許願次數已達上限
+            </div>
           }
         </div>
       </div>
 
       <!-- Loading -->
       @if (isLoading) {
-      <div class="mt-10 text-center text-gray-600 text-[25px]">
-        <i class="pi pi-spin pi-spinner" style="font-size: 1.5rem"></i>載入願望中...
-      </div>
+        <div class="mt-10 text-center text-gray-600 text-[25px]">
+          <i class="pi pi-spin pi-spinner" style="font-size: 1.5rem"></i
+          >載入願望中...
+        </div>
       } @else {
-      <!-- Tabs -->
-      <p-tabs [(value)]="activeTab" class="mt-6">
-        <!-- 📱 Mobile: Segmented Cards -->
-        <div class="grid grid-cols-3 gap-2 sm:hidden">
-          <button type="button" (click)="activeTab = 0"
-            class="rounded-2xl border px-3 py-3 text-[15px] font-extrabold flex flex-col items-center justify-center gap-1"
-            [ngClass]="
-              activeTab === 0
-                ? 'bg-red-900 text-white border-red-900'
-                : 'bg-white/70 text-red-900 border-white'
-            ">
-            <i class="pi pi-globe text-[18px]"></i>
-            <span class="leading-tight">所有</span>
-          </button>
+        <!-- Tabs -->
+        <p-tabs [(value)]="activeTab" class="mt-6">
+          <!-- 📱 Mobile: Segmented Cards -->
+          <div class="grid grid-cols-3 gap-2 sm:hidden">
+            <button
+              type="button"
+              (click)="activeTab = 0"
+              class="rounded-2xl border px-3 py-3 text-[15px] font-extrabold flex flex-col items-center justify-center gap-1"
+              [ngClass]="
+                activeTab === 0
+                  ? 'bg-red-900 text-white border-red-900'
+                  : 'bg-white/70 text-red-900 border-white'
+              "
+            >
+              <i class="pi pi-globe text-[18px]"></i>
+              <span class="leading-tight">所有</span>
+            </button>
 
-          <button type="button" (click)="activeTab = 1" [disabled]="!userId"
-            class="rounded-2xl border px-3 py-3 text-[15px] font-extrabold flex flex-col items-center justify-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
-            [ngClass]="
-              activeTab === 1
-                ? 'bg-red-900 text-white border-red-900'
-                : 'bg-white/70 text-red-900 border-white'
-            ">
-            <i class="pi pi-heart text-[18px]"></i>
-            <span class="leading-tight">跟隨</span>
-          </button>
+            <button
+              type="button"
+              (click)="activeTab = 1"
+              [disabled]="!userId"
+              class="rounded-2xl border px-3 py-3 text-[15px] font-extrabold flex flex-col items-center justify-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
+              [ngClass]="
+                activeTab === 1
+                  ? 'bg-red-900 text-white border-red-900'
+                  : 'bg-white/70 text-red-900 border-white'
+              "
+            >
+              <i class="pi pi-heart text-[18px]"></i>
+              <span class="leading-tight">跟隨</span>
+            </button>
 
-          <button type="button" (click)="activeTab = 2" [disabled]="!userId"
-            class="rounded-2xl border px-3 py-3 text-[15px] font-extrabold flex flex-col items-center justify-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
-            [ngClass]="
-              activeTab === 2
-                ? 'bg-red-900 text-white border-red-900'
-                : 'bg-white/70 text-red-900 border-white'
-            ">
-            <i class="pi pi-user text-[18px]"></i>
-            <span class="leading-tight">我的</span>
-          </button>
-        </div>
+            <button
+              type="button"
+              (click)="activeTab = 2"
+              [disabled]="!userId"
+              class="rounded-2xl border px-3 py-3 text-[15px] font-extrabold flex flex-col items-center justify-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
+              [ngClass]="
+                activeTab === 2
+                  ? 'bg-red-900 text-white border-red-900'
+                  : 'bg-white/70 text-red-900 border-white'
+              "
+            >
+              <i class="pi pi-user text-[18px]"></i>
+              <span class="leading-tight">我的</span>
+            </button>
+          </div>
 
-        <!-- 💻 Desktop: PrimeNG Tabs -->
-        <div class="hidden sm:block">
-          <p-tablist>
-            <p-tab [value]="0" class="text-[16px] md:text-[20px]"><i class="pi pi-globe mr-2"
-                style="font-size: 1.5rem"></i>大家的願望</p-tab>
-            <p-tab [value]="1" [disabled]="!userId" class="text-[16px] md:text-[20px]"><i class="pi pi-heart mr-2"
-                style="font-size: 1.5rem"></i>我跟的願望</p-tab>
-            <p-tab [value]="2" [disabled]="!userId" class="text-[16px] md:text-[20px]"><i class="pi pi-user mr-2"
-                style="font-size: 1.5rem"></i>我許的願望</p-tab>
-          </p-tablist>
-        </div>
+          <!-- 💻 Desktop: PrimeNG Tabs -->
+          <div class="hidden sm:block">
+            <p-tablist>
+              <p-tab [value]="0" class="text-[16px] md:text-[20px]"
+                ><i class="pi pi-globe mr-2" style="font-size: 1.5rem"></i
+                >大家的願望</p-tab
+              >
+              <p-tab
+                [value]="1"
+                [disabled]="!userId"
+                class="text-[16px] md:text-[20px]"
+                ><i class="pi pi-heart mr-2" style="font-size: 1.5rem"></i
+                >我跟的願望</p-tab
+              >
+              <p-tab
+                [value]="2"
+                [disabled]="!userId"
+                class="text-[16px] md:text-[20px]"
+                ><i class="pi pi-user mr-2" style="font-size: 1.5rem"></i
+                >我許的願望</p-tab
+              >
+            </p-tablist>
+          </div>
 
-        <p-tabpanels>
-          <!-- ===================== -->
-          <!-- 大家的願望 -->
-          <!-- ===================== -->
-          <p-tabpanel [value]="0">
-            <div class="mt-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
-              <div class="text-[15px] md:text-[18px] text-gray-700 font-semibold">
-                {{ getRangeText("all") }}
+          <p-tabpanels>
+            <!-- ===================== -->
+            <!-- 大家的願望 -->
+            <!-- ===================== -->
+            <p-tabpanel [value]="0">
+              <div
+                class="mt-4 flex flex-col md:flex-row md:items-center justify-between gap-3"
+              >
+                <div
+                  class="text-[15px] md:text-[18px] text-gray-700 font-semibold"
+                >
+                  {{ getRangeText("all") }}
+                </div>
               </div>
-            </div>
 
-            <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-5 gap-4 md:gap-6">
-              @for (wish of getPagedList('all'); track wish.id) {
-              <div (click)="onOpenDetail('all', wish)"
-                class="relative rounded-[22px] border p-5 md:p-6 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg cursor-pointer flex flex-col justify-between h-[280px]"
-                [id]="getWishDomId(wish.id)" [ngClass]="[
-                  getCardClass(wish),
-                  highlightWishId === wish.id
-                    ? 'ring-4 ring-[#FF9B45] shadow-xl'
-                    : ''
-                ]">
-                <!-- type badge -->
-                <div class="flex items-start justify-between gap-3">
-                  <span class="text-[15px] font-extrabold px-3 py-1 rounded-full" [ngClass]="getTypeBadgeClass(wish)">
-                    # {{ wish.type }}
-                  </span>
+              <div
+                class="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-5 gap-4 md:gap-6"
+              >
+                @for (wish of getPagedList("all"); track wish.id) {
+                  <div
+                    (click)="onOpenDetail('all', wish)"
+                    class="relative rounded-[22px] border p-5 md:p-6 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg cursor-pointer flex flex-col justify-between h-[280px]"
+                    [id]="getWishDomId(wish.id)"
+                    [ngClass]="[
+                      getCardClass(wish),
+                      highlightWishId === wish.id
+                        ? 'ring-4 ring-[#FF9B45] shadow-xl'
+                        : '',
+                    ]"
+                  >
+                    <!-- type badge -->
+                    <div class="flex items-start justify-between gap-3">
+                      <span
+                        class="text-[15px] font-extrabold px-3 py-1 rounded-full"
+                        [ngClass]="getTypeBadgeClass(wish)"
+                      >
+                        # {{ typeforHtml(wish.type) }}
+                      </span>
 
-                  <!-- follow heart -->
-                  <button (click)="$event.stopPropagation(); onToggleFollow(wish)"
-                    class="disabled:opacity-30 disabled:cursor-not-allowed active:scale-110 transition"
-                    aria-label="follow">
-                    <i class="pi text-[25px]" style="font-size: 1.5rem" [ngClass]="
-                        isFollowedByMe(wish)
-                          ? 'pi-heart-fill text-pink-600'
-                          : 'pi-heart text-gray-400'
-                      "></i>
+                      <!-- follow heart -->
+                      <button
+                        (click)="$event.stopPropagation(); onToggleFollow(wish)"
+                        class="disabled:opacity-30 disabled:cursor-not-allowed active:scale-110 transition"
+                        aria-label="follow"
+                      >
+                        <i
+                          class="pi text-[25px]"
+                          style="font-size: 1.5rem"
+                          [ngClass]="
+                            isMine(wish)
+                              ? 'pi-user text-red-900'
+                              : isFollowedByMe(wish)
+                                ? 'pi-heart-fill text-pink-600'
+                                : 'pi-heart text-gray-400'
+                          "
+                        ></i>
+                      </button>
+                    </div>
+
+                    <!-- title -->
+                    <div class="mt-3">
+                      <div
+                        class="text-[22px] font-black text-red-950 truncate"
+                        pTooltip="{{ wish.title }}"
+                      >
+                        {{ wish.title }}
+                      </div>
+
+                      <!-- nickname -->
+                      <div
+                        class="mt-3 flex items-center gap-2 text-gray-700 text-[15px] md:text-[17px]"
+                      >
+                        <span
+                          class="w-7 h-7 rounded-full bg-red-900/10 text-red-900 flex items-center justify-center text-[12px]"
+                        >
+                          <i class="pi pi-user"></i>
+                        </span>
+                        <span class="font-semibold">
+                          {{ getDisplayName(wish) }}
+                        </span>
+                      </div>
+
+                      <!-- location + date -->
+                      <div
+                        class="mt-3 space-y-2 text-[15px] font-semibold text-gray-700"
+                      >
+                        <div class="flex items-center gap-2">
+                          <i class="pi pi-map-marker text-red-900"></i>
+                          <span
+                            class="truncate"
+                            pTooltip="{{ wish.location }}"
+                            >{{ wish.location }}</span
+                          >
+                        </div>
+                        <div class="flex items-center gap-2">
+                          <i class="pi pi-calendar text-red-900"></i>
+                          <span>{{ wish.buildDate }}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- footer -->
+                    <div
+                      class="mt-4 pt-4 border-t border-black/5 flex items-center justify-between"
+                    >
+                      <div class="flex items-center gap-2 text-red-900">
+                        <i class="pi pi-users"></i>
+                        <span class="text-[15px] font-extrabold">
+                          {{ wish.followers?.length || 0 }} 人跟願
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                } @empty {
+                  <div
+                    class="col-span-full py-14 rounded-[22px] border border-dashed border-gray-300 bg-white/60 text-center"
+                  >
+                    <div class="text-gray-500 text-[16px] font-semibold">
+                      目前還沒有願望喔，快去許一個吧！
+                    </div>
+                  </div>
+                }
+              </div>
+
+              <!-- paginator -->
+              <div class="mt-6 flex flex-col items-center gap-2">
+                <p-paginator
+                  [rows]="pageSize"
+                  [totalRecords]="getTotal('all')"
+                  [first]="pageAll * pageSize"
+                  (onPageChange)="onPageChange('all', $event)"
+                ></p-paginator>
+              </div>
+            </p-tabpanel>
+
+            <!-- ===================== -->
+            <!-- 我跟的願望 -->
+            <!-- ===================== -->
+            <p-tabpanel [value]="1">
+              <!-- 上方 filter -->
+              <div
+                class="mt-4 flex flex-col lg:flex-row lg:items-center justify-between gap-3"
+              >
+                <div class="flex flex-wrap gap-2">
+                  <button
+                    (click)="setFoFilter('all')"
+                    class="cursor-pointer px-3 py-2 rounded-full text-[16px] md:text-[20px] font-extrabold border transition"
+                    [ngClass]="
+                      foFilter === 'all'
+                        ? 'bg-red-900 text-white border-red-900'
+                        : 'bg-white/70 text-red-900 border-white hover:bg-gray-200'
+                    "
+                  >
+                    全部
+                  </button>
+
+                  <button
+                    (click)="setFoFilter('active')"
+                    class="cursor-pointer px-3 py-2 rounded-full text-[16px] md:text-[20px] font-extrabold border transition"
+                    [ngClass]="
+                      foFilter === 'active'
+                        ? 'bg-red-900 text-white border-red-900'
+                        : 'bg-white/70 text-red-900 border-white hover:bg-gray-200'
+                    "
+                  >
+                    進行中
+                  </button>
+
+                  <button
+                    (click)="setFoFilter('finished')"
+                    class="cursor-pointer px-3 py-2 rounded-full text-[16px] md:text-[20px] font-extrabold border transition"
+                    [ngClass]="
+                      foFilter === 'finished'
+                        ? 'bg-red-900 text-white border-red-900'
+                        : 'bg-white/70 text-red-900 border-white hover:bg-gray-200'
+                    "
+                  >
+                    已實現
+                  </button>
+
+                  <button
+                    (click)="setFoFilter('expired')"
+                    class="cursor-pointer px-3 py-2 rounded-full text-[16px] md:text-[20px] font-extrabold border transition"
+                    [ngClass]="
+                      foFilter === 'expired'
+                        ? 'bg-red-900 text-white border-red-900'
+                        : 'bg-white/70 text-red-900 border-white hover:bg-gray-200'
+                    "
+                  >
+                    已失效
                   </button>
                 </div>
 
-                <!-- title -->
-                <div class="mt-3">
-                  <div class="text-[22px] font-black text-red-950 truncate" pTooltip="{{ wish.title }}">
-                    {{ wish.title }}
-                  </div>
-
-                  <!-- nickname -->
-                  <div class="mt-3 flex items-center gap-2 text-gray-700 text-[15px] md:text-[17px]">
-                    <span
-                      class="w-7 h-7 rounded-full bg-red-900/10 text-red-900 flex items-center justify-center text-[12px]">
-                      <i class="pi pi-user"></i>
-                    </span>
-                    <span class="font-semibold">
-                      {{ getDisplayName(wish) }}
-                    </span>
-                  </div>
-
-                  <!-- location + date -->
-                  <div class="mt-3 space-y-2 text-[15px] font-semibold text-gray-700">
-                    <div class="flex items-center gap-2">
-                      <i class="pi pi-map-marker text-red-900"></i>
-                      <span class="truncate" pTooltip="{{ wish.location }}">{{
-                        wish.location
-                        }}</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                      <i class="pi pi-calendar text-red-900"></i>
-                      <span>{{ wish.buildDate }}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- footer -->
-                <div class="mt-4 pt-4 border-t border-black/5 flex items-center justify-between">
-                  <div class="flex items-center gap-2 text-red-900">
-                    <i class="pi pi-users"></i>
-                    <span class="text-[15px] font-extrabold">
-                      {{ wish.followers?.length || 0 }} 人跟願
-                    </span>
-                  </div>
-                </div>
-              </div>
-              } @empty {
-              <div
-                class="col-span-full py-14 rounded-[22px] border border-dashed border-gray-300 bg-white/60 text-center">
-                <div class="text-gray-500 text-[16px] font-semibold">
-                  目前還沒有願望喔，快去許一個吧！
-                </div>
-              </div>
-              }
-            </div>
-
-            <!-- paginator -->
-            <div class="mt-6 flex flex-col items-center gap-2">
-              <p-paginator [rows]="pageSize" [totalRecords]="getTotal('all')" [first]="pageAll * pageSize"
-                (onPageChange)="onPageChange('all', $event)"></p-paginator>
-            </div>
-          </p-tabpanel>
-
-          <!-- ===================== -->
-          <!-- 我跟的願望 -->
-          <!-- ===================== -->
-          <p-tabpanel [value]="1">
-            <!-- 上方 filter -->
-            <div class="mt-4 flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-              <div class="flex flex-wrap gap-2">
-                <button (click)="setFoFilter('all')"
-                  class="cursor-pointer px-3 py-2 rounded-full text-[16px] md:text-[20px] font-extrabold border transition"
-                  [ngClass]="
-                    foFilter === 'all'
-                      ? 'bg-red-900 text-white border-red-900'
-                      : 'bg-white/70 text-red-900 border-white hover:bg-gray-200'
-                  ">
-                  全部
-                </button>
-
-                <button (click)="setFoFilter('active')"
-                  class="cursor-pointer px-3 py-2 rounded-full text-[16px] md:text-[20px] font-extrabold border transition"
-                  [ngClass]="
-                    foFilter === 'active'
-                      ? 'bg-red-900 text-white border-red-900'
-                      : 'bg-white/70 text-red-900 border-white hover:bg-gray-200'
-                  ">
-                  進行中
-                </button>
-
-                <button (click)="setFoFilter('finished')"
-                  class="cursor-pointer px-3 py-2 rounded-full text-[16px] md:text-[20px] font-extrabold border transition"
-                  [ngClass]="
-                    foFilter === 'finished'
-                      ? 'bg-red-900 text-white border-red-900'
-                      : 'bg-white/70 text-red-900 border-white hover:bg-gray-200'
-                  ">
-                  已實現
-                </button>
-
-                <button (click)="setFoFilter('expired')"
-                  class="cursor-pointer px-3 py-2 rounded-full text-[16px] md:text-[20px] font-extrabold border transition"
-                  [ngClass]="
-                    foFilter === 'expired'
-                      ? 'bg-red-900 text-white border-red-900'
-                      : 'bg-white/70 text-red-900 border-white hover:bg-gray-200'
-                  ">
-                  已失效
-                </button>
-              </div>
-
-              <div class="text-[15px] md:text-[18px] text-gray-700 font-semibold">
-                {{ getRangeText("followed") }}
-              </div>
-            </div>
-
-            <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-5 gap-4 md:gap-6">
-              @for (wish of getPagedList('followed'); track wish.id) {
-              <div (click)="onOpenDetail('followed', wish)"
-                class="relative rounded-[22px] border p-5 md:p-6 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg cursor-pointer flex flex-col justify-between h-[280px]"
-                [id]="getWishDomId(wish.id)" [ngClass]="[
-                  getCardClass(wish),
-                  highlightWishId === wish.id
-                    ? 'ring-4 ring-[#FF9B45] shadow-xl'
-                    : ''
-                ]">
-                <!-- status label -->
-                @if (getStatusLabel(wish)) {
                 <div
-                  class="absolute top-3 left-3 text-[12px] font-extrabold px-3 py-1 rounded-full bg-white/70 border border-white">
-                  {{ getStatusLabel(wish) }}
+                  class="text-[15px] md:text-[18px] text-gray-700 font-semibold"
+                >
+                  {{ getRangeText("followed") }}
                 </div>
+              </div>
+
+              <div
+                class="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-5 gap-4 md:gap-6"
+              >
+                @for (wish of getPagedList("followed"); track wish.id) {
+                  <div
+                    (click)="onOpenDetail('followed', wish)"
+                    class="relative rounded-[22px] border p-5 md:p-6 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg cursor-pointer flex flex-col justify-between h-[280px]"
+                    [id]="getWishDomId(wish.id)"
+                    [ngClass]="[
+                      getCardClass(wish),
+                      highlightWishId === wish.id
+                        ? 'ring-4 ring-[#FF9B45] shadow-xl'
+                        : '',
+                    ]"
+                  >
+                    <!-- status label -->
+                    @if (getStatusLabel(wish)) {
+                      <div
+                        class="absolute top-3 left-3 text-[12px] font-extrabold px-3 py-1 rounded-full bg-white/70 border border-white"
+                      >
+                        {{ getStatusLabel(wish) }}
+                      </div>
+                    }
+
+                    <div class="flex items-start justify-between gap-3">
+                      <span
+                        class="text-[15px] font-extrabold px-3 py-1 rounded-full"
+                        [ngClass]="getTypeBadgeClass(wish)"
+                      >
+                        # {{ typeforHtml(wish.type) }}
+                      </span>
+
+                      <!-- followed tab：也能取消跟願 -->
+                      <button
+                        (click)="$event.stopPropagation(); onToggleFollow(wish)"
+                        class="active:scale-110 transition"
+                        aria-label="follow"
+                      >
+                        <i
+                          class="pi text-[22px]"
+                          style="font-size: 1.5rem"
+                          [ngClass]="
+                            isFollowedByMe(wish)
+                              ? 'pi-heart-fill text-pink-600'
+                              : 'pi-heart text-gray-400'
+                          "
+                        ></i>
+                      </button>
+                    </div>
+
+                    <div class="mt-3">
+                      <div
+                        class="text-[22px] font-black text-red-950 truncate"
+                        [attr.title]="wish.title"
+                      >
+                        {{ wish.title }}
+                      </div>
+
+                      <div
+                        class="mt-3 flex items-center gap-2 text-gray-700 text-[15px] md:text-[17px]"
+                      >
+                        <span
+                          class="w-7 h-7 rounded-full bg-red-900/10 text-red-900 flex items-center justify-center text-[12px]"
+                        >
+                          <i class="pi pi-user"></i>
+                        </span>
+                        <span class="font-semibold">
+                          {{ getDisplayName(wish) }}
+                        </span>
+                      </div>
+
+                      <div
+                        class="mt-3 space-y-2 text-[15px] font-semibold text-gray-700"
+                      >
+                        <div class="flex items-center gap-2">
+                          <i class="pi pi-map-marker text-red-900"></i>
+                          <span class="truncate" [attr.title]="wish.location">{{
+                            wish.location
+                          }}</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                          <i class="pi pi-calendar text-red-900"></i>
+                          <span>{{ wish.buildDate }}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div
+                      class="mt-4 pt-4 border-t border-black/5 flex items-center justify-between"
+                    >
+                      <div class="flex items-center gap-2 text-red-900">
+                        <i class="pi pi-users"></i>
+                        <span class="text-[15px] font-extrabold">
+                          {{ wish.followers?.length || 0 }} 人跟願
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                } @empty {
+                  <div
+                    class="col-span-full py-14 rounded-[22px] border border-dashed border-gray-300 bg-white/60 text-center"
+                  >
+                    <div class="text-gray-500 text-[16px] font-semibold">
+                      這個條件下沒有願望
+                    </div>
+                  </div>
                 }
+              </div>
 
-                <div class="flex items-start justify-between gap-3">
-                  <span class="text-[15px] font-extrabold px-3 py-1 rounded-full" [ngClass]="getTypeBadgeClass(wish)">
-                    # {{ wish.type }}
-                  </span>
+              <div class="mt-6 flex flex-col items-center gap-2">
+                <p-paginator
+                  [rows]="pageSize"
+                  [totalRecords]="getTotal('followed')"
+                  [first]="pageFollowed * pageSize"
+                  (onPageChange)="onPageChange('followed', $event)"
+                ></p-paginator>
+              </div>
+            </p-tabpanel>
 
-                  <!-- followed tab：也能取消跟願 -->
-                  <button (click)="$event.stopPropagation(); onToggleFollow(wish)" class="active:scale-110 transition"
-                    aria-label="follow">
-                    <i class="pi text-[22px]" style="font-size: 1.5rem" [ngClass]="
-                        isFollowedByMe(wish)
-                          ? 'pi-heart-fill text-pink-600'
-                          : 'pi-heart text-gray-400'
-                      "></i>
+            <!-- ===================== -->
+            <!-- 我許的願望 -->
+            <!-- ===================== -->
+            <p-tabpanel [value]="2">
+              <!-- 上方 filter -->
+              <div
+                class="mt-4 flex flex-col lg:flex-row lg:items-center justify-between gap-3"
+              >
+                <div class="flex flex-wrap gap-2">
+                  <button
+                    (click)="setMyFilter('all')"
+                    class="cursor-pointer px-3 py-2 rounded-full text-[16px] md:text-[20px] font-extrabold border transition"
+                    [ngClass]="
+                      myFilter === 'all'
+                        ? 'bg-red-900 text-white border-red-900'
+                        : 'bg-white/70 text-red-900 border-white hover:bg-gray-200'
+                    "
+                  >
+                    全部
+                  </button>
+
+                  <button
+                    (click)="setMyFilter('active')"
+                    class="cursor-pointer px-3 py-2 rounded-full text-[16px] md:text-[20px] font-extrabold border transition"
+                    [ngClass]="
+                      myFilter === 'active'
+                        ? 'bg-red-900 text-white border-red-900'
+                        : 'bg-white/70 text-red-900 border-white hover:bg-gray-200'
+                    "
+                  >
+                    進行中
+                  </button>
+
+                  <button
+                    (click)="setMyFilter('finished')"
+                    class="cursor-pointer px-3 py-2 rounded-full text-[16px] md:text-[20px] font-extrabold border transition"
+                    [ngClass]="
+                      myFilter === 'finished'
+                        ? 'bg-red-900 text-white border-red-900'
+                        : 'bg-white/70 text-red-900 border-white hover:bg-gray-200'
+                    "
+                  >
+                    已實現
+                  </button>
+
+                  <button
+                    (click)="setMyFilter('expired')"
+                    class="cursor-pointer px-3 py-2 rounded-full text-[16px] md:text-[20px] font-extrabold border transition"
+                    [ngClass]="
+                      myFilter === 'expired'
+                        ? 'bg-red-900 text-white border-red-900'
+                        : 'bg-white/70 text-red-900 border-white hover:bg-gray-200'
+                    "
+                  >
+                    已失效
                   </button>
                 </div>
 
-                <div class="mt-3">
-                  <div class="text-[22px] font-black text-red-950 truncate" [attr.title]="wish.title">
-                    {{ wish.title }}
-                  </div>
-
-                  <div class="mt-3 flex items-center gap-2 text-gray-700 text-[15px] md:text-[17px]">
-                    <span
-                      class="w-7 h-7 rounded-full bg-red-900/10 text-red-900 flex items-center justify-center text-[12px]">
-                      <i class="pi pi-user"></i>
-                    </span>
-                    <span class="font-semibold">
-                      {{ getDisplayName(wish) }}
-                    </span>
-                  </div>
-
-                  <div class="mt-3 space-y-2 text-[15px] font-semibold text-gray-700">
-                    <div class="flex items-center gap-2">
-                      <i class="pi pi-map-marker text-red-900"></i>
-                      <span class="truncate" [attr.title]="wish.location">{{
-                        wish.location
-                        }}</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                      <i class="pi pi-calendar text-red-900"></i>
-                      <span>{{ wish.buildDate }}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="mt-4 pt-4 border-t border-black/5 flex items-center justify-between">
-                  <div class="flex items-center gap-2 text-red-900">
-                    <i class="pi pi-users"></i>
-                    <span class="text-[15px] font-extrabold">
-                      {{ wish.followers?.length || 0 }} 人跟願
-                    </span>
-                  </div>
-                </div>
-              </div>
-              } @empty {
-              <div
-                class="col-span-full py-14 rounded-[22px] border border-dashed border-gray-300 bg-white/60 text-center">
-                <div class="text-gray-500 text-[16px] font-semibold">
-                  這個條件下沒有願望
-                </div>
-              </div>
-              }
-            </div>
-
-            <div class="mt-6 flex flex-col items-center gap-2">
-              <p-paginator [rows]="pageSize" [totalRecords]="getTotal('followed')" [first]="pageFollowed * pageSize"
-                (onPageChange)="onPageChange('followed', $event)"></p-paginator>
-            </div>
-          </p-tabpanel>
-
-          <!-- ===================== -->
-          <!-- 我許的願望 -->
-          <!-- ===================== -->
-          <p-tabpanel [value]="2">
-            <!-- 上方 filter -->
-            <div class="mt-4 flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-              <div class="flex flex-wrap gap-2">
-                <button (click)="setMyFilter('all')"
-                  class="cursor-pointer px-3 py-2 rounded-full text-[16px] md:text-[20px] font-extrabold border transition"
-                  [ngClass]="
-                    myFilter === 'all'
-                      ? 'bg-red-900 text-white border-red-900'
-                      : 'bg-white/70 text-red-900 border-white hover:bg-gray-200'
-                  ">
-                  全部
-                </button>
-
-                <button (click)="setMyFilter('active')"
-                  class="cursor-pointer px-3 py-2 rounded-full text-[16px] md:text-[20px] font-extrabold border transition"
-                  [ngClass]="
-                    myFilter === 'active'
-                      ? 'bg-red-900 text-white border-red-900'
-                      : 'bg-white/70 text-red-900 border-white hover:bg-gray-200'
-                  ">
-                  進行中
-                </button>
-
-                <button (click)="setMyFilter('finished')"
-                  class="cursor-pointer px-3 py-2 rounded-full text-[16px] md:text-[20px] font-extrabold border transition"
-                  [ngClass]="
-                    myFilter === 'finished'
-                      ? 'bg-red-900 text-white border-red-900'
-                      : 'bg-white/70 text-red-900 border-white hover:bg-gray-200'
-                  ">
-                  已實現
-                </button>
-
-                <button (click)="setMyFilter('expired')"
-                  class="cursor-pointer px-3 py-2 rounded-full text-[16px] md:text-[20px] font-extrabold border transition"
-                  [ngClass]="
-                    myFilter === 'expired'
-                      ? 'bg-red-900 text-white border-red-900'
-                      : 'bg-white/70 text-red-900 border-white hover:bg-gray-200'
-                  ">
-                  已失效
-                </button>
-              </div>
-
-              <div class="text-[15px] md:text-[18px] text-gray-700 font-semibold">
-                {{ getRangeText("mine") }}
-              </div>
-            </div>
-
-            <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-5 gap-4 md:gap-6">
-              @for (wish of getPagedList('mine'); track wish.id) {
-              <div (click)="onOpenDetail('mine', wish)"
-                class="relative rounded-[22px] border p-5 md:p-6 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg cursor-pointer flex flex-col justify-between h-[280px]"
-                [id]="getWishDomId(wish.id)" [ngClass]="[
-                  getCardClass(wish),
-                  highlightWishId === wish.id
-                    ? 'ring-4 ring-[#FF9B45] shadow-xl'
-                    : ''
-                ]">
-                @if (getStatusLabel(wish)) {
                 <div
-                  class="absolute top-3 left-3 text-[12px] font-extrabold px-3 py-1 rounded-full bg-white/70 border border-white">
-                  {{ getStatusLabel(wish) }}
-                </div>
-                }
-
-                <div class="flex items-start justify-between gap-3">
-                  <span class="text-[15px] font-extrabold px-3 py-1 rounded-full" [ngClass]="getTypeBadgeClass(wish)">
-                    # {{ wish.type }}
-                  </span>
-
-                  <!-- 我許的願望：不顯示愛心 -->
-                  <!-- <span class="text-[12px] font-bold text-gray-500"> MY </span> -->
-                  <i class="pi pi-user" style="font-size: 1.5rem"></i>
-                </div>
-
-                <div class="mt-3">
-                  <div class="text-[22px] font-black text-red-950 truncate" [attr.title]="wish.title">
-                    {{ wish.title }}
-                  </div>
-
-                  <div class="mt-3 flex items-center gap-2 text-gray-700 text-[15px] md:text-[17px]">
-                    <span
-                      class="w-7 h-7 rounded-full bg-red-900/10 text-red-900 flex items-center justify-center text-[12px]">
-                      <i class="pi pi-user"></i>
-                    </span>
-                    <span class="font-semibold">
-                      {{ getDisplayName(wish) }}
-                    </span>
-                  </div>
-
-                  <div class="mt-3 space-y-2 text-[15px] font-semibold text-gray-700">
-                    <div class="flex items-center gap-2">
-                      <i class="pi pi-map-marker text-red-900"></i>
-                      <span class="truncate" [attr.title]="wish.location">{{
-                        wish.location
-                        }}</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                      <i class="pi pi-calendar text-red-900"></i>
-                      <span>{{ wish.buildDate }}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="mt-4 pt-4 border-t border-black/5 flex items-center justify-between">
-                  <div class="flex items-center gap-2 text-red-900">
-                    <i class="pi pi-users"></i>
-                    <span class="text-[15px] font-extrabold">
-                      {{ wish.followers?.length || 0 }} 人跟願
-                    </span>
-                  </div>
-
-                  @if (getStatusLabel(wish) === '已失效') {
-                  <span class="text-[14px] font-extrabold text-[#D5451B]">
-                    可再許一次
-                  </span>
-                  }
+                  class="text-[15px] md:text-[18px] text-gray-700 font-semibold"
+                >
+                  {{ getRangeText("mine") }}
                 </div>
               </div>
-              } @empty {
+
               <div
-                class="col-span-full py-14 rounded-[22px] border border-dashed border-gray-300 bg-white/60 text-center">
-                <div class="text-gray-500 text-[16px] font-semibold">
-                  這個條件下沒有願望
-                </div>
-              </div>
-              }
-            </div>
+                class="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-5 gap-4 md:gap-6"
+              >
+                @for (wish of getPagedList("mine"); track wish.id) {
+                  <div
+                    (click)="onOpenDetail('mine', wish)"
+                    class="relative rounded-[22px] border p-5 md:p-6 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg cursor-pointer flex flex-col justify-between h-[280px]"
+                    [id]="getWishDomId(wish.id)"
+                    [ngClass]="[
+                      getCardClass(wish),
+                      highlightWishId === wish.id
+                        ? 'ring-4 ring-[#FF9B45] shadow-xl'
+                        : '',
+                    ]"
+                  >
+                    @if (getStatusLabel(wish)) {
+                      <div
+                        class="absolute top-3 left-3 text-[12px] font-extrabold px-3 py-1 rounded-full bg-white/70 border border-white"
+                      >
+                        {{ getStatusLabel(wish) }}
+                      </div>
+                    }
 
-            <div class="mt-6 flex flex-col items-center gap-2">
-              <p-paginator [rows]="pageSize" [totalRecords]="getTotal('mine')" [first]="pageMine * pageSize"
-                (onPageChange)="onPageChange('mine', $event)"></p-paginator>
-            </div>
-          </p-tabpanel>
-        </p-tabpanels>
-      </p-tabs>
+                    <div class="flex items-start justify-between gap-3">
+                      <span
+                        class="text-[15px] font-extrabold px-3 py-1 rounded-full"
+                        [ngClass]="getTypeBadgeClass(wish)"
+                      >
+                        # {{ typeforHtml(wish.type) }}
+                      </span>
+
+                      <!-- 我許的願望：不顯示愛心 -->
+                      <!-- <span class="text-[12px] font-bold text-gray-500"> MY </span> -->
+                      <i class="pi pi-user" style="font-size: 1.5rem"></i>
+                    </div>
+
+                    <div class="mt-3">
+                      <div
+                        class="text-[22px] font-black text-red-950 truncate"
+                        [attr.title]="wish.title"
+                      >
+                        {{ wish.title }}
+                      </div>
+
+                      <div
+                        class="mt-3 flex items-center gap-2 text-gray-700 text-[15px] md:text-[17px]"
+                      >
+                        <span
+                          class="w-7 h-7 rounded-full bg-red-900/10 text-red-900 flex items-center justify-center text-[12px]"
+                        >
+                          <i class="pi pi-user"></i>
+                        </span>
+                        <span class="font-semibold">
+                          {{ getDisplayName(wish) }}
+                        </span>
+                      </div>
+
+                      <div
+                        class="mt-3 space-y-2 text-[15px] font-semibold text-gray-700"
+                      >
+                        <div class="flex items-center gap-2">
+                          <i class="pi pi-map-marker text-red-900"></i>
+                          <span class="truncate" [attr.title]="wish.location">{{
+                            wish.location
+                          }}</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                          <i class="pi pi-calendar text-red-900"></i>
+                          <span>{{ wish.buildDate }}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div
+                      class="mt-4 pt-4 border-t border-black/5 flex items-center justify-between"
+                    >
+                      <div class="flex items-center gap-2 text-red-900">
+                        <i class="pi pi-users"></i>
+                        <span class="text-[15px] font-extrabold">
+                          {{ wish.followers?.length || 0 }} 人跟願
+                        </span>
+                      </div>
+
+                      @if (getStatusLabel(wish) === "已失效") {
+                        <span class="text-[14px] font-extrabold text-[#D5451B]">
+                          可再許一次
+                        </span>
+                      }
+                    </div>
+                  </div>
+                } @empty {
+                  <div
+                    class="col-span-full py-14 rounded-[22px] border border-dashed border-gray-300 bg-white/60 text-center"
+                  >
+                    <div class="text-gray-500 text-[16px] font-semibold">
+                      這個條件下沒有願望
+                    </div>
+                  </div>
+                }
+              </div>
+
+              <div class="mt-6 flex flex-col items-center gap-2">
+                <p-paginator
+                  [rows]="pageSize"
+                  [totalRecords]="getTotal('mine')"
+                  [first]="pageMine * pageSize"
+                  (onPageChange)="onPageChange('mine', $event)"
+                ></p-paginator>
+              </div>
+            </p-tabpanel>
+          </p-tabpanels>
+        </p-tabs>
       }
     </div>
   </div>
@@ -486,77 +630,91 @@
       </div>
 
       @if (detailStatusLabel) {
-      <span class="text-[15px] font-extrabold px-3 py-1 rounded-full bg-black/5">
-        {{ detailStatusLabel }}
-      </span>
+        <span
+          class="text-[15px] font-extrabold px-3 py-1 rounded-full bg-black/5"
+        >
+          {{ detailStatusLabel }}
+        </span>
       }
     </div>
   </ng-template>
 
   <div class="p-5 md:p-6 bg-[#FFF9F6] rounded-2xl">
     @if (!selectedWish) {
-    <div class="text-[18px] text-gray-600">載入中...</div>
+      <div class="text-[18px] text-gray-600">載入中...</div>
     } @else {
-    <div class="text-[25px] md:text-[27px] font-black text-red-950 break-words">
-      {{ selectedWish.title }}
-    </div>
-
-    <div class="mt-4 space-y-3 text-[18px] text-gray-800">
-      <div class="flex items-center gap-2">
-        <i class="pi pi-user text-red-900"></i>
-        <span class="font-semibold">{{ detailDisplayName }}</span>
+      <div
+        class="text-[25px] md:text-[27px] font-black text-red-950 break-words"
+      >
+        {{ selectedWish.title }}
       </div>
 
-      <div class="flex items-center gap-2">
-        <i class="pi pi-tag text-red-900"></i>
-        <span class="font-semibold">類型：</span>
-        <span>{{ selectedWish.type }}</span>
+      <div class="mt-4 space-y-3 text-[18px] text-gray-800">
+        <div class="flex items-center gap-2">
+          <i class="pi pi-user text-red-900"></i>
+          <span class="font-semibold">許願者：</span>
+          <span class="font-semibold">{{ detailDisplayName }}</span>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <i class="pi pi-tag text-red-900"></i>
+          <span class="font-semibold">類型：</span>
+          <span>{{ typeforHtml(selectedWish.type) }}</span>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <i class="pi pi-map-marker text-red-900"></i>
+          <span class="font-semibold">地點：</span>
+          <span class="break-words">{{ selectedWish.location }}</span>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <i class="pi pi-calendar text-red-900"></i>
+          <span class="font-semibold">日期：</span>
+          <span>{{ selectedWish.buildDate }}</span>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <i class="pi pi-heart-fill text-pink-600"></i>
+          <span class="font-semibold">跟願人數：</span>
+          <span>{{ detailFollowerCount }} 人</span>
+        </div>
       </div>
 
-      <div class="flex items-center gap-2">
-        <i class="pi pi-map-marker text-red-900"></i>
-        <span class="flex flex-row break-keep font-semibold">地點：</span>
-        <span class="break-words">{{ selectedWish.location }}</span>
-      </div>
+      <div class="mt-6 flex flex-wrap gap-3">
+        @if (showDeleteBtn) {
+          <button
+            (click)="onDeleteWish(selectedWish)"
+            class="cursor-pointer px-4 py-3 rounded-xl font-extrabold text-[15px] md:text-[18px] shadow bg-[#D5451B] text-white hover:brightness-95 active:scale-95"
+          >
+            刪除願望
+          </button>
+        }
+        @if (showStartGroupBtn) {
+          <button
+            (click)="startGroupFromWish()"
+            [disabled]="disableStartGroupBtn"
+            class="ml-auto cursor-pointer px-4 py-3 rounded-xl font-extrabold text-[15px] md:text-[18px] shadow enabled:bg-red-900 enabled:text-white enabled:hover:bg-red-950 enabled:active:scale-95 disabled:bg-gray-300 disabled:text-gray-600 disabled:cursor-not-allowed"
+          >
+            以此願望開團
+          </button>
+        }
+        @if (showReWishBtn) {
+          <button
+            (click)="onReWish(selectedWish)"
+            class="ml-auto cursor-pointer px-4 py-3 rounded-xl font-extrabold text-[15px] md:text-[18px] shadow bg-orange-500 text-white hover:brightness-90 active:scale-95"
+          >
+            再許一次
+          </button>
+        }
 
-      <div class="flex items-center gap-2">
-        <i class="pi pi-calendar text-red-900"></i>
-        <span class="font-semibold">日期：</span>
-        <span>{{ selectedWish.buildDate }}</span>
-      </div>
-
-      <div class="flex items-center gap-2">
-        <i class="pi pi-heart-fill text-pink-600"></i>
-        <span class="font-semibold">跟願人數：</span>
-        <span>{{ detailFollowerCount }} 人</span>
-      </div>
-    </div>
-
-    <div class="mt-6 flex flex-wrap gap-3">
-      @if (showDeleteBtn) {
-      <button (click)="onDeleteWish(selectedWish)"
-        class="cursor-pointer px-4 py-3 rounded-xl font-extrabold text-[15px] md:text-[18px] shadow bg-[#D5451B] text-white hover:brightness-95 active:scale-95">
-        刪除願望
-      </button>
-      } @if (showStartGroupBtn) {
-      <button (click)="startGroupFromWish()" [disabled]="disableStartGroupBtn"
-        class="ml-auto cursor-pointer px-4 py-3 rounded-xl font-extrabold text-[15px] md:text-[18px] shadow enabled:bg-red-900 enabled:text-white enabled:hover:bg-red-950 enabled:active:scale-95 disabled:bg-gray-300 disabled:text-gray-600 disabled:cursor-not-allowed">
-        以此願望開團
-      </button>
-      } @if (showReWishBtn) {
-      <button (click)="onReWish(selectedWish)"
-        class="ml-auto cursor-pointer px-4 py-3 rounded-xl font-extrabold text-[15px] md:text-[18px] shadow bg-orange-500 text-white hover:brightness-90 active:scale-95">
-        再許一次
-      </button>
-      }
-
-      <!-- <button
+        <!-- <button
         (click)="closeDetail()"
         class="cursor-pointer ml-auto px-4 py-3 rounded-xl font-extrabold text-[15px] md:text-[18px] bg-white/80 text-red-900 border border-red-900/20 hover:bg-gray-200"
       >
         關閉
       </button> -->
-    </div>
+      </div>
     }
   </div>
 </p-dialog>
@@ -586,7 +744,7 @@
         <select [(ngModel)]="createForm.type"
           class="w-full px-4 py-3 rounded-xl border border-red-900/15 bg-white/80 outline-none focus:border-red-900/40">
           @for (t of typeOptions; track t) {
-          <option [value]="t">{{ t }}</option>
+            <option [value]="t">{{ t }}</option>
           }
         </select>
       </div>
