@@ -38,7 +38,24 @@
   }
 }
 
-
+.motocycle-icon {
+  width: 24px;
+  height: 24px;
+  /* 將 SVG 作為遮罩 */
+  -webkit-mask-image: url('/motocycle.svg');
+  mask-image: url('/motocycle.svg');
+  mask-repeat: no-repeat;
+  mask-size: contain;
+}
+.delivery-icon {
+  width: 24px;
+  height: 24px;
+  /* 將 SVG 作為遮罩 */
+  -webkit-mask-image: url('/delivery.svg');
+  mask-image: url('/delivery.svg');
+  mask-repeat: no-repeat;
+  mask-size: contain;
+}
 // focus 時文字(placeholder)在邊框的顏色 (( 輸入文字 type = input
 .p-floatlabel:has(input:focus) label {
   color: #662222 !important;
@@ -88,6 +105,32 @@
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #662222;
 }
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+.animate-fade-in {
+  animation: fade-in 0.15s ease-out;
+}
+.animate-slide-up {
+  animation: slide-up 0.25s ease-out;
+}
+
 
 /* ===== hero-carousel 最終版：中間大、左右不重疊、1/5不露出 ===== */
 
