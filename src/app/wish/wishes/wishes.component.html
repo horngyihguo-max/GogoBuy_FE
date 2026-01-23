@@ -4,11 +4,17 @@
 <div class="min-h-screen bg-[#F4E7E1]">
   <div class="max-w-[1700px] mx-auto px-4 md:px-8 py-6 md:py-10">
     <!-- 主容器卡片感 -->
-    <div class="bg-white/70 backdrop-blur rounded-[28px] border border-white/60 shadow-sm p-5 md:p-8">
+    <div
+      class="bg-white/70 backdrop-blur rounded-[28px] border border-white/60 shadow-sm p-5 md:p-8"
+    >
       <!-- Header -->
-      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+      <div
+        class="flex flex-col lg:flex-row lg:items-center justify-between gap-4"
+      >
         <div>
-          <h2 class="text-[37px] md:text-[42px] font-extrabold tracking-tight text-red-900">
+          <h2
+            class="text-[37px] md:text-[42px] font-extrabold tracking-tight text-red-900"
+          >
             許願池
           </h2>
           <p class="text-[16px] md:text-[20px] text-gray-600 mt-1 font-bold">
@@ -18,11 +24,16 @@
 
         <!-- 右上：我要許願 -->
         <div class="flex flex-col items-end gap-2">
-          <button (click)="onCreateWish()" [disabled]="!userId || timesRemaining === 0"
-            class="cursor-pointer flex items-center gap-2 px-5 md:px-6 py-3 rounded-full font-bold shadow-lg transition-all duration-200 text-[15px] enabled:bg-red-900 enabled:text-white enabled:hover:bg-red-950 enabled:active:scale-95 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed">
+          <button
+            (click)="onCreateWish()"
+            [disabled]="!userId || timesRemaining === 0"
+            class="cursor-pointer flex items-center gap-2 px-5 md:px-6 py-3 rounded-full font-bold shadow-lg transition-all duration-200 text-[15px] enabled:bg-red-900 enabled:text-white enabled:hover:bg-red-950 enabled:active:scale-95 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed"
+          >
             <i class="pi pi-plus-circle"></i>
             <span class="md:text-[20px]">我要許願</span>
-            <span class="ml-1 px-2 py-0.5 rounded-full bg-white/20 text-[12px] md:text-[15px]">
+            <span
+              class="ml-1 px-2 py-0.5 rounded-full bg-white/20 text-[12px] md:text-[15px]"
+            >
               剩餘 {{ timesRemaining }} 次
             </span>
           </button>
@@ -620,9 +631,19 @@
   </div>
 </div>
 
-<p-dialog [blockScroll]="true" appendTo="body" (onShow)="disableScroll()" (onHide)="enableScroll()"
-  [(visible)]="detailVisible" [modal]="true" [dismissableMask]="true" [draggable]="false" [resizable]="false"
-  [style]="{ width: 'min(480px, 92vw)' }" [contentStyle]="{ padding: '0' }">
+<p-dialog
+  [blockScroll]="true"
+  appendTo="body"
+  (onShow)="disableScroll()"
+  (onHide)="enableScroll()"
+  [(visible)]="detailVisible"
+  [modal]="true"
+  [dismissableMask]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: 'min(480px, 92vw)' }"
+  [contentStyle]="{ padding: '0' }"
+>
   <ng-template pTemplate="header">
     <div class="flex items-center justify-between w-full">
       <div class="text-[21px] md:text-[20px] font-extrabold text-red-900">
@@ -719,9 +740,19 @@
   </div>
 </p-dialog>
 
-<p-dialog [blockScroll]="true" appendTo="body" (onShow)="disableScroll()" (onHide)="enableScroll()"
-  [(visible)]="createVisible" [modal]="true" [dismissableMask]="true" [draggable]="false" [resizable]="false"
-  [style]="{ width: 'min(550px, 92vw)' }" [contentStyle]="{ padding: '0' }">
+<p-dialog
+  [blockScroll]="true"
+  appendTo="body"
+  (onShow)="disableScroll()"
+  (onHide)="enableScroll()"
+  [(visible)]="createVisible"
+  [modal]="true"
+  [dismissableMask]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: 'min(550px, 92vw)' }"
+  [contentStyle]="{ padding: '0' }"
+>
   <ng-template pTemplate="header">
     <div class="text-[22px] md:text-[25px] font-extrabold text-red-900">
       我要許願
@@ -733,16 +764,20 @@
       <!-- 願望標題 -->
       <div>
         <div class="font-extrabold text-red-900 mb-2">願望標題</div>
-        <input [(ngModel)]="createForm.title"
+        <input
+          [(ngModel)]="createForm.title"
           class="w-full px-4 py-3 rounded-xl border border-red-900/15 bg-white/80 outline-none focus:border-red-900/40"
-          placeholder="例如：五十嵐" />
+          placeholder="例如：五十嵐"
+        />
       </div>
 
       <!-- 類型 -->
       <div>
         <div class="font-extrabold text-red-900 mb-2">類型</div>
-        <select [(ngModel)]="createForm.type"
-          class="w-full px-4 py-3 rounded-xl border border-red-900/15 bg-white/80 outline-none focus:border-red-900/40">
+        <select
+          [(ngModel)]="createForm.type"
+          class="w-full px-4 py-3 rounded-xl border border-red-900/15 bg-white/80 outline-none focus:border-red-900/40"
+        >
           @for (t of typeOptions; track t) {
             <option [value]="t">{{ t }}</option>
           }
@@ -752,9 +787,11 @@
       <!-- 地點 -->
       <div>
         <div class="font-extrabold text-red-900 mb-2">地點</div>
-        <input [(ngModel)]="createForm.location"
+        <input
+          [(ngModel)]="createForm.location"
           class="w-full px-4 py-3 rounded-xl border border-red-900/15 bg-white/80 outline-none focus:border-red-900/40"
-          placeholder="例如：資安大樓" />
+          placeholder="例如：資安大樓"
+        />
       </div>
 
       <!-- 匿名 -->
@@ -766,13 +803,18 @@
 
     <!-- actions -->
     <div class="mt-6 flex items-center gap-3">
-      <button (click)="submitCreateWish()" [disabled]="isCreating"
-        class="cursor-pointer px-4 py-3 rounded-xl font-extrabold text-[15px] md:text-[18px] shadow enabled:bg-red-900 enabled:text-white enabled:hover:bg-red-950 enabled:active:scale-95 disabled:bg-gray-300 disabled:text-gray-600 disabled:cursor-not-allowed">
+      <button
+        (click)="submitCreateWish()"
+        [disabled]="isCreating"
+        class="cursor-pointer px-4 py-3 rounded-xl font-extrabold text-[15px] md:text-[18px] shadow enabled:bg-red-900 enabled:text-white enabled:hover:bg-red-950 enabled:active:scale-95 disabled:bg-gray-300 disabled:text-gray-600 disabled:cursor-not-allowed"
+      >
         送出
       </button>
 
-      <button (click)="closeCreateDialog()"
-        class="cursor-pointer px-4 py-3 rounded-xl font-extrabold text-[15px] md:text-[18px] bg-white/80 text-red-900 border border-red-900/20 hover:bg-gray-200">
+      <button
+        (click)="closeCreateDialog()"
+        class="cursor-pointer px-4 py-3 rounded-xl font-extrabold text-[15px] md:text-[18px] bg-white/80 text-red-900 border border-red-900/20 hover:bg-gray-200"
+      >
         取消
       </button>
 
