@@ -18,8 +18,6 @@ import { PanelModule } from 'primeng/panel';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { AuthService } from '../@service/auth.service';
 import { SelectModule } from 'primeng/select';
-import { MultiSelect, MultiSelectModule } from 'primeng/multiselect';
-
 
 
 export type Stores = {
@@ -89,7 +87,6 @@ export interface Store {
     TooltipModule,
     PanelModule,
     SelectModule,
-    MultiSelectModule,
   ],
   templateUrl: './gogo-buy.component.html',
   styleUrl: './gogo-buy.component.scss'
@@ -115,7 +112,7 @@ export class GogoBuyComponent {
 
   onStoreCtaClick() {
     if (this.storeStage() === 0) this.storeStage.set(1);
-    else this.router.navigate(['/gogobuy/list']); // 店家列表頁
+    else this.showDialog() // 店家列表頁
   }
 
   // 計算遮罩用
@@ -599,21 +596,10 @@ export class GogoBuyComponent {
     this.router.navigate(['/management/store_info', storeId]);
   }
 
-  /* 開團 TYPE filtered */
-  // 在 p-select 改值，這個 signal 就會更新，進而觸發下面的 computed 重新計算(正在開團中的TYPE)
-  readonly selectedTypes = signal<string[]>([]);
-  readonly typeQuery = signal<string>('');
-
-  @ViewChild('typeMs') typeMs!: MultiSelect;
-
-  openTypePanel(e: MouseEvent) {
-    this.typeMs.show();     // 用漏斗打開面板
-    e.stopPropagation();    // 避免同一次 click 立刻觸發外部點擊而關掉
-  }
-
-  // 取 type 的工具(.trim()避免後端塞空白造成「看起來一樣、其實字串不同」)
-  private getEventType(e: any): string {
-    return String(e.type).trim();
+  open = false;
+  toggle(event: MouseEvent) {
+    event.stopPropagation();
+    this.open = !this.open;
   }
   choice!: string;
   choose(category: string) {
@@ -671,13 +657,30 @@ export class GogoBuyComponent {
         this.closeStoreList = this.slowStoreList.filter(store => store.force_closed);
       }
     }
+
+    this.close();
+  }
+  close() {
+    this.open = false;
+  }
+  @HostListener('document:click')
+  onDocumentClick() {
+    this.open = false;
+  }
+  /* 開團 TYPE filtered */
+  // 在 p-select 改值，這個 signal 就會更新，進而觸發下面的 computed 重新計算(正在開團中的TYPE)
+  readonly selectedType = signal<string>('ALL');
+
+  // 取 type 的工具(.trim()避免後端塞空白造成「看起來一樣、其實字串不同」)
+  private getEventType(e: any): string {
+    return (e.type).trim();
   }
 
   // p-select 的 options
   readonly eventTypeOptions = computed(() => {
 
     // 從 events 抽出每筆的 type
-    const types = this.auths.events().map(e => this.getEventType(e)).filter(Boolean);
+    const types = this.auths.events().map(e => this.getEventType(e));
 
     // 統計各 type 出現次數
     const count = new Map<string, number>();
@@ -686,8 +689,11 @@ export class GogoBuyComponent {
     // 變成 p-select 要的 [{label, value}] 格式
     const unique = Array.from(count.keys()).sort((a, b) => a.localeCompare(b, 'zh-Hant'));
 
-    // 格式
-    return unique.map(t => ({ label: `${t} (${count.get(t)})`, value: t }));
+    // 額外加一個「全部」
+    return [
+      { label: `全部`, value: 'ALL' },
+      ...unique.map(t => ({ label: `${t} (${count.get(t)})`, value: t })),
+    ];
   });
 
 
@@ -695,34 +701,14 @@ export class GogoBuyComponent {
   readonly filteredEventCards = computed(() => {
 
     // 使用者選到的類別
-    const selected = this.selectedTypes();
+    const t = this.selectedType();
 
     // 你已經 join 店家後的卡片資料
     const cards = this.eventCards();
 
-    // ✅ 沒選任何 -> 全部
-    if (!selected.length) return cards;
-
-    return cards.filter(c => selected.includes(this.getEventType(c)));
+    if (t == 'ALL') return cards;
+    return cards.filter(c => this.getEventType(c) == t);
   });
-
-  // 外部搜尋：只影響「面板顯示的選項」
-  readonly eventTypeOptionsFiltered = computed(() => {
-    const q = this.typeQuery().trim().toLowerCase();
-    const opts = this.eventTypeOptions();
-    if (!q) return opts;
-
-    return opts.filter(o =>
-      o.value.toLowerCase().includes(q) || o.label.toLowerCase().includes(q)
-    );
-  });
-
-  readonly typePanelOpen = signal(false);
-
-  toggleTypePanel(e: MouseEvent) {
-    e.stopPropagation();
-    this.typePanelOpen.update(v => !v);
-  }
 
   /* 轉換ISO8601日期格式 */
   formatDateTime(s: string) {
@@ -737,5 +723,6 @@ export class GogoBuyComponent {
     // JS 的月份是 0~11，所以Month要+1才會變成1~12月
     return `${d.getFullYear()}/${pad(d.getMonth() + 1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
   }
-}
 
+
+}
