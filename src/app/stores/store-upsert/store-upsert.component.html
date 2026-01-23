@@ -9,7 +9,7 @@
       <p-inputgroup>
         <p-inputgroup-addon class="text-slate-700!"><i class="pi pi-shop"></i></p-inputgroup-addon>
         <p-floatlabel variant="on">
-          <input pInputText id="name" [(ngModel)]="storeData.name" class="border border-gray-300 focus:!border-2
+          <input pInputText id="name" [(ngModel)]="storeData.name" class="border border-gray-300 focus:!border
           focus:!border-[#662222] focus:!shadow-none outline-none w-full p-2 pl-3 rounded-r-xl transition-all" />
           <label for="name">店家名稱</label>
         </p-floatlabel>
@@ -20,7 +20,7 @@
       <p-inputgroup>
         <p-inputgroup-addon class="text-slate-700!"><i class="pi pi-phone"></i></p-inputgroup-addon>
         <p-floatlabel variant="on">
-          <input pInputText id="phone" [(ngModel)]="storeData.phone" class="border border-gray-300 focus:!border-2
+          <input pInputText id="phone" [(ngModel)]="storeData.phone" class="border border-gray-300 focus:!border
           focus:!border-[#662222] focus:!shadow-none outline-none w-full p-2 pl-3 rounded-r-xl transition-all" />
           <label for="phone">聯絡電話</label>
         </p-floatlabel>
@@ -33,7 +33,7 @@
           <i class="pi pi-objects-column"></i>
         </p-inputgroup-addon>
         <p-floatlabel class="w-full md:w-56" variant="on">
-          <p-select [(ngModel)]="storeData.category" id="on_label" [options]="category" optionLabel="name" />
+          <p-select [(ngModel)]="storeData.category" id="on_label" [options]="category" optionLabel="name" optionValue="value"/>
           <label for="on_label" class="text-slate-700 font-bold">經營類別</label>
         </p-floatlabel>
       </p-inputgroup>
@@ -168,10 +168,10 @@
       </div>
 
       <div class="grid grid-cols-1 gap-6">
-        @for(shippingFee of storeData.fee_description; track $index; let i = $index) {
+        @for(shippingFee of storeData.feeDescription; track $index; let i = $index) {
         <div class="relative p-5 rounded-2xl bg-gray-50 border border-gray-100 flex flex-col gap-4">
 
-          @if(storeData.fee_description.length >= 1) {
+          @if(storeData.feeDescription.length >= 1) {
           <button (click)="removeFeeRow(i)"
             class="absolute -top-2 cursor-pointer -right-2 w-8 h-8 bg-white border border-red-100 text-red-500 rounded-full shadow-sm hover:bg-red-50 transition-colors z-10">
             <i class="pi pi-trash"></i>
@@ -187,8 +187,8 @@
                   <label class="block mb-1 text-base font-bold text-gray-700 uppercase tracking-wider">公里數
                     (KM)</label>
                   <p-inputnumber [(ngModel)]="shippingFee.km" [minFractionDigits]="1" [maxFractionDigits]="2"
-                    suffix=" km" styleClass="w-full" inputStyleClass="w-full h-11 border border-gray-300 rounded-lg
-                      px-3 focus:!border-[#662222] outline-none" placeholder="1.0" />
+                     styleClass="w-full" inputStyleClass="w-full h-11 border border-gray-300 rounded-lg
+                      px-3 focus:!border-[#662222] outline-none" placeholder="km" />
                 </div>
 
                 <div class="pt-5 text-gray-700 hidden md:block">

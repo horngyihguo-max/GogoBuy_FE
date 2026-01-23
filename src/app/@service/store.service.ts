@@ -7,37 +7,55 @@ export class StoreService {
 
   constructor() { }
 
-  storeData = {
+  storeData: Stores = {
+    id: 0,
     name: '',
     phone: '',
     address: '',
-    category: null as Category | null,
+    category: '',
     type: '',
     memo: '',
-    image: null as Blob | string | null,
-    is_public: false,
-    created_by: 'A01',
-    operatingHoursVoList: [
-      {
-        week: [null as number | null],
-        openTime: '',
-        closeTime: ''
-      },
-    ],
-    fee_description: [] as FeeDescription[]
+    image: '',
+    publish: false,
+    createdBy: 'A01',
+    operatingHoursVoList: [] as OperatingHoursVoList[],
+    feeDescription: [] as FeeDescription[],
+    menuVoList: [] as MenuVoList[],
+    menuCategoriesVoList: [] as MenuCategoriesVoList[],
+    productOptionGroupsVoList: [] as ProductOptionGroupsVoList[]
+  }
+
+  clearCurrentStore() {
+    this.storeData = {
+      id: 0,
+      name: '',
+      phone: '',
+      address: '',
+      category: '',
+      type: '',
+      memo: '',
+      image: null as Blob | string | null,
+      publish: false,
+      createdBy: 'A01',
+      operatingHoursVoList: [],
+      feeDescription: [] as FeeDescription[],
+      menuVoList: [] as MenuVoList[],
+      menuCategoriesVoList: [] as MenuCategoriesVoList[],
+      productOptionGroupsVoList: [] as ProductOptionGroupsVoList[]
+    };
   }
 
 }
 export interface Stores {
-  id?: number;
-  storesName: string;
+  id: number;
+  name: string;
   phone: string;
   address: string;
-  category: any;
+  category: string;
   type: string;
-  memo?: string;
-  image?: any;
-  isPublic: boolean;
+  memo?: string | null;
+  image?: any | null;
+  publish: boolean;
   createdBy: string;
   feeDescription?: FeeDescription[];
   operatingHoursVoList: OperatingHoursVoList[];
@@ -58,18 +76,18 @@ export interface OperatingHoursVoList {
 }
 
 export interface MenuVoList {
-  id?: number,
+  id: number,
   categoryId: number;
   name: string;
   description?: string;
   basePrice: number | null;
-  isAvailable: boolean;
+  available: boolean;
   image?: string;
-  unusual?: string[];
+  unusual?: { [key: string]: any };
 }
 
 export interface MenuCategoriesVoList {
-  id?: number;
+  id: number;
   name: string;
   priceLevel?: PriceLevel[];
 }
@@ -85,7 +103,7 @@ export interface ProductOptionGroupsVoList {
   isRequired: boolean;
   maxSelection: number | null;
   items: Items[];
-  applicableCategoryIds?: number[];
+  applicableCategoryIds?: number[]; // 後端沒有欄位
 }
 
 export interface Items {
@@ -96,7 +114,7 @@ export interface Items {
 // 以下是暫存資料的interface ----------------
 export interface Category {
   name: string;
-  code: number;
+  code: string;
 }
 
 export interface TimeSlotUI {

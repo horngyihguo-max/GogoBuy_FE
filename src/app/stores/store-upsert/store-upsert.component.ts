@@ -9,9 +9,10 @@ import { InputTextModule } from 'primeng/inputtext';
 import { DatePickerModule } from 'primeng/datepicker';
 import { FluidModule } from 'primeng/fluid';
 import { CheckboxModule } from 'primeng/checkbox';
-import { StoreService } from '../../@service/store.service';
+import { MenuCategoriesVoList, MenuVoList, OperatingHoursVoList, ProductOptionGroupsVoList, StoreService } from '../../@service/store.service';
 import { DialogModule } from 'primeng/dialog';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { HttpService } from '../../@service/http.service';
 
 @Component({
   selector: 'app-store-upsert',
@@ -32,9 +33,11 @@ export class StoreUpsertComponent {
   constructor(
     private storeService: StoreService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private http: HttpService,
   ) { }
 
+  id!: number;
   displayAlertDialog: boolean = false;
   alertMessage!: string;
   selectCategory!: string;
@@ -45,8 +48,8 @@ export class StoreUpsertComponent {
   ];
 
   category: Category[] = [
-    { name: '團購代購', code: 1 },
-    { name: '外送', code: 2 },
+    { name: '團購代購', value: 'slow' },
+    { name: '外送', value: 'fast' },
   ];
 
   weeks: any[] = [
@@ -64,11 +67,12 @@ export class StoreUpsertComponent {
     {
       label: '1. 熟食餐點',
       items: [
-        { label: '各國料理', value: '各國料理' },
+        { label: '異國料理', value: '異國料理' },
         { label: '在地小吃', value: '在地小吃' },
         { label: '健康舒食', value: '健康舒食' },
         { label: '素食料理', value: '素食料理' },
-        { label: '宵夜點心', value: '宵夜點心' }
+        { label: '宵夜點心', value: '宵夜點心' },
+        { label: '便當', value: '便當' }
       ]
     },
     {
@@ -128,17 +132,18 @@ export class StoreUpsertComponent {
     }
   ];
 
-  // 從 store_upsert 來的店家資訊
+  // 送 service 店家資訊
   storeData = {
+    id: 0,
     name: '',
     phone: '',
     address: '',
     type: '',
     memo: '',
-    is_public: false,
-    category: null as Category | null,
-    image: '' as Blob | string | null,
-    created_by: 'A01',
+    isPublic: false,
+    category: '',
+    image: '' as any,
+    createdBy: 'A01',
     operatingHoursVoList: [
       {
         week: [null as number | null],
@@ -146,7 +151,88 @@ export class StoreUpsertComponent {
         closeTime: ''
       },
     ],
-    fee_description: [] as FeeDescription[]
+    feeDescription: [] as FeeDescription[],
+    menuVoList: [] as MenuVoList[],
+    menuCategoriesVoList: [] as MenuCategoriesVoList[],
+    productOptionGroupsVoList: [] as ProductOptionGroupsVoList[]
+  }
+
+  ngOnInit(): void {
+    this.id = Number(this.route.snapshot.paramMap.get('id'));
+
+    if (this.id !== 0) {
+      this.http.getApi(`http://localhost:8080/gogobuy/store/searchId?id=${this.id}`)
+        .subscribe((res: any) => {
+          if (res.storeList && res.storeList.length > 0) {
+            this.storeData = { ...res.storeList[0] };
+            if (typeof this.storeData.feeDescription === 'string') {
+              this.storeData.feeDescription = JSON.parse(this.storeData.feeDescription);
+            }
+
+            this.convertVoToTimeSlots(res.operatingHoursVoList || []);
+            console.log("this.storeData:", this.storeData);
+
+          }
+        });
+    } else if (this.storeService.storeData && this.storeService.storeData.name !== '') {
+      const source = this.storeService.storeData;
+      this.storeData = {
+        ...this.storeData,
+        ...source,
+        memo: source.memo ?? '',
+        image: source.image ?? null,
+        feeDescription: source.feeDescription ?? []
+      } as any;
+      this.convertVoToTimeSlots(source.operatingHoursVoList || []);
+    } else {
+      this.addTimeSlot();
+    }
+  }
+
+  // 從 service 拿到的資料 ( 新增店家又回來修改店家資訊 )
+  loadFromService() {
+    const sourceData = this.storeService.storeData;
+    if (!sourceData) return;
+
+    this.storeData = { ...this.storeData, ...sourceData } as any;
+
+    if (sourceData.operatingHoursVoList) {
+      this.convertVoToTimeSlots(sourceData.operatingHoursVoList);
+    }
+  }
+
+  // 時間轉換 從 {weel:1}{week:2} 變成 week:[1,2]
+  private convertVoToTimeSlots(voList: any[]) {
+    const map = new Map<string, number[]>();
+
+    voList.forEach(vo => {
+      const key = `${vo.openTime}-${vo.closeTime}`;
+      if (!map.has(key)) {
+        map.set(key, []);
+      }
+      map.get(key)?.push(vo.week);
+    });
+
+    const newSlots: TimeSlotUI[] = [];
+    map.forEach((weeks, timeKey) => {
+      const [openStr, closeStr] = timeKey.split('-');
+      newSlots.push({
+        selectedWeeks: weeks.sort((a, b) => a - b),
+        openTime: this.parseTimeToDate(openStr),
+        closeTime: this.parseTimeToDate(closeStr)
+      });
+    });
+    this.timeSlots = newSlots.length > 0 ? newSlots : [{ selectedWeeks: [], openTime: null, closeTime: null }];
+  }
+
+  private parseTimeToDate(timeStr: string): Date {
+    if (!timeStr) return new Date();
+    const parts = timeStr.split(':');
+    const h = Number(parts[0]);
+    const m = Number(parts[1]);
+    const d = new Date();
+    d.setHours(h, m, 0, 0);
+    return d;
   }
 
   // 上傳照片
@@ -205,13 +291,14 @@ export class StoreUpsertComponent {
 
   // 運費級距
   addFeeRow() {
-    this.storeData.fee_description.push({ km: 0, fee: 0 });
+    this.storeData.feeDescription.push({ km: 0, fee: 0 });
   }
 
   removeFeeRow(index: number) {
-    this.storeData.fee_description.splice(index, 1);
+    this.storeData.feeDescription.splice(index, 1);
   }
 
+  // 下一步
   onSubmit() {
     const finalVoList: any[] = [];
     const missingFields: string[] = [];
@@ -219,6 +306,8 @@ export class StoreUpsertComponent {
     if (!this.storeData.name) missingFields.push('商店名稱');
     if (!this.storeData.address) missingFields.push('商店地址');
     if (!this.storeData.phone) missingFields.push('聯絡電話');
+    if (!this.storeData.category) missingFields.push('經營類別');
+    if (!this.storeData.type) missingFields.push('商店類型');
 
     this.timeSlots.forEach(slot => {
       const openStr = this.formatTime(slot.openTime);
@@ -244,20 +333,27 @@ export class StoreUpsertComponent {
     }
 
     this.storeData.operatingHoursVoList = finalVoList;
-    this.storeService.storeData = this.storeData;
-    console.log('storeData：', this.storeData);
+    const readyToSave = { ...this.storeData } as any;
 
-    this.router.navigate(['../store'], { relativeTo: this.route });
+    this.storeService.storeData = readyToSave;
+
+    console.log('同步到 Service 成功：', this.storeService.storeData);
+
+    if (this.id !== 0) {
+      this.router.navigate(['/management/store', this.id]);
+    } else {
+      this.router.navigate(['/management/store']);
+    }
   }
 }
 
 export interface Category {
   name: string;
-  code: number;
+  value: string;
 }
 
 export interface TimeSlotUI {
-  selectedWeeks: number[]; // 例如 [1, 2, 3]
+  selectedWeeks: number[];
   openTime: Date | null;
   closeTime: Date | null;
 }
@@ -266,3 +362,4 @@ export interface FeeDescription {
   km: number;
   fee: number;
 }
+
