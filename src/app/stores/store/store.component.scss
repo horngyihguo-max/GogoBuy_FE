@@ -2,15 +2,6 @@ p {
   margin: 10px 0px;
 }
 
-// .custom-dialog .p-dialog-header {
-//   background-color: #662222;
-//   color: #ffffff;
-// }
-
-// .custom-dialog .p-dialog-header-icon {
-//   color: #ffffff;
-// }
-
 body.p-overflow-hidden {
   overflow: hidden !important;
   touch-action: none;
@@ -56,4 +47,13 @@ input {
 
 :host ::ng-deep .p-toggleswitch:not(.p-toggleswitch-disabled).p-focus .p-toggleswitch-slider {
   box-shadow: 0 0 0 0.2rem rgba(102, 34, 34, 0.2) !important;
+}
+
+// 商品列表的分類 tabs 隱藏滾動條 -----------------------------------------------------------------
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
 }
