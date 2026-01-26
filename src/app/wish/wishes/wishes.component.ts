@@ -41,11 +41,8 @@ export class WishesComponent implements OnInit {
     private messageService: MessageService,
     private route: ActivatedRoute,
     private router: Router
-<<<<<<< HEAD
   ) {}
-=======
-  ) { }
->>>>>>> origin/Mickey
+
 
   // =========================
   // 用戶資料(ngOnInt注入)
