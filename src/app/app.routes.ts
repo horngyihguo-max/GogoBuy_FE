@@ -75,29 +75,30 @@ export const routes: Routes = [
   { path: 'auth-callback', component: AuthCallbackComponent },
 
   // 6. 管理員頁面
-  // {
-  //   path: 'admin',
-  //   // component: AdminLayoutComponent, // 關鍵：這是一個有側邊欄的後台專用版型
-  //   // canActivate: [AdminGuard],       // 關鍵：安全性守衛，防止非管理者直接輸入 URL 進入
-  //   data: { breadcrumb: '管理後台' },
-  //   children: [
-  //     {
-  //       path: '',
-  //       redirectTo: 'dashboard',
-  //       pathMatch: 'full'
-  //     },
-  //     {
-  //       path: 'dashboard',
-  //       component: DashboardComponent,
-  //       data: { breadcrumb: '數據概覽' }
-  //     },
-  //     {
-  //       path: 'users',
-  //       // component: UserManagementComponent,
-  //       data: { breadcrumb: '會員管理' }
-  //     }
-  //   ]
-  // },
+  {
+    path: 'admin',
+    component: DashboardComponent, // 關鍵：這是一個有側邊欄的後台專用版型
+    // canActivate: [AdminGuard],       // 關鍵：安全性守衛，防止非管理者直接輸入 URL 進入
+    title: '管理後台',
+    data: { breadcrumb: '管理後台' },
+    //   children: [
+    //     {
+    //       path: '',
+    //       redirectTo: 'dashboard',
+    //       pathMatch: 'full'
+    //     },
+    //     {
+    //       path: 'dashboard',
+    //       component: DashboardComponent,
+    //       data: { breadcrumb: '數據概覽' }
+    //     },
+    //     {
+    //       path: 'users',
+    //       // component: UserManagementComponent,
+    //       data: { breadcrumb: '會員管理' }
+    //     }
+    //   ]
+  },
 
   // 7. 錯誤處理
   { path: '', redirectTo: 'gogobuy', pathMatch: 'full' },
