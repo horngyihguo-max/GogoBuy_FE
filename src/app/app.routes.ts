@@ -19,6 +19,7 @@ import { StoreInfoComponent } from './stores/store-info/store-info.component';
 import { CartPageComponent } from './account/cart-page/cart-page.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { StoreListComponent } from './stores/store-list/store-list.component';
+import { GroupEventComponent } from './groupbuy-event/group-event/group-event.component';
 
 export const routes: Routes = [
   // 1. 公開頁面與首頁
@@ -60,7 +61,16 @@ export const routes: Routes = [
     ]
   },
 
-  // 4. 條款與幫助頁面
+  // 4. 開團/跟團
+  {
+    path: 'groupbuy-event',
+    data: { breadcrumb: '團購活動' },
+    children: [
+      { path: 'group-event/:id', component: GroupEventComponent, title: '開團資料設定', data: { breadcrumb: '開團' } }
+    ]
+  },
+
+  // 5. 條款與幫助頁面
   {
     path: 'support',
     data: { breadcrumb: '幫助中心' },
@@ -71,10 +81,10 @@ export const routes: Routes = [
     ]
   },
 
-  // 5.GOOGLE登入跳轉頁面
+  // 6.GOOGLE登入跳轉頁面
   { path: 'auth-callback', component: AuthCallbackComponent },
 
-  // 6. 管理員頁面
+  // 7. 管理員頁面
   // {
   //   path: 'admin',
   //   // component: AdminLayoutComponent, // 關鍵：這是一個有側邊欄的後台專用版型
@@ -99,7 +109,7 @@ export const routes: Routes = [
   //   ]
   // },
 
-  // 7. 錯誤處理
+  // 8. 錯誤處理
   { path: '', redirectTo: 'gogobuy', pathMatch: 'full' },
   { path: '404', component: PageNotFoundComponent, title: '頁面不存在' },
   { path: '**', redirectTo: '/404' }

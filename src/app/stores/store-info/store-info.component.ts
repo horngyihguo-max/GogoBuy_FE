@@ -323,8 +323,8 @@ export class StoreInfoComponent implements OnInit {
       this.toastWarn('今日公休', '今日暫停開團');
       return;
     }
-    // TODO 之後再改成真正開團頁
-    this.router.navigate(['/management/store_upsert', this.storeId]);
+
+    this.router.navigate(['/groupbuy-event/group-event', this.storeId]);
   }
 
   // =========================
