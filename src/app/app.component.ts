@@ -281,7 +281,13 @@ export class AppComponent {
     });
   }
 
-  //登出清除session
+  // 跳轉購物車頁面
+  gocart() {
+    this.router.navigate(['/user/cart']);
+  }
+
+
+  // 登出清除session
   logout() {
     this.auth.logout();
     // 清除前端紀錄
