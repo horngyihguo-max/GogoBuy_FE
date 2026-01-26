@@ -54,6 +54,16 @@ nav img:hover {
   transition: all 0.5s;
 }
 
+nav i.nav-icon{
+  color: #fff;
+  transition: color .3s, transform .5s;
+}
+
+nav i.nav-icon:hover {
+  color: rgb(252, 165, 165);
+}
+
+
 /* 手機搜尋欄桌機隱藏，小於768px 才顯示（搭配 .disappear 隱藏桌機搜尋） */
 .search-mobile {
   display: none;
