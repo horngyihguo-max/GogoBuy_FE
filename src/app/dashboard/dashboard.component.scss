@@ -1,0 +1,52 @@
+:host {
+  display: block;
+}
+
+// Custom Scrollbar for navigation
+nav {
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: #e2e8f0;
+    border-radius: 20px;
+  }
+}
+
+// Adjust PrimeNG Table Header z-index if sticky
+::ng-deep {
+  .p-datatable .p-datatable-thead > tr > th {
+    background-color: #f9fafb;
+    color: #4b5563;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border-color: #f3f4f6;
+  }
+  
+  .p-datatable .p-datatable-tbody > tr > td {
+    border-color: #f3f4f6;
+    padding: 1rem 1rem;
+  }
+  
+  .p-tag {
+    font-weight: 600;
+    font-size: 0.75rem;
+  }
+}
+
+// Sidebar active state enhancement
+button.active {
+  background-color: #eff6ff; 
+  border-right: 3px solid #2563eb;
+  
+  i {
+    color: #2563eb;
+  }
+  
+  span {
+    color: #1e3a8a;
+  }
+}

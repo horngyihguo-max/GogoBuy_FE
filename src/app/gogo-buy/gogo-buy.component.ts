@@ -18,8 +18,6 @@ import { PanelModule } from 'primeng/panel';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { AuthService } from '../@service/auth.service';
 import { SelectModule } from 'primeng/select';
-import { MultiSelect, MultiSelectModule } from 'primeng/multiselect';
-
 
 
 export type Stores = {
@@ -89,7 +87,6 @@ export interface Store {
     TooltipModule,
     PanelModule,
     SelectModule,
-    MultiSelectModule,
   ],
   templateUrl: './gogo-buy.component.html',
   styleUrl: './gogo-buy.component.scss'
@@ -118,6 +115,7 @@ export class GogoBuyComponent {
     else this.router.navigate(['/gogobuy/list']); // 店家列表頁
   }
 
+
   // 計算遮罩用
   numVisible = 3;
 
@@ -126,14 +124,14 @@ export class GogoBuyComponent {
 
   activeTab: any = "allstores";  // tab 預設值
   @ViewChild(Tooltip) tooltip!: Tooltip;
-  storeList:Store[]=[];
-  fastStoreList:Store[]=[];
-  slowStoreList:Store[]=[];
-  openStoreList:Store[]=[];
-  closeStoreList:Store[]=[];
-  private idleTimer:any;
+  storeList: Store[] = [];
+  fastStoreList: Store[] = [];
+  slowStoreList: Store[] = [];
+  openStoreList: Store[] = [];
+  closeStoreList: Store[] = [];
+  private idleTimer: any;
   visibleTooltip: boolean = true;
-  storeSearch!:string;
+  storeSearch!: string;
   allStoresBackup: Store[] = []; // 備份完整清單
 
 
@@ -243,12 +241,12 @@ export class GogoBuyComponent {
         deleted: false, publish: true, force_closed: false, created_by: "e1d2c3b4-a5f6-4a7b-8c9d-0e1f2a3b4c5d"
       }
     ];
-    this.storeList=this.storeList.filter(store=>!store.deleted&&store.publish);  // 未刪除且公開
-    this.allStoresBackup=this.storeList;
-    this.fastStoreList=this.storeList.filter(store=>!store.force_closed && store.category=="外送");
-    this.slowStoreList=this.storeList.filter(store=>store.category=="團購");  // 只有團購可以顯示未營業，外送不可
-    this.openStoreList=this.slowStoreList.filter(store=>!store.force_closed);
-    this.closeStoreList=this.slowStoreList.filter(store=>store.force_closed);
+    this.storeList = this.storeList.filter(store => !store.deleted && store.publish);  // 未刪除且公開
+    this.allStoresBackup = this.storeList;
+    this.fastStoreList = this.storeList.filter(store => !store.force_closed && store.category == "外送");
+    this.slowStoreList = this.storeList.filter(store => store.category == "團購");  // 只有團購可以顯示未營業，外送不可
+    this.openStoreList = this.slowStoreList.filter(store => !store.force_closed);
+    this.closeStoreList = this.slowStoreList.filter(store => store.force_closed);
   }
 
   // 監聽全域滑鼠移動
@@ -469,7 +467,7 @@ export class GogoBuyComponent {
   ];
 
 
-  visible:boolean = false;
+  visible: boolean = false;
   showDialog() {
     this.visible = true;
     this.disableScroll();
@@ -525,34 +523,34 @@ export class GogoBuyComponent {
 
 
   // 即時搜尋
-  fast:Store[]=[];  //備份模糊搜尋
-  slow:Store[]=[];  //備份模糊搜尋
+  fast: Store[] = [];  //備份模糊搜尋
+  slow: Store[] = [];  //備份模糊搜尋
   @ViewChild('storeTabs') storeTabs: any;
   letterSearch() {
     const searchKey = this.storeSearch.toLowerCase().trim();
     if (!searchKey) {  // 搜尋資料不存在，還原成完整清單
       this.storeList = [...this.allStoresBackup];
-      this.fastStoreList=this.storeList.filter(store=>!store.force_closed && store.category=="外送");
-      this.slowStoreList=this.storeList.filter(store=>store.category=="團購");  // 只有團購可以顯示未營業，外送不可
-      this.openStoreList=this.slowStoreList.filter(store=>!store.force_closed);
-      this.closeStoreList=this.slowStoreList.filter(store=>store.force_closed);
+      this.fastStoreList = this.storeList.filter(store => !store.force_closed && store.category == "外送");
+      this.slowStoreList = this.storeList.filter(store => store.category == "團購");  // 只有團購可以顯示未營業，外送不可
+      this.openStoreList = this.slowStoreList.filter(store => !store.force_closed);
+      this.closeStoreList = this.slowStoreList.filter(store => store.force_closed);
       this.activeTab = 'allstores';
     }
     if (searchKey && searchKey.length > 0) {  // 有搜尋資料，tab回到"全部店家"，下拉選單回不選狀態
       this.activeTab = 'allstores';
-      this.choice="";
+      this.choice = "";
     }
     const eachLetter = searchKey.split('');
     this.storeList = this.allStoresBackup.filter((store: any) => {
       const storeName = store.name.toLowerCase();
       return eachLetter.every(char => storeName.includes(char));
     });
-    this.fastStoreList=this.storeList.filter(store=>!store.force_closed && store.category=="外送");
-    this.slowStoreList=this.storeList.filter(store=>store.category=="團購");  // 只有團購可以顯示未營業，外送不可
-    this.openStoreList=this.slowStoreList.filter(store=>!store.force_closed);
-    this.closeStoreList=this.slowStoreList.filter(store=>store.force_closed);
-    this.fast=[...this.fastStoreList];
-    this.slow=[...this.slowStoreList];
+    this.fastStoreList = this.storeList.filter(store => !store.force_closed && store.category == "外送");
+    this.slowStoreList = this.storeList.filter(store => store.category == "團購");  // 只有團購可以顯示未營業，外送不可
+    this.openStoreList = this.slowStoreList.filter(store => !store.force_closed);
+    this.closeStoreList = this.slowStoreList.filter(store => store.force_closed);
+    this.fast = [...this.fastStoreList];
+    this.slow = [...this.slowStoreList];
   }
   highlight(text: string): SafeHtml {
     // 1. 如果沒有搜尋字串、沒有內容，或是搜尋字串全是空白，直接回傳原文字
@@ -587,7 +585,7 @@ export class GogoBuyComponent {
     this.enableScroll();
     this.router.navigate(['/management/store_upsert']);
   }
-  goStoreInfo(storeId:number){
+  goStoreInfo(storeId: number) {
     // 跳轉前手動銷毀 Tooltip，防止文字殘留
     if (this.tooltip) {
       this.tooltip.deactivate();
@@ -604,60 +602,60 @@ export class GogoBuyComponent {
     event.stopPropagation();
     this.open = !this.open;
   }
-  choice!:string;
-  choose(category:string){
-    this.activeTab="allstores";
-    if(this.storeSearch.trim().length>0){
-      if(category=="fast"){
-        this.choice="外送";
-        this.fastStoreList=[...this.fast];
-        this.storeList=[...this.fast];  // tab篩選用
+  choice!: string;
+  choose(category: string) {
+    this.activeTab = "allstores";
+    if (this.storeSearch.trim().length > 0) {
+      if (category == "fast") {
+        this.choice = "外送";
+        this.fastStoreList = [...this.fast];
+        this.storeList = [...this.fast];  // tab篩選用
         this.uniqueTabs;
-        this.slowStoreList=[];
-        this.openStoreList=[];
-        this.closeStoreList=[];
-      }else if(category=="slow"){
-        this.choice="團購";
-        this.slowStoreList=[...this.slow];
-        this.storeList=[...this.slow];  // tab篩選用
+        this.slowStoreList = [];
+        this.openStoreList = [];
+        this.closeStoreList = [];
+      } else if (category == "slow") {
+        this.choice = "團購";
+        this.slowStoreList = [...this.slow];
+        this.storeList = [...this.slow];  // tab篩選用
         this.uniqueTabs;
-        this.openStoreList=this.slowStoreList.filter(store=>!store.force_closed);
-        this.closeStoreList=this.slowStoreList.filter(store=>store.force_closed);
-        this.fastStoreList=[];
-      }else if(category=="all"){
-        this.choice="不限";
-        this.fastStoreList=[...this.fast];  // 復原
-        this.slowStoreList=[...this.slow];  // 復原
-        this.openStoreList=this.slowStoreList.filter(store=>!store.force_closed);
-        this.closeStoreList=this.slowStoreList.filter(store=>store.force_closed);
+        this.openStoreList = this.slowStoreList.filter(store => !store.force_closed);
+        this.closeStoreList = this.slowStoreList.filter(store => store.force_closed);
+        this.fastStoreList = [];
+      } else if (category == "all") {
+        this.choice = "不限";
+        this.fastStoreList = [...this.fast];  // 復原
+        this.slowStoreList = [...this.slow];  // 復原
+        this.openStoreList = this.slowStoreList.filter(store => !store.force_closed);
+        this.closeStoreList = this.slowStoreList.filter(store => store.force_closed);
         this.storeList = [...this.fastStoreList, ...this.slowStoreList];  // tab篩選用
         this.uniqueTabs;
       }
-    }else{
-      if(category=="fast"){
-        this.choice="外送";
-        this.storeList=this.allStoresBackup.filter(store=>!store.force_closed && store.category=="外送");  // tab篩選用
+    } else {
+      if (category == "fast") {
+        this.choice = "外送";
+        this.storeList = this.allStoresBackup.filter(store => !store.force_closed && store.category == "外送");  // tab篩選用
         this.uniqueTabs;
-        this.fastStoreList=this.allStoresBackup.filter(store=>!store.force_closed && store.category=="外送");
-        this.slowStoreList=[];
-        this.openStoreList=[];
-        this.closeStoreList=[];
-      }else if(category=="slow"){
-        this.choice="團購";
-        this.storeList=this.allStoresBackup.filter(store=>store.category=="團購");  // tab篩選用
+        this.fastStoreList = this.allStoresBackup.filter(store => !store.force_closed && store.category == "外送");
+        this.slowStoreList = [];
+        this.openStoreList = [];
+        this.closeStoreList = [];
+      } else if (category == "slow") {
+        this.choice = "團購";
+        this.storeList = this.allStoresBackup.filter(store => store.category == "團購");  // tab篩選用
         this.uniqueTabs;
-        this.fastStoreList=[];
-        this.slowStoreList=this.allStoresBackup.filter(store=>store.category=="團購");  // 只有團購可以顯示未營業，外送不可
-        this.openStoreList=this.slowStoreList.filter(store=>store.force_closed);
-        this.closeStoreList=this.slowStoreList.filter(store=>!store.force_closed);
-      }else if(category=="all"){
-        this.choice="不限";
-        this.storeList=this.allStoresBackup;  // tab篩選用
+        this.fastStoreList = [];
+        this.slowStoreList = this.allStoresBackup.filter(store => store.category == "團購");  // 只有團購可以顯示未營業，外送不可
+        this.openStoreList = this.slowStoreList.filter(store => store.force_closed);
+        this.closeStoreList = this.slowStoreList.filter(store => !store.force_closed);
+      } else if (category == "all") {
+        this.choice = "不限";
+        this.storeList = this.allStoresBackup;  // tab篩選用
         this.uniqueTabs;
-        this.fastStoreList=this.allStoresBackup.filter(store=>!store.force_closed && store.category=="外送");
-        this.slowStoreList=this.allStoresBackup.filter(store=>store.category=="團購");  // 只有團購可以顯示未營業，外送不可
-        this.openStoreList=this.slowStoreList.filter(store=>!store.force_closed);
-        this.closeStoreList=this.slowStoreList.filter(store=>store.force_closed);
+        this.fastStoreList = this.allStoresBackup.filter(store => !store.force_closed && store.category == "外送");
+        this.slowStoreList = this.allStoresBackup.filter(store => store.category == "團購");  // 只有團購可以顯示未營業，外送不可
+        this.openStoreList = this.slowStoreList.filter(store => !store.force_closed);
+        this.closeStoreList = this.slowStoreList.filter(store => store.force_closed);
       }
     }
 
@@ -672,26 +670,18 @@ export class GogoBuyComponent {
   }
   /* 開團 TYPE filtered */
   // 在 p-select 改值，這個 signal 就會更新，進而觸發下面的 computed 重新計算(正在開團中的TYPE)
-  readonly selectedTypes = signal<string[]>([]);
-  readonly typeQuery = signal<string>('');
-
-  @ViewChild('typeMs') typeMs!: MultiSelect;
-
-  openTypePanel(e: MouseEvent) {
-    this.typeMs.show();     // 用漏斗打開面板
-    e.stopPropagation();    // 避免同一次 click 立刻觸發外部點擊而關掉
-  }
+  readonly selectedType = signal<string>('ALL');
 
   // 取 type 的工具(.trim()避免後端塞空白造成「看起來一樣、其實字串不同」)
   private getEventType(e: any): string {
-    return String(e.type).trim();
+    return (e.type).trim();
   }
 
   // p-select 的 options
   readonly eventTypeOptions = computed(() => {
 
     // 從 events 抽出每筆的 type
-    const types = this.auths.events().map(e => this.getEventType(e)).filter(Boolean);
+    const types = this.auths.events().map(e => this.getEventType(e));
 
     // 統計各 type 出現次數
     const count = new Map<string, number>();
@@ -700,8 +690,11 @@ export class GogoBuyComponent {
     // 變成 p-select 要的 [{label, value}] 格式
     const unique = Array.from(count.keys()).sort((a, b) => a.localeCompare(b, 'zh-Hant'));
 
-    // 格式
-    return unique.map(t => ({ label: `${t} (${count.get(t)})`, value: t }));
+    // 額外加一個「全部」
+    return [
+      { label: `全部`, value: 'ALL' },
+      ...unique.map(t => ({ label: `${t} (${count.get(t)})`, value: t })),
+    ];
   });
 
 
@@ -709,34 +702,14 @@ export class GogoBuyComponent {
   readonly filteredEventCards = computed(() => {
 
     // 使用者選到的類別
-    const selected = this.selectedTypes();
+    const t = this.selectedType();
 
     // 你已經 join 店家後的卡片資料
     const cards = this.eventCards();
 
-    // ✅ 沒選任何 -> 全部
-    if (!selected.length) return cards;
-
-    return cards.filter(c => selected.includes(this.getEventType(c)));
+    if (t == 'ALL') return cards;
+    return cards.filter(c => this.getEventType(c) == t);
   });
-
-  // 外部搜尋：只影響「面板顯示的選項」
-  readonly eventTypeOptionsFiltered = computed(() => {
-    const q = this.typeQuery().trim().toLowerCase();
-    const opts = this.eventTypeOptions();
-    if (!q) return opts;
-
-    return opts.filter(o =>
-      o.value.toLowerCase().includes(q) || o.label.toLowerCase().includes(q)
-    );
-  });
-
-  readonly typePanelOpen = signal(false);
-
-  toggleTypePanel(e: MouseEvent) {
-    e.stopPropagation();
-    this.typePanelOpen.update(v => !v);
-  }
 
   /* 轉換ISO8601日期格式 */
   formatDateTime(s: string) {

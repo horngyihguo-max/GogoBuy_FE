@@ -1,3 +1,4 @@
+import { Component } from '@angular/core';
 import { LoginComponent } from './account/login/login.component';
 import { ProblemsComponent } from './terms/problems/problems.component';
 import { PrivacyPolicyComponent } from './terms/privacy-policy/privacy-policy.component';
@@ -16,45 +17,9 @@ import { NotificationsComponent } from './account/notifications/notifications.co
 import { StoreUpsertComponent } from './stores/store-upsert/store-upsert.component';
 import { StoreInfoComponent } from './stores/store-info/store-info.component';
 import { CartPageComponent } from './account/cart-page/cart-page.component';
+import { DashboardComponent } from './dashboard/dashboard.component';
 import { StoreListComponent } from './stores/store-list/store-list.component';
 
-// export const routes: Routes = [
-//   // 首頁
-//   { path: 'gogobuy', component: GogoBuyComponent, title: 'GoGoBuy | 首頁' },
-//   { path: '', redirectTo: '/gogobuy', pathMatch: 'full' },
-//   { path: 'orders', component: OrdersComponent, title: '我的訂單', canActivate: [authGuard], },
-
-//   // 登入/註冊
-//   { path: 'login', component: LoginComponent },
-//   { path: 'auth-callback', component: AuthCallbackComponent },
-
-//   // 用戶資料頁面
-//   { path: 'personInfo', component: PersonInfoComponent,canActivate: [authGuard], },
-//   { path: 'personinfoedit', component: PersonInfoEditComponent },
-
-//   // 願望清單
-//   { path: 'wishes', component: WishesComponent },
-
-//   // 通知頁面
-//   { path: 'notifications', component: NotificationsComponent },
-
-//   // 條款頁面 ------------------------------------------------------------------
-//   { path: 'problems', component: ProblemsComponent },
-//   { path: 'privacyPolicy', component: PrivacyPolicyComponent },
-//   { path: 'conditions', component: ConditionsComponent },
-//   // --------------------------------------------------------------------------
-
-//   //創立店家與品項
-//   { path: 'store', component: StoreComponent },
-//   { path: 'store_upsert', component: StoreUpsertComponent },
-
-//   // 錯誤/失效網址
-//   { path: '404', component: PageNotFoundComponent },
-//   { path: '**', component: PageNotFoundComponent }
-// ];
-
-
-// 待確認
 export const routes: Routes = [
   // 1. 公開頁面與首頁
   {
@@ -109,7 +74,32 @@ export const routes: Routes = [
   // 5.GOOGLE登入跳轉頁面
   { path: 'auth-callback', component: AuthCallbackComponent },
 
-  // 6. 錯誤處理
+  // 6. 管理員頁面
+  // {
+  //   path: 'admin',
+  //   // component: AdminLayoutComponent, // 關鍵：這是一個有側邊欄的後台專用版型
+  //   // canActivate: [AdminGuard],       // 關鍵：安全性守衛，防止非管理者直接輸入 URL 進入
+  //   data: { breadcrumb: '管理後台' },
+  //   children: [
+  //     {
+  //       path: '',
+  //       redirectTo: 'dashboard',
+  //       pathMatch: 'full'
+  //     },
+  //     {
+  //       path: 'dashboard',
+  //       component: DashboardComponent,
+  //       data: { breadcrumb: '數據概覽' }
+  //     },
+  //     {
+  //       path: 'users',
+  //       // component: UserManagementComponent,
+  //       data: { breadcrumb: '會員管理' }
+  //     }
+  //   ]
+  // },
+
+  // 7. 錯誤處理
   { path: '', redirectTo: 'gogobuy', pathMatch: 'full' },
   { path: '404', component: PageNotFoundComponent, title: '頁面不存在' },
   { path: '**', redirectTo: '/404' }

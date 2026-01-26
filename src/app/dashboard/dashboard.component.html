@@ -1,0 +1,207 @@
+<div class="dashboard-wrapper flex min-h-screen bg-gray-50">
+
+  <!-- Sidebar -->
+  <aside class="w-64 bg-white border-r border-gray-200 flex-shrink-0 flex flex-col fixed h-full z-10">
+    <div class="p-6 border-b border-gray-100">
+      <h1 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
+        GoGoBuy
+      </h1>
+      <p class="text-xs text-gray-400 mt-1 uppercase tracking-wider font-semibold">Admin Portal</p>
+    </div>
+
+    <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+      <ng-container *ngFor="let item of menuItems">
+        <button (click)="setView(item.id)" [class.active]="currentView === item.id"
+          class="w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 group">
+          <i [class]="item.icon" class="mr-3 text-lg transition-colors group-hover:text-blue-600"
+            [class.text-blue-600]="currentView === item.id" [class.text-gray-400]="currentView !== item.id"></i>
+          <span [class.text-gray-900]="currentView === item.id" [class.text-gray-600]="currentView !== item.id"
+            class="group-hover:text-blue-800">
+            {{ item.label }}
+          </span>
+          <span *ngIf="item.id === 'users'"
+            class="ml-auto bg-blue-100 text-blue-600 py-0.5 px-2 rounded-full text-xs font-semibold">
+            {{ users.length }}
+          </span>
+        </button>
+      </ng-container>
+    </nav>
+
+    <div class="p-4 border-t border-gray-100">
+      <div class="flex items-center gap-3 px-2">
+        <p-avatar icon="pi pi-user" styleClass="mr-2" shape="circle" size="normal"
+          [style]="{'background-color': '#e0e7ff', 'color': '#4f46e5'}"></p-avatar>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-medium text-gray-900 truncate">Administrator</p>
+          <p class="text-xs text-gray-500 truncate">admin&#64;gogobuy.com</p>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="flex-1 ml-64 p-8">
+
+    <!-- Top Header -->
+    <header class="mb-8 flex justify-between items-center">
+      <div>
+        <h2 class="text-2xl font-bold text-gray-900">
+          {{ currentView === 'stores' ? '店家管理' : (currentView === 'events' ? '團購活動' : '會員管理') }}
+        </h2>
+        <p class="mt-1 text-sm text-gray-500">
+          {{ currentView === 'stores' ? '檢視並管理所有註冊店家' : (currentView === 'events' ? '監控所有進行中與歷史團購' : '管理平台使用者權限與狀態') }}
+        </p>
+      </div>
+      <div>
+        <p-button label="更新資料" icon="pi pi-refresh" [loading]="loading" (onClick)="loadData()"
+          styleClass="p-button-outlined p-button-secondary"></p-button>
+      </div>
+    </header>
+
+    <!-- Content Area -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+
+      <!-- STORE VIEW -->
+      <ng-container *ngIf="currentView === 'stores'">
+        <p-table [value]="stores" [paginator]="true" [rows]="10" [loading]="loading" [rowHover]="true"
+          styleClass="p-datatable-striped" [tableStyle]="{ 'min-width': '50rem' }">
+          <ng-template pTemplate="header">
+            <tr>
+              <th pSortableColumn="id" style="width:10%">ID <p-sortIcon field="id"></p-sortIcon></th>
+              <th pSortableColumn="name" style="width:20%">店家名稱 <p-sortIcon field="name"></p-sortIcon></th>
+              <th pSortableColumn="category" style="width:15%">分類 <p-sortIcon field="category"></p-sortIcon></th>
+              <th pSortableColumn="address" style="width:25%">地址 <p-sortIcon field="address"></p-sortIcon></th>
+              <th pSortableColumn="phone" style="width:15%">電話 <p-sortIcon field="phone"></p-sortIcon></th>
+              <th style="width:15%">操作</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-store>
+            <tr>
+              <td><span class="text-gray-500">#{{ store.id }}</span></td>
+              <td class="font-semibold text-gray-900">{{ store.name }}</td>
+              <td><p-tag [value]="store.category || '未分類'" severity="info" [rounded]="true"></p-tag></td>
+              <td class="text-sm text-gray-600">{{ store.address }}</td>
+              <td class="text-sm text-gray-600">{{ store.phone }}</td>
+              <td>
+                <p-button label="詳情" icon="pi pi-file-edit" styleClass="p-button-text p-button-sm p-button-rounded"
+                  [routerLink]="['/management/store', store.id]"></p-button>
+              </td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="6" class="text-center p-8 text-gray-500">
+                <i class="pi pi-inbox text-4xl mb-2 block"></i>
+                目前沒有店家資料
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </ng-container>
+
+      <!-- EVENTS VIEW -->
+      <ng-container *ngIf="currentView === 'events'">
+        <p-table [value]="events" [paginator]="true" [rows]="10" [loading]="loading" [rowHover]="true"
+          styleClass="p-datatable-striped" [tableStyle]="{ 'min-width': '50rem' }">
+          <ng-template pTemplate="header">
+            <tr>
+              <th pSortableColumn="id" style="width:10%">ID <p-sortIcon field="id"></p-sortIcon></th>
+              <th pSortableColumn="eventName" style="width:25%">活動名稱 <p-sortIcon field="eventName"></p-sortIcon></th>
+              <th pSortableColumn="storeId" style="width:10%">店家ID <p-sortIcon field="storeId"></p-sortIcon></th>
+              <th pSortableColumn="hostName" style="width:15%">開團者 <p-sortIcon field="hostName"></p-sortIcon></th>
+              <th pSortableColumn="status" style="width:15%">狀態 <p-sortIcon field="status"></p-sortIcon></th>
+              <th style="width:25%">操作</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-event>
+            <tr>
+              <td><span class="text-gray-500">#{{ event.id }}</span></td>
+              <td class="font-semibold text-gray-900">{{ event.eventName || '未命名活動' }}</td>
+              <td>{{ event.storeId || event.storesId }}</td>
+              <td>
+                <div class="flex items-center gap-2">
+                  <p-avatar icon="pi pi-user" shape="circle" size="normal"></p-avatar>
+                  <span>{{ event.hostName || event.hostId || '未知' }}</span>
+                </div>
+              </td>
+              <td>
+                <p-tag [value]="event.status || '進行中'" [severity]="getSeverity(event.status)" [rounded]="true"></p-tag>
+              </td>
+              <td>
+                <p-button label="查看" icon="pi pi-eye"
+                  styleClass="p-button-text p-button-sm p-button-rounded"></p-button>
+              </td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="6" class="text-center p-8 text-gray-500">
+                <i class="pi pi-calendar-times text-4xl mb-2 block"></i>
+                目前沒有活動資料
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </ng-container>
+
+      <!-- USERS VIEW (NEW) -->
+      <ng-container *ngIf="currentView === 'users'">
+        <p-table [value]="users" [paginator]="true" [rows]="10" [loading]="loading" [rowHover]="true"
+          styleClass="p-datatable-striped" [tableStyle]="{ 'min-width': '50rem' }">
+          <ng-template pTemplate="header">
+            <tr>
+              <th pSortableColumn="id" style="width:10%">ID <p-sortIcon field="id"></p-sortIcon></th>
+              <th pSortableColumn="nickname" style="width:20%">暱稱 <p-sortIcon field="nickname"></p-sortIcon></th>
+              <th pSortableColumn="email" style="width:25%">Email <p-sortIcon field="email"></p-sortIcon></th>
+              <th pSortableColumn="role" style="width:15%">角色 <p-sortIcon field="role"></p-sortIcon></th>
+              <th pSortableColumn="status" style="width:15%">狀態 <p-sortIcon field="status"></p-sortIcon></th>
+              <th style="width:15%">操作</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-user>
+            <tr>
+              <td><span class="text-gray-500">#{{ user.id }}</span></td>
+              <td>
+                <div class="flex items-center gap-2">
+                  <p-avatar [image]="user.avatarUrl" icon="pi pi-user" shape="circle"></p-avatar>
+                  <span class="font-medium text-gray-900">{{ user.nickname }}</span>
+                </div>
+              </td>
+              <td class="text-gray-600">{{ user.email }}</td>
+              <td>
+                <span
+                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800"
+                  *ngIf="user.role === 'ADMIN'">
+                  管理員
+                </span>
+                <span
+                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
+                  *ngIf="user.role !== 'ADMIN'">
+                  {{ user.role }}
+                </span>
+              </td>
+              <td>
+                <p-tag [value]="user.status" [severity]="getSeverity(user.status)" [rounded]="true"></p-tag>
+              </td>
+              <td>
+                <p-button icon="pi pi-pencil"
+                  styleClass="p-button-text p-button-sm p-button-rounded p-button-secondary"></p-button>
+                <p-button icon="pi pi-ban"
+                  styleClass="p-button-text p-button-sm p-button-rounded p-button-danger"></p-button>
+              </td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="6" class="text-center p-8 text-gray-500">
+                <i class="pi pi-users text-4xl mb-2 block"></i>
+                目前沒有使用者資料
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </ng-container>
+
+    </div>
+  </main>
+</div>

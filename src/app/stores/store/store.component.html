@@ -68,14 +68,14 @@
 
               <div class="flex flex-wrap gap-1.5 mt-auto pt-3">
                 @for(level of category.priceLevel; track $index) {
-                  @if(level.price === 0 || level.price === null){
-                  }@else{
-                    <span class="text-[10px] px-6 py-2 bg-white border border-gray-200 text-[#662222]
+                @if(level.price === 0 || level.price === null){
+                }@else{
+                <span class="text-[10px] px-6 py-2 bg-white border border-gray-200 text-[#662222]
                     rounded-md font-medium">
-                      {{ level.name }}
-                      ${{ level.price }}
-                    </span>
-                  }
+                  {{ level.name }}
+                  ${{ level.price }}
+                </span>
+                }
                 } @empty {
                 <span class="text-[10px] text-gray-300 italic">尚未設定價格級距</span>
                 }
@@ -95,13 +95,15 @@
       </div>
 
       <!-- 規格表 -->
-      <div class="space-y-4 bg-white border border-gray-200 rounded-xl overflow-hidden shadow-md p-5">
+      <div class="space-y-4 bg-white border border-gray-200 rounded-xl overflow-hidden shadow-md p-5"
+        [style.pointer-events]="storeData.menuCategoriesVoList.length <= 0 ? 'none' : 'auto'"
+        [style.opacity]="storeData.menuCategoriesVoList.length <= 0 ? '0.3' : '1'">
         <div class="flex flex-col gap-6 p-3">
           <div class="flex justify-between items-center border-b border-[#662222]/70 pb-3">
             <h3 class="font-bold text-[#662222] flex items-center gap-2 text-lg">
               <i class="pi pi-cog"></i> 商品規格配置
             </h3>
-            <button (click)="addSpecs()"
+            <button (click)="addSpecs()" [disabled]="storeData.menuCategoriesVoList.length <= 0"
               class="flex items-center gap-2 px-4 py-1.5 bg-[#662222] text-white rounded-full text-sm font-medium hover:bg-[#662222]/90 transition-all shadow-sm">
               <i class="pi pi-plus text-xs"></i>
               新增規格
@@ -110,7 +112,7 @@
         </div>
 
         <div class="grid gap-4" [class.grid-cols-1]="storeData.productOptionGroupsVoList.length === 1"
-        [class.grid-cols-2]="storeData.productOptionGroupsVoList.length > 1">
+          [class.grid-cols-2]="storeData.productOptionGroupsVoList.length > 1">
           @for(group of storeData.productOptionGroupsVoList; track $index) {
           <div class="group border border-gray-100 rounded-xl p-4 bg-gray-50/50 hover:bg-white hover:border-[#662222]/30
         hover:shadow-md transition-all relative">
@@ -139,7 +141,8 @@
 
             <div class="flex flex-wrap gap-1.5">
               @for(item of group.items; track $index) {
-              <span class="text-[11px] px-2 py-0.5 bg-white border border-gray-200 text-gray-600 rounded-md text-center">
+              <span
+                class="text-[11px] px-2 py-0.5 bg-white border border-gray-200 text-gray-600 rounded-md text-center">
                 {{ item.name }} <br> {{ (item.extraPrice ?? 0) > 0 ? '(+$'+item.extraPrice+')' : '(+$0)' }}
               </span>
               }
@@ -157,7 +160,9 @@
       </div>
 
       <!-- 商品表 -->
-      <div class="space-y-4 bg-white border border-gray-200 rounded-xl overflow-hidden shadow-md p-5">
+      <div class="space-y-4 bg-white border border-gray-200 rounded-xl overflow-hidden shadow-md p-5"
+        [style.pointer-events]="storeData.productOptionGroupsVoList.length <= 0 ? 'none' : 'auto'"
+        [style.opacity]="storeData.productOptionGroupsVoList.length <= 0 ? '0.3' : '1'">
         <div class="flex flex-col gap-6 p-3">
           <div class="border-b border-[#662222]/20 mb-4">
             <div class="flex justify-between items-center pb-3">
@@ -255,8 +260,8 @@
                   <td class="px-6 py-4">
                     <div class="flex items-center justify-center gap-2">
                       <p-toggleswitch [(ngModel)]="product.available" (onChange)="onStatusChange()"></p-toggleswitch>
-                      <span class="text-xs font-medium transition-colors duration-300" [class.text-[#662222]]="product.available"
-                        [class.text-gray-400]="!product.available">
+                      <span class="text-xs font-medium transition-colors duration-300"
+                        [class.text-[#662222]]="product.available" [class.text-gray-400]="!product.available">
                         {{ product.available ? '供應中' : '已停售' }}
                       </span>
                     </div>
@@ -329,7 +334,7 @@
         <button (click)="storeTab = 'info'"
           class="group relative pb-3 font-semibold transition-colors cursor-pointer flex items-center justify-center gap-2"
           [ngClass]="storeTab === 'info' ? 'text-[#662222]' : 'text-[#662222]/60 hover:text-[#662222]'">
-          <span>店家資訊</span>
+          <span class="text-xl">店家資訊</span>
           <span class="absolute left-0 bottom-0 h-[2px] bg-[#662222] transition-all duration-300"
             [ngClass]="storeTab === 'info' ? 'w-full' : 'w-0 group-hover:w-full'"></span>
         </button>
@@ -337,42 +342,104 @@
         <button (click)="storeTab = 'orderInfo'"
           class="group relative pb-3 font-semibold transition-colors cursor-pointer flex items-center justify-center gap-2"
           [ngClass]="storeTab === 'orderInfo' ? 'text-[#662222]' : 'text-[#662222]/60 hover:text-[#662222]'">
-          <span>訂購資訊</span>
+          <span class="text-xl">訂購資訊</span>
           <span class="absolute left-0 bottom-0 h-[2px] bg-[#662222] transition-all duration-300"
             [ngClass]="storeTab === 'orderInfo' ? 'w-full' : 'w-0 group-hover:w-full'"></span>
         </button>
       </nav>
     </div>
 
-    <!-- 店家資訊 -->
     <div class="flex-1 overflow-y-auto">
-      <div *ngIf="storeTab === 'info'" class="py-2">
 
-        <p class="text-gray-700 font-semibold text-lg">{{ store.name }}</p>
-        <p class="text-gray-700 font-semibold">{{ store.type }}</p>
-        <p class="text-gray-700 font-semibold"><i class="pi pi-map-marker mr-2"></i>{{ store.address }}</p>
-        <p class="text-gray-700 font-semibold"><i class="pi pi-phone mr-2"></i>{{ store.phone }}</p>
-        <div class="flex">
-          <i class="pi pi-clock mr-2 mt-3"></i>
-          <div class="m-0">
-            @for(week of store.operatingHoursVoList; track $index){
-            <p class="text-gray-600 font-semibold">
-              @if(week.week == 1 ){星期一}
-              @else if(week.week == 2 ){星期二}
-              @else if(week.week == 3 ){星期三}
-              @else if(week.week == 4 ){星期四}
-              @else if(week.week ==5 ){星期五}
-              @else if(week.week == 6 ){星期六}
-              @else if(week.week == 7 ){星期日}
-              {{ week.openTime }} - {{ week.closeTime }}</p>
-            }
+      <!-- 店家資訊 -->
+      <div *ngIf="storeTab === 'info'" class="py-4 px-2">
+        <div class="mb-6">
+          <h2 class="text-gray-900 font-bold text-2xl mb-2">{{ storeData.name }}</h2>
+          <span class="text-base bg-gray-100 text-gray-500 px-3 py-1 rounded">
+            {{ storeData.type }}
+          </span>
+        </div>
+
+        <div class="bg-gray-50 rounded-xl p-5 space-y-5">
+
+          <div class="flex items-start">
+            <i class="pi pi-map-marker text-gray-400 mr-3 mt-1.5 text-lg"></i>
+            <div class="flex flex-col">
+              <span class="text-sm text-gray-400 font-medium tracking-wide">門市地址</span>
+              <p class="text-gray-800 m-0 font-semibold text-lg leading-relaxed">{{ storeData.address }}</p>
+            </div>
+          </div>
+
+          <div class="flex items-start">
+            <i class="pi pi-phone text-gray-400 mr-3 mt-1.5 text-lg"></i>
+            <div class="flex flex-col">
+              <span class="text-sm text-gray-400 font-medium tracking-wide">聯絡電話</span>
+              <p class="text-gray-800 m-0 font-semibold text-lg">{{ storeData.phone }}</p>
+            </div>
+          </div>
+
+          <div class="flex items-start border-t border-gray-200 pt-5">
+            <i class="pi pi-clock text-gray-400 mr-3 mt-1.5 text-lg"></i>
+            <div class="flex flex-col w-full">
+              <span class="text-sm text-gray-400 font-medium tracking-wide mb-3">營業時間</span>
+
+              <div class="space-y-3">
+                @for(group of groupedOperatingHours; track group.week) {
+                  <div class="flex items-center text-base">
+                    <span class="w-20 text-gray-500 font-medium text-lg">
+                      @switch (group.week) {
+                        @case (1) { 星期一 }
+                        @case (2) { 星期二 }
+                        @case (3) { 星期三 }
+                        @case (4) { 星期四 }
+                        @case (5) { 星期五 }
+                        @case (6) { 星期六 }
+                        @case (7) { 星期日 }
+                      }
+                    </span>
+
+                    <div class="flex flex-wrap gap-1">
+                      @for(time of group.times; track $index; let last = $last) {
+                        <span class="text-gray-900 font-bold text-lg">
+                          {{ time }}
+                        </span>
+                        <span class="text-gray-300 mx-2 text-lg">{{ !last ? '|' : '' }}</span>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
       <!-- 訂購資訊 -->
-      <div *ngIf="storeTab === 'orderInfo'" class="py-2">
-        <p class="text-gray-700 font-semibold">{{ store.memo }}</p>
+      <div *ngIf="storeTab === 'orderInfo'" class="py-4 px-2">
+        <p class="text-gray-500 italic mb-6 border-l-4 border-gray-200 pl-4 leading-loose text-lg">
+          {{ storeData.memo }}
+        </p>
+
+        @if(storeData.feeDescription.length > 0){
+        <div class="bg-gray-50 rounded-xl p-5">
+          <div class="flex items-center gap-2 mb-4">
+            <i class="pi pi-truck text-gray-700 text-base"></i>
+            <span class="text-gray-500 text-base font-medium tracking-wide">外送費用詳情</span>
+          </div>
+
+            @for(kmFee of storeData.feeDescription; track $index){
+            <div class="flex items-center text-gray-700">
+              <span class="w-2 h-2 bg-gray-300 rounded-full mr-4"></span>
+
+              <p class="m-0 text-gray-800 text-lg">
+                <span class="font-bold text-[#662222] text-xl">{{ kmFee.km }}</span> 公里範圍內，
+                運送費用 <span class="font-bold text-[#662222] text-xl">${{ kmFee.fee }}</span>
+              </p>
+            </div>
+            }
+
+        </div>
+        }
       </div>
     </div>
   </div>
@@ -641,7 +708,7 @@
         </button>
       </div>
       <div class="grid grid-cols-1 gap-4 w-full">
-        @for(group of storeData.productOptionGroupsVoList; track $index) {
+        @for(group of storeData.productOptionGroupsVoList; track group.id) {
         <div class="group border border-gray-100 rounded-xl p-4 bg-gray-50/50 hover:bg-white hover:border-[#662222]/30
           hover:shadow-md transition-all relative">
           <div class="flex justify-between items-start mb-3">

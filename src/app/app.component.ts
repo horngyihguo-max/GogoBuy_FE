@@ -31,6 +31,7 @@ export interface Category {
   name: string;
   value: SearchMode;
 }
+
 @Component({
   selector: 'app-root',
   imports: [

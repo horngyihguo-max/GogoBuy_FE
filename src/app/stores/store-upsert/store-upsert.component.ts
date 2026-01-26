@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
@@ -157,6 +157,16 @@ export class StoreUpsertComponent {
     productOptionGroupsVoList: [] as ProductOptionGroupsVoList[]
   }
 
+  // session ---------------------------------------------------------
+  @HostListener('window:beforeunload')
+  onBeforeUnload() {
+    this.saveData(); // 在頁面消失前最後一刻存檔
+  }
+
+  saveData() {
+    sessionStorage.setItem('temp_order_info', JSON.stringify(this.storeData));
+  }
+
   ngOnInit(): void {
     this.id = Number(this.route.snapshot.paramMap.get('id'));
 
@@ -186,6 +196,12 @@ export class StoreUpsertComponent {
       this.convertVoToTimeSlots(source.operatingHoursVoList || []);
     } else {
       this.addTimeSlot();
+    }
+
+    // session 讀取資料
+    const savedData = sessionStorage.getItem('temp_order_info');
+    if (savedData) {
+      this.storeData = JSON.parse(savedData);
     }
   }
 
@@ -344,6 +360,8 @@ export class StoreUpsertComponent {
     } else {
       this.router.navigate(['/management/store']);
     }
+
+    sessionStorage.removeItem('temp_order_info');
   }
 }
 

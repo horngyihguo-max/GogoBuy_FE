@@ -1,5 +1,5 @@
 import { StoreService } from './../../@service/store.service';
-import { Component, ElementRef, QueryList, ViewChildren } from '@angular/core';
+import { Component, ElementRef, HostListener, QueryList, ViewChildren } from '@angular/core';
 import { StepperModule } from 'primeng/stepper';
 import { ButtonModule } from 'primeng/button';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
@@ -161,9 +161,17 @@ export class StoreComponent {
     productOptionGroupsVoList: [] as ProductOptionGroupsVoList[]
   }
 
-
-
   @ViewChildren('tabBtn') tabBtns!: QueryList<ElementRef>;
+
+  // session ---------------------------------------------------------
+  @HostListener('window:beforeunload')
+  onBeforeUnload() {
+    this.saveData(); // 在頁面消失前最後一刻存檔
+  }
+
+  saveData() {
+    sessionStorage.setItem('temp_order_info', JSON.stringify(this.storeData));
+  }
 
   ngOnInit() {
     if (this.storeService.storeData && this.storeService.storeData.name !== '') {
@@ -183,7 +191,7 @@ export class StoreComponent {
           this.storeData = res.storeList[0];
           this.storeData.menuCategoriesVoList = res.menuCategoriesVoList;
           this.storeData.productOptionGroupsVoList = res.productOptionGroupsVoList;
-          this.storeData.operatingHoursVoList = res.operatingHoursVoList.map((item:any) => ({
+          this.storeData.operatingHoursVoList = res.operatingHoursVoList.map((item: any) => ({
             ...item,
             openTime: item.openTime?.slice(0, 5),
             closeTime: item.closeTime?.slice(0, 5)
@@ -193,11 +201,17 @@ export class StoreComponent {
           this.filteredProducts = [...this.storeData.menuVoList];
           console.log("storeData", this.storeData);
           console.log("filteredProductsMenu:", this.filteredProducts);
-          this.newPId = this.storeData.menuVoList.length +1;
+          this.newPId = this.storeData.menuVoList.length + 1;
         }
       });
     this.filteredProducts = [...this.storeData.menuVoList];
     console.log("filteredProductsMenu2:", this.filteredProducts);
+
+    // session 讀取資料
+    const savedData = sessionStorage.getItem('temp_order_info');
+    if (savedData) {
+      this.storeData = JSON.parse(savedData);
+    }
   }
 
   // 店家資訊 ---------------------------------------------------------
@@ -208,6 +222,27 @@ export class StoreComponent {
 
   editStore(event: Event) {
     event.stopPropagation();
+  }
+
+  // 變數
+  get groupedOperatingHours() {
+    const grouped = this.storeData.operatingHoursVoList.reduce((acc, curr) => {
+      const existing = acc.find(item => item.week === curr.week);
+      const timeString = `${curr.openTime} - ${curr.closeTime}`;
+
+      if (existing) {
+        existing.times.push(timeString);
+      } else {
+        acc.push({
+          week: curr.week,
+          times: [timeString]
+        });
+      }
+      return acc;
+    }, [] as { week: number, times: string[] }[]);
+
+    // 選擇性：按星期 1 到 7 排序
+    return grouped.sort((a, b) => a.week - b.week);
   }
 
   // 商品分類 ---------------------------------------------------------
@@ -507,7 +542,7 @@ export class StoreComponent {
         i === index ? { ...this.currentProduct } : p
       );
     } else {
-      const newProduct = { ...this.currentProduct, id: this.newPId++ , storesId: this.storeData.id};
+      const newProduct = { ...this.currentProduct, id: this.newPId++, storesId: this.storeData.id };
       this.storeData.menuVoList = [...this.storeData.menuVoList, newProduct];
     }
 
@@ -573,7 +608,7 @@ export class StoreComponent {
         .subscribe((res: any) => {
           console.log("create store:" + res);
         });
-    }else{
+    } else {
       const payload = {
         storesname: this.storeData.name,
         phone: this.storeData.phone,
@@ -594,12 +629,13 @@ export class StoreComponent {
       console.log("payload(update):", payload);
 
       this.http.postApi(`http://localhost:8080/gogobuy/store/update?id=${this.storeData.id}`, payload)
-      .subscribe((res: any) => {
-        console.log("update store:", res);
-      });
+        .subscribe((res: any) => {
+          console.log("update store:", res);
+        });
     }
     this.storeService.clearCurrentStore();
     // this.displaySaveDialog = true;
+    sessionStorage.removeItem('temp_order_info');
   }
 
   // 假資料 ---------------------------------------------------------
@@ -634,7 +670,7 @@ export class StoreComponent {
         basePrice: 35,
         image: "",
         available: true,
-        unusual: {"去冰": "微糖"}
+        unusual: { "去冰": "微糖" }
       },
       {
         id: 2,
