@@ -5,9 +5,10 @@ import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 import { RouterLink } from '@angular/router';
-import { AvatarModule } from 'primeng/avatar';
+import { Avatar, AvatarModule } from 'primeng/avatar';
 import { MenuModule } from 'primeng/menu';
 import { BadgeModule } from 'primeng/badge';
+import { forkJoin, map } from 'rxjs';
 
 @Component({
   selector: 'app-dashboard',
@@ -25,83 +26,83 @@ import { BadgeModule } from 'primeng/badge';
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
-export class DashboardComponent implements OnInit {
+
+export class DashboardComponent {
   stores: any[] = [];
   events: any[] = [];
   users: any[] = [];
   loading = false;
-  
-  // Navigation State
+
   currentView: 'stores' | 'events' | 'users' = 'stores';
-  
+
   menuItems = [
     { label: '店家管理', icon: 'pi pi-shop', id: 'stores' },
     { label: '團購活動', icon: 'pi pi-calendar', id: 'events' },
     { label: '會員管理', icon: 'pi pi-users', id: 'users' }
   ];
 
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService) { }
 
   ngOnInit() {
-    this.loading = true;
     this.loadData();
   }
-  
+
   setView(view: any) {
     this.currentView = view;
   }
 
   loadData() {
     this.loading = true;
-    // Load Stores
-    this.authService.getallstore().subscribe({
-      next: (res: any) => {
-        this.stores = res.storeList || res || [];
-        console.log('Stores loaded:', this.stores);
-      },
-      error: () => console.error('Failed to load stores')
-    });
+    const defaultAvatar = '../default_avatar.png';
 
-    // Load Events
-    this.authService.getallevent().subscribe({
-      next: (res: any) => {
-        const rawEvents = Array.isArray(res) ? res : (res.groupsSearchViewList || res.groupbuyEvents || res.eventList || []);
-        this.events = rawEvents;
-        console.log('Events loaded:', this.events);
+    // 使用 forkJoin 同時發送多個請求
+    forkJoin({
+      stores: this.authService.getallstore(),
+      events: this.authService.getallevent(),
+      users: this.authService.getAllUser()
+    }).pipe(
+      // 這裡給予 res 一個 any 型別，或者定義介面，解決 'unknown' 問題
+      map((res: { stores: any, events: any, users: any }) => {        // 1. 處理 Store 資料
+        const stores = res.stores.storeList || res.stores || [];
+        // 2. 處理 User 資料 (先整理出頭像對照表)
+        const rawUsers = res.users.userList || res.users || [];
+        const processedUsers = rawUsers.map((u: any) => ({
+          ...u,
+          avatarUrl: u.avatarUrl || defaultAvatar
+        }));
+
+        // 建立一個快速查詢 Map: [userId, avatarUrl]
+        const avatarMap = new Map(processedUsers.map((u: any) => [u.id, u.avatarUrl]));
+
+        // 3. 處理 Event 資料 (並將頭像塞入)
+        const rawEvents = Array.isArray(res.events) ? res.events :
+          (res.events.groupsSearchViewList || res.events.groupbuyEvents || res.events.eventList || []);
+
+        const eventsWithAvatar = rawEvents.map((event: any) => ({
+          ...event,
+          avatarUrl: avatarMap.get(event.hostId) || defaultAvatar
+        }));
+
+        return { stores, processedUsers, eventsWithAvatar };
+      })
+    ).subscribe({
+      next: (finalData) => {
+        this.stores = finalData.stores;
+        this.users = finalData.processedUsers;
+        this.events = finalData.eventsWithAvatar;
+        this.loading = false;
       },
-      error: () => console.error('Failed to load events'),
-      complete: () => this.loading = false
+      error: (err) => {
+        console.error('Data load failed', err);
+        this.loading = false;
+      }
     });
-    
-    // Load Users (Mock for now as API is missing)
-    this.loadUsers();
-  }
-  
-  loadUsers() {
-    // TODO: Replace with actual API call this.authService.getAllUsers()
-    // Simulating user data for UI development
-    this.users = [
-      { id: 1, email: 'admin@gogobuy.com', nickname: '超級管理員', role: 'ADMIN', status: 'active', avatarUrl: '' },
-      { id: 2, email: 'user1@test.com', nickname: '熱心團主', role: 'USER', status: 'active', avatarUrl: '' },
-      { id: 3, email: 'shop_owner@test.com', nickname: '飲料店長', role: 'STORE_OWNER', status: 'active', avatarUrl: '' },
-      { id: 4, email: 'banned@test.com', nickname: '違規用戶', role: 'USER', status: 'banned', avatarUrl: '' },
-    ];
   }
 
   getSeverity(status: string) {
     switch (status) {
-      case 'open':
-      case 'COMPLETED':
-      case 'active':
-        return 'success';
-      case 'closed':
-      case 'CANCELLED':
-      case 'banned':
-        return 'danger';
-      case 'pending':
-        return 'warning';
-      default:
-        return 'info';
+      case 'GOOGLE': return 'success';
+      default: return 'info';
     }
   }
 }

@@ -413,4 +413,9 @@ export class AuthService {
     return this.https.getApi(`http://localhost:8080/gogobuy/getAll`);
   }
 
+  // 查詢全部user
+  getAllUser() {
+    return this.https.getApi(`http://localhost:8080/gogobuy/user/get-all-user`);
+  }
+
 }
