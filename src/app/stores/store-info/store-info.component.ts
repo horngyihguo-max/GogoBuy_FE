@@ -104,7 +104,7 @@ export class StoreInfoComponent implements OnInit {
   }
 
   // =========================
-  // 讀資料（先假資料，後面換 API）
+  // TODO 讀資料（先假資料，後面換 API）
   // =========================
   loadStoreById(id: number): void {
     this.isLoading = true;
@@ -316,14 +316,20 @@ export class StoreInfoComponent implements OnInit {
     this.router.navigate(['/management/store_upsert', this.storeId]);
   }
 
-  // 開團按鈕目前只有鎖 未登入 || 今日公休 (如果要改休息/打烊都不行，就要寫邏輯)
+  // 開團按鈕目前只有鎖 未登入 || 今日公休 || fast的休息時間
   goStartGroup(): void {
     if (!this.userId) return;
     if (this.isForceClosed) {
       this.toastWarn('今日公休', '今日暫停開團');
       return;
     }
-
+    // 如果外送fast今日休息就擋，slow都不擋
+    if (this.store?.category === 'fast') {
+      if (this.openStatusDot === 'closed') {
+        this.toastWarn('休息中', '目前暫停開團');
+        return;
+      }
+    }
     this.router.navigate(['/groupbuy-event/group-event', this.storeId]);
   }
 
@@ -423,9 +429,124 @@ export class StoreInfoComponent implements OnInit {
   }
 
   // 打開商品詳情（純瀏覽）
+  selectedPriceLevel: any = null;
+  // groupId -> itemId[]
+  selectedOptionIdsByGroup: Record<number, number[]> = {};
+
   openProduct(p: any): void {
     this.selectedProduct = p;
+
+    // 【新增】清空上一個商品的選擇狀態
+    this.selectedOptionIdsByGroup = {};
+
+    // 【新增】規格（priceLevel）預設值
+    const levels = this.getPriceLevelsByCategoryId(p?.categoryId);
+    this.selectedPriceLevel =
+      levels.find((x: any) => String(x?.name || '') === '標準') ||
+      levels.find((x: any) => Number(x?.price) === 0) ||
+      null;
+
+    // 【新增】依 unusual 白名單初始化可選群組
+    this.initSelectedOptions();
+
     this.productVisible = true;
+  }
+
+  initSelectedOptions(): void {
+    const groups = this.getOptionGroupsForDisplay();
+    groups.forEach((g: any) => {
+      const gid = Number(g?.id);
+      if (Number.isNaN(gid)) return;
+      this.selectedOptionIdsByGroup[gid] = [];
+    });
+  }
+
+  toggleOptionItem(group: any, item: any): void {
+    const gid = Number(group?.id);
+    const iid = Number(item?.id);
+    if (Number.isNaN(gid) || Number.isNaN(iid)) return;
+
+    const maxSel = Number(group?.maxSelection || 1);
+    const isSingle = maxSel === 1;
+
+    const current = (this.selectedOptionIdsByGroup[gid] || []).slice();
+    const idx = current.findIndex((x) => Number(x) === iid);
+
+    // 已選 -> 取消
+    if (idx >= 0) {
+      current.splice(idx, 1);
+      this.selectedOptionIdsByGroup[gid] = current;
+      return;
+    }
+
+    // 未選 -> 加入
+    if (isSingle) {
+      this.selectedOptionIdsByGroup[gid] = [iid];
+      return;
+    }
+
+    if (current.length >= maxSel) return;
+    current.push(iid);
+    this.selectedOptionIdsByGroup[gid] = current;
+  }
+
+  isOptionItemSelected(groupId: any, itemId: any): boolean {
+    const gid = Number(groupId);
+    const iid = Number(itemId);
+    if (Number.isNaN(gid) || Number.isNaN(iid)) return false;
+
+    return (this.selectedOptionIdsByGroup[gid] || []).some(
+      (x) => Number(x) === iid,
+    );
+  }
+
+  getSelectedCount(groupId: any): number {
+    const gid = Number(groupId);
+    if (Number.isNaN(gid)) return 0;
+    return (this.selectedOptionIdsByGroup[gid] || []).length;
+  }
+
+  getSelectedOptionsExtraPrice(): number {
+    const groups = this.getOptionGroupsForDisplay();
+
+    let sum = 0;
+    groups.forEach((g: any) => {
+      const gid = Number(g?.id);
+      if (Number.isNaN(gid)) return;
+
+      const selectedIds = this.selectedOptionIdsByGroup[gid] || [];
+      const items = Array.isArray(g?.items) ? g.items : [];
+
+      selectedIds.forEach((id) => {
+        const hit = items.find((x: any) => Number(x?.id) === Number(id));
+        if (!hit) return;
+        sum += Number(hit?.extraPrice || 0);
+      });
+    });
+
+    return sum;
+  }
+
+  getPriceLevelsByCategoryId(categoryId: any): any[] {
+    const cid = Number(categoryId);
+    const list = this.store?.menuCategoriesVoList || [];
+    if (!Array.isArray(list)) return [];
+
+    const cat = list.find((c: any) => Number(c?.categoryId) === cid);
+    const levels = cat?.priceLevel || [];
+    return Array.isArray(levels) ? levels : [];
+  }
+
+  selectPriceLevel(level: any): void {
+    this.selectedPriceLevel = level;
+  }
+
+  // 【新增】顯示用：basePrice + 規格加價 + 已選選項加價
+  getSelectedProductPrice(): number {
+    const base = Number(this.selectedProduct?.basePrice || 0);
+    const extra = Number(this.selectedPriceLevel?.price || 0);
+    const optionExtra = this.getSelectedOptionsExtraPrice();
+    return base + extra + optionExtra;
   }
 
   // unusual 轉成 key/value 清單（不可預測欄位）
@@ -521,36 +642,20 @@ export class StoreInfoComponent implements OnInit {
   detailTabIndex = 0;
 
   getOptionGroupsForDisplay(): any[] {
-    // 目前先用店家層級的選項（瀏覽用途）
-    const list = this.store?.productOptionGroupsVoList || [];
-    return Array.isArray(list) ? list : [];
-  }
+    const all = this.store?.productOptionGroupsVoList || [];
+    if (!Array.isArray(all)) return [];
 
-  private unusualLabelMap: Record<string, string> = {
-    status: '狀態',
-    tag: '標籤',
-    is_sold_out: '是否售完',
-    alcohol_content: '酒精濃度',
-    spicy_level: '辣度',
-  };
-
-  getPrettyUnusualEntries(
-    p: any,
-  ): Array<{ key: string; label: string; value: any }> {
-    const u = p?.unusual;
+    const u = this.selectedProduct?.unusual;
     if (!u || typeof u !== 'object') return [];
 
-    const entries = Object.keys(u).map((k) => {
-      const label = this.unusualLabelMap[k];
-      return { key: k, label: label || k, value: u[k] };
-    });
+    const allowIds = Object.keys(u)
+      .map((k) => Number(k))
+      .filter((n) => !Number.isNaN(n));
 
-    // 只顯示「有中文 label」的，避免英文污染畫面
-    const filtered = entries.filter((e) => this.unusualLabelMap[e.key]);
-
-    // 如果想保留未知欄位但弱化，也可以改成 return entries;
-    return entries;
+    if (!allowIds.length) return [];
+    return all.filter((g: any) => allowIds.includes(Number(g?.id)));
   }
+
   // 處理營業時間 ==============================================
   getGroupedOperatingHours(): Array<{
     dayLabel: string;
@@ -619,9 +724,9 @@ export class StoreInfoComponent implements OnInit {
   }
 
   // 地址帶入GoogleMap ==========================================================
-  getMap(address: string | undefined){
+  getMap(address: string | undefined) {
     if (!address) return '#';
-    const gmap = "https://www.google.com/maps/search/?api=1&query=";
+    const gmap = 'https://www.google.com/maps/search/?api=1&query=';
     let mapUrl = gmap + encodeURIComponent(address);
     return mapUrl;
   }
@@ -729,13 +834,6 @@ export class StoreInfoComponent implements OnInit {
           image:
             'aHR0cHM6Ly9pbWdjZG4uY25hLmNvbS50dy93d3cvV2ViUGhvdG9zLzEwMjQvMjAyMTA3MjcvMTAyNHgxMDI0XzM3OTQyMDUzOTA4NS5qcGc=',
           available: false,
-          unusual: {
-            status: '限時供應',
-            tag: 'HOT',
-            is_sold_out: 'false',
-            alcohol_content: '0%',
-            spicy_level: 'none',
-          },
         },
         {
           id: 123,
@@ -749,17 +847,13 @@ export class StoreInfoComponent implements OnInit {
             'aHR0cHM6Ly9pbWFnZS1jZG4tZmxhcmUucWRtLmNsb3VkL3E2MDgxYzRmODFmMDFhL2ltYWdlL2RhdGEvJUU1JTk1JTg2JUU1JTkzJTgxJUU3JTg1JUE3JUU3JTg5JTg3LzEyXyVFNyVCNCU5MCVFNSVBNSVBNyVFOCU4OSVBRiVFOCVCRSVBMyVFNyVCRiU4NS8qJUU3JTk0JUEyJUU1JTkzJTgxJUU1JTlDJTk2LSVFNyVCNCU5MCVFNSVBNSVBNyVFOCU4OSVBRiVFOSU5QiU5RSVFNyVCRiU4NTAzLmpwZw==',
           available: true,
           unusual: {
-            status: '一般',
-            tag: '推薦',
-            is_sold_out: 'false',
-            alcohol_content: '0%',
-            spicy_level: 'medium',
+            24: 'true',
           },
         },
         {
           id: 124,
           storesId: 40,
-          categoryId: 35,
+          categoryId: 59,
           name: '午夜藍色夏威夷',
           description: '伏特加基底搭配藍柑橘糖漿，口感清爽',
           basePrice: 350,
@@ -767,27 +861,20 @@ export class StoreInfoComponent implements OnInit {
             'aHR0cHM6Ly9hc3NldHMudG1lY29zeXMuY29tL2ltYWdlL3VwbG9hZC90X3dlYl9yZHBfcmVjaXBlXzU4NHg0ODBfMV81eC9pbWcvcmVjaXBlL3Jhcy9Bc3NldHMvOTA5REEyRjItODczOS00Mjk3LTkyQjAtMUQ4NkM5MjExMjMyL0Rlcml2YXRlcy8xMTZjZGIwNC05NDczLTQzZDAtOWVmZC1kOWY2ZjU5ZGZmYTMuanBn',
           available: true,
           unusual: {
-            status: '熱銷',
-            tag: '酒類',
-            is_sold_out: 'false',
-            alcohol_content: '12%',
-            spicy_level: 'none',
+            22: 'true',
+            23: 'true',
           },
         },
         {
           id: 125,
           storesId: 40,
-          categoryId: 34,
+          categoryId: 58,
           name: '深夜炸物大三元',
           description: '包含雞塊、洋蔥圈、起司條',
           basePrice: 450,
           available: true,
           unusual: {
-            status: '多量',
-            tag: 'CP值高',
-            is_sold_out: 'false',
-            alcohol_content: '0%',
-            spicy_level: 'none',
+            24: 'true',
           },
         },
       ],
@@ -796,25 +883,35 @@ export class StoreInfoComponent implements OnInit {
           id: 1,
           storesId: 40,
           name: '人氣單點小物',
-          priceLevel: [],
         },
         {
-          id: 34,
+          id: 58,
           storesId: 40,
           name: '深夜炸物拼盤',
           priceLevel: [
-            { name: '雙人分享', price: 450 },
-            { name: '三人狂歡', price: 650 },
-            { name: '派對特大', price: 880 },
+            {
+              name: '雙人分享',
+              price: 250,
+            },
+            {
+              name: '派對特大',
+              price: 450,
+            },
           ],
         },
         {
-          id: 35,
+          id: 59,
           storesId: 40,
           name: '特調調酒系列',
           priceLevel: [
-            { name: '標準杯', price: 350 },
-            { name: '雙倍酒精', price: 450 },
+            {
+              name: '標準',
+              price: 0,
+            },
+            {
+              name: '濃縮加強',
+              price: 200,
+            },
           ],
         },
       ],
