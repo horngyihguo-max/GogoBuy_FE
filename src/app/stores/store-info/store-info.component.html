@@ -309,7 +309,7 @@
                 <div>
                   <span class="text-gray-500 font-semibold">分類：</span>
                   <span class="font-semibold">{{
-                    store?.category || "—"
+                    getCategoryName(store?.category) || "—"
                   }}</span>
                 </div>
                 <div>
@@ -440,7 +440,7 @@
               <div
                 class="text-[20px] md:text-[22px] font-extrabold text-red-900"
               >
-                ${{ selectedProduct.basePrice }}
+                ${{ getSelectedProductPrice() }}
               </div>
 
               @if (isSoldOut(selectedProduct) || selectedProduct.available) {
@@ -449,6 +449,50 @@
                 >
                   已售完
                 </div>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- priceLevel / 規格（純瀏覽） -->
+        <div class="spec-block" *ngIf="selectedProduct">
+          <div
+            class="spec-header mt-2"
+            *ngIf="
+              getPriceLevelsByCategoryId(selectedProduct.categoryId).length > 0
+            "
+          >
+          </div>
+
+          <!-- 有規格 -->
+          <div
+            class="bg-white/70 border border-zinc-200 rounded-[16px] p-4"
+            *ngIf="
+              getPriceLevelsByCategoryId(selectedProduct.categoryId).length > 0
+            "
+          >
+            <div class="flex items-center justify-between">
+              <div class="font-extrabold text-red-900 text-[18px]">規格</div>
+              <div class="text-[14px] font-semibold text-gray-600">
+                必選 · 單選
+              </div>
+            </div>
+
+            <div class="mt-3 flex flex-wrap gap-2">
+              @for (
+                lv of getPriceLevelsByCategoryId(selectedProduct.categoryId);
+                track lv.name
+              ) {
+                <span
+                  class="px-3 py-2 rounded-full bg-white border border-black/20 text-[17px] font-semibold"
+                >
+                  {{ lv.name }}
+                  @if (lv.price && lv.price > 0) {
+                    <span class="ml-1 text-red-900 font-extrabold">
+                      +${{ lv.price }}
+                    </span>
+                  }
+                </span>
               }
             </div>
           </div>
@@ -505,7 +549,7 @@
           </div>
 
           <!-- unusual -->
-          <div>
+          <!-- <div>
             <div class="text-gray-500 font-semibold text-[17px] mb-2">
               其他資訊
             </div>
@@ -531,7 +575,7 @@
             } @else {
               <div class="text-gray-500 text-[15px]">（無）</div>
             }
-          </div>
+          </div> -->
 
           <div class="h-3"></div>
         </div>

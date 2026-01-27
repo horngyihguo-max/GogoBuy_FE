@@ -20,6 +20,7 @@ import { CartPageComponent } from './account/cart-page/cart-page.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { StoreListComponent } from './stores/store-list/store-list.component';
 import { GroupEventComponent } from './groupbuy-event/group-event/group-event.component';
+import { FollowGroupComponent } from './groupbuy-event/follow-group/follow-group.component';
 
 export const routes: Routes = [
   // 1. 公開頁面與首頁
@@ -66,7 +67,8 @@ export const routes: Routes = [
     path: 'groupbuy-event',
     data: { breadcrumb: '團購活動' },
     children: [
-      { path: 'group-event/:id', component: GroupEventComponent, title: '開團資料設定', data: { breadcrumb: '開團' } }
+      { path: 'group-event/:id', component: GroupEventComponent, title: '開團資料設定', data: { breadcrumb: '開團' } },
+      { path: 'group-follow/:id', component: FollowGroupComponent, title: '跟團店家頁面', data: { breadcrumb: '跟團' } },
     ]
   },
 
