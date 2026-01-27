@@ -17,6 +17,7 @@ import { FloatLabelModule } from 'primeng/floatlabel';
 import { SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
 import { NearbyBarComponent } from './nearby-bar.component';
+import { SseService } from './@service/sse.service';
 
 
 // 選擇欄位
@@ -58,7 +59,11 @@ export interface Category {
 })
 export class AppComponent {
 
-  constructor(public router: Router, private http: HttpService, public auths: AuthService) {
+  constructor(
+    public router: Router,
+    private http: HttpService,
+    public auths: AuthService,
+    public sse: SseService) {
   }
   title = 'gogobuy';
 
@@ -117,6 +122,8 @@ export class AppComponent {
     // 初始載入
     this.auths.performSearch('');
     this.auths.loadAllEventsOnce();
+    const userId = localStorage.getItem('user_id');
+    if (userId) this.sse.connect(userId);
   }
 
 

@@ -23,18 +23,12 @@ export class NotificationsComponent implements OnInit, OnDestroy {
   constructor(public sse: SseService, private router: Router) { }
 
   ngOnInit() {
-    this.sse.connect();
-
-    // 從 service 拿資料，存到 notifications 陣列
     this.sub = this.sse.notifications$.subscribe((list: any[]) => {
       this.notifications = Array.isArray(list) ? list : [];
 
-      // 如果資料變少，避免 first 超出範圍
-      if (this.notifications.length === 0) {
-        this.first = 0;
-      } else if (this.first >= this.notifications.length) {
-        this.first =
-          Math.floor((this.notifications.length - 1) / this.rows) * this.rows;
+      if (this.notifications.length === 0) this.first = 0;
+      else if (this.first >= this.notifications.length) {
+        this.first = Math.floor((this.notifications.length - 1) / this.rows) * this.rows;
       }
     });
   }
