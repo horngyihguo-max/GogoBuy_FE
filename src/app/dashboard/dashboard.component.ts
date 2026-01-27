@@ -61,10 +61,11 @@ export class DashboardComponent {
       events: this.authService.getallevent(),
       users: this.authService.getAllUser()
     }).pipe(
-      // 這裡給予 res 一個 any 型別，或者定義介面，解決 'unknown' 問題
-      map((res: { stores: any, events: any, users: any }) => {        // 1. 處理 Store 資料
+      // 這裡給予 res 一個 any 型別，解決 'unknown' 型別問題
+      map((res: { stores: any, events: any, users: any }) => {
+        // 1. 處理 Store 資料
         const stores = res.stores.storeList || res.stores || [];
-        // 2. 處理 User 資料 (先整理出頭像對照表)
+        // 2. 處理 User 資料 (先用map處理頭像對照)
         const rawUsers = res.users.userList || res.users || [];
         const processedUsers = rawUsers.map((u: any) => ({
           ...u,

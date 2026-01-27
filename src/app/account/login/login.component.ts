@@ -72,7 +72,6 @@ export class LoginComponent {
       email: this.user.email,
       password: this.user.password,
     };
-    console.log('登入提交資料:' + JSON.stringify(payload, null, 2));
     this.auth.login(payload); // 呼叫AuthService
   }
 
@@ -84,7 +83,6 @@ export class LoginComponent {
       phone: this.user.phone,
       password: this.user.password,
     };
-    console.log('註冊提交資料:' + JSON.stringify(payload, null, 2));
     this.auth.register(payload); // 呼叫AuthService
   }
 

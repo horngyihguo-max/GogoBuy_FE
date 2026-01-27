@@ -33,6 +33,12 @@
     <nav>
       <!-- 右側功能列表 -->
       <ul class="items-center justify-center disappear">
+        <!-- 管理者介面 -->
+        @if(isAdmin()){
+        <li>
+          <i class="pi pi-wrench nav-icon cursor-pointer" style="font-size: 1.5rem" (click)="toDashboard()"></i>
+        </li>
+        }
         <!-- 通知鈴鐺 -->
         <li>
           <app-notification-bell class="pi"></app-notification-bell>
@@ -118,6 +124,7 @@
       訂購
     </div>
   </a>
+
   <!-- 購物車 -->
   <a>
     <div>

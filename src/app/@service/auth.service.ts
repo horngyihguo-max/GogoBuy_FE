@@ -57,10 +57,8 @@ export class AuthService {
         const list = this.normalizeEvents(res);
         this.events.set(list);
         if (saveAll) this.eventsAll.set(list);
-        console.log('events 更新後:', this.events());
       },
       error: (err: any) => {
-        console.error('抓取開團失敗', err);
         this.events.set([]);
         if (saveAll) this.eventsAll.set([]);
       }
@@ -79,8 +77,6 @@ export class AuthService {
       ...user,
       user_avatar_url: user.avatar_url || user.avatarUrl
     };
-    console.log("user.avatar_url" + user.avatar_url);
-    console.log("user.avatarUrl" + user.avatarUrl);
     this.user = formattedUser;
     localStorage.setItem('user_info', JSON.stringify(formattedUser));
     this.userSubject.next(formattedUser);
@@ -95,12 +91,10 @@ export class AuthService {
   refreshUser() {
     const userId = localStorage.getItem('user_id');
     if (!userId) {
-      console.warn('刷新失敗：找不到用戶 ID');
       return;
     }
     this.https.getApi(`http://localhost:8080/gogobuy/user/get-user?id=${userId}`).subscribe({
       next: (res: any) => {
-        console.log('API 回傳原始資料:', res);
         const userData = res;
         localStorage.setItem('user_avatar_url', res.avatarUrl);
         if (userData && (userData.id || userData.userId)) {
@@ -119,8 +113,6 @@ export class AuthService {
       .subscribe({
         next: (res: any) => {
           if (res.code == 200) {
-            console.log('登入成功，填寫資料：', payload);
-            console.log('登入成功，回傳資料：', res);
             this.user = res;
             this.setUser(res);
             localStorage.setItem('user_id', res.id);
@@ -350,7 +342,6 @@ export class AuthService {
           return;
         }
         this.filterEventsByStoreIds(processedList.map((s: { id: any; }) => s.id));
-        console.log('API 資料已成功存入 Signal:', this.store());
       },
       error: (err: any) => console.error('API 錯誤:', err)
     });
