@@ -36,4 +36,11 @@ export class HttpService {
   delApi(url: string) {
     return this.http.delete(url);
   }
+
+  // 拿行政區域 
+  getDApi(url: string, withCreds = true) {
+    return this.http.get(url, {
+      withCredentials: withCreds
+    });
+  }
 }

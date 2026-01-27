@@ -19,7 +19,7 @@ export class StoreService {
     publish: false,
     createdBy: 'A01',
     operatingHoursVoList: [] as OperatingHoursVoList[],
-    feeDescription: [] as FeeDescription[],
+    feeDescription: [] as FeeDescriptionVolist[],
     menuVoList: [] as MenuVoList[],
     menuCategoriesVoList: [] as MenuCategoriesVoList[],
     productOptionGroupsVoList: [] as ProductOptionGroupsVoList[]
@@ -38,7 +38,7 @@ export class StoreService {
       publish: false,
       createdBy: 'A01',
       operatingHoursVoList: [],
-      feeDescription: [] as FeeDescription[],
+      feeDescription: [] as FeeDescriptionVolist[],
       menuVoList: [] as MenuVoList[],
       menuCategoriesVoList: [] as MenuCategoriesVoList[],
       productOptionGroupsVoList: [] as ProductOptionGroupsVoList[]
@@ -57,14 +57,14 @@ export interface Stores {
   image?: any | null;
   publish: boolean;
   createdBy: string;
-  feeDescription?: FeeDescription[];
+  feeDescription?: FeeDescriptionVolist[];
   operatingHoursVoList: OperatingHoursVoList[];
   menuVoList: MenuVoList[];
   menuCategoriesVoList?: MenuCategoriesVoList[];
   productOptionGroupsVoList?: ProductOptionGroupsVoList[]
 }
 
-export interface FeeDescription {
+export interface FeeDescriptionVolist {
   km: number;
   fee: number;
 }
@@ -83,7 +83,7 @@ export interface MenuVoList {
   basePrice: number | null;
   available: boolean;
   image?: string;
-  unusual?: { [key: string]: any };
+  unusual?: { [key: string]: string };
 }
 
 export interface MenuCategoriesVoList {
@@ -98,15 +98,16 @@ export interface PriceLevel {
 }
 
 export interface ProductOptionGroupsVoList {
-  id?: number;
+  id: number;
   name: string;
-  isRequired: boolean;
+  required: boolean;
   maxSelection: number | null;
   items: Items[];
-  applicableCategoryIds?: number[]; // 後端沒有欄位
+  applicableCategoryIds?: number[]; // 前端判斷用 不計入到資料庫
 }
 
 export interface Items {
+  id: number;
   name: string;
   extraPrice: number | null;
 }
@@ -121,9 +122,4 @@ export interface TimeSlotUI {
   selectedWeeks: number[];
   openTime: Date | null;
   closeTime: Date | null;
-}
-
-export interface FeeDescription {
-  km: number;
-  fee: number;
 }

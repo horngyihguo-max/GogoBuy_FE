@@ -9,7 +9,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { DatePickerModule } from 'primeng/datepicker';
 import { FluidModule } from 'primeng/fluid';
 import { CheckboxModule } from 'primeng/checkbox';
-import { MenuCategoriesVoList, MenuVoList, OperatingHoursVoList, ProductOptionGroupsVoList, StoreService } from '../../@service/store.service';
+import { FeeDescriptionVolist, MenuCategoriesVoList, MenuVoList, OperatingHoursVoList, ProductOptionGroupsVoList, StoreService } from '../../@service/store.service';
 import { DialogModule } from 'primeng/dialog';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HttpService } from '../../@service/http.service';
@@ -44,9 +44,67 @@ export class StoreUpsertComponent {
 
   // 暫存輸入時間
   timeSlots: TimeSlotUI[] = [
-    { selectedWeeks: [], openTime: null, closeTime: null }
   ];
 
+  // 行政地區
+  cityOptions: any[] = [];
+  selectedCity: any = null;
+  selectedDistrict: any = null;
+  detailAddress: string = '';
+  loadTaiwanDistricts() {
+    const url = 'https://raw.githubusercontent.com/donma/TaiwanAddressCityAreaRoadChineseEnglishJSON/master/AllData.json';
+
+    this.http.getDApi(url, false).subscribe((data: any) => {
+      this.cityOptions = data.filter((city: any) => city.CityName !== '釣魚臺')
+      .map((city: any) => {
+        if(city.CityName == '宜蘭縣'){
+          return {
+            ...city,
+            AreaList: city.AreaList.filter((area: any) => area.AreaName !== '釣魚臺')
+          }
+        }
+        return city;
+      });
+      console.log("this.cityOptions", this.cityOptions);
+      if (this.storeData.address) {
+        this.parseAddress();
+      }
+    });
+  }
+
+  updateFullAddress() {
+    const city = this.selectedCity?.CityName || '';
+    const district = this.selectedDistrict?.AreaName || '';
+    const detail = this.detailAddress?.trim() || '';
+
+    this.storeData.address = `${city}${district}${detail}`;
+  }
+
+  onCityChange() {
+    this.selectedDistrict = null;
+    this.updateFullAddress();
+  }
+
+  parseAddress() {
+    const fullAddr = this.storeData.address;
+
+    this.selectedCity = this.cityOptions.find(c => fullAddr.startsWith(c.name));
+
+    if (this.selectedCity) {
+      const remaining = fullAddr.replace(this.selectedCity.name, '');
+      this.selectedDistrict = this.selectedCity.districts.find((d: any) => remaining.startsWith(d.name));
+
+      if (this.selectedDistrict) {
+        this.detailAddress = remaining.replace(this.selectedDistrict.name, '');
+      } else {
+        this.detailAddress = remaining;
+      }
+    } else {
+      this.detailAddress = fullAddr;
+    }
+  }
+
+  // 經營類別
   category: Category[] = [
     { name: '團購代購', value: 'slow' },
     { name: '外送', value: 'fast' },
@@ -151,7 +209,7 @@ export class StoreUpsertComponent {
         closeTime: ''
       },
     ],
-    feeDescription: [] as FeeDescription[],
+    feeDescription: null as FeeDescriptionVolist[] | null,
     menuVoList: [] as MenuVoList[],
     menuCategoriesVoList: [] as MenuCategoriesVoList[],
     productOptionGroupsVoList: [] as ProductOptionGroupsVoList[]
@@ -168,6 +226,7 @@ export class StoreUpsertComponent {
   }
 
   ngOnInit(): void {
+    this.loadTaiwanDistricts();
     this.id = Number(this.route.snapshot.paramMap.get('id'));
 
     if (this.id !== 0) {
@@ -307,11 +366,11 @@ export class StoreUpsertComponent {
 
   // 運費級距
   addFeeRow() {
-    this.storeData.feeDescription.push({ km: 0, fee: 0 });
+    this.storeData.feeDescription?.push({ km: 0, fee: 0 });
   }
 
   removeFeeRow(index: number) {
-    this.storeData.feeDescription.splice(index, 1);
+    this.storeData.feeDescription?.splice(index, 1);
   }
 
   // 下一步
@@ -375,9 +434,3 @@ export interface TimeSlotUI {
   openTime: Date | null;
   closeTime: Date | null;
 }
-
-export interface FeeDescription {
-  km: number;
-  fee: number;
-}
-
