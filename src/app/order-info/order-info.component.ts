@@ -41,6 +41,14 @@ export class OrderInfoComponent implements OnInit {
     ];
   }
 
+  get progressRatio(): number {
+    const n = this.items?.length ?? 0;
+    if (n <= 1) return 0;
+    return this.activeIndex / (n - 1); // 0~1
+  }
+
+
+
   // 返回購物車
   backtocart() {
     this.router.navigate(['/user/cart'])

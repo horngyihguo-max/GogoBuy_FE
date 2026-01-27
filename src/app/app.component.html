@@ -1,33 +1,31 @@
 <div class="topbar-wrapper">
-  <header class="flex items-center justify-between px-4">
-    <!-- LOGO -->
-    <div class="flex-none">
+  <header class="relative flex items-center px-4">
+    <!-- 左：LOGO + nearby（怎麼變寬都不影響置中） -->
+    <div class="flex items-center gap-3 flex-none">
       <img routerLink="gogobuy" src="ggb3.png" class="logo cursor-pointer h-13">
+
+      @if (showSearch) {
+      <app-nearby-bar class="hidden md:block"></app-nearby-bar>
+      }
     </div>
 
-    <!-- 搜尋欄，@if (showSearch)讓搜尋欄只在 /gogobuy/home 出現 -->
+    <!-- 中：搜尋欄「固定置中」(桌機才顯示，手機用你下面那條 search-mobile) -->
     @if (showSearch) {
+    <div class="disappear absolute left-1/2 -translate-x-1/2 w-full max-w-[560px] px-4">
+      <p-inputgroup class="w-full">
+        <p-select [options]="category" optionLabel="name" optionValue="value"
+          (onChange)="onSearchModeChangePrime($event)" styleClass="!w-28">
+        </p-select>
 
-    <!-- disappear桌機顯示/手機隱藏 -->
-    <div class="flex-1 flex justify-center disappear px-4">
-      <div class="relative flex items-center w-full md:w-[560px] group">
+        <input pInputText #searchInput type="text" [placeholder]="searchPlaceholder()"
+          (keyup.enter)="onSearch(searchInput.value)" class="!w-full" />
 
-        <p-inputgroup class="w-full">
-          <!-- 分類 -->
-          <p-select [options]="category" optionLabel="name" optionValue="value"
-            (onChange)="onSearchModeChangePrime($event)" styleClass="!w-28"></p-select>
-
-          <!-- 關鍵字 -->
-          <input pInputText #searchInput type="text" [placeholder]="searchPlaceholder()"
-            (keyup.enter)="onSearch(searchInput.value)" class="!w-full" />
-
-          <!-- 按鈕放回 inputgroup 內（不要 absolute） -->
-          <button pButton type="button" icon="pi pi-search" class="p-button-danger"
-            (click)="onSearch(searchInput.value)"></button>
-        </p-inputgroup>
-      </div>
+        <button pButton type="button" icon="pi pi-search" class="p-button-danger" (click)="onSearch(searchInput.value)">
+        </button>
+      </p-inputgroup>
     </div>
     }
+
 
 
     <nav>

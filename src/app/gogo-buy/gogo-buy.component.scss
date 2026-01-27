@@ -47,6 +47,7 @@
   mask-repeat: no-repeat;
   mask-size: contain;
 }
+
 .delivery-icon {
   width: 24px;
   height: 24px;
@@ -56,6 +57,7 @@
   mask-repeat: no-repeat;
   mask-size: contain;
 }
+
 // focus 時文字(placeholder)在邊框的顏色 (( 輸入文字 type = input
 .p-floatlabel:has(input:focus) label {
   color: #662222 !important;
@@ -111,22 +113,27 @@
     opacity: 0;
     transform: translateY(-4px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
+
 @keyframes slide-up {
   from {
     transform: translateY(100%);
   }
+
   to {
     transform: translateY(0);
   }
 }
+
 .animate-fade-in {
   animation: fade-in 0.15s ease-out;
 }
+
 .animate-slide-up {
   animation: slide-up 0.25s ease-out;
 }
@@ -141,10 +148,9 @@
 
 /* 1) viewport 內做 5% 空白，並裁切 */
 :host ::ng-deep .hero-carousel .p-carousel-viewport {
-  position: relative;
-  padding-inline: 5%;
-  box-sizing: border-box;
-  overflow: hidden;
+  overflow: hidden !important;
+  padding-top: 40px;
+  padding-bottom: 40px;
 }
 
 /* 2) 允許中間跨格（但最終仍被 viewport 裁切在輪播區內） */
@@ -159,12 +165,11 @@
 :host ::ng-deep .hero-carousel .p-carousel-viewport::after {
   content: "";
   position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 5%;
+  top: -50px;
+  bottom: -50px;
+  width: 5.5%;
   background: #f8fafc;
-  /* ←如果你背景不是這色，改成你的背景色 */
-  z-index: 20;
+  z-index: 100;
   pointer-events: none;
 }
 
@@ -310,13 +315,12 @@
 }
 
 @media (max-width: 560px) {
-  :host ::ng-deep .hero-carousel
-  .p-carousel-item-active .banner-title {
+  :host ::ng-deep .hero-carousel .p-carousel-item-active .banner-title {
     display: block !important;
   }
 }
 
-:host ::ng-deep .type-ms-anchor{
+:host ::ng-deep .type-ms-anchor {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -324,4 +328,3 @@
   opacity: 0;
   pointer-events: none;
 }
-

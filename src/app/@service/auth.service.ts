@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { tap } from 'rxjs/internal/operators/tap';
+import { tap } from 'rxjs';
 import Swal from 'sweetalert2';
 import { HttpService } from './http.service';
 import { BehaviorSubject } from 'rxjs';
@@ -413,4 +413,42 @@ export class AuthService {
     return this.https.getApi(`http://localhost:8080/gogobuy/getAll`);
   }
 
+  // 搜尋附近商家(座標或地址)
+  searchNearbyStore(lat?: number, lng?: number, address?: string, radius: number = 5) {
+    const qs: string[] = [];
+    if (lat != null) qs.push(`lat=${encodeURIComponent(String(lat))}`);
+    if (lng != null) qs.push(`lng=${encodeURIComponent(String(lng))}`);
+    if (address) qs.push(`address=${encodeURIComponent(address)}`);
+    qs.push(`radius=${encodeURIComponent(String(radius))}`);
+
+    return this.https.getApi(`http://localhost:8080/gogobuy/store/searchNearby?${qs.join('&')}`);
+  }
+
+  loadNearbyByGeo(lat: number, lng: number, radius: number = 5) {
+    return this.searchNearbyStore(lat, lng, undefined, radius).pipe(
+      tap((res: any) => this.applyNearbyStoreResult(res))
+    );
+  }
+
+  loadNearbyByAddress(address: string, radius: number = 5) {
+    return this.searchNearbyStore(undefined, undefined, address, radius).pipe(
+      tap((res: any) => this.applyNearbyStoreResult(res))
+    );
+  }
+
+  private applyNearbyStoreResult(res: any) {
+    const demoImages = [
+      'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800',
+      'https://images.unsplash.com/photo-1544148103-0773bf10d330?w=800',
+    ];
+
+    const list = (res.storeList ?? res.stores ?? res.data ?? []).map((s: any, i: number) => ({
+      ...s,
+      image: s.image || demoImages[i % demoImages.length],
+    }));
+
+    // 讓「原本首頁」自動連動：店家清單變附近、開團跟著篩
+    this.store.set(list);
+    this.filterEventsByStoreIds(list.map((x: any) => x.id));
+  }
 }

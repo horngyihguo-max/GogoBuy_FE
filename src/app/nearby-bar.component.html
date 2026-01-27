@@ -1,0 +1,38 @@
+<div class="flex items-center gap-2">
+  <button pButton type="button" icon="pi pi-map-marker" class="p-button-text" (click)="openDialog()">
+    附近
+  </button>
+</div>
+
+<p-dialog header="設定附近店家" [(visible)]="dialogVisible" [modal]="true" [draggable]="false" [resizable]="false"
+  styleClass="w-[380px] h-[450px]">
+  <div class="space-y-3">
+    <p class="font-size-500 font-bold">偵測地址</p>
+    <div class="flex gap-2">
+      <button pButton type="button" icon="pi pi-compass" label="使用目前位置" class="p-button-sm w-full"
+        (click)="startAuto()">
+      </button>
+    </div>
+
+    <!-- 半徑 5~20 -->
+    <p class="font-size-500 font-bold">選擇範圍</p>
+    <div class="flex items-center gap-2">
+      <p-select [options]="radiusOptions" optionLabel="label" optionValue="value" [ngModel]="radius()"
+        (ngModelChange)="onRadiusChange($event)" styleClass="!w-full">
+      </p-select>
+      <button pButton type="button" icon="pi pi-times" class="p-button-text p-button-sm" (click)="clearNearby()"
+        pTooltip="清除附近篩選">
+      </button>
+    </div>
+
+    <p class="font-size-500 font-bold">新增地址</p>
+    <div class="flex items-center gap-2">
+      <input pInputText placeholder="請輸入地址" [ngModel]="address()" (ngModelChange)="address.set($event)"
+        (keyup.enter)="fetchByAddress(address().trim())" class="w-full" />
+
+      <button pButton type="button" icon="pi pi-search" class="p-button-sm" (click)="fetchByAddress(address().trim())">
+      </button>
+    </div>
+
+  </div>
+</p-dialog>

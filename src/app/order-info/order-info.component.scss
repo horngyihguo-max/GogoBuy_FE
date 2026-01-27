@@ -1,0 +1,60 @@
+:host ::ng-deep .ggb-progress {
+  --dot: 34px;
+  --line: 6px;
+  --done: #769902;
+  --todo: #e5e7eb;
+  --seg: calc(100% / var(--ggb-count));
+
+}
+
+/* ✅ 強制每個 step 等寬，點點中心才會等距 */
+:host ::ng-deep .ggb-progress .p-steps-item {
+  flex: 1 1 0 !important;
+}
+
+/* 灰底線：從「第一格中心」到「最後一格中心」 */
+:host ::ng-deep .ggb-progress .p-steps-list::before {
+  content: "";
+  position: absolute;
+  top: calc(var(--dot) / 2 - var(--line) / 2);
+  left: calc(var(--seg) / 2);
+  right: calc(var(--seg) / 2);
+  height: var(--line);
+  background: var(--todo);
+  border-radius: 999px;
+  z-index: 0;
+}
+
+/* 綠填充線：同一條線，用 scaleX 動畫 */
+:host ::ng-deep .ggb-progress .p-steps-list::after {
+  content: "";
+  position: absolute;
+  top: calc(var(--dot) / 2 - var(--line) / 2);
+  left: calc(var(--seg) / 2);
+  width: calc(100% - var(--seg));
+  height: var(--line);
+  background: var(--done);
+  border-radius: 999px;
+  transform-origin: left;
+  transform: scaleX(var(--ggb-progress, 0));
+  transition: transform 550ms ease;
+  z-index: 0;
+}
+
+/* 目前步驟：圓框變綠（對準 .p-steps-item-number） */
+:host ::ng-deep .ggb-progress .p-steps-item.p-highlight .p-steps-item-number,
+:host ::ng-deep .ggb-progress .p-steps-item[aria-current="step"] .p-steps-item-number {
+  border: 2px solid var(--done, #769902) !important;
+  box-shadow: none !important;
+  outline: none !important;
+  color: var(--done, #769902) !important;
+  background: #fff !important; /* 想要綠底可改成 var(--done) + color: #fff */
+}
+
+:host ::ng-deep .ggb-progress.completed-1 .p-steps-item:nth-child(-n + 1) .p-steps-item-number,
+:host ::ng-deep .ggb-progress.completed-2 .p-steps-item:nth-child(-n + 2) .p-steps-item-number,
+:host ::ng-deep .ggb-progress.completed-3 .p-steps-item:nth-child(-n + 3) .p-steps-item-number {
+  background: var(--done, #769902) !important;
+  border-color: var(--done, #769902) !important;
+  color: #fff !important;
+}
