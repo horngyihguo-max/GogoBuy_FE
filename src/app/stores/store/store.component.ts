@@ -1,4 +1,4 @@
-import { StoreService } from './../../@service/store.service';
+import { FeeDescriptionVolist, StoreService } from './../../@service/store.service';
 import { Component, ElementRef, HostListener, QueryList, ViewChildren } from '@angular/core';
 import { StepperModule } from 'primeng/stepper';
 import { ButtonModule } from 'primeng/button';
@@ -14,7 +14,7 @@ import { SelectButtonModule } from 'primeng/selectbutton';
 import { DialogModule } from 'primeng/dialog';
 import { HttpService } from '../../@service/http.service';
 import { ActivatedRoute, Router, RouterLink } from "@angular/router";
-import { Category, FeeDescription, Items, MenuCategoriesVoList, MenuVoList, OperatingHoursVoList, ProductOptionGroupsVoList, Stores } from '../../@service/store.service';
+import { Category, Items, MenuCategoriesVoList, MenuVoList, OperatingHoursVoList, ProductOptionGroupsVoList, Stores } from '../../@service/store.service';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { FloatLabelModule } from 'primeng/floatlabel';
@@ -23,6 +23,7 @@ import { SelectModule } from 'primeng/select';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { CheckboxModule } from 'primeng/checkbox';
+import { CdkDrag } from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'app-store',
@@ -35,7 +36,8 @@ import { CheckboxModule } from 'primeng/checkbox';
     DialogModule, ButtonModule, RouterLink,
     InputGroupModule, InputGroupAddonModule, FloatLabelModule,
     InputNumberModule, SelectModule, InputTextModule,
-    IconFieldModule, InputIconModule, CheckboxModule
+    IconFieldModule, InputIconModule, CheckboxModule,
+    CdkDrag
   ],
   templateUrl: './store.component.html',
   styleUrl: './store.component.scss'
@@ -44,7 +46,6 @@ export class StoreComponent {
 
   constructor(
     private http: HttpService,
-    private router: Router,
     private route: ActivatedRoute,
     private storeService: StoreService,
   ) { }
@@ -61,6 +62,8 @@ export class StoreComponent {
   displayDeleteCategories = false;
   displayDeleteSpecs = false;
   displayDeleteProduct = false;
+  displayDeleteProductSpec = false;
+  displayExistenceSpec = false;
 
   selectedProduct!: MenuVoList;
   selectedCategoryId: number | null = null;
@@ -80,6 +83,7 @@ export class StoreComponent {
   editingIndex!: number;
   tempCateTarget!: any;
   tempCateIndex: number = -1;
+  newCateId: number = 0;
 
   // 規格
   editingSpecIndex: number = -1;
@@ -88,20 +92,24 @@ export class StoreComponent {
   filteredSpecsForProduct: any[] = [];
   tempSpecTarget!: any;
   tempSpecIndex: number = -1;
+  newSpecId: number = 0;
+  newItemId: number = 0
 
   // 商品
   currentProduct: MenuVoList = this.getNewProduct();
   optionGroups: ProductOptionGroupsVoList = this.getNewGroups();
   currentGroupIndex: number | null = null;
   currentItemIndex: number | null = null;
-  currentItem: Items = { name: '', extraPrice: 0 };
+  currentItem: Items = this.getNewItem();
   tempProductTarget!: any;
   tempProductIndex: number = -1;
-  newPId!: number;
+  tempProductSpecTarget!: any;
+  newPId: number = 0;
 
   isEditMode = false;
   searchKeyword: string = '';
 
+  // 清空欄位
   getNewProduct(): MenuVoList {
     return {
       id: 0,
@@ -117,15 +125,18 @@ export class StoreComponent {
 
   getNewGroups(): ProductOptionGroupsVoList {
     return {
+      id: 0,
       name: '',
-      isRequired: false,
+      required: false,
       maxSelection: null,
-      items: []
+      items: [],
+      applicableCategoryIds: []
     }
   };
 
   getNewItem(): Items {
     return {
+      id: 0,
       name: '',
       extraPrice: 0
     }
@@ -135,12 +146,9 @@ export class StoreComponent {
     return {
       id: 0,
       name: '',
-      priceLevel: [
-        { name: '', price: null }
-      ]
+      priceLevel: []
     };
   }
-
 
   // 打包傳進資料庫
   storeData = {
@@ -155,7 +163,7 @@ export class StoreComponent {
     publish: false,
     createdBy: 'A01',
     operatingHoursVoList: [] as OperatingHoursVoList[],
-    feeDescription: [] as FeeDescription[],
+    feeDescription: [] as FeeDescriptionVolist[],
     menuVoList: [] as MenuVoList[],
     menuCategoriesVoList: [] as MenuCategoriesVoList[],
     productOptionGroupsVoList: [] as ProductOptionGroupsVoList[]
@@ -199,9 +207,9 @@ export class StoreComponent {
           this.storeData.feeDescription = res.feeDescriptionVoList;
           this.storeData.menuVoList = res.menuVoList;
           this.filteredProducts = [...this.storeData.menuVoList];
-          console.log("storeData", this.storeData);
-          console.log("filteredProductsMenu:", this.filteredProducts);
+          console.log("storeDatastoreData", this.storeData);
           this.newPId = this.storeData.menuVoList.length + 1;
+          this.newSpecId = this.storeData.productOptionGroupsVoList.length + 1;
         }
       });
     this.filteredProducts = [...this.storeData.menuVoList];
@@ -212,6 +220,7 @@ export class StoreComponent {
     if (savedData) {
       this.storeData = JSON.parse(savedData);
     }
+    this.applyFilters();
   }
 
   // 店家資訊 ---------------------------------------------------------
@@ -241,12 +250,12 @@ export class StoreComponent {
       return acc;
     }, [] as { week: number, times: string[] }[]);
 
-    // 選擇性：按星期 1 到 7 排序
+    // 星期一到日排序
     return grouped.sort((a, b) => a.week - b.week);
   }
 
   // 商品分類 ---------------------------------------------------------
-  addCategories(event: Event) {
+  addCategories() {
     this.isEditMode = false;
     this.currentCategories = this.getNewCategories();
     this.displayCategoriesDialog = true;
@@ -301,15 +310,20 @@ export class StoreComponent {
     if (this.isEditMode && this.editingIndex !== -1) {
       this.storeData.menuCategoriesVoList[this.editingIndex] = { ...this.currentCategories };
     } else {
+      this.newCateId++;
+
       const newCategory = {
         ...this.currentCategories,
-        id: Date.now()
+        id: this.newCateId
       };
+
       this.storeData.menuCategoriesVoList.push(newCategory);
     }
 
     this.storeData.menuCategoriesVoList = [...this.storeData.menuCategoriesVoList];
     this.displayCategoriesDialog = false;
+
+    this.currentCategories = this.getNewCategories();
   }
 
   selectedCategories(categoryId: number, index: number) {
@@ -322,21 +336,17 @@ export class StoreComponent {
 
   // 規格 ---------------------------------------------------------
   addSpecs() {
-    this.displaySpecsDialog = true;
+    this.isEditMode = false;
     this.editingSpecIndex = -1;
-    this.currentGroup = {
-      isRequired: false,
-      name: '',
-      maxSelection: 1,
-      items: [{ name: '', extraPrice: 0 }]
-    };
+    this.currentGroup = this.getNewGroups();
+    this.selectedSpecsCategories = [];
     this.displaySpecsDialog = true;
   }
 
   editSpec(spec: ProductOptionGroupsVoList, index: number) {
     this.isEditMode = true;
     this.editingSpecIndex = index;
-    this.currentGroup = structuredClone(spec);
+    this.currentGroup = { ...spec };
 
     if (spec.applicableCategoryIds) {
       this.selectedSpecsCategories = this.storeData.menuCategoriesVoList.filter(cate => {
@@ -354,6 +364,7 @@ export class StoreComponent {
 
   addSpecItem() {
     this.currentGroup.items.push({
+      id: this.newItemId++,
       name: '',
       extraPrice: 0
     });
@@ -383,8 +394,10 @@ export class StoreComponent {
   }
 
   isCateSelected(cate: any): boolean {
-    if (!this.selectedSpecsCategories) return false;
-    return this.selectedSpecsCategories.some(selected => selected === cate);
+    if (!this.selectedSpecsCategories || this.selectedSpecsCategories.length === 0) {
+      return false;
+    }
+    return this.selectedSpecsCategories.some(selected => selected.name === cate.name);
   }
 
   removeSpecItem(index: number) {
@@ -395,24 +408,32 @@ export class StoreComponent {
     if (!this.currentGroup.name.trim()) return;
     this.currentGroup.applicableCategoryIds = this.selectedSpecsCategories.map(cate => cate.id);
 
-    if (this.isEditMode) {
-      this.storeData.productOptionGroupsVoList[this.editingSpecIndex] = { ...this.currentGroup };
+    if (this.isEditMode && this.editingSpecIndex > -1) {
+      this.storeData.productOptionGroupsVoList = this.storeData.productOptionGroupsVoList.map((g, i) =>
+        i === this.editingSpecIndex ? { ...this.currentGroup } : g
+      );
     } else {
-      const newSpec = { ...this.currentGroup, id: Date.now() };
-      this.storeData.productOptionGroupsVoList.push(newSpec);
+      this.newSpecId++;
+      const newSpec = { ...this.currentGroup, id: this.newSpecId };
+
+      this.storeData.productOptionGroupsVoList = [
+        ...this.storeData.productOptionGroupsVoList, newSpec
+      ];
     }
 
-    this.storeData.productOptionGroupsVoList = [...this.storeData.productOptionGroupsVoList];
+    console.log("this.storeData.productOptionGroupsVoList", this.storeData.productOptionGroupsVoList);
+
     this.displaySpecsDialog = false;
     this.currentGroup = this.getNewGroups();
-    this.selectedSpecsCategories = [];
+    this.isEditMode = false;
+    this.editingSpecIndex = -1;
   }
 
   // search ---------------------------------------------------------
   applyFilters() {
     let results = this.storeData.menuVoList;
 
-    if (this.selectedCategoryId !== null) {
+    if (this.selectedCategoryId !== null && this.selectedCategoryId !== -1) {
       results = results.filter(p => p.categoryId === this.selectedCategoryId);
     }
 
@@ -430,7 +451,20 @@ export class StoreComponent {
   // 新增商品 ---------------------------------------------------------
   openNewProduct() {
     this.isEditMode = false;
-    this.currentProduct = this.getNewProduct();
+    const defaultCategoryId = this.storeData.menuCategoriesVoList.length > 0
+      ? this.storeData.menuCategoriesVoList[0].id
+      : 1;
+
+    this.currentProduct = {
+      id: 0,
+      name: '',
+      description: '',
+      basePrice: 0,
+      categoryId: defaultCategoryId, // 設定正確的預設 ID (例如 60)
+      image: '',
+      available: true,
+      unusual: {}
+    };
     this.displayProductDialog = true;
   }
 
@@ -461,25 +495,55 @@ export class StoreComponent {
     const selectedId = this.currentProduct.categoryId;
     if (!selectedId) {
       this.filteredSpecsForProduct = [];
+      this.currentProduct.unusual = {};
       return;
     }
     this.filteredSpecsForProduct = this.storeData.productOptionGroupsVoList.filter(spec =>
       spec.applicableCategoryIds?.includes(selectedId)
     );
+
+    const autoSelectSpec = this.filteredSpecsForProduct.reduce((acc, spec) => {
+      if (spec.id) {
+        acc[spec.id.toString()] = 'true';
+      }
+      return acc;
+    }, {} as { [key: string]: string });
+
+    this.currentProduct.unusual = autoSelectSpec;
   }
 
-  // 單一商品新增規格 ---------------------------------------------------------
-  addProductSpecs() {
-    this.storeData.productOptionGroupsVoList.push({
-      isRequired: false,
-      name: '',
-      maxSelection: 0,
-      items: []
-    });
+  // 單一商品的規格配置 ---------------------------------------------------------
+  openExistenceSpec() {
+    this.displayExistenceSpec = true;
   }
 
-  removeProductSpecs(index: number) {
+  openProductSpecDelete(group: any) {
+    this.tempProductSpecTarget = group;
+    this.displayDeleteProductSpec = true;
+  }
 
+  removeProductSpecs() {
+    if (!this.tempProductSpecTarget) return;
+
+    const id = this.tempProductSpecTarget.id.toString();
+
+    if (this.currentProduct.unusual && this.currentProduct.unusual[id]) {
+      const { [id]: _, ...rest } = this.currentProduct.unusual; // _是變數
+      this.currentProduct.unusual = rest;
+    }
+
+    this.displayDeleteProductSpec = false;
+    this.tempProductSpecTarget = null;
+  }
+
+  // 變數
+  get filteredOptionGroups() {
+    if (!this.currentProduct.categoryId) {
+      return []
+    }
+    return this.storeData.productOptionGroupsVoList.filter(group => {
+      return group.applicableCategoryIds?.includes(this.currentProduct.categoryId)
+    })
   }
 
   openItemDialog(groupIndex: number, itemIndex: number | null = null) {
@@ -489,7 +553,7 @@ export class StoreComponent {
       const targetItem = this.storeData.productOptionGroupsVoList[groupIndex].items[itemIndex];
       this.currentItem = { ...targetItem };
     } else {
-      this.currentItem = { name: '', extraPrice: 0 };
+      this.currentItem = this.getNewItem();
     }
     this.displayItemDialog = true;
   }
@@ -512,24 +576,6 @@ export class StoreComponent {
     }
   }
 
-  // 商品列排序 ---------------------------------------------------------
-  onStatusChange() {
-    setTimeout(() => {
-      this.sortProduct();
-    }, 200);
-  }
-
-  sortProduct() {
-    this.storeData.menuVoList.sort((a, b) => {
-      if (a.available !== b.available) {
-        return a.available ? -1 : 1;
-      }
-      return b.id - a.id;
-    })
-    this.storeData.menuVoList = [...this.storeData.menuVoList];
-    this.applyFilters();
-  }
-
   saveProduct() {
     if (!this.currentProduct.name) {
       return;
@@ -537,22 +583,30 @@ export class StoreComponent {
     // 若未符合 p.id === this.currentProduct.id ， 那 index = -1
     const index = this.storeData.menuVoList.findIndex(p => p.id === this.currentProduct.id);
 
+    this.currentProduct.unusual = this.currentProduct.unusual ? { ...this.currentProduct.unusual } : {};
+
     if (index > -1) {
       this.storeData.menuVoList = this.storeData.menuVoList.map((p, i) =>
         i === index ? { ...this.currentProduct } : p
       );
     } else {
-      const newProduct = { ...this.currentProduct, id: this.newPId++, storesId: this.storeData.id };
+      this.newPId++;
+      const newProduct = { ...this.currentProduct, id: this.newPId, storesId: this.storeData.id };
       this.storeData.menuVoList = [...this.storeData.menuVoList, newProduct];
     }
+
+    console.log("this.storeData.menuVoList", this.storeData.menuVoList);
 
     this.sortProduct();
     this.displayProductDialog = false;
   }
+
   // 修改商品 ---------------------------------------------------------
   editProduct(product: MenuVoList) {
     this.isEditMode = true;
     this.currentProduct = { ...product };
+    console.log("this.currentProduct", this.currentProduct);
+
     this.onCategoryChange();
     this.displayProductDialog = true;
   }
@@ -583,8 +637,25 @@ export class StoreComponent {
     this.tempProductIndex = -1;
   }
 
+  // 商品列排序 ---------------------------------------------(已不需要
+  onStatusChange() {
+    setTimeout(() => {
+      this.sortProduct();
+    }, 200);
+  }
 
-  // 存資料庫 ---------------------------------------------------------( 還沒測試API )
+  sortProduct() {
+    this.storeData.menuVoList.sort((a, b) => {
+      if (a.available !== b.available) {
+        return a.available ? -1 : 1;
+      }
+      return b.id - a.id;
+    })
+    this.storeData.menuVoList = [...this.storeData.menuVoList];
+    this.applyFilters();
+  }
+
+  // 存資料庫 ---------------------------------------------------------
   onSaveAll() {
     if (this.storeData.id == 0) {
       const payload = {
@@ -610,21 +681,8 @@ export class StoreComponent {
         });
     } else {
       const payload = {
-        storesname: this.storeData.name,
-        phone: this.storeData.phone,
-        address: this.storeData.address,
-        category: this.storeData.category,
-        type: this.storeData.type,
-        memo: this.storeData.memo,
-        image: this.storeData.image,
-        publish: this.storeData.publish,
+        ...this.storeData, storesname: this.storeData.name, fee_description: this.storeData.feeDescription,
         createdBy: 'SystemManager',
-        fee_description: this.storeData.feeDescription,
-        operatingHoursVoList: this.storeData.operatingHoursVoList,
-        menuVoList: this.storeData.menuVoList,
-        menuCategoriesVoList: this.storeData.menuCategoriesVoList,
-        productOptionGroupsVoList: this.storeData.productOptionGroupsVoList,
-
       }
       console.log("payload(update):", payload);
 
@@ -639,105 +697,107 @@ export class StoreComponent {
   }
 
   // 假資料 ---------------------------------------------------------
-  store: Stores = {
-    id: 1,
-    name: "可不可 OKORNOT",
-    phone: "0988777666",
-    address: "台南市歸仁區中正南路1001號",
-    category: "餐飲",
-    type: "手搖飲",
-    memo: "外送請提前一小時訂購",
-    image: "okornot.png",
-    feeDescription: [
-      { km: 1.0, fee: 20 },
-      { km: 5.0, fee: 50 }
-    ],
-    publish: true,
-    createdBy: "UUID",
-    operatingHoursVoList: [
-      { week: 1, openTime: "10:00", closeTime: "22:00" },
-      { week: 2, openTime: "10:00", closeTime: "22:00" },
-      { week: 3, openTime: "10:00", closeTime: "22:00" },
-      { week: 4, openTime: "10:00", closeTime: "22:00" },
-      { week: 5, openTime: "10:00", closeTime: "23:00" }
-    ],
-    menuVoList: [
-      {
-        id: 1,
-        categoryId: 1,
-        name: "經典紅玉",
-        description: "嚴選紅玉紅茶",
-        basePrice: 35,
-        image: "",
-        available: true,
-        unusual: { "去冰": "微糖" }
-      },
-      {
-        id: 2,
-        categoryId: 2,
-        name: "波霸紅茶拿鐵",
-        basePrice: 45,
-        description: "濃醇紅茶融合香濃鮮奶，搭配Q彈波霸，口感層次豐富、甜而不膩。",
-        image: "blackMilk.jpeg",
-        available: true,
-        unusual: []
-      }, {
-        id: 3,
-        categoryId: 2,
-        name: "阿華田拿鐵",
-        basePrice: 50,
-        description: "香濃阿華田巧克力融合鮮奶，口感滑順，甜而不膩，暖心提神飲品。",
-        image: "chocolate.jpeg",
-        available: true,
-        unusual: []
-      }
-    ],
-    menuCategoriesVoList: [
-      {
-        id: 1,
-        name: "純茶",
-        priceLevel: [
-          { "name": "中杯", "price": 0 },
-          { "name": "大杯", "price": 10 }
-        ]
-      },
-      {
-        id: 2,
-        name: "找拿鐵",
-        priceLevel: [
-          { "name": "中杯", "price": 0 },
-          { "name": "大杯", "price": 15 }
-        ]
-      },
-      {
-        id: 3,
-        name: "醇奶",
-        priceLevel: [
-          { "name": "中杯", "price": 0 },
-          { "name": "大杯", "price": 10 }
-        ]
-      },
-    ],
-    productOptionGroupsVoList: [
-      {
-        name: "甜度",
-        isRequired: true,
-        maxSelection: 1,
-        items: [
-          { name: "無糖", extraPrice: 0 },
-          { name: "半糖", extraPrice: 0 },
-          { name: "全糖", extraPrice: 0 }
-        ]
-      },
-      {
-        name: "加配料",
-        isRequired: false,
-        maxSelection: 2,
-        items: [
-          { name: "黑糖珍珠", extraPrice: 10 },
-          { name: "仙草凍", extraPrice: 5 }
-        ]
-      }
-    ]
-  }
+  // store: Stores = {
+  //   id: 1,
+  //   name: "可不可 OKORNOT",
+  //   phone: "0988777666",
+  //   address: "台南市歸仁區中正南路1001號",
+  //   category: "餐飲",
+  //   type: "手搖飲",
+  //   memo: "外送請提前一小時訂購",
+  //   image: "okornot.png",
+  //   feeDescription: [
+  //     { km: 1.0, fee: 20 },
+  //     { km: 5.0, fee: 50 }
+  //   ],
+  //   publish: true,
+  //   createdBy: "UUID",
+  //   operatingHoursVoList: [
+  //     { week: 1, openTime: "10:00", closeTime: "22:00" },
+  //     { week: 2, openTime: "10:00", closeTime: "22:00" },
+  //     { week: 3, openTime: "10:00", closeTime: "22:00" },
+  //     { week: 4, openTime: "10:00", closeTime: "22:00" },
+  //     { week: 5, openTime: "10:00", closeTime: "23:00" }
+  //   ],
+  //   menuVoList: [
+  //     {
+  //       id: 1,
+  //       categoryId: 1,
+  //       name: "經典紅玉",
+  //       description: "嚴選紅玉紅茶",
+  //       basePrice: 35,
+  //       image: "",
+  //       available: true,
+  //       unusual: { "去冰": "微糖" }
+  //     },
+  //     {
+  //       id: 2,
+  //       categoryId: 2,
+  //       name: "波霸紅茶拿鐵",
+  //       basePrice: 45,
+  //       description: "濃醇紅茶融合香濃鮮奶，搭配Q彈波霸，口感層次豐富、甜而不膩。",
+  //       image: "blackMilk.jpeg",
+  //       available: true,
+  //       unusual: { '1': 'true' }
+  //     }, {
+  //       id: 3,
+  //       categoryId: 2,
+  //       name: "阿華田拿鐵",
+  //       basePrice: 50,
+  //       description: "香濃阿華田巧克力融合鮮奶，口感滑順，甜而不膩，暖心提神飲品。",
+  //       image: "chocolate.jpeg",
+  //       available: true,
+  //       unusual: { '1': 'true' }
+  //     }
+  //   ],
+  //   menuCategoriesVoList: [
+  //     {
+  //       id: 1,
+  //       name: "純茶",
+  //       priceLevel: [
+  //         { "name": "中杯", "price": 0 },
+  //         { "name": "大杯", "price": 10 }
+  //       ]
+  //     },
+  //     {
+  //       id: 2,
+  //       name: "找拿鐵",
+  //       priceLevel: [
+  //         { "name": "中杯", "price": 0 },
+  //         { "name": "大杯", "price": 15 }
+  //       ]
+  //     },
+  //     {
+  //       id: 3,
+  //       name: "醇奶",
+  //       priceLevel: [
+  //         { "name": "中杯", "price": 0 },
+  //         { "name": "大杯", "price": 10 }
+  //       ]
+  //     },
+  //   ],
+  //   productOptionGroupsVoList: [
+  //     {
+  //       id: 1,
+  //       name: "甜度",
+  //       required: true,
+  //       maxSelection: 1,
+  //       items: [
+  //         { id: 1, name: "無糖", extraPrice: 0 },
+  //         { id: 2, name: "半糖", extraPrice: 0 },
+  //         { id: 3, name: "全糖", extraPrice: 0 }
+  //       ]
+  //     },
+  //     {
+  //       id: 2,
+  //       name: "加配料",
+  //       required: false,
+  //       maxSelection: 2,
+  //       items: [
+  //         { id: 1, name: "黑糖珍珠", extraPrice: 10 },
+  //         { id: 2, name: "仙草凍", extraPrice: 5 }
+  //       ]
+  //     }
+  //   ]
+  // }
 }

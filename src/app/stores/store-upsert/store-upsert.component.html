@@ -68,15 +68,54 @@
       </p-inputgroup>
     </div>
 
-    <div class=" flex flex-col gap-2 md:col-span-2 mt-2">
-      <p-inputgroup>
-        <p-inputgroup-addon class="text-slate-700!"><i class="pi pi-map-marker"></i></p-inputgroup-addon>
-        <p-floatlabel variant="on">
-          <input pInputText id="address" [(ngModel)]="storeData.address" class="border border-gray-300 focus:!border-2
-          focus:!border-[#662222] focus:!shadow-none outline-none w-full p-2 pl-3 rounded-r-xl transition-all" />
-          <label for="address">店家地址</label>
-        </p-floatlabel>
-      </p-inputgroup>
+    <div class="flex flex-col gap-2 md:col-span-2 mt-2">
+      <label class="text-sm font-bold text-[#662222]/80">店家地址</label>
+
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-2">
+        <p-select
+          [(ngModel)]="selectedCity"
+          [options]="cityOptions"
+          optionLabel="CityName"
+          dataKey="CityName"
+          placeholder="選擇縣市"
+          class="w-full text-sm"
+          (onChange)="onCityChange()">
+        </p-select>
+
+        <p-select
+          [(ngModel)]="selectedDistrict"
+          [options]="selectedCity?.AreaList || []"
+          optionLabel="AreaName"
+          dataKey="AreaName"
+          placeholder="選擇地區"
+          [disabled]="!selectedCity"
+          class="w-full text-sm"
+          (onChange)="updateFullAddress()">
+        </p-select>
+
+        <div class="md:col-span-2">
+          <p-inputgroup>
+            <p-inputgroup-addon class="text-slate-700!">
+              <i class="pi pi-map-marker"></i>
+            </p-inputgroup-addon>
+
+            <input
+              pInputText
+              [(ngModel)]="detailAddress"
+              (input)="updateFullAddress()"
+              (blur)="updateFullAddress()"
+              placeholder="街道門牌號碼、樓層"
+              class="border border-gray-300 focus:!border-2 focus:!border-[#662222] focus:!shadow-none outline-none w-full p-2 pl-3 rounded-r-xl transition-all" />
+          </p-inputgroup>
+        </div>
+      </div>
+
+      <div class="flex justify-between items-center mt-1">
+        <div class="text-[10px] text-gray-400">
+          <span class="font-medium text-gray-500">目前儲存地址：</span>
+          {{ storeData.address || '尚未輸入完整地址' }}
+        </div>
+      </div>
     </div>
 
     <!-- 時段 -->
@@ -87,8 +126,8 @@
           <span class="font-bold text-lg text-gray-700">營業時段配置</span>
         </div>
         <button type="button" (click)="addTimeSlot()" class="flex items-center gap-1 px-4 py-2
-        bg-[#662222] text-white rounded-lg text-sm hover:brightness-110 cursor-pointer transition-all">
-          <i class="pi pi-plus text-xs"></i>新增時段
+        bg-[#662222] text-white rounded-lg  hover:brightness-110 cursor-pointer transition-all">
+          <i class="pi pi-plus text-sm"></i>新增時段
         </button>
       </div>
       <p class="text-base text-gray-700 font-semibold mt-4">若同一日有多個時段（如午餐/晚餐），請新增多組配置。</p>
@@ -153,8 +192,8 @@
           <span class="font-bold text-lg text-gray-700">運費級距配置</span>
         </div>
         <button type="button" (click)="addFeeRow()" class="flex items-center gap-1 px-4 py-2
-          bg-[#662222] text-white cursor-pointer rounded-lg text-sm hover:brightness-110 transition-all">
-          <i class="pi pi-plus text-xs"></i>新增級距
+          bg-[#662222] text-white cursor-pointer rounded-lg  hover:brightness-110 transition-all">
+          <i class="pi pi-plus text-sm"></i>新增級距
         </button>
       </div>
 
@@ -171,7 +210,7 @@
         @for(shippingFee of storeData.feeDescription; track $index; let i = $index) {
         <div class="relative p-5 rounded-2xl bg-gray-50 border border-gray-100 flex flex-col gap-4">
 
-          @if(storeData.feeDescription.length >= 1) {
+          @if(storeData.feeDescription) {
           <button (click)="removeFeeRow(i)"
             class="absolute -top-2 cursor-pointer -right-2 w-8 h-8 bg-white border border-red-100 text-red-500 rounded-full shadow-sm hover:bg-red-50 transition-colors z-10">
             <i class="pi pi-trash"></i>
@@ -192,7 +231,7 @@
                 </div>
 
                 <div class="pt-5 text-gray-700 hidden md:block">
-                  <i class="pi pi-arrow-right text-xs"></i>
+                  <i class="pi pi-arrow-right text-sm"></i>
                 </div>
 
                 <div class="flex-1 min-w-[120px]">
@@ -237,7 +276,8 @@
             </div>
             <div class="text-center">
               <p class="text-base font-semibold text-[#662222]">點擊上傳照片</p>
-              <p class="text-sm text-gray-700">建議尺寸 800x800 (PNG, JPG)</p>
+              <p class=" text-gray-700">推薦比例：16:9 或 2:1</p>
+              <p class=" text-gray-700">建議尺寸：最小 1200 x 675 px，建議 1920 x 1080 px</p>
             </div>
           </div>
           }
