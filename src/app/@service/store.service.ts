@@ -64,7 +64,7 @@ export interface Stores {
   productOptionGroupsVoList?: ProductOptionGroupsVoList[]
 }
 
-export interface FeeDescription {
+export interface FeeDescriptionVoList {
   km: number;
   fee: number;
 }

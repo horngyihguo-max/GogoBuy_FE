@@ -1,0 +1,19 @@
+@import "tailwindcss";
+
+.storeName{
+  @apply text-2xl md:text-4xl
+}
+.info{
+  @apply text-lg pt-[5px] md:pt-[10px]
+}
+.store-table{
+  @apply max-w-[295px] mt-[5px] ml-[10px]
+  md:max-w-none md:!w-[550px] md:mt-[10px];
+  tr{
+    @apply w-[100vw]
+  }
+  .td-icon{
+    @apply w-[24px] text-lg
+  }
+}
+
