@@ -39,7 +39,8 @@ nav {
   }
 
   .p-button {
-    --p-button-label-font-weight: 700
+    --p-button-label-font-weight: 700;
+    --p-button-outlined-info-border-color: var(--p-sky-500);
   }
 
 }

@@ -54,7 +54,7 @@ nav img:hover {
   transition: all 0.5s;
 }
 
-nav i.nav-icon{
+nav i.nav-icon {
   color: #fff;
   transition: color .3s, transform .5s;
 }
@@ -88,7 +88,7 @@ main {
 .marquee__track {
   display: flex;
   width: max-content;
-  animation: marquee 15s linear infinite;
+  animation: marquee 20s linear infinite;
 }
 
 .marquee__group {
