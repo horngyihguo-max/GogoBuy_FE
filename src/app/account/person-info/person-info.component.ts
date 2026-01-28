@@ -61,4 +61,9 @@ export class PersonInfoComponent {
     this.router.navigate(['/user/profile/edit']);
   }
 
+  // 判斷是否為手機業面
+  get isMobile(): boolean {
+    return window.innerWidth <= 768;
+  }
+
 }

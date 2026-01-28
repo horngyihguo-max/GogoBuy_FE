@@ -1,29 +1,12 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { Injectable, NgZone } from '@angular/core';
+import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { HttpService } from './http.service';
 import { Router } from '@angular/router';
 import { AuthService } from './auth.service';
-
 @Injectable({
   providedIn: 'root',
 })
 export class SseService {
-  constructor(
-    private http: HttpService,
-    private router: Router,
-    private auth: AuthService
-  ) {
-    // 這邊是把抓到的通知內容存入localStorage(就不會消失)
-    const raw = localStorage.getItem('notifications_cache');
-    if (raw) {
-      try {
-        this.notifications = JSON.parse(raw);
-        this.emit();
-      } catch {
-        // ignore
-      }
-    }
-  }
   private es?: EventSource;
   userId: string = '';
 
@@ -31,10 +14,6 @@ export class SseService {
   private retentionDays = 30;
   // 總共顯示筆數限制(如果不要這個限制，記得cleanup()要改)
   private maxItems = 50;
-
-  ngOnInit(): void {
-    this.userId = this.auth.user.id;
-  }
 
   // 通知列表（單一來源）
   private notificationsSubject = new BehaviorSubject<any[]>([]);
@@ -47,32 +26,78 @@ export class SseService {
   // 目前快取
   private notifications: any[] = [];
 
+  // 防止重複 connect
+  private connectedUserId: string | null = null;
+
+  constructor(
+    private zone: NgZone,
+    public auths: AuthService
+  ) {
+    const raw = localStorage.getItem('notifications_cache');
+    if (raw) {
+      try {
+        const list = JSON.parse(raw);
+        this.notifications = Array.isArray(list)
+          ? list.filter(n => n?.id !== 'SYSTEM_NOTICE')
+          : [];
+        this.emit();
+      } catch { }
+    }
+  }
+
   // 只要呼叫一次就好（Bell 或 Page 呼叫都行）
-  connect() {
-    if (this.es) return; // 防止重複連線
+  connect(userId: string) {
+    if (!userId) return;
+    if (this.connectedUserId === userId && this.es) return; // 已連線就不重複連
 
-    // 這邊寫實際API
-    this.es = new EventSource(`http://localhost:8080/這邊要改/${this.userId}`);
+    this.disconnect();
+    this.connectedUserId = userId;
 
-    this.es.onmessage = (event) => {
-      console.log('SSE 連接成功');
-      const item = this.toUiNotification(event.data);
+    this.es = new EventSource(`http://localhost:8080/api/sse/subscribe/${userId}`);
 
-      // 新通知放最上面
-      this.notifications = [item, ...this.notifications];
-      this.cleanup();
-      this.emit();
+    this.es.onopen = () => {
+      this.zone.run(() => console.log('[SSE] connected'));
     };
 
-    this.es.onerror = () => {
-      console.log('SSE error');
+    // INIT（可選）
+    this.es.addEventListener('INIT', (event: any) => {
+      this.zone.run(() => {
+        console.log('[SSE] INIT:', event.data);
+      });
+    });
+
+    // 公告（SYSTEM_NOTICE）
+    this.es.addEventListener('SYSTEM_NOTICE', (event: any) => {
+      this.zone.run(() => {
+        this.upsertSystemNotice(event.data);
+      });
+    });
+
+
+    // 一般通知（message）
+    this.es.addEventListener('message', (event: any) => {
+      this.zone.run(() => {
+        const item = this.toUiNotification(event.data);
+        this.notifications = [item, ...this.notifications];
+        this.cleanup();
+        this.emit();
+      });
+    });
+
+    // 不要 observer.error，讓 EventSource 有機會自動重連
+    this.es.onerror = (e) => {
+      this.zone.run(() => {
+        console.warn('[SSE] error (may reconnect):', e);
+      });
     };
   }
 
   disconnect() {
     this.es?.close();
     this.es = undefined;
+    this.connectedUserId = null;
   }
+
 
   // 測試用 +通知
   pushTest() {
@@ -116,18 +141,18 @@ export class SseService {
   // 小工具 -----------------------------------------------------------------------------
 
   private emit() {
-    // 讓訂閱了notificationsSubject的頁面在接收到更新時自動刷新
     this.notificationsSubject.next(this.notifications);
+
+    // 未讀數排除系統公告
     this.unreadCountSubject.next(
-      this.notifications.filter((n) => !n.isRead).length
+      this.notifications.filter(n => !n.isRead && n.id !== 'SYSTEM_NOTICE').length
     );
 
-    // 重要! 讓刷新不消失(存入localStorage)
-    localStorage.setItem(
-      'notifications_cache',
-      JSON.stringify(this.notifications)
-    );
+    // 快取也排除系統公告（你原本就有）
+    const cacheList = this.notifications.filter(n => n.id !== 'SYSTEM_NOTICE');
+    localStorage.setItem('notifications_cache', JSON.stringify(cacheList));
   }
+
 
   // 把後端丟來的一筆 data（字串）轉成 UI 能吃的物件
   private toUiNotification(raw: string) {
@@ -147,6 +172,37 @@ export class SseService {
       link: data.link ?? null,
     };
   }
+
+  private upsertSystemNotice(raw: string) {
+    let data: any;
+    try {
+      data = JSON.parse(raw);
+    } catch {
+      data = { message: raw };
+    }
+
+    const id = 'SYSTEM_NOTICE';
+
+    const item = {
+      id,
+      title: data.title ?? '系統公告',
+      message: data.message ?? data.content ?? raw ?? '',
+      createdAt: data.createdAt ?? new Date().toLocaleString(),
+      isRead: false,
+      link: data.link ?? null,
+    };
+
+    const exists = this.notifications.some(n => n.id === id);
+
+    this.notifications = exists
+      ? this.notifications.map(n => (n.id === id ? { ...n, ...item } : n))
+      : [item, ...this.notifications];
+
+    this.cleanup();
+    this.emit();
+  }
+
+
 
   // 自動生成ID小工具
   private fallbackId() {

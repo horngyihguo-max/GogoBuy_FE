@@ -159,7 +159,6 @@
   <a routerLink="/user/profile">
     <div>
       <i class="pi pi-user cursor-pointer" style=" color: rgb(255, 255, 255); font-size: 1.5rem"
-        (click)="onUserClick($event, menu)"
         [ngStyle]="{ 'color': (router.url == '/user/profile'||router.url =='/user/profile/edit') ? 'rgb(252, 165, 165)' : '' }"></i>
     </div>
     <div
