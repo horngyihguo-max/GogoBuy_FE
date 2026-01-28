@@ -16,13 +16,20 @@
     @case (0) {
     <!-- 購物車 -->
     <div class="bg-white h-[90px] py-[32px] px-[16px] mt-[16px] font-bold text-2xl">
-      店名
+      商店名稱
+      <!-- <span>{{ '{商店名稱(user.id use event_id => groupbuy_events get store.id => store get store.name)}' }}</span> -->
     </div>
+
     <div class="bg-white py-[32px] px-[16px] mt-[16px] font-bold text-2xl">
-      購物內容
+      餐點明細
+      <!-- <span>{{' {use user_id and event_id get personal_order} '}}</span> -->
       <div class="cursor-pointer" (click)="gotoshop()">
-        繼續加購
+        繼續加購(返回加購頁面)
       </div>
+    </div>
+
+    <div class="bg-white py-[32px] px-[16px] mt-[16px] font-bold text-2xl">
+      餐點總計 $
     </div>
 
     <div class="bg-white h-[90px] mt-[16px] flex">
@@ -38,10 +45,16 @@
     }
 
     @case (1) {
-    <!-- Seat -->
+    <!-- Payment -->
     <div class="bg-white p-6 mt-[16px] font-bold text-2xl">
       內容
     </div>
+
+    <div class="bg-white py-[32px] px-[16px] mt-[16px] font-bold text-2xl">
+      付款方式
+      <small class="text-xm">付款資料說明</small>
+    </div>
+
     <div class="bg-white h-[90px] mt-[16px] flex">
       <div class="flex-1 flex items-center justify-center cursor-pointer" (click)="prevStep()"><span
           class="font-bold text-xl">上一步</span></div>
@@ -51,23 +64,12 @@
     }
 
     @case (2) {
-    <!-- Payment -->
-    <div class="bg-white p-6 mt-[16px] font-bold text-2xl">
-      內容
-    </div>
-    <div class="bg-white h-[90px] mt-[16px] flex">
-      <div class="flex-1 flex items-center justify-center cursor-pointer" (click)="prevStep()"><span
-          class="font-bold text-xl">上一步</span></div>
-      <div class="flex-1 flex items-center justify-center cursor-pointer bg-[#769902]" (click)="nextStep()"><span
-          class="font-bold text-white text-xl">下一步</span></div>
-    </div>
-    }
-
-    @case (3) {
     <!-- Confirmation -->
     <div class="bg-white p-6 mt-[16px] font-bold text-2xl">
       內容
     </div>
+
+
     <div class="bg-white h-[90px] mt-[16px] flex">
       <div class="flex-1 flex items-center justify-center cursor-pointer" (click)="prevStep()"><span
           class="font-bold text-xl">上一步</span></div>

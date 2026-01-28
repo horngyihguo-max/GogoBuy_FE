@@ -167,6 +167,7 @@
   position: absolute;
   top: -50px;
   bottom: -50px;
+  height: 600px;
   width: 5.5%;
   background: #f8fafc;
   z-index: 100;
@@ -309,7 +310,7 @@
   }
 }
 
-/* ✅ 非 active 的 item，一律不顯示 title（含第1/第5張偷露出的情況） */
+/* 非 active 的 item，一律不顯示 title（含第1/第5張偷露出的情況） */
 :host ::ng-deep .hero-carousel .p-carousel-item:not(.p-carousel-item-active) .banner-title {
   display: none !important;
 }
