@@ -50,8 +50,11 @@
         </p>
       </div>
       <div>
+        @if (currentView === 'announce') {
+          <p-button label="發送新公告" icon="pi pi-megaphone" (onClick)="openAnnounceDialog()"></p-button>
+        }
         <p-button label="更新資料" severity="info" icon="pi pi-refresh" [loading]="loading" (onClick)="loadData()"
-          styleClass="p-button-outlined p-button-secondary"></p-button>
+          styleClass="p-button-outlined p-button-secondary ml-2"></p-button>
       </div>
     </header>
 
@@ -202,3 +205,28 @@
     </div>
   </main>
 </div>
+
+<p-dialog header="發送系統公告" [(visible)]="displayAnnounceDialog" [modal]="true" [style]="{width: '50vw'}" [draggable]="false" [resizable]="false">
+    <div class="flex flex-col gap-4">
+        <div class="flex flex-col gap-2">
+            <label for="title" class="font-bold">標題</label>
+            <input pInputText id="title" [(ngModel)]="announceData.title" placeholder="請輸入公告標題" />
+        </div>
+        <div class="flex flex-col gap-2">
+            <label for="content" class="font-bold">內容</label>
+            <textarea pTextarea id="content" [(ngModel)]="announceData.content" rows="5" placeholder="請輸入公告內容" autoResize="autoResize" class="w-full"></textarea>
+        </div>
+        <div class="flex flex-col gap-2">
+            <label for="targetUrl" class="font-bold">相關連結 (選填)</label>
+            <input pInputText id="targetUrl" [(ngModel)]="announceData.targetUrl" placeholder="https://..." />
+        </div>
+        <div class="flex flex-col gap-2">
+            <label for="expiredAt" class="font-bold">過期時間 (選填)</label>
+            <p-calendar [(ngModel)]="announceDate" dateFormat="yy-mm-dd" [showIcon]="true" placeholder="選擇日期" appendTo="body"></p-calendar>
+        </div>
+    </div>
+    <ng-template pTemplate="footer">
+        <p-button label="取消" icon="pi pi-times" (onClick)="displayAnnounceDialog = false" styleClass="p-button-text"></p-button>
+        <p-button label="發送" icon="pi pi-send" (onClick)="sendAnnouncement()" autofocus="true"></p-button>
+    </ng-template>
+</p-dialog>
