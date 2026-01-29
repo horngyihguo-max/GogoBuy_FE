@@ -30,7 +30,7 @@ export class CartPageComponent {
     {
       id: '01',
       updatedAt: '2026-01-26T10:36:00',
-      storeName: '多喝茶',
+      storeName: '迷客夏',
       storeBranch: '歸仁店',
       itemCount: 5,
       total: 100,
@@ -39,8 +39,8 @@ export class CartPageComponent {
     {
       id: '02',
       updatedAt: '2026-01-25T21:10:00',
-      storeName: '迷客夏',
-      storeBranch: '台南歸仁店',
+      storeName: '多喝茶',
+      storeBranch: '歸仁店',
       itemCount: 1,
       total: 65,
       img: '/多喝茶.jpg',

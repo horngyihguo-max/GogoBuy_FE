@@ -47,8 +47,10 @@
           <img [src]="userAvatar()" alt="User Avatar" class="avatar-style" class="w-9 h-9 rounded-full cursor-pointer"
             (click)="onUserClick($event, menu)" />
           } @else {
-          <i class="pi pi-user nav-icon cursor-pointer" style=" color: rgb(255, 255, 255); font-size: 1.5rem"
-            (click)="menu.toggle($event)"></i>
+          <p-avatar icon="pi pi-user" class="w-9 h-9 nav-icon cursor-pointer"
+            [style]="{ 'background-color': '#ece9fc', color: '#2a1261' }" shape="circle" (click)="menu.toggle($event)">
+          </p-avatar>
+
           }
           <p-menu #menu [popup]="true" [model]="items" [model]="filteredItems" appendTo="body"></p-menu>
         </li>

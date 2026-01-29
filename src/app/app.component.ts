@@ -20,6 +20,7 @@ import { NearbyBarComponent } from './nearby-bar.component';
 import { Subscription } from 'rxjs';
 import { filter, distinctUntilChanged, map } from 'rxjs/operators';
 import { SseService } from './@service/sse.service';
+import { AvatarModule } from 'primeng/avatar';
 
 
 // 選擇欄位
@@ -47,6 +48,7 @@ export interface Category {
     SelectModule,
     FormsModule,
     NearbyBarComponent,
+    AvatarModule
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
@@ -111,7 +113,7 @@ export class AppComponent {
   userAvatar = computed(() => {
     const u: any = this.user();
     if (!u) return null;
-    return u.user_avatar_url || u.avatar_url || u.avatarUrl || '/Snoopy.jpg';
+    return u.user_avatar_url || u.avatar_url || u.avatarUrl || '/default_avatar.png';
   });
 
   ngOnInit(): void {
