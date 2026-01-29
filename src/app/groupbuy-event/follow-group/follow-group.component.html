@@ -1,4 +1,12 @@
-<p>follow-group works!</p>
+@if (isLoading || !group || !store) {
+  <div class="min-h-screen bg-[#F4E7E1]">
+    <div class="max-w-[1700px] mx-auto px-4 md:px-8 py-10">
+      <div class="text-center text-gray-700 text-[18px] font-semibold">
+        <i class="pi pi-spin pi-spinner mr-2" style="font-size: 1.2rem"></i>
+        載入中...
+      </div>
+    </div>
+  </div>
+} @else {
 
-
-
+}

@@ -110,18 +110,19 @@ export class StoreInfoComponent implements OnInit {
     this.isLoading = true;
 
     // 後端上線後使用
-    // this.http
-    //   .getApi(`http://localhost:8080/store/searchId?id=${id}`)
-    //   .subscribe((res: any) => {
-    //     const normalized = this.normalizeStoreResponse(res);
-    //     this.store = normalized;
-    //     this.afterLoaded();
-    //   });
+    this.http
+      .getApi(`http://localhost:8080/gogobuy/store/searchId?id=${id}`)
+      .subscribe((res: any) => {
+        console.log(res);
+        const normalized = this.normalizeStoreResponse(res);
+        this.store = normalized;
+        this.afterLoaded();
+      });
 
     // 假資料 =============================================
-    const res = this.getMockResponse(); // 假資料方法在這
-    this.store = this.normalizeStoreResponse(res);
-    this.afterLoaded();
+    // const res = this.getMockResponse(); // 假資料方法在這
+    // this.store = this.normalizeStoreResponse(res);
+    // this.afterLoaded();
   }
 
   afterLoaded(): void {
@@ -847,7 +848,7 @@ export class StoreInfoComponent implements OnInit {
             'aHR0cHM6Ly9pbWFnZS1jZG4tZmxhcmUucWRtLmNsb3VkL3E2MDgxYzRmODFmMDFhL2ltYWdlL2RhdGEvJUU1JTk1JTg2JUU1JTkzJTgxJUU3JTg1JUE3JUU3JTg5JTg3LzEyXyVFNyVCNCU5MCVFNSVBNSVBNyVFOCU4OSVBRiVFOCVCRSVBMyVFNyVCRiU4NS8qJUU3JTk0JUEyJUU1JTkzJTgxJUU1JTlDJTk2LSVFNyVCNCU5MCVFNSVBNSVBNyVFOCU4OSVBRiVFOSU5QiU5RSVFNyVCRiU4NTAzLmpwZw==',
           available: true,
           unusual: {
-            24: 'true',
+            '24': 'true',
           },
         },
         {
@@ -861,8 +862,8 @@ export class StoreInfoComponent implements OnInit {
             'aHR0cHM6Ly9hc3NldHMudG1lY29zeXMuY29tL2ltYWdlL3VwbG9hZC90X3dlYl9yZHBfcmVjaXBlXzU4NHg0ODBfMV81eC9pbWcvcmVjaXBlL3Jhcy9Bc3NldHMvOTA5REEyRjItODczOS00Mjk3LTkyQjAtMUQ4NkM5MjExMjMyL0Rlcml2YXRlcy8xMTZjZGIwNC05NDczLTQzZDAtOWVmZC1kOWY2ZjU5ZGZmYTMuanBn',
           available: true,
           unusual: {
-            22: 'true',
-            23: 'true',
+            "22": 'true',
+            "23": 'true',
           },
         },
         {
@@ -874,7 +875,7 @@ export class StoreInfoComponent implements OnInit {
           basePrice: 450,
           available: true,
           unusual: {
-            24: 'true',
+            "24": 'true',
           },
         },
       ],
