@@ -33,9 +33,10 @@ export class DashboardComponent {
   users: any[] = [];
   loading = false;
 
-  currentView: 'stores' | 'events' | 'users' = 'stores';
+  currentView: 'announce' | 'stores' | 'events' | 'users' = 'announce';
 
   menuItems = [
+    { label: '公告通知管理', icon: 'pi pi-megaphone', id: 'announce' },
     { label: '店家管理', icon: 'pi pi-shop', id: 'stores' },
     { label: '團購活動', icon: 'pi pi-calendar', id: 'events' },
     { label: '會員管理', icon: 'pi pi-users', id: 'users' }

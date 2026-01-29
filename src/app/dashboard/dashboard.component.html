@@ -39,11 +39,13 @@
         <h2 class="text-2xl font-bold text-gray-900">
           @if (currentView === 'stores') { 店家管理 }
           @else if (currentView === 'events') { 團購活動 }
+          @else if (currentView === 'announce') { 通知管理 }
           @else { 會員管理 }
         </h2>
         <p class="mt-1 text-lg font-bold text-gray-700">
           @if (currentView === 'stores') { 檢視並管理所有註冊店家 }
           @else if (currentView === 'events') { 監控所有進行中與歷史團購 }
+          @else if (currentView === 'announce') { 發送及管理通知公告 }
           @else { 管理平台使用者權限與狀態 }
         </p>
       </div>
