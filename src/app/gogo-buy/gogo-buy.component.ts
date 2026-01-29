@@ -72,6 +72,26 @@ export interface Store {
 }
 
 @Component({
+  template: `
+    <div class="card">
+      <p-tabs value="0" scrollable>
+        <p-tablist>
+          @for (tab of scrollableTabs; track tab.value) {
+              <p-tab [value]="tab.value">
+                  {{ tab.title }}
+              </p-tab>
+          }
+        </p-tablist>
+        <p-tabpanels>
+          @for (tab of scrollableTabs; track tab.value) {
+              <p-tabpanel [value]="tab.value">
+                  <p class="m-0">{{ tab.content }}</p>
+              </p-tabpanel>
+          }
+        </p-tabpanels>
+      </p-tabs>
+    </div>`,
+  standalone: true,
   selector: 'app-gogo-buy',
   imports: [
     CarouselModule,
@@ -133,6 +153,7 @@ export class GogoBuyComponent {
   visibleTooltip: boolean = true;
   storeSearch!: string;
   allStoresBackup: Store[] = []; // 備份完整清單
+  scrollableTabs!: any[];
 
 
   ngOnInit(): void {
@@ -152,37 +173,37 @@ export class GogoBuyComponent {
     this.storeList = [
       {
         id: 1, name: "清新搖搖冰", phone: "04-2345-6789", address: "台中市西區公益路200號",
-        category: "外送", type: "飲品", memo: "微糖微冰最推薦",
+        category: "外送", type: "飲品A", memo: "微糖微冰最推薦",
         image: "https://picsum.photos/200/300?random=1", feeDescription: "外送費 $20",
         deleted: false, publish: true, force_closed: true, created_by: "7c9e6679-7425-40de-944b-e07fc1f90ae7"
       },
       {
         id: 2, name: "阿嬤雜貨鋪", phone: "05-5544-3322", address: "嘉義市西區中山路",
-        category: "外送", type: "雜貨", memo: "什麼都有什麼都賣",
+        category: "外送", type: "雜貨B", memo: "什麼都有什麼都賣",
         image: "https://picsum.photos/200/300?random=2", feeDescription: "免收服務費",
         deleted: false, publish: true, force_closed: false, created_by: "e4d3c2b1-a0b9-4c8d-7e6f-5a4b3c2d1e0f"
       },
       {
         id: 3, name: "美味漢堡店", phone: "02-1234-5678", address: "台北市大安區新生南路一段1號",
-        category: "外送", type: "美食", memo: "特製花生醬漢堡必點",
+        category: "外送", type: "美食C", memo: "特製花生醬漢堡必點",
         image: "https://picsum.photos/200/300?random=3", feeDescription: "外送費 $30",
         deleted: false, publish: true, force_closed: false, created_by: "550e8400-e29b-41d4-a716-446655440000"
       },
       {
         id: 4, name: "森林系咖啡館", phone: "08-8901-2345", address: "屏東縣屏東市公園路5號",
-        category: "外送", type: "飲品", memo: "安靜舒適，適合工作",
+        category: "外送", type: "飲品D", memo: "安靜舒適，適合工作",
         image: "https://picsum.photos/200/300?random=4", feeDescription: "內用低消一杯飲品",
         deleted: false, publish: false, force_closed: false, created_by: "c9b8a7d6-e5f4-3c2b-1a0d-9e8f7a6b5c4d"
       },
       {
         id: 5, name: "潔淨洗鞋大師", phone: "06-1122-3344", address: "台南市東區大學路",
-        category: "團購", type: "其他", memo: "給愛鞋煥然一新的機會",
+        category: "團購", type: "其他E", memo: "給愛鞋煥然一新的機會",
         image: "https://picsum.photos/200/300?random=5", feeDescription: "兩雙以上享 8 折",
         deleted: true, publish: true, force_closed: true, created_by: "f0a1b2c3-d4e5-4f6a-7b8c-9d0e1f2a3b4c"
       },
       {
         id: 6, name: "老張牛肉麵", phone: "07-3456-7890", address: "高雄市新興區中正三路15號",
-        category: "外送", type: "美食", memo: "湯頭濃郁，肉質軟嫩",
+        category: "外送", type: "美食F", memo: "湯頭濃郁，肉質軟嫩",
         image: "https://picsum.photos/200/300?random=6", feeDescription: "僅供自取",
         deleted: false, publish: true, force_closed: false, created_by: "a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d"
       },

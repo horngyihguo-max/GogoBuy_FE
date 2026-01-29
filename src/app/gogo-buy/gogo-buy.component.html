@@ -180,30 +180,30 @@
 
 
 @if(open){ <!-- ================= 手機 Bottom Sheet ================= -->
-<div class="sm:hidden fixed inset-0 z-[1102] bg-black/50 backdrop-blur-sm"></div> <!-- 背景遮罩 -->
-<div class="sm:hidden fixed inset-0 z-[1102] flex items-end" (click)="close()">
-  <div class="relative w-full max-h-[85vh] bg-white rounded-t-xl px-5 pt-4 pb-6
-            shadow-2xl animate-slide-up" (click)="$event.stopPropagation()"> <!-- 底部選單 -->
-    <!-- <div class="flex justify-center mb-5">  拖曳條
-        <div class="w-12 h-1.5 bg-gray-300 rounded-full"></div>
-      </div> -->
-    <h3 class="text-base font-semibold text-gray-900 mb-4">請選擇購買類型</h3> <!-- 標題 -->
-    <button class="w-full flex items-center justify-between py-4 px-3 rounded-xl
-              transition hover:bg-gray-100 active:bg-gray-200" (click)="choose('fast')"> <!-- 選項 -->
-      <span>外送</span>
-    </button>
-    <button class="w-full flex items-center justify-between py-4 px-3 rounded-xl
-              transition hover:bg-gray-100 active:bg-gray-200" (click)="choose('slow')">
-      <span>團購</span>
-    </button>
-    <button class="w-full flex items-center justify-between py-4 px-3 rounded-xl
-              transition hover:bg-gray-100 active:bg-gray-200" (click)="choose('all')">
-      <span>不限類型(外送+團購)</span>
-    </button>
-    <button class="mt-6 w-full py-3 rounded-xl text-gray-600 bg-gray-100 active:bg-gray-200"
-      (click)="close()">取消</button>
+  <div class="sm:hidden fixed inset-0 z-[1102] bg-black/50 backdrop-blur-sm"></div> <!-- 背景遮罩 -->
+  <div class="sm:hidden fixed inset-0 z-[1102] flex items-end" (click)="close()">
+    <div class="relative w-full max-h-[85vh] bg-white rounded-t-xl px-5 pt-4 pb-6
+              shadow-2xl animate-slide-up" (click)="$event.stopPropagation()"> <!-- 底部選單 -->
+      <!-- <div class="flex justify-center mb-5">  拖曳條
+          <div class="w-12 h-1.5 bg-gray-300 rounded-full"></div>
+        </div> -->
+      <h3 class="text-base font-semibold text-gray-900 mb-4">請選擇購買類型</h3> <!-- 標題 -->
+      <button class="w-full flex items-center justify-between py-4 px-3 rounded-xl
+                transition hover:bg-gray-100 active:bg-gray-200" (click)="choose('fast')"> <!-- 選項 -->
+        <span>外送</span>
+      </button>
+      <button class="w-full flex items-center justify-between py-4 px-3 rounded-xl
+                transition hover:bg-gray-100 active:bg-gray-200" (click)="choose('slow')">
+        <span>團購</span>
+      </button>
+      <button class="w-full flex items-center justify-between py-4 px-3 rounded-xl
+                transition hover:bg-gray-100 active:bg-gray-200" (click)="choose('all')">
+        <span>不限類型(外送+團購)</span>
+      </button>
+      <button class="mt-6 w-full py-3 rounded-xl text-gray-600 bg-gray-100 active:bg-gray-200"
+        (click)="close()">取消</button>
+    </div>
   </div>
-</div>
 }
 <p-dialog header="選擇開團店家" [modal]="true" [(visible)]="visible" [style]="{ width: '900px', height:'700px' }"
   [breakpoints]="{ '960px': '90vw', '640px': '95vw' }" [draggable]="false" [resizable]="false" [blockScroll]="true"
@@ -222,7 +222,7 @@
       </p-floatlabel>
     </p-inputgroup>
   </div>
-  <p-tabs [(value)]="activeTab" #storeTabs class="flex flex-col flex-1 overflow-hidden">
+  <p-tabs [scrollable]="!isMobile" [(value)]="activeTab" #storeTabs class="flex flex-col flex-1 overflow-hidden">
     <div class="flex bg-white z-10">
       <div class="relative flex-1 overflow-hidden">
         <!-- TabList -->
@@ -240,7 +240,7 @@
 
       <div class="relative inline-block mr-[30px] pt-2 w-24 sm:w-64"> <!-- 下拉選單 -->
         <button (click)="toggle($event)"
-          class="w-full px-4 py-2 bg-rose-50 text-[#662222] rounded-md flex justify-between items-center"> <!-- 觸發按鈕 -->
+          class="w-full px-4 py-2 bg-[#F4E7E1]/50 text-[#662222] rounded-md flex justify-between items-center"> <!-- 觸發按鈕 -->
           {{choice || "類型"}}
           <span class="transition-transform duration-200" [class.rotate-180]="open">▼</span>
         </button>
@@ -259,8 +259,9 @@
 
     <div class="flex-1 overflow-y-auto pt-2 pb-4 px-4 custom-scrollbar">
       <p-tabpanel [value]="activeTab">
-        @if(storeList.length<=0){ <p class="mt-[20px] text-2xl text-center font-bold">目前尚無相關店家資料</p>
-          }@else {
+        @if(storeList.length<=0){
+          <p class="mt-[20px] text-2xl text-center font-bold">目前尚無相關店家資料</p>
+        }@else {
           @if(choice=="不限" || !choice){
           <div class="flex items-center my-4">
             <div class="flex-1 border-t border-gray-400"></div> <!-- 左邊線 -->
@@ -273,45 +274,45 @@
           @if(filteredFastStoreList.length==0 && (choice=="不限" || !choice)){
           <p class="text-center">無外送店家資料</p>
           }@else{
-          @for (store of fastStoreList; track $index) {
-          @if(activeTab=="allstores" || activeTab==store.type){
-          <div class="w-full bg-rose-50 rounded-xl border border-gray-100 overflow-hidden mt-4
-                            hover:border-2 hover:border-[#662222] hover:scale-[1.01] transition duration-200
-                            active:scale-[0.98]" (click)="goStoreInfo(store.id)">
-            <div class="flex flex-col sm:flex-row items-stretch sm:items-center">
-              <div
-                class="shrink-0 w-full aspect-[4/3] sm:w-[200px] sm:h-[150px] bg-gray-100 relative overflow-hidden sm:m-4 sm:rounded-lg">
-                <img [src]="store.image" class="absolute inset-0 w-full h-full object-cover" />
-              </div>
-              <div class="flex-1 min-w-0 p-4 sm:pr-6 sm:py-4">
-                <div class="flex items-center justify-between mb-2">
-                  <p class="text-2xl font-bold text-gray-800 truncate m-0" [innerHTML]="highlight(store.name)">
-                    {{store.name }}</p>
-                  <div class="text-right">
-                    <span class="shrink-0 ml-2 px-2 py-0.5 rounded text-base bg-red-100 text-red-700">
-                      {{store.type}}
-                    </span>
-                    <span
-                      class="shrink-0 ml-2 px-2 py-0.5 rounded text-base bg-red-100 text-red-700 flex mt-[5px] min-w-[77px]">
-                      <div class="motocycle-icon -scale-x-100" style="background-color: oklch(50.5% 0.213 27.518);">
+            @for (store of fastStoreList; track $index) {
+              @if(activeTab=="allstores" || activeTab==store.type){
+                <div class="w-full bg-[#F4E7E1]/50 rounded-xl border border-gray-100 overflow-hidden mt-4
+                                  hover:border-2 hover:border-[#662222] hover:scale-[1.01] transition duration-200
+                                  active:scale-[0.98]" (click)="goStoreInfo(store.id)">
+                  <div class="flex flex-col sm:flex-row items-stretch sm:items-center">
+                    <div
+                      class="shrink-0 w-full aspect-[4/3] sm:w-[200px] sm:h-[150px] bg-gray-100 relative overflow-hidden sm:m-4 sm:rounded-lg">
+                      <img [src]="store.image" class="absolute inset-0 w-full h-full object-cover" />
+                    </div>
+                    <div class="flex-1 min-w-0 p-4 sm:pr-6 sm:py-4">
+                      <div class="flex items-center justify-between mb-2">
+                        <p class="text-2xl font-bold text-gray-800 truncate m-0" [innerHTML]="highlight(store.name)">
+                          {{store.name }}</p>
+                        <div class="text-right">
+                          <span class="shrink-0 ml-2 px-2 py-0.5 rounded text-base bg-[#f0c9b7]/70 text-[#662222]">
+                            {{store.type}}
+                          </span>
+                          <span
+                            class="shrink-0 ml-2 px-2 py-0.5 rounded text-base bg-[#f0c9b7]/70 text-[#662222] flex mt-[5px] min-w-[77px]">
+                            <div class="motocycle-icon -scale-x-100" style="background-color: #662222;">
+                            </div>
+                            &nbsp;{{store.category}}
+                          </span>
+                        </div>
                       </div>
-                      &nbsp;{{store.category}}
-                    </span>
+                      <div class="text-sm sm:text-base text-gray-600 space-y-1.5">
+                        <p class="m-0 truncate">📞電話：{{store.phone}}</p>
+                        <p class="m-0 truncate">📍地址：{{store.address}}</p>
+                        <p class="m-0 font-bold text-[#662222]">🚚外送費：{{store.feeDescription}}</p>
+                        @if(store.memo){
+                        <p class="m-0 text-sm text-gray-400 italic truncate">備註：{{store.memo}}</p>
+                        }
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <div class="text-sm sm:text-base text-gray-600 space-y-1.5">
-                  <p class="m-0 truncate">📞電話：{{store.phone}}</p>
-                  <p class="m-0 truncate">📍地址：{{store.address}}</p>
-                  <p class="m-0 font-bold text-[#662222]">🚚外送費：{{store.feeDescription}}</p>
-                  @if(store.memo){
-                  <p class="m-0 text-sm text-gray-400 italic truncate">備註：{{store.memo}}</p>
-                  }
-                </div>
-              </div>
-            </div>
-          </div>
-          }
-          }
+              }
+            }
           }
           @if(choice=="不限" || !choice){
           <div class="flex items-center my-4">
@@ -325,94 +326,94 @@
           @if(filteredSlowStoreList.length==0 && (choice=="不限" || !choice)){
           <p class="text-center">無團購店家資料</p>
           }@else {
-          @for (store of openStoreList; track $index) {
-          @if(activeTab === 'allstores' || activeTab === store.type) {
-          <div class="w-full bg-rose-50 rounded-xl border border-gray-100 overflow-hidden mt-4
-                            hover:border-2 hover:border-[#662222] hover:scale-[1.01] transition duration-200
-                            active:scale-[0.98]" (click)="goStoreInfo(store.id)">
-            <div class="flex flex-col sm:flex-row items-stretch sm:items-center">
-              <div
-                class="shrink-0 w-full aspect-[4/3] sm:w-[200px] sm:h-[150px] bg-gray-100 relative overflow-hidden sm:m-4 sm:rounded-lg">
-                <img [src]="store.image" class="absolute inset-0 w-full h-full object-cover" />
-              </div>
-              <div class="flex-1 min-w-0 p-4 sm:pr-6 sm:py-4">
-                <div class="flex items-center justify-between mb-2">
-                  <p class="text-2xl font-bold text-gray-800 truncate m-0" [innerHTML]="highlight(store.name)">
-                    {{store.name }}</p>
-                  <div class="text-right">
-                    <span class="shrink-0 ml-2 px-2 py-0.5 rounded text-base bg-red-100 text-red-700">
-                      {{store.type}}
-                    </span>
-                    <span
-                      class="shrink-0 ml-2 px-2 py-0.5 rounded text-base bg-red-100 text-red-700 flex mt-[5px] min-w-[77px]">
-                      <div class="delivery-icon -scale-x-100" style="background-color: oklch(50.5% 0.213 27.518);">
-                      </div>
-                      &nbsp;{{store.category}}
-                    </span>
-                  </div>
-                </div>
-                <div class="text-sm sm:text-base text-gray-600 space-y-1.5">
-                  <p class="m-0 truncate">📞電話：{{store.phone}}</p>
-                  <p class="m-0 truncate">📍地址：{{store.address}}</p>
-                  <p class="m-0 font-bold text-[#662222]">🚚外送費：{{store.feeDescription}}</p>
-                  @if(store.memo){
-                  <p class="m-0 text-sm text-gray-400 italic truncate">備註：{{store.memo}}</p>
-                  }
-                </div>
-              </div>
-            </div>
-          </div>
-          }
-          }
-          @for (store of closeStoreList; track $index) {
-          @if(activeTab === 'allstores' || activeTab === store.type) {
-          <div class="relative w-full rounded-xl overflow-hidden bg-amber-50 border border-gray-200 mt-4
-                          hover:border-2 hover:border-[#4F4F4F] hover:scale-[1.01] transition duration-200
-                          active:scale-[0.98]" (click)="goStoreInfo(store.id)">
-            <div class="w-full rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-              <div class="flex flex-col sm:flex-row items-stretch sm:items-center">
-                <div
-                  class="shrink-0 w-full aspect-[4/3] sm:w-[200px] sm:h-[150px] bg-gray-100 relative overflow-hidden sm:m-4 sm:rounded-lg">
-                  <img [src]="store.image" class="absolute inset-0 w-full h-full object-cover" />
-                  <div class="absolute inset-0 z-10 flex items-center justify-center bg-amber-100/90">
-                    <div class="text-2xl sm:text-xl font-bold tracking-[4px] sm:tracking-[2px]
-                                    px-4 py-1 border-2 whitespace-nowrap">
-                      未營業
+            @for (store of openStoreList; track $index) {
+              @if(activeTab === 'allstores' || activeTab === store.type) {
+                <div class="w-full bg-[#F4E7E1]/50 rounded-xl border border-gray-100 overflow-hidden mt-4
+                                  hover:border-2 hover:border-[#662222] hover:scale-[1.01] transition duration-200
+                                  active:scale-[0.98]" (click)="goStoreInfo(store.id)">
+                  <div class="flex flex-col sm:flex-row items-stretch sm:items-center">
+                    <div
+                      class="shrink-0 w-full aspect-[4/3] sm:w-[200px] sm:h-[150px] bg-gray-100 relative overflow-hidden sm:m-4 sm:rounded-lg">
+                      <img [src]="store.image" class="absolute inset-0 w-full h-full object-cover" />
                     </div>
-                  </div>
-                </div>
-                <div class="flex-1 min-w-0 p-4 sm:pr-6 sm:py-4">
-                  <div class="flex items-center justify-between mb-2">
-                    <p class="text-2xl font-bold text-gray-800 truncate m-0" [innerHTML]="highlight(store.name)">
-                      {{store.name }}</p>
-                    <div class="text-right">
-                      <span class="shrink-0 ml-2 px-2 py-0.5 rounded text-base bg-amber-100 text-amber-700">
-                        {{store.type}}
-                      </span>
-                      <span
-                        class="shrink-0 ml-2 px-2 py-0.5 rounded text-base bg-amber-100 text-amber-700 flex mt-[5px] min-w-[77px]">
-                        <div class="delivery-icon -scale-x-100" style="background-color: oklch(55.5% 0.163 48.998);">
+                    <div class="flex-1 min-w-0 p-4 sm:pr-6 sm:py-4">
+                      <div class="flex items-center justify-between mb-2">
+                        <p class="text-2xl font-bold text-gray-800 truncate m-0" [innerHTML]="highlight(store.name)">
+                          {{store.name }}</p>
+                        <div class="text-right">
+                          <span class="shrink-0 ml-2 px-2 py-0.5 rounded text-base bg-[#f0c9b7]/70 text-[#662222]">
+                            {{store.type}}
+                          </span>
+                          <span
+                            class="shrink-0 ml-2 px-2 py-0.5 rounded text-base bg-[#f0c9b7]/70 text-[#662222] flex mt-[5px] min-w-[77px]">
+                            <div class="delivery-icon -scale-x-100" style="background-color: #662222;">
+                            </div>
+                            &nbsp;{{store.category}}
+                          </span>
                         </div>
-                        &nbsp;{{store.category}}
-                      </span>
+                      </div>
+                      <div class="text-sm sm:text-base text-gray-600 space-y-1.5">
+                        <p class="m-0 truncate">📞電話：{{store.phone}}</p>
+                        <p class="m-0 truncate">📍地址：{{store.address}}</p>
+                        <p class="m-0 font-bold text-[#662222]">🚚外送費：{{store.feeDescription}}</p>
+                        @if(store.memo){
+                        <p class="m-0 text-sm text-gray-400 italic truncate">備註：{{store.memo}}</p>
+                        }
+                      </div>
                     </div>
                   </div>
-                  <div class="text-sm sm:text-base text-gray-600 space-y-1.5">
-                    <p class="m-0 truncate">📞電話：{{store.phone}}</p>
-                    <p class="m-0 truncate">📍地址：{{store.address}}</p>
-                    <p class="m-0 font-bold text-[#662222]">🚚外送費：{{store.feeDescription}}</p>
-                    @if(store.memo){
-                    <p class="m-0 text-sm text-gray-400 italic truncate">備註：{{store.memo}}</p>
-                    }
+                </div>
+              }
+            }
+            @for (store of closeStoreList; track $index) {
+              @if(activeTab === 'allstores' || activeTab === store.type) {
+                <div class="relative w-full rounded-xl overflow-hidden bg-amber-50/50 border border-gray-200 mt-4
+                                hover:border-2 hover:border-[#4F4F4F] hover:scale-[1.01] transition duration-200
+                                active:scale-[0.98]" (click)="goStoreInfo(store.id)">
+                  <div class="w-full rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center">
+                      <div
+                        class="shrink-0 w-full aspect-[4/3] sm:w-[200px] sm:h-[150px] bg-gray-100 relative overflow-hidden sm:m-4 sm:rounded-lg">
+                        <img [src]="store.image" class="absolute inset-0 w-full h-full object-cover" />
+                        <div class="absolute inset-0 z-10 flex items-center justify-center bg-amber-100/90">
+                          <div class="text-2xl sm:text-xl font-bold tracking-[4px] sm:tracking-[2px]
+                                          px-4 py-1 border-2 whitespace-nowrap">
+                            未營業
+                          </div>
+                        </div>
+                      </div>
+                      <div class="flex-1 min-w-0 p-4 sm:pr-6 sm:py-4">
+                        <div class="flex items-center justify-between mb-2">
+                          <p class="text-2xl font-bold text-gray-800 truncate m-0" [innerHTML]="highlight(store.name)">
+                            {{store.name }}</p>
+                          <div class="text-right">
+                            <span class="shrink-0 ml-2 px-2 py-0.5 rounded text-base bg-amber-100 text-amber-700">
+                              {{store.type}}
+                            </span>
+                            <span
+                              class="shrink-0 ml-2 px-2 py-0.5 rounded text-base bg-amber-100 text-amber-700 flex mt-[5px] min-w-[77px]">
+                              <div class="delivery-icon -scale-x-100" style="background-color: oklch(55.5% 0.163 48.998);">
+                              </div>
+                              &nbsp;{{store.category}}
+                            </span>
+                          </div>
+                        </div>
+                        <div class="text-sm sm:text-base text-gray-600 space-y-1.5">
+                          <p class="m-0 truncate">📞電話：{{store.phone}}</p>
+                          <p class="m-0 truncate">📍地址：{{store.address}}</p>
+                          <p class="m-0 font-bold text-[#662222]">🚚外送費：{{store.feeDescription}}</p>
+                          @if(store.memo){
+                          <p class="m-0 text-sm text-gray-400 italic truncate">備註：{{store.memo}}</p>
+                          }
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
-          </div>
+              }
+            }
           }
-          }
-          }
-          }
+        }
       </p-tabpanel>
     </div>
   </p-tabs>
@@ -420,8 +421,8 @@
   <button pTooltip="找不到店家嗎?" severity="secondary" tooltipPosition="top" (click)="addStore()" [tooltipDisabled]=open
     class="fixed md:absolute right-4 bottom-4 md:right-[2rem] md:bottom-[2rem]
                  px-4 py-2 md:w-[150px] md:h-[50px]
-                 bg-[#E07A3F] z-30 rounded-full md:rounded-sm shadow-lg
-                 hover:bg-red-700 text-white font-bold transition-all">
+                 bg-[#edb797] text-[#662222] z-30 rounded-full md:rounded-sm shadow-lg
+                 hover:bg-red-700 hover:text-white font-bold transition-all">
     <span class="hidden md:inline">新增店家 ➜</span>
     <span class="md:hidden">＋ 新增</span>
   </button>

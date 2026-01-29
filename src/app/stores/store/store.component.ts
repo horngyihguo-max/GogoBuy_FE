@@ -1,4 +1,4 @@
-import { FeeDescriptionVolist, StoreService } from './../../@service/store.service';
+import { FeeDescriptionVoList, StoreService } from './../../@service/store.service';
 import { Component, ElementRef, HostListener, QueryList, ViewChildren } from '@angular/core';
 import { StepperModule } from 'primeng/stepper';
 import { ButtonModule } from 'primeng/button';
@@ -163,7 +163,7 @@ export class StoreComponent {
     publish: false,
     createdBy: 'A01',
     operatingHoursVoList: [] as OperatingHoursVoList[],
-    feeDescription: [] as FeeDescriptionVolist[],
+    feeDescription: [] as FeeDescriptionVoList[],
     menuVoList: [] as MenuVoList[],
     menuCategoriesVoList: [] as MenuCategoriesVoList[],
     productOptionGroupsVoList: [] as ProductOptionGroupsVoList[]

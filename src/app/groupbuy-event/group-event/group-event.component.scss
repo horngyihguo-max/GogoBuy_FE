@@ -1,10 +1,18 @@
 @import "tailwindcss";
 
+.area{
+  @apply flex justify-center items-center;
+  .area-block{
+    @apply flex flex-col w-[90vw] rounded-lg h-fit bg-[#F4E7E1]/50
+            md:flex-row md:h-fit md:mt-[30px];
+  }
+}
+
 .storeName{
-  @apply text-2xl md:text-4xl
+  @apply text-2xl w-full sm:text-3xl md:text-4xl
 }
 .info{
-  @apply text-lg pt-[5px] md:pt-[10px]
+  @apply text-lg pt-[5px] sm:pt-[7.5px] md:pt-[10px]
 }
 .store-table{
   @apply max-w-[295px] mt-[5px] ml-[10px]
@@ -17,3 +25,29 @@
   }
 }
 
+.event-div{
+  @apply pt-4 sm:pt-6 md:pt-8
+}
+.each-div{
+  @apply w-full px-2 md:px-4;
+  .div-title{
+    @apply text-[#662222] text-lg md:text-xl;
+  }
+  .div-content{
+    @apply w-full pt-2 px-2 md:px-8
+  }
+}
+
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+  }
+
+  to {
+    transform: translateY(0);
+  }
+}
+
+p-tabs{
+  @apply flex flex-col flex-1 overflow-hidden;
+}

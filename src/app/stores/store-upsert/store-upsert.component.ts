@@ -9,7 +9,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { DatePickerModule } from 'primeng/datepicker';
 import { FluidModule } from 'primeng/fluid';
 import { CheckboxModule } from 'primeng/checkbox';
-import { FeeDescriptionVolist, MenuCategoriesVoList, MenuVoList, OperatingHoursVoList, ProductOptionGroupsVoList, StoreService } from '../../@service/store.service';
+import { FeeDescriptionVoList, MenuCategoriesVoList, MenuVoList, OperatingHoursVoList, ProductOptionGroupsVoList, StoreService } from '../../@service/store.service';
 import { DialogModule } from 'primeng/dialog';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HttpService } from '../../@service/http.service';
@@ -209,7 +209,7 @@ export class StoreUpsertComponent {
         closeTime: ''
       },
     ],
-    feeDescription: null as FeeDescriptionVolist[] | null,
+    feeDescription: null as FeeDescriptionVoList[] | null,
     menuVoList: [] as MenuVoList[],
     menuCategoriesVoList: [] as MenuCategoriesVoList[],
     productOptionGroupsVoList: [] as ProductOptionGroupsVoList[]
