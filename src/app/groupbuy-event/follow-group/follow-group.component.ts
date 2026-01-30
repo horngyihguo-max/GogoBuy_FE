@@ -5,6 +5,10 @@ import { HttpService } from '../../@service/http.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
+import { TabViewModule } from 'primeng/tabview';
+import { PaginatorModule } from 'primeng/paginator';
+import { AccordionModule } from 'primeng/accordion';
+import { TooltipModule } from 'primeng/tooltip';
 import {
   CdkDrag,
   CdkDragDrop,
@@ -14,6 +18,8 @@ import {
   transferArrayItem,
 } from '@angular/cdk/drag-drop';
 import Swal from 'sweetalert2';
+
+type TabMode = 'info' | 'order';
 
 type PriceLevel = { name: string; price: number };
 
@@ -41,6 +47,10 @@ type ProductOptionGroup = {
     CdkDrag,
     CdkDropList,
     CdkDropListGroup,
+    AccordionModule,
+    TooltipModule,
+    TabViewModule,
+    PaginatorModule,
   ],
   templateUrl: './follow-group.component.html',
   styleUrl: './follow-group.component.scss',
@@ -60,12 +70,21 @@ export class FollowGroupComponent {
   userId = ''; // 用戶Id（未登入就空字串）
   groupId = 0; // 團Id
   storeId = 0; // 店家Id
+  openedPanels: string[] = []; // 目前展開的 panel value
 
   // 團的資料
   group: GroupbuyEvents | null = null;
 
   // 店家資料(要先解析過)
   store: any = null;
+
+  // 店家狀態顯示用（營業中/休息/打烊/公休）
+  openStatusText = '';
+  openStatusDot: 'open' | 'closed' = 'closed'; // 用來決定 ●/○ 顏色
+  openStatusSubText = ''; // 「將於 XX:XX ...」「明日 XX:XX ...」
+  openStatusType: 'OPEN' | 'REST' | 'CLOSED' | 'FORCE_CLOSED' = 'CLOSED';
+  // force_closed 額外提示
+  isForceClosed = false;
 
   // ========= 菜單限制 / 推薦 =========
   allowedMenuIds: number[] = []; // tempMenuList 解析後
@@ -79,9 +98,156 @@ export class FollowGroupComponent {
     items: any[];
   }> = [];
 
-  // ========= 店家營業狀態（給上方卡片顯示） =========
-  openStatusText = '';
-  openStatusType: 'OPEN' | 'REST' | 'CLOSED' | 'FORCE_CLOSED' = 'CLOSED';
+  // 關掉指定Panel ==================================
+  closePanel(value: string) {
+    // 過濾掉傳入的 value，達到收起效果
+    this.openedPanels = this.openedPanels.filter((v) => v !== value);
+  }
+
+  // =========================
+  // 詳細資訊 drawer
+  // =========================
+  openDetail(): void {
+    this.detailTab = 'info';
+    this.detailVisible = true;
+  }
+  // 詳細資訊 drawer
+  detailVisible = false;
+  detailTab: TabMode = 'info';
+
+  // =========================
+  // 店家卡：顯示圖
+  // =========================
+  getStoreCover(): string {
+    const img = this.store?.image;
+    return img ? img : this.defaultStoreCover;
+  }
+  // 預設圖
+  readonly defaultStoreCover = '/Store Default Cover Image2.webp';
+  readonly defaultProductCover = '/Default Product Image.webp';
+
+  // =========================
+  // 營業狀態計算
+  // =========================
+  buildOpenStatus(): void {
+    // force_closed：直接覆蓋顯示
+    if (this.isForceClosed) {
+      this.openStatusDot = 'closed';
+      this.openStatusText = '今日公休';
+      this.openStatusSubText = '暫停開團';
+      return;
+    }
+
+    const hours: any[] = this.store?.operatingHoursVoList || [];
+    const now = new Date();
+
+    // 取今天星期（資料是 1~7：週一=1…週日=7）
+    const jsDay = now.getDay(); // 0(日)~6(六)
+    const dayNum = jsDay === 0 ? 7 : jsDay; // 轉成 1~7
+
+    // 找今天的時段
+    const todaySlots = hours
+      .filter((h) => Number(h.dayOfWeek) === dayNum)
+      .map((h) => ({
+        start: String(h.startTime || ''),
+        end: String(h.endTime || ''),
+      }))
+      .filter((s) => this.isValidTime(s.start) && this.isValidTime(s.end));
+
+    // 如果今天完全沒有營業時間
+    if (todaySlots.length === 0) {
+      this.openStatusDot = 'closed';
+      this.openStatusText = '休息中';
+      this.openStatusSubText = '今日無營業時段';
+      return;
+    }
+
+    // 轉成區間（處理跨日）
+    const intervals = todaySlots
+      .map((s) => this.toInterval(now, s.start, s.end))
+      .sort((a, b) => a.start.getTime() - b.start.getTime());
+
+    // now 是否在任何區間內
+    const current = intervals.find((it) => now >= it.start && now < it.end);
+
+    if (current) {
+      // 營業中 → 顯示將於 XX:XX 結束
+      this.openStatusDot = 'open';
+      this.openStatusText = '營業中';
+      this.openStatusSubText = `將於 ${this.formatTime(current.end)} 休息`;
+      return;
+    }
+
+    // 不在區間內 → 找下一段開始
+    const next = intervals.find((it) => now < it.start);
+
+    if (next) {
+      this.openStatusDot = 'closed';
+      this.openStatusText = '休息中';
+      this.openStatusSubText = `將於 ${this.formatTime(next.start)} 開始營業`;
+      return;
+    }
+
+    // 今天沒有下一段 → 已打烊，找明天第一段
+    const tomorrow = new Date(now);
+    tomorrow.setDate(now.getDate() + 1);
+    const tomorrowJsDay = tomorrow.getDay();
+    const tomorrowDayNum = tomorrowJsDay === 0 ? 7 : tomorrowJsDay;
+
+    const tomorrowSlots = hours
+      .filter((h) => Number(h.dayOfWeek) === tomorrowDayNum)
+      .map((h) => ({
+        start: String(h.startTime || ''),
+        end: String(h.endTime || ''),
+      }))
+      .filter((s) => this.isValidTime(s.start) && this.isValidTime(s.end))
+      .map((s) => this.toInterval(tomorrow, s.start, s.end))
+      .sort((a, b) => a.start.getTime() - b.start.getTime());
+
+    if (tomorrowSlots.length > 0) {
+      this.openStatusDot = 'closed';
+      this.openStatusText = '已打烊';
+      this.openStatusSubText = `明日 ${this.formatTime(tomorrowSlots[0].start)} 開始營業`;
+      return;
+    }
+
+    // 明天也沒有 → 先給保守文案
+    this.openStatusDot = 'closed';
+    this.openStatusText = '已打烊';
+    this.openStatusSubText = '近期無營業時段';
+  }
+
+  isValidTime(t: string): boolean {
+    // 允許 "HH:mm"
+    return /^\d{2}:\d{2}$/.test(t);
+  }
+
+  toInterval(
+    baseDate: Date,
+    startStr: string,
+    endStr: string,
+  ): { start: Date; end: Date } {
+    const start = this.setTime(new Date(baseDate), startStr);
+    const end = this.setTime(new Date(baseDate), endStr);
+
+    // 跨日：end <= start → end + 1 day
+    if (end.getTime() <= start.getTime()) {
+      end.setDate(end.getDate() + 1);
+    }
+    return { start, end };
+  }
+
+  setTime(d: Date, hhmm: string): Date {
+    const [hh, mm] = hhmm.split(':').map((x) => Number(x));
+    d.setHours(hh, mm, 0, 0);
+    return d;
+  }
+
+  formatTime(d: Date): string {
+    const hh = String(d.getHours()).padStart(2, '0');
+    const mm = String(d.getMinutes()).padStart(2, '0');
+    return `${hh}:${mm}`;
+  }
 
   // =====================================================
   // 商品 dialog
@@ -199,6 +365,23 @@ export class FollowGroupComponent {
     this.allowedMenuIds = this.parseIdList(g.tempMenuList);
     this.recommendMenuIds = this.parseIdList(g.recommendList);
     // allowedMenuIds 空陣列代表「顯示全部」
+  }
+
+  category: any[] = [
+    { name: '團購代購', value: 'slow' },
+    { name: '外送', value: 'fast' },
+  ];
+  getCategoryName(value: string): string {
+    const item = this.category.find((c) => c.value === value);
+    return item ? item.name : value;
+  }
+
+  // 地址帶入GoogleMap ==========================================================
+  getMap(address: string | undefined) {
+    if (!address) return '#';
+    const gmap = 'https://www.google.com/maps/search/?api=1&query=';
+    let mapUrl = gmap + encodeURIComponent(address);
+    return mapUrl;
   }
 
   // =========================
@@ -531,69 +714,6 @@ export class FollowGroupComponent {
   }
 
   // =========================
-  // 營業狀態（先做一個可用版）
-  // =========================
-  buildOpenStatus(): void {
-    if (!this.store) return;
-
-    if (this.store.force_closed === true) {
-      this.openStatusType = 'FORCE_CLOSED';
-      this.openStatusText = '○ 今日公休';
-      return;
-    }
-
-    const now = new Date();
-    const weekday = now.getDay(); // 0(日)~6(六)
-    const dayOfWeek = weekday === 0 ? 7 : weekday; // 1~7
-
-    const list: any[] = Array.isArray(this.store.operatingHoursVoList)
-      ? this.store.operatingHoursVoList
-      : [];
-
-    const todaySlots = list
-      .filter((h) => Number(h.dayOfWeek) === dayOfWeek)
-      .map((h) => ({ start: h.startTime, end: h.endTime }));
-
-    if (!todaySlots.length) {
-      this.openStatusType = 'CLOSED';
-      this.openStatusText = '○ 今日未營業';
-      return;
-    }
-
-    const nowMin = now.getHours() * 60 + now.getMinutes();
-
-    const inSlot = todaySlots.find((s) => {
-      const [sh, sm] = String(s.start).split(':').map(Number);
-      const [eh, em] = String(s.end).split(':').map(Number);
-      const startMin = sh * 60 + sm;
-      const endMin = eh * 60 + em;
-      return nowMin >= startMin && nowMin < endMin;
-    });
-
-    if (inSlot) {
-      this.openStatusType = 'OPEN';
-      this.openStatusText = `● 營業中 ⋅ 將於 ${inSlot.end} 休息`;
-      return;
-    }
-
-    const next = todaySlots
-      .map((s) => {
-        const [sh, sm] = String(s.start).split(':').map(Number);
-        return { start: s.start, startMin: sh * 60 + sm };
-      })
-      .filter((s) => s.startMin > nowMin)
-      .sort((a, b) => a.startMin - b.startMin)[0];
-
-    if (next) {
-      this.openStatusType = 'REST';
-      this.openStatusText = `○ 休息中 ⋅ 將於 ${next.start} 開始營業`;
-    } else {
-      this.openStatusType = 'CLOSED';
-      this.openStatusText = `○ 已打烊 ⋅ 明日開始營業`;
-    }
-  }
-
-  // =========================
   // 小工具
   // =========================
   toastWarn(title: string, text: string): void {
@@ -696,6 +816,128 @@ export class FollowGroupComponent {
     };
   }
 
+  // 這邊是防止 dialog 開啟但畫面可滾 ----------------------------
+  disableScroll() {
+    const scrollY = window.scrollY;
+    const body = document.body;
+    const scrollbarWidth =
+      window.innerWidth - document.documentElement.clientWidth;
+
+    console.log('scrollbarWidth:', scrollbarWidth);
+
+    // 設定 CSS variable
+    document.documentElement.style.setProperty(
+      '--scrollbar-offset',
+      `${scrollbarWidth}px`,
+    );
+
+    body.style.position = 'fixed';
+    body.style.top = `-${scrollY}px`;
+    body.style.width = '100%';
+    body.style.overflowY = 'hidden';
+  }
+
+  enableScroll() {
+    const body = document.body;
+    const scrollY = body.style.top;
+
+    // 清除 CSS variable
+    document.documentElement.style.setProperty('--scrollbar-offset', '0px');
+
+    body.style.position = '';
+    body.style.top = '';
+    body.style.width = '';
+    body.style.overflowY = '';
+
+    window.scrollTo(0, -parseInt(scrollY || '0'));
+  }
+
+  // 處理營業時間 ==============================================
+  getGroupedOperatingHours(): Array<{
+    dayLabel: string;
+    times: string[];
+  }> {
+    const list = this.store?.operatingHoursVoList || [];
+    if (!Array.isArray(list)) return [];
+
+    const map = new Map<number, string[]>();
+
+    list.forEach((h: any) => {
+      const day = Number(h.dayOfWeek);
+      if (!map.has(day)) map.set(day, []);
+
+      map.get(day)!.push(`${h.startTime} - ${h.endTime}`);
+    });
+
+    // 依週一～週日排序
+    return Array.from(map.entries())
+      .sort((a, b) => a[0] - b[0])
+      .map(([day, times]) => ({
+        dayLabel: this.getWeekdayLabel(day),
+        times,
+      }));
+  }
+
+  getWeekdayLabel(day: number): string {
+    const map = ['一', '二', '三', '四', '五', '六', '日'];
+    return map[day - 1] ? `週${map[day - 1]}` : `週?`;
+  }
+
+  // 轉換成直覺時間 ===================================================
+  formatDateTime(dateString: string): string {
+    if (!dateString) return '';
+
+    const date = new Date(dateString);
+
+    // 取得年月日
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+
+    // 取得時分
+    let hours = date.getHours();
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+
+    // 判斷上午/下午
+    const period = hours >= 12 ? '下午' : '上午';
+
+    // 轉換成 12 小時制
+    if (hours > 12) {
+      hours = hours - 12;
+    } else if (hours === 0) {
+      hours = 12;
+    }
+
+    return `${year}年${month}月${day}日 ${period}${hours}:${minutes}`;
+  }
+
+  // 畫面美化/標籤 ==================================================
+  detailTabIndex = 0;
+
+  // 是否達標
+  get isReached(): boolean {
+    const total = Number(this.group?.totalOrderAmount ?? 0);
+    const limit = Number(this.group?.limitation ?? 0);
+    if (limit <= 0) return true; // 避免 limitation = 0 時除以 0
+    return total >= limit;
+  }
+
+  // 還差多少（最低 0）
+  get remainingToReach(): number {
+    const total = Number(this.group?.totalOrderAmount ?? 0);
+    const limit = Number(this.group?.limitation ?? 0);
+    return Math.max(0, limit - total);
+  }
+
+  // 進度條百分比（0~100）
+  get reachPercent(): number {
+    const total = Number(this.group?.totalOrderAmount ?? 0);
+    const limit = Number(this.group?.limitation ?? 0);
+    if (limit <= 0) return 100;
+    const p = (total / limit) * 100;
+    return Math.min(100, Math.max(0, Math.round(p)));
+  }
+
   // =========================
   // 假資料
   // =========================
@@ -710,12 +952,14 @@ export class FollowGroupComponent {
           status: 'OPEN',
           hostId: '16c88406-e303-454d-bf60-508eb0f6ba83',
           nickname: '王大明',
-          eventName: '快來買',
+          eventName:
+            '快來買快來買快來買快來買快來買快來買快來買快來買快來買快來買快來買快來買快來買',
           shippingFee: 0,
-          limitation: 50,
+          limitation: 100,
           splitType: 'EQUAL',
           endTime: '2026-01-31T21:20:30',
-          announcement: '每杯買二送一～',
+          announcement:
+            '每杯買二送一～每杯買二送一～每杯買二送一～每杯買二送一～每杯買二送一～',
           storesId: 40,
           recommendList: '[49,57]',
           tempMenuList: '[25,49,57]',
