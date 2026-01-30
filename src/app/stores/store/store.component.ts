@@ -46,6 +46,7 @@ export class StoreComponent {
 
   constructor(
     private http: HttpService,
+    private router: Router,
     private route: ActivatedRoute,
     private storeService: StoreService,
   ) { }
@@ -105,9 +106,12 @@ export class StoreComponent {
   tempProductIndex: number = -1;
   tempProductSpecTarget!: any;
   newPId: number = 0;
+  searchKeyword: string = '';
 
   isEditMode = false;
-  searchKeyword: string = '';
+
+  // 是否嘗試過提交
+  submitted = false;
 
   // 清空欄位
   getNewProduct(): MenuVoList {
@@ -150,6 +154,18 @@ export class StoreComponent {
     };
   }
 
+  getApplicableSpecs(item: MenuVoList) {
+    if (!item.unusual){
+      return;
+    }
+
+    const unusualIds = Object.keys(item.unusual).map(id => Number(id));
+    return this.storeData.productOptionGroupsVoList.filter(group =>
+      unusualIds.includes(group.id) &&
+      group.applicableCategoryIds?.includes(item.categoryId)
+    );
+  }
+
   // 打包傳進資料庫
   storeData = {
     id: 0,
@@ -182,19 +198,12 @@ export class StoreComponent {
   }
 
   ngOnInit() {
-    if (this.storeService.storeData && this.storeService.storeData.name !== '') {
-      const source = this.storeService.storeData;
-      this.storeData = {
-        ...this.storeData,
-        ...source,
-        memo: source.memo ?? '',
-      }
-    }
-
     this.id = Number(this.route.snapshot.paramMap.get('id'));
 
     this.http.getApi(`http://localhost:8080/gogobuy/store/searchId?id=${this.id}`)
       .subscribe((res: any) => {
+        console.log("res", res);
+
         if (res.storeList && res.storeList.length > 0) {
           this.storeData = res.storeList[0];
           this.storeData.menuCategoriesVoList = res.menuCategoriesVoList;
@@ -215,10 +224,37 @@ export class StoreComponent {
     this.filteredProducts = [...this.storeData.menuVoList];
     console.log("filteredProductsMenu2:", this.filteredProducts);
 
+    if (this.storeService.storeData && this.storeService.storeData.name !== '') {
+      const source = this.storeService.storeData;
+      this.storeData = {
+        ...this.storeData,
+        ...source,
+        memo: source.memo ?? '',
+      }
+    }
+
     // session 讀取資料
     const savedData = sessionStorage.getItem('temp_order_info');
     if (savedData) {
       this.storeData = JSON.parse(savedData);
+      if (this.storeData.menuCategoriesVoList && this.storeData.menuCategoriesVoList.length > 0) {
+        const maxId = Math.max(...this.storeData.menuCategoriesVoList.map((c: any) => c.id || 0));
+        this.newCateId = maxId;
+      } else {
+        this.newCateId = 0;
+      }
+      if (this.storeData.productOptionGroupsVoList && this.storeData.productOptionGroupsVoList.length > 0) {
+        const maxId = Math.max(...this.storeData.productOptionGroupsVoList.map((c: any) => c.id || 0));
+        this.newSpecId = maxId;
+      } else {
+        this.newSpecId = 0;
+      }
+      if (this.storeData.menuVoList && this.storeData.menuVoList.length > 0) {
+        const maxId = Math.max(...this.storeData.menuVoList.map((c: any) => c.id || 0));
+        this.newPId = maxId;
+      } else {
+        this.newPId = 0;
+      }
     }
     this.applyFilters();
   }
@@ -230,7 +266,13 @@ export class StoreComponent {
   }
 
   editStore(event: Event) {
+    this.displayStoreInfoDialog = false;
     event.stopPropagation();
+    if (this.id !== 0) {
+      this.router.navigate(['../../store_upsert', this.id], { relativeTo: this.route });
+    } else {
+      this.router.navigate(['../store_upsert'], { relativeTo: this.route });
+    }
   }
 
   // 變數
@@ -307,6 +349,17 @@ export class StoreComponent {
   }
 
   saveCategories() {
+    this.submitted = true;
+    const isNameValid = !!this.currentCategories.name?.trim();
+
+    const isPriceLevelValid = this.currentCategories.priceLevel?.every((level: any) =>
+      level.name?.trim() && (level.price !== null && level.price !== undefined)
+    );
+
+    if (!isNameValid || !isPriceLevelValid) {
+      return;
+    }
+
     if (this.isEditMode && this.editingIndex !== -1) {
       this.storeData.menuCategoriesVoList[this.editingIndex] = { ...this.currentCategories };
     } else {
@@ -322,8 +375,9 @@ export class StoreComponent {
 
     this.storeData.menuCategoriesVoList = [...this.storeData.menuCategoriesVoList];
     this.displayCategoriesDialog = false;
-
     this.currentCategories = this.getNewCategories();
+
+    this.submitted = false;
   }
 
   selectedCategories(categoryId: number, index: number) {
@@ -370,6 +424,10 @@ export class StoreComponent {
     });
   }
 
+  removeSpecItem(index: number) {
+    this.currentGroup.items.splice(index, 1);
+  }
+
   openDeleteSpec(group: ProductOptionGroupsVoList, index: number) {
     this.tempSpecTarget = group;
     this.tempSpecIndex = index;
@@ -400,12 +458,16 @@ export class StoreComponent {
     return this.selectedSpecsCategories.some(selected => selected.name === cate.name);
   }
 
-  removeSpecItem(index: number) {
-    this.currentGroup.items.splice(index, 1);
-  }
-
   saveSpec() {
-    if (!this.currentGroup.name.trim()) return;
+    this.submitted = true;
+    const isNameValid = !!this.currentGroup.name?.trim();
+    const isMaxValid = this.currentGroup.maxSelection !== null && this.currentGroup.maxSelection !== undefined;
+    const areItemsValid = this.currentGroup.items.every((item: any) => !!item.name?.trim());
+
+    if (!isNameValid || !isMaxValid || !areItemsValid) {
+      return;
+    }
+
     this.currentGroup.applicableCategoryIds = this.selectedSpecsCategories.map(cate => cate.id);
 
     if (this.isEditMode && this.editingSpecIndex > -1) {
@@ -421,12 +483,11 @@ export class StoreComponent {
       ];
     }
 
-    console.log("this.storeData.productOptionGroupsVoList", this.storeData.productOptionGroupsVoList);
-
     this.displaySpecsDialog = false;
     this.currentGroup = this.getNewGroups();
     this.isEditMode = false;
     this.editingSpecIndex = -1;
+    this.submitted = false;
   }
 
   // search ---------------------------------------------------------
@@ -453,7 +514,7 @@ export class StoreComponent {
     this.isEditMode = false;
     const defaultCategoryId = this.storeData.menuCategoriesVoList.length > 0
       ? this.storeData.menuCategoriesVoList[0].id
-      : 1;
+      : null as any as number;
 
     this.currentProduct = {
       id: 0,
@@ -577,9 +638,16 @@ export class StoreComponent {
   }
 
   saveProduct() {
-    if (!this.currentProduct.name) {
+    console.log('當前分類 ID:', this.currentProduct.categoryId);
+    this.submitted = true;
+    const isNameValid = !!this.currentProduct.name?.trim();
+    const isCategoryValid = !!this.currentProduct.categoryId;
+    const isPriceValid = this.currentProduct.basePrice !== null && this.currentProduct.basePrice !== undefined;
+
+    if (!isNameValid || !isCategoryValid || !isPriceValid) {
       return;
     }
+
     // 若未符合 p.id === this.currentProduct.id ， 那 index = -1
     const index = this.storeData.menuVoList.findIndex(p => p.id === this.currentProduct.id);
 
@@ -599,6 +667,7 @@ export class StoreComponent {
 
     this.sortProduct();
     this.displayProductDialog = false;
+    this.submitted = false;
   }
 
   // 修改商品 ---------------------------------------------------------
@@ -694,6 +763,11 @@ export class StoreComponent {
     this.storeService.clearCurrentStore();
     // this.displaySaveDialog = true;
     sessionStorage.removeItem('temp_order_info');
+  }
+
+  closeSaveDialog() {
+    this.displaySaveDialog = false;
+    this.router.navigate(['../../store_info', this.id]);
   }
 
   // 假資料 ---------------------------------------------------------

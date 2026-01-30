@@ -43,16 +43,10 @@
         </li>
         <li><i class="pi pi-cart-plus nav-icon cursor-pointer" style="font-size: 1.5rem" (click)="gocart()"></i></li>
         <li>
-          @if (userAvatar()) {
-          <img [src]="userAvatar()" alt="User Avatar" class="avatar-style" class="w-9 h-9 rounded-full cursor-pointer"
-            (click)="onUserClick($event, menu)" />
-          } @else {
-          <p-avatar icon="pi pi-user" class="w-9 h-9 nav-icon cursor-pointer"
-            [style]="{ 'background-color': '#ece9fc', color: '#2a1261' }" shape="circle" (click)="menu.toggle($event)">
-          </p-avatar>
+          <i class="pi pi-user nav-icon cursor-pointer" style="font-size: 1.5rem" (click)="menu.toggle($event)"></i>
 
-          }
-          <p-menu #menu [popup]="true" [model]="items" [model]="filteredItems" appendTo="body"></p-menu>
+          <!-- appendTo="body" 避免 menu 被 header/overflow 裁切 -->
+          <p-menu #menu [popup]="true" [model]="filteredItems" appendTo="body"></p-menu>
         </li>
       </ul>
     </nav>

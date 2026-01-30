@@ -1,0 +1,46 @@
+:host ::ng-deep .follow-group-accordion .p-accordion-header-link {
+  align-items: flex-start; /* 讓 icon 可以貼上去 */
+}
+
+/* PrimeNG 的 toggle icon：推到最右邊並貼上方 */
+:host ::ng-deep .follow-group-accordion .p-accordion-toggle-icon {
+  margin-left: auto;
+  margin-top: 6px;
+}
+
+/* md 以上：讓 header 看起來更置中 */
+@media (min-width: 768px) {
+  :host ::ng-deep .follow-group-accordion .p-accordion-header-link {
+    align-items: center;
+  }
+
+  :host ::ng-deep .follow-group-accordion .p-accordion-toggle-icon {
+    margin-top: 0;
+  }
+}
+
+.marquee-wrapper {
+  overflow: hidden;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+/* 預設不動 */
+.marquee-text {
+  display: inline-block;
+}
+
+/* 當文字超過容器時才加這個 class */
+.marquee-text.is-marquee {
+  padding-left: 100%;
+  animation: marquee 12s linear infinite;
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}

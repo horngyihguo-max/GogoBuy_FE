@@ -9,6 +9,13 @@ import { Avatar, AvatarModule } from 'primeng/avatar';
 import { MenuModule } from 'primeng/menu';
 import { BadgeModule } from 'primeng/badge';
 import { forkJoin, map } from 'rxjs';
+import { MessageService, NotifiMesReq, NotifiCategoryEnum } from '../@service/message.service';
+import { DialogModule } from 'primeng/dialog';
+import { CalendarModule } from 'primeng/calendar';
+import { InputTextModule } from 'primeng/inputtext';
+import { TextareaModule } from 'primeng/textarea';
+import { FormsModule } from '@angular/forms';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-dashboard',
@@ -21,7 +28,14 @@ import { forkJoin, map } from 'rxjs';
     RouterLink,
     AvatarModule,
     MenuModule,
-    BadgeModule
+    AvatarModule,
+    MenuModule,
+    BadgeModule,
+    DialogModule,
+    CalendarModule,
+    InputTextModule,
+    TextareaModule,
+    FormsModule
   ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
@@ -33,15 +47,30 @@ export class DashboardComponent {
   users: any[] = [];
   loading = false;
 
-  currentView: 'stores' | 'events' | 'users' = 'stores';
+  currentView: 'announce' | 'stores' | 'events' | 'users' = 'announce';
 
   menuItems = [
+    { label: '公告通知管理', icon: 'pi pi-megaphone', id: 'announce' },
     { label: '店家管理', icon: 'pi pi-shop', id: 'stores' },
     { label: '團購活動', icon: 'pi pi-calendar', id: 'events' },
     { label: '會員管理', icon: 'pi pi-users', id: 'users' }
   ];
 
-  constructor(private authService: AuthService) { }
+  // 公告相關變數
+  displayAnnounceDialog = false;
+  announceData: Partial<NotifiMesReq> = {
+    title: '',
+    content: '',
+    targetUrl: '',
+    expiredAt: '',
+    category: NotifiCategoryEnum.SYSTEM
+  };
+  announceDate: Date | null = null; // for Calendar binding
+
+  constructor(
+    private authService: AuthService,
+    private messageService: MessageService
+  ) { }
 
   ngOnInit() {
     this.loadData();
@@ -105,5 +134,50 @@ export class DashboardComponent {
       case 'GOOGLE': return 'success';
       default: return 'info';
     }
+  }
+
+  // 開啟公告視窗
+  openAnnounceDialog() {
+    this.displayAnnounceDialog = true;
+    this.announceDate = null;
+    this.announceData = {
+      title: '',
+      content: '',
+      targetUrl: '',
+      category: NotifiCategoryEnum.SYSTEM
+    };
+  }
+
+  // 發送公告
+  sendAnnouncement() {
+    if (!this.announceData.title || !this.announceData.content) {
+      Swal.fire('請填寫標題與內容', '', 'warning');
+      return;
+    }
+
+    // 處理日期
+    if (this.announceDate) {
+        // 簡單格式化 YYYY-MM-DD (視後端需求調整)
+        const year = this.announceDate.getFullYear();
+        const month = String(this.announceDate.getMonth() + 1).padStart(2, '0');
+        const day = String(this.announceDate.getDate()).padStart(2, '0');
+        this.announceData.expiredAt = `${year}-${month}-${day}`;
+    }
+
+    // 呼叫 Service
+    this.messageService.create(this.announceData as NotifiMesReq).subscribe({
+      next: (res) => {
+        if (res.code === 200 || res.message === 'Success') { // Adjust based on actual Backend response structure
+             Swal.fire('公告發送成功', '', 'success');
+             this.displayAnnounceDialog = false;
+        } else {
+             Swal.fire('發送失敗', res.message || '未知錯誤', 'error');
+        }
+      },
+      error: (err) => {
+        console.error(err);
+        Swal.fire('發送失敗', '請稍後再試', 'error');
+      }
+    });
   }
 }

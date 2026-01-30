@@ -28,3 +28,17 @@
     border-color: #662222 !important;
   }
 }
+
+// close 瀏覽器的 Autofill 機制
+:host ::ng-deep .p-floatlabel input:focus ~ label,
+:host ::ng-deep .p-floatlabel input.p-filled ~ label {
+  color: #662222 !important; /* 確保標籤維持你的品牌色，而不是預設綠色 */
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  /* 背景顏色：如果想維持白色，可以用 shadow 蓋掉 */
+  transition: background-color 5000s ease-in-out 0s;
+}
+
