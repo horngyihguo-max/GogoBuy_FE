@@ -66,7 +66,7 @@
                 <!-- 按鈕群 -->
                 <div class="flex items-center gap-2">
                   <button
-                    (click)="openDetail()"
+                    (click)="detailTabIndex = 0; openDetail()"
                     class="cursor-pointer px-5 py-2 rounded-full text-[17px] font-extrabold border transition bg-white text-red-900 border-red-900 hover:brightness-95"
                   >
                     <i class="pi pi-info-circle"></i>
@@ -127,8 +127,8 @@
                     [href]="getMap(store?.address)"
                     >{{ store?.address || "—" }}</a
                   >
+                  <p (click)="detailTabIndex = 1; openDetail()" class="cursor-pointer hover:border-b hover:border-slate-300">(詳細運費說明)</p>
                 </div>
-
                 <div class="flex items-center gap-2">
                   <i class="pi pi-phone text-red-900"></i>
                   <span class="font-semibold text-[17px]">{{
@@ -547,35 +547,6 @@
               </div>
             }
           </div>
-
-          <!-- unusual -->
-          <!-- <div>
-            <div class="text-gray-500 font-semibold text-[17px] mb-2">
-              其他資訊
-            </div>
-
-            @if (getPrettyUnusualEntries(selectedProduct).length) {
-              <div class="space-y-2">
-                @for (
-                  e of getPrettyUnusualEntries(selectedProduct);
-                  track e.key
-                ) {
-                  <div
-                    class="flex items-start justify-between gap-3 bg-white/70 border border-white rounded-xl px-3 py-2"
-                  >
-                    <div class="font-extrabold text-red-900">{{ e.label }}</div>
-                    <div
-                      class="font-semibold text-gray-800 break-all text-right"
-                    >
-                      {{ e.value }}
-                    </div>
-                  </div>
-                }
-              </div>
-            } @else {
-              <div class="text-gray-500 text-[15px]">（無）</div>
-            }
-          </div> -->
 
           <div class="h-3"></div>
         </div>

@@ -115,6 +115,11 @@ export class FollowGroupComponent {
   detailVisible = false;
   detailTab: TabMode = 'info';
 
+  // 前往店家 =======================================
+  goToStore() {
+    this.router.navigate(['/management/store_info', this.storeId]);
+  }
+
   // =========================
   // 店家卡：顯示圖
   // =========================
@@ -497,6 +502,192 @@ export class FollowGroupComponent {
     return zero || levels[0] || { name: '標準', price: 0 };
   }
 
+  // ====== 訂單（先最小可行，後面做加入訂單再補）======
+  cartTotal = 0;
+
+  goNextStep(): void {
+    if (this.cartTotal <= 0) {
+      this.toastWarn('尚未選購', '請先點餐後再下一步');
+      return;
+    }
+
+    // TODO：之後做「下一步 dialog」
+    this.toastSuccess('下一步', '（待完成）');
+  }
+
+  // 商品卡：封面圖
+  getProductImage(p: any): string {
+    const img = p?.image;
+    if (!img) return this.defaultProductCover;
+
+    // 如果看起來是 http(s) 直接回傳
+    if (
+      typeof img === 'string' &&
+      (img.startsWith('http://') || img.startsWith('https://'))
+    ) {
+      return img;
+    }
+
+    // 如果是 base64 包 url，先嘗試 decode
+    try {
+      const decoded = atob(String(img));
+      if (decoded.startsWith('http://') || decoded.startsWith('https://'))
+        return decoded;
+    } catch {}
+
+    return this.defaultProductCover;
+  }
+
+  isSoldOut(p: any): boolean {
+    // 你菜單資料有的欄位可能叫 soldOut 或 available，兩個都兼容
+    if (!p) return false;
+    if (p.soldOut === true) return true;
+    if (p.available === false) return true;
+    return false;
+  }
+
+  // =========================
+  // 訂單暫存（最小可行）
+  // =========================
+  orderItems: Array<{
+    menuId: number;
+    name: string;
+    quantity: number;
+
+    specName: string;
+    specExtraPrice: number;
+
+    basePrice: number;
+    finalUnitPrice: number;
+
+    // 用 orderPost 的格式概念存（optionName / value / extraPrice）
+    selectedOptionList: Array<{
+      optionName: string;
+      value: string;
+      extraPrice?: number;
+    }>;
+  }> = [];
+
+  // 右下角總金額
+  get orderSubtotal(): number {
+    return this.orderItems.reduce(
+      (sum, it) =>
+        sum + Number(it.finalUnitPrice || 0) * Number(it.quantity || 0),
+      0,
+    );
+  }
+
+  // 判斷這個商品「點 + 要不要開 dialog」
+  productNeedsDialog(product: any): boolean {
+    if (!product) return false;
+
+    const cid = Number(product?.categoryId || 0);
+
+    // 規格：只有 1 個（通常就是標準+0）就不算需要 dialog
+    const levels = this.getPriceLevelsByCategoryId(cid);
+    const hasMultipleSpecs = (levels?.length || 0) > 1;
+
+    // 選項：用 unusual 找得到 groupIds 才算
+    const groupIds = this.extractGroupIdsFromUnusual(product?.unusual);
+    const hasOptions = (groupIds?.length || 0) > 0;
+
+    return hasMultipleSpecs || hasOptions;
+  }
+
+  // 只處理「不需要 dialog 的商品」：直接 +1（標準 + 無選項）
+  quickAdd(product: any): void {
+    if (!product) return;
+
+    const key = this.makeOrderKey({
+      menuId: Number(product.id),
+      specName: '標準',
+      selectedOptionList: [],
+    });
+
+    const idx = this.orderItems.findIndex((x) => this.makeOrderKey(x) === key);
+
+    if (idx >= 0) {
+      this.orderItems[idx].quantity += 1;
+    } else {
+      const base = Number(product?.basePrice ?? 0);
+      this.orderItems.push({
+        menuId: Number(product.id),
+        name: String(product?.name || ''),
+        quantity: 1,
+
+        specName: '標準',
+        specExtraPrice: 0,
+
+        basePrice: base,
+        finalUnitPrice: base,
+
+        selectedOptionList: [],
+      });
+    }
+  }
+
+  // 卡片上的「+」：能快加就快加；要選就開 dialog
+  onPlusClick(product: any): void {
+    if (!this.productNeedsDialog(product)) {
+      this.quickAdd(product);
+      return;
+    }
+    this.openProductDialog(product);
+  }
+
+  // 卡片上的「-」：只針對「快加商品」直減（有規格/選項的先不做卡片直減，避免規格混在一起）
+  onMinusClick(product: any): void {
+    if (!product) return;
+
+    if (this.productNeedsDialog(product)) {
+      // 這裡先不做（不然會遇到同一商品不同規格/選項要扣哪一筆）
+      return;
+    }
+
+    const key = this.makeOrderKey({
+      menuId: Number(product.id),
+      specName: '標準',
+      selectedOptionList: [],
+    });
+
+    const idx = this.orderItems.findIndex((x) => this.makeOrderKey(x) === key);
+    if (idx < 0) return;
+
+    this.orderItems[idx].quantity -= 1;
+    if (this.orderItems[idx].quantity <= 0) this.orderItems.splice(idx, 1);
+  }
+
+  getQuickQty(product: any): number {
+    if (!product) return 0;
+    if (this.productNeedsDialog(product)) return 0;
+
+    const key = this.makeOrderKey({
+      menuId: Number(product.id),
+      specName: '標準',
+      selectedOptionList: [],
+    });
+
+    const found = this.orderItems.find((x) => this.makeOrderKey(x) === key);
+    return Number(found?.quantity || 0);
+  }
+
+  private makeOrderKey(x: {
+    menuId: number;
+    specName: string;
+    selectedOptionList: Array<{
+      optionName: string;
+      value: string;
+      extraPrice?: number;
+    }>;
+  }): string {
+    const opts = (x.selectedOptionList || [])
+      .map((o) => `${o.optionName}:${o.value}:${Number(o.extraPrice || 0)}`)
+      .sort()
+      .join('|');
+
+    return `${Number(x.menuId)}__${x.specName || ''}__${opts}`;
+  }
+
   // =====================================================
   // dialog HTML 需要的「操作方法」
   // =====================================================
@@ -622,11 +813,80 @@ export class FollowGroupComponent {
     return base + specExtra + singleExtra + addonExtra;
   }
 
-  // 這裡先留一個「加入訂單」最小可行版：先關 dialog
+  // 加入訂單
   addToOrder(): void {
     if (!this.selectedProduct) return;
 
-    // 先做最小可行：提示 + 關閉 dialog
+    // required 單選如果沒選到（理論上你 init 已幫必選預選第一個）
+    const requiredNotPicked = this.singleOptionGroups.some(
+      (g) => g.required && !this.selectedSingleOptionMap[g.id],
+    );
+    if (requiredNotPicked) {
+      this.toastWarn('尚未完成', '有必選項目尚未選擇');
+      return;
+    }
+
+    const base = Number(this.selectedProduct?.basePrice ?? 0);
+    const specName = String(this.selectedPriceLevel?.name || '標準');
+    const specExtraPrice = Number(this.selectedPriceLevel?.price ?? 0);
+    const finalUnitPrice = this.calcFinalUnitPrice();
+
+    // 組 optionList（用 orderPost 範本的概念）
+    const selectedOptionList: Array<{
+      optionName: string;
+      value: string;
+      extraPrice?: number;
+    }> = [];
+
+    // 單選（糖度/冰塊...）
+    this.singleOptionGroups.forEach((g) => {
+      const picked = this.selectedSingleOptionMap[g.id];
+      if (picked) {
+        selectedOptionList.push({
+          optionName: g.name,
+          value: picked.name,
+          extraPrice: Number(picked.extraPrice || 0) || undefined,
+        });
+      }
+    });
+
+    // 加料（先用現成的 selectedAddons）
+    if (this.selectedAddons.length) {
+      this.selectedAddons.forEach((a) => {
+        selectedOptionList.push({
+          optionName: '加料',
+          value: a.name,
+          extraPrice: Number(a.extraPrice || 0) || undefined,
+        });
+      });
+    }
+
+    const key = this.makeOrderKey({
+      menuId: Number(this.selectedProduct.id),
+      specName,
+      selectedOptionList,
+    });
+
+    const idx = this.orderItems.findIndex((x) => this.makeOrderKey(x) === key);
+
+    if (idx >= 0) {
+      this.orderItems[idx].quantity += this.quantity;
+    } else {
+      this.orderItems.push({
+        menuId: Number(this.selectedProduct.id),
+        name: String(this.selectedProduct?.name || ''),
+        quantity: this.quantity,
+
+        specName,
+        specExtraPrice,
+
+        basePrice: base,
+        finalUnitPrice,
+
+        selectedOptionList,
+      });
+    }
+
     this.toastSuccess(
       '已加入',
       `${this.selectedProduct?.name || ''} x${this.quantity}`,
@@ -955,15 +1215,15 @@ export class FollowGroupComponent {
           eventName:
             '快來買快來買快來買快來買快來買快來買快來買快來買快來買快來買快來買快來買快來買',
           shippingFee: 0,
-          limitation: 100,
+          limitation: 200,
           splitType: 'EQUAL',
           endTime: '2026-01-31T21:20:30',
           announcement:
             '每杯買二送一～每杯買二送一～每杯買二送一～每杯買二送一～每杯買二送一～',
           storesId: 40,
-          recommendList: '[49,57]',
-          tempMenuList: '[25,49,57]',
-          recommendDescription: '強推雞尾酒',
+          recommendList: '[123,124]',
+          tempMenuList: '[122,123,124]',
+          recommendDescription: '強推雞尾酒強推雞尾酒強推雞尾酒強推雞尾酒強推雞尾酒強推雞尾酒強推雞尾酒強推雞尾酒強推雞尾酒強推雞尾酒強推雞尾酒強推雞尾酒強推雞尾酒強推雞尾酒',
           totalOrderAmount: 100,
           deleted: 0,
         },

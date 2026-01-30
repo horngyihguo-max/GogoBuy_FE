@@ -862,8 +862,8 @@ export class StoreInfoComponent implements OnInit {
             'aHR0cHM6Ly9hc3NldHMudG1lY29zeXMuY29tL2ltYWdlL3VwbG9hZC90X3dlYl9yZHBfcmVjaXBlXzU4NHg0ODBfMV81eC9pbWcvcmVjaXBlL3Jhcy9Bc3NldHMvOTA5REEyRjItODczOS00Mjk3LTkyQjAtMUQ4NkM5MjExMjMyL0Rlcml2YXRlcy8xMTZjZGIwNC05NDczLTQzZDAtOWVmZC1kOWY2ZjU5ZGZmYTMuanBn',
           available: true,
           unusual: {
-            "22": 'true',
-            "23": 'true',
+            '22': 'true',
+            '23': 'true',
           },
         },
         {
@@ -875,7 +875,7 @@ export class StoreInfoComponent implements OnInit {
           basePrice: 450,
           available: true,
           unusual: {
-            "24": 'true',
+            '24': 'true',
           },
         },
       ],
