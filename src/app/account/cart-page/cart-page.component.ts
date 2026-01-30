@@ -25,7 +25,7 @@ interface CartGroup {
   eventsId: number;
   eventName: string | null;
   storeName: string | null;
-  storeLogo: string | null;
+  storeLogo: any;
   totalAmount: number;
   totalQuantity: number;
   latestOrderTime: string;
