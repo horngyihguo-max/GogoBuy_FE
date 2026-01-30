@@ -1,28 +1,39 @@
 <div>
-  <div class="flex flex-col lg:flex-row gap-6 p-5 ">
+  <div class="flex flex-col lg:flex-row gap-6 p-5">
     <!-- 店家資訊 左 -->
-    <div class="w-full lg:w-70 space-y-3 flex justify-center text-center place-items-start">
-      <div class="w-full flex lg:flex-col top-50 left-5 pb-5 items-center justify-around lg:shadow-md gap-2">
-        <div class="flex items-center gap-3 lg:flex-col">
+    <div class="flex justify-center p-1">
+      <div class="w-full rounded-2xl bg-white shadow-lg ring-1 ring-black/5
+        transition-all hover:shadow-xl flex lg:flex-col">
 
+        <div class="relative lg:h-52 w-full bg-gray-100">
           @if(storeData.image){
-          <div class="flex justify-center mt-3">
-            <p-image [src]="storeData.image" alt="store" width="250" class="mx-auto" />
-          </div>
-          }@else{
-          <div class="w-full flex justify-center text-gray-300">
-            <i class="pi pi-image text-4xl"></i>
-          </div>
-          }
-
-          <div class="flex flex-col mb:items-start mb:justify-start mx-2">
-            <p class=" lg:text-lg font-semibold">{{ storeData.name }}</p>
-            <div class="text-sm lg:text-sm text-[#662222] space-y-1">
-              <p>{{ storeData.address }}</p>
-              <p>{{ storeData.phone }}</p>
+            <img [src]="storeData.image" alt="store" class="h-full w-full object-cover" />
+          } @else {
+            <div class="flex h-full items-center justify-center text-gray-400">
+              <i class="pi pi-image text-5xl"></i>
             </div>
-            <button class="rounded-full border border-[#662222] bg-white px-4 py-2 mx-5
-             text-sm font-medium text-[#662222] transition hover:bg-[#662222]/10" (click)="opendStoreInfo()">詳細資訊
+          }
+        </div>
+
+        <div class="p-6">
+          <div class="flex flex-col items-center text-center">
+            <h3 class="mb-2 text-xl font-bold text-gray-800">{{ storeData.name }}</h3>
+
+            <div class="mb-6 space-y-2 text-sm text-gray-600">
+              <p class="flex items-center justify-center gap-2">
+                <i class="pi pi-map-marker text-[#662222]"></i>
+                {{ storeData.address }}
+              </p>
+              <p class="flex items-center justify-center gap-2">
+                <i class="pi pi-phone text-[#662222]"></i>
+                {{ storeData.phone }}
+              </p>
+            </div>
+
+            <button
+              class="w-full rounded-xl border-2 border-[#662222] bg-white py-2.5 font-bold text-[#662222] transition-all duration-200 hover:bg-[#662222] hover:text-white active:scale-95"
+              (click)="opendStoreInfo()">
+              詳細資訊
             </button>
           </div>
         </div>
@@ -36,12 +47,12 @@
       <!-- 分類表 -->
       <div class="space-y-4 bg-white border border-gray-200 rounded-xl overflow-hidden shadow-md p-5">
         <div class="flex flex-col gap-6 p-3">
-          <div class="flex justify-between items-center border-b border-[#662222]/70 pb-3">
-            <h3 class="font-bold text-[#662222] flex items-center gap-2 text-lg">
+          <div class="flex justify-between items-center border-b border-[#662222]/70 pb-2">
+            <span class="font-bold text-[#662222] flex items-center gap-2 text-xl">
               <i class="pi pi-tag"></i> 商品分類
-            </h3>
+            </span>
             <button (click)="addCategories()" class="flex items-center gap-2 px-4 py-1.5 bg-[#662222] text-white
-          rounded-full text-sm font-medium hover:bg-[#662222]/90 transition-all shadow-sm active:scale-95">
+          rounded-full  font-medium hover:bg-[#662222]/90 transition-all shadow-sm active:scale-95">
               + 新增分類</button>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -51,33 +62,32 @@
 
               <div class="flex justify-between items-start mb-3">
                 <div class="flex flex-col">
-                  <span class="font-bold text-gray-700">{{ category.name }}</span>
+                  <span class="font-bold text-lg text-gray-700">{{ category.name }}</span>
                 </div>
 
                 <div class="flex gap-1 transition-opacity">
                   <button (click)="editCategory(category, $index)"
                     class="p-1.5 text-gray-400 hover:text-[#662222] transition-colors">
-                    <i class="pi pi-pencil text-xs"></i>
+                    <i class="pi pi-pencil text-sm"></i>
                   </button>
                   <button (click)="openCateDelete(category, $index)"
                     class="p-1.5 text-gray-400 hover:text-red-500 transition-colors">
-                    <i class="pi pi-trash text-xs"></i>
+                    <i class="pi pi-trash text-sm"></i>
                   </button>
                 </div>
               </div>
 
               <div class="flex flex-wrap gap-1.5 mt-auto pt-3">
                 @for(level of category.priceLevel; track $index) {
-                @if(level.price === 0 || level.price === null){
-                }@else{
-                <span class="text-[10px] px-6 py-2 bg-white border border-gray-200 text-[#662222]
+
+                <span class="px-6 py-2 bg-white border border-gray-200 text-[#662222]
                     rounded-md font-medium">
                   {{ level.name }}
                   ${{ level.price }}
                 </span>
-                }
+
                 } @empty {
-                <span class="text-[10px] text-gray-300 italic">尚未設定價格級距</span>
+                <span class="text-sm text-gray-300 italic">尚未設定價格級距</span>
                 }
               </div>
             </div>
@@ -85,7 +95,7 @@
             <div
               class="col-span-full py-10 text-center border-2 border-dashed border-gray-200 bg-gray-50/50 rounded-xl">
               <p class="text-gray-400">目前尚無分類設定</p>
-              <button class="mt-3 text-sm text-[#662222] font-bold hover:underline" (click)="addCategories()">
+              <button class="mt-3  text-[#662222] font-bold hover:underline" (click)="addCategories()">
                 + 立即新增第一個分類
               </button>
             </div>
@@ -99,13 +109,13 @@
         [style.pointer-events]="storeData.menuCategoriesVoList.length <= 0 ? 'none' : 'auto'"
         [style.opacity]="storeData.menuCategoriesVoList.length <= 0 ? '0.3' : '1'">
         <div class="flex flex-col gap-6 p-3">
-          <div class="flex justify-between items-center border-b border-[#662222]/70 pb-3">
-            <h3 class="font-bold text-[#662222] flex items-center gap-2 text-lg">
+          <div class="flex justify-between items-center border-b border-[#662222]/70 pb-2">
+            <h3 class="font-bold text-[#662222] flex items-center gap-2 text-xl">
               <i class="pi pi-cog"></i> 商品規格配置
             </h3>
             <button (click)="addSpecs()" [disabled]="storeData.menuCategoriesVoList.length <= 0"
-              class="flex items-center gap-2 px-4 py-1.5 bg-[#662222] text-white rounded-full text-sm font-medium hover:bg-[#662222]/90 transition-all shadow-sm">
-              <i class="pi pi-plus text-xs"></i>
+              class="flex items-center gap-2 px-4 py-1.5 bg-[#662222] text-white rounded-full  font-medium hover:bg-[#662222]/90 transition-all shadow-sm">
+              <i class="pi pi-plus text-sm"></i>
               新增規格
             </button>
           </div>
@@ -119,30 +129,30 @@
             <div class="flex justify-between items-start mb-3">
               <div>
                 <div class="flex items-center gap-2">
-                  <span class="font-bold text-gray-700">{{ group.name }}</span>
+                  <span class="font-bold text-gray-700 text-lg">{{ group.name }}</span>
                   @if(group.required) {
-                  <span class="text-[10px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded">必填</span>
+                  <span class="text-xs bg-red-100 text-red-600 px-1.5 py-0.5 rounded">必填</span>
                   }
                 </div>
-                <p class="text-[11px] text-gray-400 mt-1">最多可選: {{ group.maxSelection }} 項</p>
+                <p class="text-sm text-gray-400 mt-1">最多可選: {{ group.maxSelection }} 項</p>
               </div>
 
               <div class="flex gap-1">
                 <button (click)="editSpec(group, $index)"
                   class="p-2 text-gray-400 hover:text-[#662222] transition-colors">
-                  <i class="pi pi-pencil text-sm"></i>
+                  <i class="pi pi-pencil "></i>
                 </button>
                 <button (click)="openDeleteSpec(group, $index)"
                   class="p-2 text-gray-400 hover:text-red-500 transition-colors">
-                  <i class="pi pi-trash text-sm"></i>
+                  <i class="pi pi-trash "></i>
                 </button>
               </div>
             </div>
 
-            <div class="flex flex-wrap gap-1.5">
+            <div class="flex flex-wrap gap-2">
               @for(item of group.items; track $index) {
               <span
-                class="text-[11px] px-2 py-0.5 bg-white border border-gray-200 text-gray-600 rounded-md text-center">
+                class="px-2 py-0.5 bg-white border border-gray-200 text-gray-600 rounded-md text-center">
                 {{ item.name }} <br> {{ (item.extraPrice ?? 0) > 0 ? '(+$'+item.extraPrice+')' : '(+$0)' }}
               </span>
               }
@@ -151,7 +161,7 @@
           } @empty {
           <div class="col-span-full py-10 text-center border-2 border-dashed border-gray-200 bg-gray-50/50 rounded-xl">
             <p class="text-gray-400">目前尚無規格設定</p>
-            <button class="mt-3 text-sm text-[#662222] font-bold hover:underline" (click)="addSpecs()">
+            <button class="mt-3  text-[#662222] font-bold hover:underline" (click)="addSpecs()">
               + 立即新增第一個規格
             </button>
           </div>
@@ -165,13 +175,13 @@
         [style.opacity]="storeData.productOptionGroupsVoList.length <= 0 ? '0.3' : '1'">
         <div class="flex flex-col gap-6 p-3">
           <div class="border-b border-[#662222]/20 mb-4">
-            <div class="flex justify-between items-center pb-3">
-              <h3 class="font-bold text-[#662222] flex items-center gap-2 text-lg">
+            <div class="flex justify-between items-center pb-2">
+              <h3 class="font-bold text-[#662222] flex items-center gap-2 text-xl">
                 <i class="pi pi-list"></i> 商品列表
               </h3>
-              <button class="flex items-center gap-2 px-4 py-1.5 bg-[#662222] text-white rounded-full text-sm font-medium
+              <button class="flex items-center gap-2 px-4 py-1.5 bg-[#662222] text-white rounded-full  font-medium
               hover:bg-[#662222]/90 transition-all shadow-sm active:scale-95" (click)="openNewProduct()">
-                <i class="pi pi-plus text-xs"></i>
+                <i class="pi pi-plus text-sm"></i>
                 <span>新增商品</span>
               </button>
             </div>
@@ -180,7 +190,7 @@
               <div class="relative flex items-end flex-nowrap">
 
                 <button (click)="selectedCategories(-1, -1)"
-                  class="p-2 px-4 font-medium transition-colors shrink-0 border-b-2"
+                  class="p-2 px-4 font-medium transition-colors shrink-0 border-b-2 text-lg"
                   [class.hover:bg-red-50]="selectedIndex !== -1"
                   [style.color]="selectedIndex === -1 ? '#662222' : 'rgba(102, 34, 34, 0.4)'"
                   [style.border-color]="selectedIndex === -1 ? '#662222' : 'transparent'">
@@ -190,7 +200,7 @@
                 @for(category of storeData.menuCategoriesVoList; track category.id || $index; let i = $index) {
                 <div class="h-4 w-[1px] bg-gray-300 self-center mx-1 shrink-0"></div>
                 <button (click)="selectedCategories(category.id, i)"
-                  class="p-2 px-4 font-medium transition-colors shrink-0 border-b-2"
+                  class="p-2 px-4 font-medium transition-colors shrink-0 border-b-2 text-lg"
                   [class.hover:bg-red-50]="selectedIndex !== $index"
                   [style.color]="selectedIndex === $index ? '#662222' : 'rgba(102, 34, 34, 0.4)'"
                   [style.border-color]="selectedIndex === $index ? '#662222' : 'transparent'">
@@ -210,11 +220,10 @@
                 <p-iconfield>
                   <p-inputicon class="pi pi-search" />
                   <input pInputText type="text" placeholder="搜尋商品名稱..." [(ngModel)]="searchKeyword"
-                    (input)="applyFilters()"
-                    class="w-full border-gray-200 focus:!border-[#662222] rounded-xl text-sm" />
+                    (input)="applyFilters()" class="w-full border-gray-200 focus:!border-[#662222] rounded-xl " />
                 </p-iconfield>
               </div>
-              <div class="text-xs text-gray-400 font-medium whitespace-nowrap">
+              <div class="text-sm text-gray-400 font-medium whitespace-nowrap">
                 共顯示 {{ filteredProducts.length }} 個品項
               </div>
             </div>
@@ -228,11 +237,11 @@
             <table class="min-w-full text-left border-collapse bg-white">
               <thead class="bg-gray-50/80">
                 <tr class="text-center">
-                  <th class="px-6 py-4 text-sm font-bold text-gray-500 uppercase tracking-wider">商品資訊</th>
-                  <th class="px-6 py-4 text-sm font-bold text-gray-500 uppercase tracking-wider">預覽圖</th>
-                  <th class="px-6 py-4 text-sm font-bold text-gray-500 uppercase tracking-wider">價格</th>
-                  <th class="px-6 py-4 text-sm font-bold text-gray-500 uppercase tracking-wider">狀態控制</th>
-                  <th class="px-6 py-4 text-sm font-bold text-gray-500 uppercase tracking-wider">管理</th>
+                  <th class="px-6 py-4  font-bold text-gray-500 uppercase tracking-wider">商品資訊</th>
+                  <th class="px-6 py-4  font-bold text-gray-500 uppercase tracking-wider">預覽圖</th>
+                  <th class="px-6 py-4  font-bold text-gray-500 uppercase tracking-wider">價格</th>
+                  <th class="px-6 py-4  font-bold text-gray-500 uppercase tracking-wider">狀態控制</th>
+                  <th class="px-6 py-4  font-bold text-gray-500 uppercase tracking-wider">管理</th>
                 </tr>
               </thead>
 
@@ -260,7 +269,7 @@
                   <td class="px-6 py-4">
                     <div class="flex items-center justify-center gap-2">
                       <p-toggleswitch [(ngModel)]="product.available"></p-toggleswitch>
-                      <span class="text-xs font-medium transition-colors duration-300"
+                      <span class="text-sm font-medium transition-colors duration-300"
                         [class.text-[#662222]]="product.available" [class.text-gray-400]="!product.available">
                         {{ product.available ? '供應中' : '已停售' }}
                       </span>
@@ -286,11 +295,11 @@
           border-gray-200 bg-gray-50/50">
             <div class="text-center space-y-2 max-w-xs">
               <h3 class="text-lg font-bold text-gray-700">還沒有建立商品</h3>
-              <p class="text-sm text-gray-400 leading-relaxed">
+              <p class=" text-gray-400 leading-relaxed">
                 這裡暫時空空如也，點擊 <span class="font-semibold">新增商品</span> 按鈕，開始建立您的第一份菜單吧！
               </p>
             </div>
-            <button class="mt-3 text-sm text-[#662222] font-bold hover:underline" (click)="openNewProduct()">
+            <button class="mt-3  text-[#662222] font-bold hover:underline" (click)="openNewProduct()">
               + 立即新增第一個商品
             </button>
           </div>
@@ -302,9 +311,9 @@
   </div>
   <!-- 儲存變更按鈕 -->
   <div class="flex justify-center my-3">
-    <button type="button" (click)="onSaveAll()" class="flex items-center gap-2 px-8 py-4 bg-[#662222] text-white rounded-full text-sm font-medium
+    <button type="button" (click)="onSaveAll()" class="flex items-center gap-2 px-8 py-4 bg-[#662222] text-white rounded-full  font-medium
     shadow-lg hover:brightness-110 active:scale-95 transition">
-      <i class="pi pi-save text-xs"></i>
+      <i class="pi pi-save text-sm"></i>
       <span>儲存所有</span>
     </button>
   </div>
@@ -322,7 +331,7 @@
 
   <div class="flex absolute right-5 top-17">
     <button (click)="editStore($event)" class="p-2 rounded-md bg-[#662222] transition-colors cursor-pointer
-    transition-colors" [routerLink]="id !== 0 ? ['../../store_upsert', id] : ['../store_upsert']">
+    transition-colors">
       <i class="pi pi-pencil text-base font-semibold mr-2 text-white"></i><span class="text-white">編輯店家</span>
     </button>
   </div>
@@ -365,7 +374,7 @@
           <div class="flex items-start">
             <i class="pi pi-map-marker text-gray-400 mr-3 mt-1.5 text-lg"></i>
             <div class="flex flex-col">
-              <span class="text-sm text-gray-400 font-medium tracking-wide">門市地址</span>
+              <span class=" text-gray-400 font-medium tracking-wide">門市地址</span>
               <p class="text-gray-800 m-0 font-semibold text-lg leading-relaxed">{{ storeData.address }}</p>
             </div>
           </div>
@@ -373,7 +382,7 @@
           <div class="flex items-start">
             <i class="pi pi-phone text-gray-400 mr-3 mt-1.5 text-lg"></i>
             <div class="flex flex-col">
-              <span class="text-sm text-gray-400 font-medium tracking-wide">聯絡電話</span>
+              <span class=" text-gray-400 font-medium tracking-wide">聯絡電話</span>
               <p class="text-gray-800 m-0 font-semibold text-lg">{{ storeData.phone }}</p>
             </div>
           </div>
@@ -381,7 +390,7 @@
           <div class="flex items-start border-t border-gray-200 pt-5">
             <i class="pi pi-clock text-gray-400 mr-3 mt-1.5 text-lg"></i>
             <div class="flex flex-col w-full">
-              <span class="text-sm text-gray-400 font-medium tracking-wide mb-3">營業時間</span>
+              <span class=" text-gray-400 font-medium tracking-wide mb-3">營業時間</span>
 
               <div class="space-y-3">
                 @for(group of groupedOperatingHours; track group.week) {
@@ -452,37 +461,45 @@
 
   <div class="flex flex-col gap-6 py-2 ">
     <div class="flex flex-col px-4 gap-1">
-      <label class="text-sm font-bold text-[#662222]/80">商品分類名稱</label>
-      <input pInputText [(ngModel)]="currentCategories.name" placeholder="例如：純茶、鮮奶" class="w-full text-sm border-gray-200 bg-gray-50
-      rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#662222]/20 transition-all placeholder:text-[11px]" />
+      <label class=" font-bold text-[#662222]/80">商品分類名稱</label>
+      <input pInputText [(ngModel)]="currentCategories.name" placeholder="例如：純茶、鮮奶" class="w-full  border-gray-200 bg-gray-50
+      rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#662222]/20 transition-all placeholder:text-sm" />
+      @if (submitted && !currentCategories.name) {
+      <small class="text-red-500 text-[10px] ml-1">請填寫商品分類名稱
+      </small>
+      }
     </div>
 
     <div class="flex flex-col gap-1 px-4">
       <div class="flex items-center justify-between ">
-        <label class="text-sm font-bold text-[#662222]/80">商品大小的價格級距</label>
+        <label class=" font-bold text-[#662222]/80">商品大小的價格級距</label>
         <button type="button" (click)="addPriceLevel()" class="border border-outset border-[#662222] text-[#662222] rounded-lg
-        hover:bg-[#662222]/5 transition-colors flex items-center justify-center px-2 cursor-pointer text-sm">
+        hover:bg-[#662222]/5 transition-colors flex items-center justify-center px-2 cursor-pointer ">
           + 新增級距
         </button>
       </div>
 
-      <div class="max-h-[300px] overflow-y-auto pr-2 space-y-3 custom-scrollbar">
+      <div class="max-h-[300px] overflow-y-auto pr-2 custom-scrollbar flex flex-col gap-2">
         @for (level of currentCategories.priceLevel; track $index) {
         <div class="grid grid-cols-[1fr_100px_40px] items-center gap-2 animate-fade-in group">
-          <input pInputText [(ngModel)]="level.name" placeholder="例如：大杯" class="w-full text-sm bg-gray-50 border-gray-100 rounded-lg px-3
-            py-2 focus:ring-2 focus:ring-[#662222]/10 placeholder:text-[11px]" />
+          <input pInputText [(ngModel)]="level.name" placeholder="例如：大杯" class="w-full  bg-gray-50 border-gray-100 rounded-lg px-3
+            py-2 focus:ring-2 focus:ring-[#662222]/10 placeholder:text-sm" />
 
           <p-inputnumber [(ngModel)]="level.price" placeholder="$" [min]="0" mode="decimal" prefix="$ "
-            inputStyleClass="w-full text-sm bg-gray-50 border-gray-100 rounded-lg px-3 py-2 text-right">
+            inputStyleClass="w-full  bg-gray-50 border-gray-100 rounded-lg px-3 py-2 text-right">
           </p-inputnumber>
 
           <button type="button" (click)="removePriceLevel($index)"
             class="w-9 h-9 flex items-center justify-center rounded-xl text-gray-400 hover:bg-red-50 hover:text-red-500 transition-all">
-            <i class="pi pi-trash text-sm"></i>
+            <i class="pi pi-trash "></i>
           </button>
         </div>
+        @if (submitted && (!level.name || level.price === null || level.price === undefined)) {
+        <small class="text-red-500 text-[10px] ml-1">此級距內容未填寫完整或有空白
+        </small>
+        }
         } @empty {
-        <div class="text-center py-6 border-2 border-dashed border-gray-100 rounded-xl">
+        <div class="text-center border-2 border-dashed border-gray-100 rounded-xl">
           <p class="text-gray-400">目前無預設分類價格設定</p>
         </div>
         }
@@ -491,7 +508,7 @@
 
     <div class="mx-4 p-4 bg-amber-50/50 border border-amber-100 rounded-xl flex gap-3 items-center">
       <i class="pi pi-info-circle text-amber-600 text-lg"></i>
-      <span class="text-sm text-amber-800">
+      <span class=" text-amber-800">
         <strong>提示：</strong>此價格設定將預設套用至該分類下所有新商品。若無大小差異，則無需填寫；如需調整個別商品價格，請至商品列表進行設定。
       </span>
     </div>
@@ -524,7 +541,7 @@
       <div class="grid md:grid-cols-[80px_1fr] gap-4">
         <div class="flex flex-col gap-3">
           <div class="flex flex-row md:flex-col items-center justify-start gap-2">
-            <label class="text-sm font-bold text-[#662222]/80 min-w-[40px] md:min-w-0 md:text-center">
+            <label class=" font-bold text-[#662222]/80 min-w-[40px] md:min-w-0 md:text-center">
               必填
             </label>
             <div class="flex items-center justify-center">
@@ -536,12 +553,16 @@
         <div class="flex flex-col gap-3">
           <div class="flex gap-4 justify-between">
             <div class="flex flex-col gap-1 w-full">
-              <label class="text-sm font-bold text-[#662222]/80">規格名稱</label>
+              <label class="font-bold text-[#662222]/80">規格名稱</label>
               <input pInputText [(ngModel)]="currentGroup.name" placeholder="例如：甜度" required
-                class="w-full text-sm border-none bg-white rounded-lg px-3 py-2" />
+                class="w-full  border-none bg-white rounded-lg px-3 py-2" />
+              @if (submitted && !currentGroup.name.trim()) {
+              <small class="text-red-500 text-[10px] ml-1">請輸入規格名稱
+              </small>
+              }
             </div>
             <div class="flex flex-col gap-1">
-              <label class="text-sm font-bold text-[#662222]/80">最大數量</label>
+              <label class=" font-bold text-[#662222]/80">最大數量</label>
               <p-inputnumber [(ngModel)]="currentGroup.maxSelection" [showButtons]="true" buttonLayout="horizontal"
                 spinnerMode="horizontal" inputId="vertical" [inputStyle]="{ width: '3rem' }"
                 [min]="currentGroup.required ? 1 : 0" max="99">
@@ -552,10 +573,14 @@
                   <span class="pi pi-minus"></span>
                 </ng-template>
               </p-inputnumber>
+              @if (submitted && (!currentGroup.maxSelection || currentGroup.maxSelection <= 0)) { <small
+                class="text-red-500 text-[10px] ml-1">此規格最大數量無效
+                </small>
+                }
             </div>
           </div>
           <div class="flex flex-col gap-1">
-            <label class="text-sm font-bold text-[#662222]/80 mb-1">適用分類</label>
+            <label class=" font-bold text-[#662222]/80 mb-1">適用分類</label>
             <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
               @for(cate of storeData.menuCategoriesVoList; track cate.id || $index){
               <div class="flex items-center p-3 rounded-xl border transition-all cursor-pointer" [ngClass]="{ 'bg-[#662222]/5 border-[#662222]/30': isCateSelected(cate),
@@ -567,21 +592,21 @@
                 </div>
 
                 <label [for]="'cate-' + $index"
-                  class="ml-3 text-sm font-medium text-gray-700 cursor-pointer select-none leading-none flex-1">
+                  class="ml-3  font-medium text-gray-700 cursor-pointer select-none leading-none flex-1">
                   {{ cate.name }}
                 </label>
               </div>
               } @empty {
-              <p class="text-sm text-gray-400 italic">尚無可選分類</p>
+              <p class=" text-gray-400 italic">尚無可選分類</p>
               }
             </div>
           </div>
 
           <div class="flex flex-col gap-1">
             <div class="flex justify-between items-center">
-              <span class="text-sm font-bold text-[#662222]/80">選項內容</span>
+              <span class=" font-bold text-[#662222]/80">選項內容</span>
               <button (click)="addSpecItem()" class="border border-outset border-[#662222] text-[#662222] rounded-lg
-                hover:bg-[#662222]/5 transition-colors flex items-center justify-center px-2 cursor-pointer text-sm">
+                hover:bg-[#662222]/5 transition-colors flex items-center justify-center px-2 cursor-pointer ">
                 + 選項
               </button>
             </div>
@@ -590,14 +615,18 @@
               @for(item of currentGroup.items; track item.id) {
               <div class="flex gap-2 items-center">
                 <input pInputText [(ngModel)]="item.name" placeholder="項目名稱"
-                  class="flex-[2] text-sm border-gray-100 bg-gray-50 rounded-lg px-3 py-2" />
+                  class="flex-[2]  border-gray-100 bg-gray-50 rounded-lg px-3 py-2" />
                 <p-inputNumber [(ngModel)]="item.extraPrice" prefix="$"
-                  inputStyleClass="w-24 text-sm border-gray-100 bg-gray-50 rounded-lg px-2 py-2">
+                  inputStyleClass="w-24  border-gray-100 bg-gray-50 rounded-lg px-2 py-2">
                 </p-inputNumber>
                 <button (click)="removeSpecItem(item.id)" class="text-gray-300 hover:text-red-500">
                   <i class="pi pi-times-circle text-lg"></i>
                 </button>
               </div>
+              @if (submitted && (!item.name.trim() || !item.extraPrice)) {
+              <small class="text-red-500 text-[10px] ml-1">此規格選項內容未填寫完整
+              </small>
+              }
               }
             </div>
           </div>
@@ -606,10 +635,10 @@
       <div class="mx-4 p-4 bg-amber-50/50 border border-amber-100 rounded-xl flex gap-3 items-center">
         <i class="pi pi-info-circle text-amber-600 text-lg"></i>
         <div>
-          <span class="text-sm text-amber-800">
+          <span class=" text-amber-800">
             <strong>提示：</strong>若有多組相同類別但內容不同的規格，請分別建立。
           </span>
-          <span class="text-sm text-amber-800">
+          <span class=" text-amber-800">
             <strong>※</strong>若有相同規格(如：冰量)但選項不同(如：不同品項不同的冰量選擇)，請另外新增規格。
           </span>
         </div>
@@ -621,8 +650,8 @@
 
   <ng-template pTemplate="footer">
     <div class="flex justify-end gap-2">
-      <button (click)="displaySpecsDialog = false" class="px-4 py-2 text-sm text-gray-500">取消</button>
-      <button (click)="saveSpec()" class="px-6 py-2 bg-[#662222] text-white text-sm font-bold rounded-xl">
+      <button (click)="displaySpecsDialog = false" class="px-4 py-2  text-gray-500">取消</button>
+      <button (click)="saveSpec()" class="px-6 py-2 bg-[#662222] text-white  font-bold rounded-xl">
         確認儲存
       </button>
     </div>
@@ -638,8 +667,7 @@
     <div class="w-full lg:max-w-xs space-y-3">
       <!-- 照片上傳 -->
       <div class="relative group mx-auto border-2 border-gray-300 rounded-2xl
-      overflow-hidden bg-gray-50 hover:border-[#662222] transition-all
-      w-60 h-60">
+        overflow-hidden bg-gray-50 hover:border-[#662222] transition-all w-60 h-60">
 
         @if (currentProduct.image) {
         <img [src]="currentProduct.image" class="w-full h-full object-cover" />
@@ -662,10 +690,10 @@
             <i class="pi pi-image text-[#662222] text-3xl"></i>
           </div>
           <div class="text-center">
-            <p class="text-sm font-semibold text-[#662222]">點擊上傳照片</p>
-            <p class="text-sm text-gray-700 font-semibold ">推薦比例 1:1</p>
-            <p class="text-sm text-gray-700 font-semibold ">建議尺寸 600 x 600 (WebP, JPG)</p>
-            <p class="text-sm text-gray-700 font-semibold ">檔案大小 80KB 以下</p>
+            <p class=" font-semibold text-[#662222]">點擊上傳照片</p>
+            <p class=" text-gray-700 font-semibold ">推薦比例 1:1</p>
+            <p class=" text-gray-700 font-semibold ">建議尺寸 600 x 600 (WebP, JPG)</p>
+            <p class=" text-gray-700 font-semibold ">檔案大小 80KB 以下</p>
           </div>
         </div>
         }
@@ -675,38 +703,50 @@
 
       <div class="space-y-1.5">
         <div class="flex items-center justify-between">
-          <label class="text-sm font-bold text-[#662222]/80">商品名稱</label>
+          <label class="font-bold text-[#662222]/80">商品名稱</label>
         </div>
-        <input pInputText [(ngModel)]="currentProduct.name" class="w-full border-gray-200 focus:border-[#662222]
-          rounded-xl text-sm" placeholder="請輸入商品名稱" />
+        <div>
+          <input pInputText [(ngModel)]="currentProduct.name" class="w-full border-gray-200 focus:border-[#662222]
+          rounded-xl h-12" placeholder="請輸入商品名稱" />
+          @if (submitted && !currentProduct.name.trim()) {
+          <small class="text-red-500 text-[10px] ml-1">請輸入商品名稱</small>
+          }
+        </div>
       </div>
 
       <div class="grid grid-cols-2 gap-4">
         <div class="space-y-1.5">
           <div class="flex items-center justify-between">
-            <label class="text-sm font-bold text-[#662222]/80">所屬分類</label>
+            <label class=" font-bold text-[#662222]/80">所屬分類</label>
           </div>
           <p-select [(ngModel)]="currentProduct.categoryId" [options]="storeData.menuCategoriesVoList"
-            optionLabel="name" optionValue="id" appendTo="body" class="w-full text-sm"
-            (onChange)="onCategoryChange()" />
+            optionLabel="name" optionValue="id" appendTo="body" class="w-full h-12" (onChange)="onCategoryChange()" />
+          @if (submitted && !currentProduct.categoryId) {
+          <small class="text-red-500 text-[10px] ml-1">請選擇分類</small>
+          }
         </div>
 
         <div class="space-y-1.5">
           <div class="flex items-center justify-between">
-            <label class="text-sm font-bold text-[#662222]/80">基礎價格</label>
+            <label class=" font-bold text-[#662222]/80">基礎價格</label>
           </div>
-          <p-inputnumber [(ngModel)]="currentProduct.basePrice" currency="TWD" [min]="0" class="w-full"
-            inputStyleClass="w-full border-gray-200 focus:border-[#662222] rounded-xl text-sm text-right" prefix="$ "
-            placeholder="$ " [maxFractionDigits]="0" />
+          <div>
+            <p-inputnumber [(ngModel)]="currentProduct.basePrice" currency="TWD" [min]="0" class="w-full"
+              inputStyleClass="w-full border-gray-200 focus:border-[#662222] rounded-xl h-12 text-right" prefix="$ "
+              placeholder="$ " [maxFractionDigits]="0" />
+            @if (submitted && (currentProduct.basePrice === null || currentProduct.basePrice === undefined)) {
+            <small class="text-red-500 text-[10px] ml-1">請填寫價格</small>
+            }
+          </div>
         </div>
       </div>
 
       <div class="space-y-1.5">
         <div class="flex items-center justify-between">
-          <label class="text-sm font-bold text-[#662222]/80">商品描述</label>
+          <label class=" font-bold text-[#662222]/80">商品描述</label>
         </div>
         <textarea pTextarea [(ngModel)]="currentProduct.description"
-          class="w-full p-3 rounded-xl border border-gray-300 transition-all outline-none focus:border focus:border-[#662222] focus:ring-0 max-h-32 overflow-y-auto text-sm"
+          class="w-full p-3 rounded-xl border border-gray-300 transition-all outline-none focus:border focus:border-[#662222] focus:ring-0 max-h-32 overflow-y-auto "
           placeholder="請描述您的商品特色..." rows="3"></textarea>
       </div>
     </div>
@@ -714,9 +754,9 @@
     <!-------------右--------------->
     <div class="flex flex-col gap-1 mt-3 w-full">
       <div class="flex items-center justify-between">
-        <label class="text-sm font-bold text-[#662222]/80">產品規格配置</label>
+        <label class=" font-bold text-[#662222]/80">產品規格配置</label>
         <button type="button" (click)="openExistenceSpec()" class="border border-outset border-[#662222] text-[#662222] rounded-lg
-        hover:bg-[#662222]/5 transition-colors flex items-center justify-center px-2 cursor-pointer text-sm">
+        hover:bg-[#662222]/5 transition-colors flex items-center justify-center px-2 cursor-pointer ">
           + 加入現有規格
         </button>
       </div>
@@ -727,29 +767,29 @@
           <div class="flex justify-between items-start mb-3">
             <div>
               <div class="flex items-center gap-2">
-                <span class="font-bold text-gray-700">{{ group.name }}</span>
+                <span class="font-bold text-gray-700 text-lg">{{ group.name }}</span>
                 @if(group.required) {
-                <span class="text-[10px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded">必填</span>
+                <span class="text-xs bg-red-100 text-red-600 px-1.5 py-0.5 rounded">必填</span>
                 }
               </div>
-              <p class="text-[11px] text-gray-400 mt-1">最多可選: {{ group.maxSelection }} 項</p>
+              <p class="text-sm text-gray-400 mt-1">最多可選: {{ group.maxSelection }} 項</p>
             </div>
 
             <div class="flex gap-1">
               <button (click)="editSpec(group, $index)"
                 class="p-2 text-gray-400 hover:text-[#662222] transition-colors">
-                <i class="pi pi-pencil text-sm"></i>
+                <i class="pi pi-pencil "></i>
               </button>
               <button (click)="openProductSpecDelete(group)"
                 class="p-2 text-gray-400 hover:text-red-500 transition-colors">
-                <i class="pi pi-trash text-sm"></i>
+                <i class="pi pi-trash "></i>
               </button>
             </div>
           </div>
 
           <div class="flex flex-wrap gap-1.5">
             @for(item of group.items; track $index) {
-            <span class="text-[14px] px-2 py-0.5 bg-white border border-gray-200 text-gray-600 rounded-md text-center">
+            <span class="px-2 py-0.5 bg-white border border-gray-200 text-gray-600 rounded-md text-center">
               {{ item.name }} <br> {{ (item.extraPrice ?? 0) > 0 ? '(+$'+item.extraPrice+')' : '(+$0)' }}
             </span>
             }
@@ -796,7 +836,7 @@
     </div>
 
     <div class="mt-5 sm:mt-6">
-      <button type="button" (click)="displaySaveDialog = false" routerLink='../../gogobuy/home' class="inline-flex w-full justify-center rounded-md bg-[#662222] px-3 py-2 text-sm font-semibold
+      <button type="button" (click)="closeSaveDialog()" class="inline-flex w-full justify-center rounded-md bg-[#662222] px-3 py-2  font-semibold
         text-white shadow-sm hover:bg-[#662222]/90 transition-all active:scale-95 outline-none">確認
       </button>
     </div>
@@ -819,15 +859,15 @@
 
       <div class="mt-3 text-center">
         <h3 class="text-lg font-semibold leading-6 text-gray-900" id="modal-title">刪除分類</h3>
-        <p class="text-sm text-gray-700">是否確定刪除 <span class="font-bold">{{ tempCateTarget?.name }}</span> 分類</p>
+        <p class=" text-gray-700">是否確定刪除 <span class="font-bold">{{ tempCateTarget?.name }}</span> 分類</p>
       </div>
     </div>
 
     <div class="flex gap-5 mt-5">
-      <button type="button" (click)="displayDeleteCategories = false" class="inline-flex w-full justify-center rounded-md px-3 py-2 text-sm font-semibold
+      <button type="button" (click)="displayDeleteCategories = false" class="inline-flex w-full justify-center rounded-md px-3 py-2  font-semibold
         text-gray-500 shadow-sm hover:bg-gray-100 transition-all outline-none">取消
       </button>
-      <button type="button" (click)="deleteCategories()" class="inline-flex w-full justify-center rounded-md bg-[#662222] px-3 py-2 text-sm font-semibold
+      <button type="button" (click)="deleteCategories()" class="inline-flex w-full justify-center rounded-md bg-[#662222] px-3 py-2  font-semibold
         text-white shadow-sm hover:bg-[#662222]/90 transition-all active:scale-95 outline-none">確認
       </button>
     </div>
@@ -850,15 +890,15 @@
 
       <div class="mt-3 text-center">
         <h3 class="text-lg font-semibold leading-6 text-gray-900" id="modal-title">刪除規格</h3>
-        <p class="text-sm text-gray-700">是否確定刪除 <span class="font-bold">{{ tempSpecTarget?.name }}</span> 規格</p>
+        <p class=" text-gray-700">是否確定刪除 <span class="font-bold">{{ tempSpecTarget?.name }}</span> 規格</p>
       </div>
     </div>
 
     <div class="flex gap-5 mt-5">
-      <button type="button" (click)="displayDeleteSpecs = false" class="inline-flex w-full justify-center rounded-md px-3 py-2 text-sm font-semibold
+      <button type="button" (click)="displayDeleteSpecs = false" class="inline-flex w-full justify-center rounded-md px-3 py-2  font-semibold
         text-gray-500 shadow-sm hover:bg-gray-100 transition-all outline-none">取消
       </button>
-      <button type="button" (click)="deleteSpec()" class="inline-flex w-full justify-center rounded-md bg-[#662222] px-3 py-2 text-sm font-semibold
+      <button type="button" (click)="deleteSpec()" class="inline-flex w-full justify-center rounded-md bg-[#662222] px-3 py-2  font-semibold
         text-white shadow-sm hover:bg-[#662222]/90 transition-all active:scale-95 outline-none">確認
       </button>
     </div>
@@ -881,15 +921,15 @@
 
       <div class="mt-3 text-center">
         <h3 class="text-lg font-semibold leading-6 text-gray-900" id="modal-title">刪除商品</h3>
-        <p class="text-sm text-gray-700">是否確定刪除 <span class="font-bold">{{ tempProductTarget?.name }}</span> 商品</p>
+        <p class=" text-gray-700">是否確定刪除 <span class="font-bold">{{ tempProductTarget?.name }}</span> 商品</p>
       </div>
     </div>
 
     <div class="flex gap-5 mt-5">
-      <button type="button" (click)="displayDeleteProduct = false" class="inline-flex w-full justify-center rounded-md px-3 py-2 text-sm font-semibold
+      <button type="button" (click)="displayDeleteProduct = false" class="inline-flex w-full justify-center rounded-md px-3 py-2  font-semibold
         text-gray-500 shadow-sm hover:bg-gray-100 transition-all outline-none">取消
       </button>
-      <button type="button" (click)="deleteProduct()" class="inline-flex w-full justify-center rounded-md bg-[#662222] px-3 py-2 text-sm font-semibold
+      <button type="button" (click)="deleteProduct()" class="inline-flex w-full justify-center rounded-md bg-[#662222] px-3 py-2  font-semibold
         text-white shadow-sm hover:bg-[#662222]/90 transition-all active:scale-95 outline-none">確認
       </button>
     </div>
@@ -897,8 +937,8 @@
 </p-dialog>
 
 <!---------------------------- 確定要從此商品 移除 此規格嗎 Dialog ---------------------------->
-<p-dialog [(visible)]="displayDeleteProductSpec" [modal]="true" [closable]="false" [showHeader]="false" [draggable]="false"
-  [resizable]="false" [closeOnEscape]="false" styleClass="rounded-xl overflow-hidden"
+<p-dialog [(visible)]="displayDeleteProductSpec" [modal]="true" [closable]="false" [showHeader]="false"
+  [draggable]="false" [resizable]="false" [closeOnEscape]="false" styleClass="rounded-xl overflow-hidden"
   [style]="{ width: '90vw', maxWidth: '24rem', border: 'none' }">
 
   <div class="bg-white px-4">
@@ -912,15 +952,16 @@
 
       <div class="mt-3 text-center">
         <h3 class="text-lg font-semibold leading-6 text-gray-900" id="modal-title">從此商品移除此規格</h3>
-        <p class="text-sm text-gray-700">是否確定刪除此商品的 <span class="font-bold">{{ tempProductSpecTarget?.name }}</span> 規格</p>
+        <p class=" text-gray-700">是否確定刪除此商品的 <span class="font-bold">{{ tempProductSpecTarget?.name }}</span> 規格
+        </p>
       </div>
     </div>
 
     <div class="flex gap-5 mt-5">
-      <button type="button" (click)="displayDeleteProduct = false" class="inline-flex w-full justify-center rounded-md px-3 py-2 text-sm font-semibold
+      <button type="button" (click)="displayDeleteProduct = false" class="inline-flex w-full justify-center rounded-md px-3 py-2  font-semibold
         text-gray-500 shadow-sm hover:bg-gray-100 transition-all outline-none">取消
       </button>
-      <button type="button" (click)="removeProductSpecs()" class="inline-flex w-full justify-center rounded-md bg-[#662222] px-3 py-2 text-sm font-semibold
+      <button type="button" (click)="removeProductSpecs()" class="inline-flex w-full justify-center rounded-md bg-[#662222] px-3 py-2  font-semibold
         text-white shadow-sm hover:bg-[#662222]/90 transition-all active:scale-95 outline-none">確認
       </button>
     </div>
@@ -928,8 +969,9 @@
 </p-dialog>
 
 <!---------------------------- 商品Dialog 加上現有規格 Dialog ---------------------------->
-<p-dialog [(visible)]="displayExistenceSpec"  [modal]="true" [draggable]="false" [resizable]="false"
-  styleClass="h-screen max-h-screen m-0 rounded-none shadow-2xl" [style]="{ width: '90vw', maxWidth: '30rem', border: 'none' }">
+<p-dialog [(visible)]="displayExistenceSpec" [modal]="true" [draggable]="false" [resizable]="false"
+  styleClass="h-screen max-h-screen m-0 rounded-none shadow-2xl"
+  [style]="{ width: '90vw', maxWidth: '30rem', border: 'none' }">
   <div class="bg-white px-4">
 
 
