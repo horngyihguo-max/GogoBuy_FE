@@ -1,21 +1,23 @@
-import { FeeDescriptionVoList, MenuCategoriesVoList, MenuVoList, OperatingHoursVoList, ProductOptionGroupsVoList, Stores } from './../../@service/store.service';
+import { FeeDescriptionVoList, MenuCategoriesVoList, MenuVoList, OperatingHoursVoList, PriceLevel, ProductOptionGroupsVoList, Stores } from './../../@service/store.service';
 import { Component } from '@angular/core';
 import { AuthService } from '../../@service/auth.service';
 import { HttpService } from '../../@service/http.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Dialog } from "primeng/dialog";
-import { TabsModule } from 'primeng/tabs';
 import { PickListModule } from 'primeng/picklist';
 import { DragDropModule } from '@angular/cdk/drag-drop';
-
+import { InputGroupModule } from 'primeng/inputgroup';
+import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { FloatLabelModule } from 'primeng/floatlabel';
 
 
 @Component({
   selector: 'app-group-event',
   imports: [
-    CommonModule, Dialog, TabsModule,
-    PickListModule, DragDropModule
+    CommonModule, Dialog, PickListModule, DragDropModule,
+    InputGroupModule, InputGroupAddonModule, InputNumberModule, FloatLabelModule
   ],
   templateUrl: './group-event.component.html',
   styleUrl: './group-event.component.scss'
@@ -64,6 +66,23 @@ export class GroupEventComponent {
       this.menuVoList=res.menuVoList;
       this.menuCategoriesVoList=res.menuCategoriesVoList;
       if (this.menuCategoriesVoList.length > 0) {
+        const categoryMap = new Map(
+          this.menuCategoriesVoList.map(cat => [cat.id, cat])
+        );
+        for (const cate of this.menuVoList) {
+          const perPrice:PriceLevel[]=[];
+          const matchedCategory = categoryMap.get(cate.categoryId);
+          if (matchedCategory?.priceLevel) {
+            matchedCategory.priceLevel.forEach(level => {
+              const base = cate?.basePrice ?? 0;
+              perPrice.push({
+                name:level.name,
+                price:(level.price ?? 0) + base
+              });
+            });
+          }
+          cate.basePrice=perPrice;
+        }
         this.activeTab = this.menuCategoriesVoList[0].id;
       }
       this.productOptionGroupsVoList=res.productOptionGroupsVoList;
@@ -210,7 +229,7 @@ export class GroupEventComponent {
   onMoveAllToTarget(event: any) {
     this.fixPaddingPosition();
   }
-  private fixPaddingPosition() {
+  fixPaddingPosition() {
     // 給 PrimeNG 內建邏輯 50ms 的緩衝，確保它跑完
     setTimeout(() => {
       // 1. 抓出目前兩個清單中「真正」的產品 (排除墊片)

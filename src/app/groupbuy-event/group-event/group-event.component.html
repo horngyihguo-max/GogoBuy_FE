@@ -2,11 +2,11 @@
   <div class="min-h-screen flex flex-col bg-gray-50">
     <div class="flex-1 flex flex-col justify-center items-center bg-[#F4E7E1] px-4 text-center">
       <div class="text-6xl mb-4"><i class="pi pi-search !text-6xl text-[#662222]"></i></div>
-      <h2 class="text-2xl md:text-4xl font-bold text-[#662222]">無店家資料</h2>
-      <p class="text-gray-500 mt-2 text-base md:text-base">很抱歉，找不到您指定的店家資訊。</p>
+      <h2 class="text-2xl lg:text-4xl font-bold text-[#662222]">無店家資料</h2>
+      <p class="text-gray-500 mt-2 text-base lg:text-base">很抱歉，找不到您指定的店家資訊。</p>
       <button class="mt-6 px-8 py-2 bg-[#662222] border-1 text-white rounded-full
                       hover:bg-white hover:border-[#662222] hover:!text-[#662222]
-                      transition-all w-full md:w-auto"
+                      transition-all w-full lg:w-auto"
               (click)="goTo()">
         返回首頁
       </button>
@@ -17,9 +17,9 @@
     <div class="mt-[20px] area-block">
       <img src={{storeList?.image}} crossorigin="anonymous"
           class="rounded-t-lg aspect-[3/2] object-cover
-              md:rounded-l-lg md:rounded-tr-none md:mr-[20px]">
+              lg:rounded-l-lg lg:rounded-tr-none lg:mr-[20px]">
       <div class="py-[20px] ml-[10px] flex-1 min-w-0 h-full
-                  md:my-[0px] md:flex md:flex-col md:justify-center md:align-center">
+                  lg:my-[0px] lg:flex lg:flex-col lg:justify-center lg:align-center">
         <p class="storeName">{{storeList?.name}}</p>
         <table class="store-table">
           <tr>
@@ -42,16 +42,16 @@
   </div>
   <div class="area">
     <div class="my-[20px] area-block">
-      <div class="w-full px-4 md:pl-8">
+      <div class="w-full px-4 lg:pl-8">
         <div class="text-[#662222] font-bold text-2xl
-                    md:text-3xl event-div">開團資料設定</div>
+                    lg:text-3xl event-div">開團資料設定</div>
         <div class="event-div each-div">
           <div class="div-title">請選擇拆帳模式</div>
-          <div class="div-content sm:flex sm:gap-15 md:flex md:gap-30">
+          <div class="div-content sm:flex sm:gap-15 lg:flex lg:gap-30">
             <div class="relative inline-block"> <!-- 下拉選單 -->
               <button (click)="toggle($event)"
                 class="w-64 px-4 py-2 bg-white/70 text-[#662222] rounded-md flex justify-between items-center
-                        md:w-80"> <!-- 觸發按鈕 -->
+                        lg:w-80"> <!-- 觸發按鈕 -->
                 {{choice || "運費拆帳方式"}}
                 <span class="transition-transform duration-200" [class.rotate-180]="open">▼</span>
               </button>
@@ -82,7 +82,7 @@
                 </div>
               }
             </div>
-            <div class="flex items-center gap-3 cursor-pointer group w-64 md:w-auto">
+            <div class="flex items-center gap-3 cursor-pointer group w-64 lg:w-auto">
               <input type="checkbox" [checked]="isConfirmed" (change)="onCheckChange($event)"
                     class="w-5 h-5 rounded border-gray-300 text-[#662222] focus:ring-[#662222]">
               <span class="text-base font-bold group-hover:text-[#662222] transition-colors" (click)="dialog()">
@@ -93,89 +93,101 @@
         </div>
         <div class="event-div each-div">
           <div class="div-title">編輯開團菜單</div>
-
-          <!-- <p-tabs [(value)]="activeTab" class="div-content flex flex-row h-full">
-            <div class="bg-white z-10 w-56 shrink-0 border-r">
-              <div class="h-full overflow-y-auto custom-scrollbar">
-                <p-tablist class=" flex flex-col gap-2 py-2 ">
-                  @for (cate of menuCategoriesVoList; track $index) {
-                    <p-tab [value]="cate.id" class="justify-start" >
-                      {{ cate.name }}
-                    </p-tab>
-                  }
-                </p-tablist>
+          <div class="div-content">
+            <div class="flex flex-col lg:flex-row h-full bg-gray-100">
+              <div class="flex w-full flex-shrink-0 bg-gray-100 overflow-x-auto
+                          lg:flex-col lg:w-30 lg:overflow-x-hidden lg:overflow-y-auto">
+                @for(cate of menuCategoriesVoList; track $index){
+                  <button class="relative py-4 px-6 transition-all duration-200
+                                rounded-t-xl
+                                lg:rounded-tr-none lg:rounded-l-xl"
+                    (click)="activeTab = cate.id"                    [class.active-tab]="activeTab === cate.id"
+                    [class.text-[#662222]]="activeTab === cate.id"   [class.font-bold]="activeTab === cate.id"
+                    [class.bg-white]="activeTab === cate.id" [class.border-transparent]="activeTab !== cate.id">
+                    {{cate.name}}
+                    @if(activeTab == cate.id) {
+                      <div class="hidden lg:block absolute -right-[2px] top-0 h-full w-[2px] bg-white z-20"></div>
+                    }
+                  </button>
+                }
               </div>
-            </div> -->
-          <div class="flex flex-col md:flex-row h-full bg-gray-100">
-            <div class="flex w-full flex-shrink-0 bg-gray-100 overflow-x-auto
-                        md:flex-col md:w-30 md:overflow-x-hidden md:overflow-y-auto">
-              @for(cate of menuCategoriesVoList; track $index){
-                <button class="relative py-4 px-6 transition-all duration-200
-                               rounded-t-xl
-                               md:rounded-tr-none md:rounded-l-xl"
-                  (click)="activeTab = cate.id"                    [class.active-tab]="activeTab === cate.id"
-                  [class.text-[#662222]]="activeTab === cate.id"   [class.font-bold]="activeTab === cate.id"
-                  [class.bg-white]="activeTab === cate.id" [class.border-transparent]="activeTab !== cate.id">
-                  {{cate.name}}
-                  @if(activeTab == cate.id) {
-                    <div class="hidden md:block absolute -right-[2px] top-0 h-full w-[2px] bg-white z-20"></div>
-                  }
-                </button>
-              }
-            </div>
 
-            <div class="flex-1 overflow-y-auto pt-2 pb-4 px-4 bg-white custom-scrollbar rounded-r-xl">
-              <!-- <p-tabpanel [value]="activeTab"> -->
+              <div class="flex-1 overflow-y-auto pt-2 pb-4 px-4 bg-white custom-scrollbar rounded-r-xl">
                 @if(activeTab){
-                <p-pickList [source]="displaySource" [target]="selectedItems"
-                  [showSourceControls]="false" [showTargetControls]="false"
-                  sourceHeader="可用項目" targetHeader="已選項目"
-                  [dragdrop]="true" [responsive]="false"
-                  [sourceStyle]="{ height: '18rem' }" [targetStyle]="{ height: '18rem' }"
-                  dataKey="id" [metaKeySelection]="false" class="responsive-picklist">
-                    <ng-template let-product pTemplate="item">
-                      @if (product.isPadding) {
-                        <div class="dynamic-padding"
-                            [class.can-hover]="selectedItems.length === 1"
-                            [style.height]="getPaddingHeight()">
+                  <p-pickList
+                    [source]="displaySource"                        [target]="selectedItems"
+                    (onMoveToTarget)="onMoveToTarget($event)"       (onMoveToSource)="onMoveToSource($event)"
+                    (onMoveAllToTarget)="onMoveAllToTarget($event)" (onMoveAllToSource)="onMoveAllToSource($event)"
+                    (onSourceReorder)="fixPaddingPosition()"        (onTargetReorder)="fixPaddingPosition()" (onSourceSelect)="fixPaddingPosition()"
+                    [showSourceControls]="false"                    [showTargetControls]="false"
+                    sourceHeader="可選品項"                          targetHeader="已選品項"
+                    [dragdrop]="true"                               [responsive]="false"
+                    [sourceStyle]="{ height: '18rem' }"             [targetStyle]="{ height: '18rem' }"
+                    dataKey="id" [metaKeySelection]="false" class="responsive-picklist">
+                      <ng-template let-product pTemplate="item">
+                        @if (product.isPadding) {
+                          <div class="dynamic-padding"
+                              [class.can-hover]="selectedItems.length === 1"
+                              [style.height]="getPaddingHeight()">
 
-                          @if (selectedItems.length === 1) {
-                            <span>請拖曳項目至此</span>
-                          } @else {
-                            <div class="plus-icon">
-                              <i class="pi pi-plus"></i>
-                            </div>
-                          }
-
-                        </div>
-                      } @else {
-                        <div class="product-item">
-                          @if (isItemInTarget(product)) {
-                            <div class="remove-badge" (click)="removeItem(product, $event)">
-                              <i class="pi pi-minus"></i>
-                            </div>
-                          }
-                          <div class="flex flex-column gap-2">
-                            <span class="font-bold">{{ product.name }}</span>
-                            <div class="flex align-items-center gap-2">
-                              <i class="pi pi-tag text-sm"></i>
-                              <span>$ {{ product.price }}</span>
+                            @if (selectedItems.length === 1) {
+                              <span>請拖曳項目至此</span>
+                            } @else {
+                              <div class="plus-icon">
+                                <i class="pi pi-plus"></i>
+                              </div>
+                            }
+                          </div>
+                        } @else {
+                          <div class="product-item min-w-[300px]">
+                            @if (isItemInTarget(product)) {
+                              <div class="remove-badge" (click)="removeItem(product, $event)">
+                                <i class="pi pi-minus"></i>
+                              </div>
+                            }
+                            <img [src]="product.image ? product.image : 'no-product-image.jpg'"
+                                  class="w-[60px] aspect-square object-cover rounded-sm mr-2">
+                            <div class="flex-1 flex-col">
+                              <div class="flex justify-between">
+                                <div class="font-bold">{{ product.name }}<i class="pi pi-tag text-sm"></i></div>
+                                @if (isItemInTarget(product)) {
+                                  <div>
+                                    <button class="bg-[#662222]/20 min-w-[70px] rounded-xl">推薦</button>
+                                  </div>
+                                }
+                              </div>
+                              <div class="flex align-items-center gap-2">
+                                @for(each of product.basePrice;track $index){
+                                  <span>{{each.name}} ${{ each.price }}</span>
+                                }
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      }
-                    </ng-template>
+                        }
+                      </ng-template>
                   </p-pickList>
-
-              <!-- </p-tabpanel> -->
-            }
+                }
+              </div>
             </div>
           </div>
-          <!-- </p-tabs> -->
 
         </div>
         <div class="event-div each-div">
           <div class="div-title">填寫開團資料</div>
+          <div class="div-content">
+            <div class="flex-none flex flex-col gap-2 mt-[1vh] pb-2">
+    <p-inputgroup>
+      <p-inputgroup-addon>
+        <i class="pi pi-search"></i>
+      </p-inputgroup-addon>
+      <p-floatlabel variant="on" autocomplete="off">
+        <input type="search"
+          class="border border-gray-300 focus:!border-2 focus:!border-[#662222] focus:!shadow-none outline-none w-full p-2 pl-3 rounded-r-xl transition-all" />
+        <label>店家名稱</label>
+      </p-floatlabel>
+    </p-inputgroup>
+  </div>
+          </div>
         </div>
       </div>
     </div>
