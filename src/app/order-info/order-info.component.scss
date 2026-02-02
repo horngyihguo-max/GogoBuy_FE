@@ -7,7 +7,7 @@
 
 }
 
-/* ✅ 強制每個 step 等寬，點點中心才會等距 */
+/* 強制每個 step 等寬，點點中心才會等距 */
 :host ::ng-deep .ggb-progress .p-steps-item {
   flex: 1 1 0 !important;
 }

@@ -16,6 +16,14 @@ export class CartService {
     return this.https.getApi(`http://localhost:8080/gogobuy/event/getCart?user_id=${encodeURIComponent(userId)}`);
   }
 
+  // 取得用戶跟團訂單品項
+  getOrders(userId: string, eventsId: number) {
+    const url =
+      `http://localhost:8080/gogobuy/getAllOrdersByUserIdAndEventsId?user_id=${encodeURIComponent(userId)}&events_id=${eventsId}`;
+    return this.https.getApi(url);
+  }
+
+
   // 硬刪除
   deleteOrderByUserIdAndEventsId(userId: string, eventsId: number) {
     const url =

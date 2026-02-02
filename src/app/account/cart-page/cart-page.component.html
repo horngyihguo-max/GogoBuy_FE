@@ -44,9 +44,10 @@
           <div class="flex items-center gap-3">
             <button type="button"
               class="px-4 py-2 rounded-full bg-sky-600 text-white font-bold hover:bg-sky-700 active:scale-[0.98]"
-              (click)="checkout(item.eventsId)">
+              (click)="checkout(item)">
               立即結帳
             </button>
+
 
             <button type="button" class="p-2 rounded-full text-rose-500 hover:bg-rose-50"
               (click)="removeCart(item.eventsId)" aria-label="刪除購物車">

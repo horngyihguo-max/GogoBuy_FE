@@ -1,8 +1,16 @@
-<div class="flex justify-center mb-4">
-  <a class="text-3xl font-bold">
-    購物車
-  </a>
-</div>
+<section class="max-w-[1440px] mx-auto p-4">
+  <!-- 購物車 -->
+  <div class="relative flex items-center mb-4 mt-5">
+    <a class="absolute left-1/2 -translate-x-1/2 text-3xl font-bold">
+      購物車
+    </a>
+    <p class="ml-auto font-normal text-lg ">
+      更新時間：{{ formatDateTime(latestOrderTime) }}
+    </p>
+  </div>
+</section>
+
+<!-- 進度條 -->
 <div class="card">
   <p-toast></p-toast>
   <p-steps [model]="items" [readonly]="true" [activeIndex]="activeIndex"
@@ -10,15 +18,19 @@
     [style.--ggb-progress]="progressRatio">
   </p-steps>
 </div>
+
+<!-- 分頁 -->
 <div class="Outline mt-4">
   @switch (activeIndex) {
+  <!-- 第0頁(個人訂單詳情/團長總訂單詳情(帶新增判斷)) -->
   @case (0) {
-  <!-- 購物車 -->
   <section class="max-w-[1440px] mx-auto p-4">
     <div class="bg-white py-[32px] px-[16px] mt-[16px] font-bold text-2xl rounded-lg shadow-sm">
-      商店名稱
-      <p>迷客夏(歸仁店)</p>
-      <!-- <span>{{ '{商店名稱(user.id use event_id => groupbuy_events get store.id => store get store.name)}' }}</span> -->
+      團購名稱：
+      <p class="font-normal text-lg">{{ eventName }}</p>
+      <br>
+      商店名稱：
+      <p class="font-normal text-lg">{{ storeName }}</p>
     </div>
 
     <div class="bg-white py-[32px] px-[16px] mt-[16px] font-bold text-2xl rounded-lg shadow-sm">
@@ -95,10 +107,10 @@
   </section>
   }
 
+  <!-- 第1頁(團長結帳方式) -->
   @case (1) {
-  <!-- Payment -->
   <section class="max-w-[1440px] mx-auto p-4">
-    <div class="bg-white p-6 mt-[16px] font-bold text-2xl">
+    <div class="bg-white py-[32px] px-[16px] mt-[16px] font-bold text-2xl rounded-lg shadow-sm">
       取貨人姓名
       <br>
       <div class="mt-2 mb-4">
@@ -122,7 +134,7 @@
       </div>
     </div>
 
-    <div class="bg-white py-[32px] px-[16px] mt-[16px] font-bold text-2xl flex flex-col gap-6">
+    <div class="bg-white py-[32px] px-[16px] mt-[16px] font-bold text-2xl rounded-lg shadow-sm flex flex-col gap-6">
       付款方式
       <br>
       <div class="flex flex-row gap-4">
@@ -172,19 +184,24 @@
   </section>
   }
 
+
+  <!-- 第2頁(確認送出頁面) -->
   @case (2) {
-  <!-- Confirmation -->
-  <div class="bg-white p-6 mt-[16px] font-bold text-2xl">
-    內容
-  </div>
+  <section class="max-w-[1440px] mx-auto p-4">
+    <div class="bg-white py-[32px] px-[16px] mt-[16px] font-bold text-2xl rounded-lg shadow-sm">
+      內容
+    </div>
+  </section>
 
 
-  <div class="bg-white h-[90px] mt-[16px] flex">
-    <div class="flex-1 flex items-center justify-center cursor-pointer" (click)="prevStep()"><span
-        class="font-bold text-xl">上一步</span></div>
-    <div class="flex-1 flex items-center justify-center cursor-pointer bg-[#769902]" (click)="nextStep()"><span
-        class="font-bold text-white text-xl">下一步</span></div>
-  </div>
+  <section class="max-w-[1340px] mx-auto p-4">
+    <div class="h-[60px] mt-[16px] rounded-lg shadow-sm flex flex-row gap-4">
+      <div class="flex-1 flex items-center justify-center cursor-pointer" (click)="prevStep()"><span
+          class="font-bold text-xl">上一步</span></div>
+      <div class="flex-1 flex items-center justify-center cursor-pointer bg-[#769902]" (click)="nextStep()"><span
+          class="font-bold text-white text-xl">確認送出</span></div>
+    </div>
+  </section>
   }
   }
 </div>

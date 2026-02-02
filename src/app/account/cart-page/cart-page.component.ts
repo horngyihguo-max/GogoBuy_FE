@@ -80,27 +80,7 @@ export class CartPageComponent {
     });
   }
 
-  // carts = signal<CartSummary[]>([]);
-  carts = signal<CartSummary[]>([
-    {
-      id: '01',
-      updatedAt: '2026-01-26T10:36:00',
-      storeName: '迷客夏',
-      storeBranch: '歸仁店',
-      itemCount: 5,
-      total: 100,
-      img: '/Milksha.png',
-    },
-    {
-      id: '02',
-      updatedAt: '2026-01-25T21:10:00',
-      storeName: '多喝茶',
-      storeBranch: '歸仁店',
-      itemCount: 1,
-      total: 65,
-      img: '/多喝茶.jpg',
-    }
-  ]);
+  carts = signal<CartSummary[]>([]);
 
   cartsSorted = computed(() =>
     [...this.carts()].sort(
@@ -146,10 +126,20 @@ export class CartPageComponent {
 
   }
 
+  checkout(item: CartGroup) {
+    const user = JSON.parse(localStorage.getItem('user_info') || '{}');
+    const userId: string = user.id;
+    if (!userId) return;
 
-  checkout(id: number) {
-    this.router.navigate(['/user/orders/info']);
-    console.log('checkout', id);
+    this.router.navigate(['/user/orders/info'], {
+      queryParams: {
+        user_id: userId,
+        events_id: item.eventsId,
+        eventName: item.eventName ?? '',
+        storeName: item.storeName ?? '',
+        latestOrderTime: item.latestOrderTime ?? ''
+      }
+    });
   }
 
   /* 轉換ISO8601日期格式 */
