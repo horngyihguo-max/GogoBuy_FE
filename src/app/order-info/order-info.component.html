@@ -1,29 +1,68 @@
 <section class="max-w-[1440px] mx-auto p-4">
   <!-- 購物車 -->
+  @if (mode == 'host'){
   <div class="relative flex items-center mb-4 mt-5">
     <a class="absolute left-1/2 -translate-x-1/2 text-3xl font-bold">
-      購物車
+      購物車(開團者版本)
     </a>
     <p class="ml-auto font-normal text-lg ">
       更新時間：{{ formatDateTime(latestOrderTime) }}
     </p>
   </div>
+  }@else {
+  <div class="relative flex items-center mb-4 mt-5">
+    <a class="absolute left-1/2 -translate-x-1/2 text-3xl font-bold">
+      購物車(跟團者版本)
+    </a>
+    <p class="ml-auto font-normal text-lg ">
+      更新時間：{{ formatDateTime(latestOrderTime) }}
+    </p>
+  </div>
+  }
 </section>
 
 <!-- 進度條 -->
+@if (mode == 'host'){
 <div class="card">
   <p-toast></p-toast>
-  <p-steps [model]="items" [readonly]="true" [activeIndex]="activeIndex"
-    [styleClass]="'ggb-progress completed-' + activeIndex" [style.--ggb-count]="items?.length || 1"
+  <p-steps [model]="host" [readonly]="true" [activeIndex]="activeIndex"
+    [styleClass]="'ggb-progress is-host completed-' + activeIndex" [style.--ggb-count]="host?.length || 1"
     [style.--ggb-progress]="progressRatio">
   </p-steps>
 </div>
+} @else {
+<div class="card">
+  <p-toast></p-toast>
+  <p-steps [model]="member" [readonly]="true" [activeIndex]="activeIndex"
+    [styleClass]="'ggb-progress is-member completed-' + activeIndex">
+  </p-steps>
+</div>
+}
+
 
 <!-- 分頁 -->
 <div class="Outline mt-4">
   @switch (activeIndex) {
   <!-- 第0頁(個人訂單詳情/團長總訂單詳情(帶新增判斷)) -->
   @case (0) {
+  <!-- 如果使用者ID與開團者ID相同進入開團者頁面(結單)，如果不同則進入跟團者頁面(送單) -->
+  @if (mode == 'host'){
+  <section class="max-w-[1440px] mx-auto p-4">
+    <section class="max-w-[1340px] mx-auto p-4">
+      <div class="h-[60px] mt-[16px] rounded-lg shadow-sm flex flex-row gap-4">
+        <div class=" bg-gray-300 flex-1 text-center font-bold flex items-center justify-center cursor-pointer"
+          (click)="backtocart()">
+          <span class="font-bold text-2xl">返回購物車</span>
+        </div>
+
+        <div class="flex-1 text-center font-bold flex items-center justify-center cursor-pointer bg-[#769902]"
+          (click)="nextStep()">
+          <span class="font-bold text-white text-2xl">下一步</span>
+        </div>
+      </div>
+    </section>
+  </section>
+  } @else {
   <section class="max-w-[1440px] mx-auto p-4">
     <div class="bg-white py-[32px] px-[16px] mt-[16px] font-bold text-2xl rounded-lg shadow-sm">
       團購名稱：
@@ -32,50 +71,24 @@
       商店名稱：
       <p class="font-normal text-lg">{{ storeName }}</p>
     </div>
-
     <div class="bg-white py-[32px] px-[16px] mt-[16px] font-bold text-2xl rounded-lg shadow-sm">
       餐點明細
+      @if (res?.orders?.length) {
+      @for (order of res.orders; track order.id) {
       <div class="mt-4 divide-y divide-gray-200 font-normal">
         <div class="py-4">
+          <div class="justify-items-end">
+            <p class="font-bold text-md">點單者：{{ auth.user.nickname }}</p>
+          </div>
           <p class="flex items-center justify-between font-bold">
-            <span class="text-[#E07A3F]">桂香原片青</span>
-            <span>$20元</span>
+            <span class="text-[#E07A3F]">{{ order.menuName }}</span>
+            <span>{{ order.quantity }}杯 共${{ order.subtotal }}元</span>
           </p>
-          <p class="text-base text-gray-500">去冰，正常糖</p>
-        </div>
-
-        <div class="py-4">
-          <p class="flex items-center justify-between font-bold">
-            <span class="text-[#E07A3F]">桂香輕蕎麥</span>
-            <span>$20元</span>
-          </p>
-          <p class="text-base text-gray-500">微冰，半糖</p>
-        </div>
-
-        <div class="py-4">
-          <p class="flex items-center justify-between font-bold">
-            <span class="text-[#E07A3F]">娜杯紅茶</span>
-            <span>$20元</span>
-          </p>
-          <p class="text-base text-gray-500">少冰，少糖</p>
-        </div>
-
-        <div class="py-4">
-          <p class="flex items-center justify-between font-bold">
-            <span class="text-[#E07A3F]">英倫伯爵紅茶</span>
-            <span>$20元</span>
-          </p>
-          <p class="text-base text-gray-500">正常冰，多糖</p>
-        </div>
-
-        <div class="py-4">
-          <p class="flex items-center justify-between font-bold">
-            <span class="text-[#E07A3F]">茉莉原淬綠茶</span>
-            <span>$20元</span>
-          </p>
-          <p class="text-base text-gray-500">多冰，無糖</p>
+          <p class="text-base text-gray-500">{{ formatSelectedOption(order.selectedOption) }}</p>
         </div>
       </div>
+      }
+      }
 
       <!-- <span>{{' {use user_id and event_id get personal_order} '}}</span> -->
       <br>
@@ -83,15 +96,15 @@
         繼續加購(返回加購頁面)
       </a>
     </div>
-
     <div class="bg-white py-[32px] px-[16px] mt-[16px] font-bold text-2xl rounded-lg shadow-sm">
       <p class="flex items-center justify-between font-bold">
         <span>餐點總計</span>
-        <span>$100元</span>
+        <span>${{totalAmount}}元</span>
       </p>
     </div>
   </section>
 
+  <!-- TODO 如果不是團長ID這裡直接顯示送單給團長-->
   <section class="max-w-[1340px] mx-auto p-4">
     <div class="h-[60px] mt-[16px] rounded-lg shadow-sm flex flex-row gap-4">
       <div class=" bg-gray-300 flex-1 text-center font-bold flex items-center justify-center cursor-pointer"
@@ -99,12 +112,12 @@
         <span class="font-bold text-2xl">返回購物車</span>
       </div>
 
-      <div class="flex-1 text-center font-bold flex items-center justify-center cursor-pointer bg-[#769902]"
-        (click)="nextStep()">
-        <span class="font-bold text-white text-2xl">下一步</span>
+      <div class="flex-1 text-center font-bold flex items-center justify-center cursor-pointer bg-[#769902]">
+        <span class="font-bold text-white text-2xl">送單</span>
       </div>
     </div>
   </section>
+  }
   }
 
   <!-- 第1頁(團長結帳方式) -->

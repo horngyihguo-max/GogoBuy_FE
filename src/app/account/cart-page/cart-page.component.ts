@@ -3,7 +3,7 @@ import { Component } from '@angular/core';
 import { computed, signal } from '@angular/core';
 import { CartService } from '../../@service/cart.service';
 import Swal from 'sweetalert2';
-type SelectedOpt = { optionName: string; value: string; extraPrice?: number };
+import { finalize } from 'rxjs/operators';
 
 interface CartItem {
   id: number;
@@ -57,6 +57,7 @@ type CartSummary = {
   styleUrl: './cart-page.component.scss'
 })
 export class CartPageComponent {
+  isLoading = true
   res?: CartRes;
   cartData = signal<CartGroup[]>([]);
   constructor(
@@ -68,17 +69,25 @@ export class CartPageComponent {
   ngOnInit(): void {
     const user = JSON.parse(localStorage.getItem('user_info') || '{}');
     const userId = user.id;
-    if (!userId) return;
+    if (!userId) {
+      this.isLoading = false;
+      return;
+    }
 
-    this.cart.getCart(userId).subscribe({
-      next: (r: CartRes) => {
-        this.res = r;
-        this.cartData.set(r.cartData);
-        console.log(this.res);
-      },
-      error: (err: any) => console.error('getCart failed:', err)
-    });
+    this.isLoading = true;
+
+    this.cart.getCart(userId)
+      .pipe(finalize(() => this.isLoading = false))
+      .subscribe({
+        next: (r: CartRes) => {
+          this.res = r;
+          this.cartData.set(r.cartData);
+          console.log(this.res);
+        },
+        error: (err: any) => console.error('getCart failed:', err)
+      });
   }
+
 
   carts = signal<CartSummary[]>([]);
 
@@ -131,16 +140,30 @@ export class CartPageComponent {
     const userId: string = user.id;
     if (!userId) return;
 
-    this.router.navigate(['/user/orders/info'], {
-      queryParams: {
-        user_id: userId,
-        events_id: item.eventsId,
-        eventName: item.eventName ?? '',
-        storeName: item.storeName ?? '',
-        latestOrderTime: item.latestOrderTime ?? ''
-      }
+    this.cart.getEventsByEventsId(item.eventsId).subscribe({
+      next: (res: { groupbuyEvents: any[]; }) => {
+        const event = res.groupbuyEvents?.[0];
+        if (!event) return;
+
+        const mode = (event.hostId === userId) ? 'host' : 'member';
+
+        this.router.navigate(['/user/orders/info'], {
+          queryParams: {
+            user_id: userId,
+            events_id: item.eventsId,
+            eventName: item.eventName ?? '',
+            storeName: item.storeName ?? '',
+            latestOrderTime: item.latestOrderTime ?? '',
+            totalAmount: item.totalAmount ?? '',
+            // 身分判斷結果
+            mode, // 'host' | 'member'
+          }
+        });
+      },
+      error: (err: any) => console.error(err)
     });
   }
+
 
   /* 轉換ISO8601日期格式 */
   formatDateTime(s: string) {

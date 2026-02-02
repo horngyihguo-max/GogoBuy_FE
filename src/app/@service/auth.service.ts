@@ -16,8 +16,6 @@ export class AuthService {
     private https: HttpService,
     private router: Router,
     private route: ActivatedRoute,) { }
-
-  // TODO 用戶資料 (正式連接時用這個!)
   user: any = null;
 
   private userSubject = new BehaviorSubject<any>(this.getUserFromStorage());

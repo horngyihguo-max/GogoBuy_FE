@@ -8,11 +8,14 @@ export class HttpService {
   constructor(private http: HttpClient) { }
 
   // 讀取
-  getApi(url: string): any {
+  getApi(
+    url: string,
+    options?: { params?: HttpParams | Record<string, any>; withCredentials?: boolean }
+  ): any {
     return this.http.get(url, {
-      withCredentials: true
+      withCredentials: options?.withCredentials ?? true,
+      params: options?.params
     });
-
   }
 
   // 新增
@@ -37,7 +40,7 @@ export class HttpService {
     return this.http.delete(url);
   }
 
-  // 拿行政區域 
+  // 拿行政區域
   getDApi(url: string, withCreds = true) {
     return this.http.get(url, {
       withCredentials: withCreds
