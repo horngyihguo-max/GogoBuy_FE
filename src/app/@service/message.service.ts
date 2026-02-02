@@ -27,7 +27,7 @@ export interface NotifiMesReq {
 export class MessageService {
 
   // 團員公告 API
-  private apiUrl = 'http://localhost:8080/gogobuy/messages'; 
+  private apiUrl = 'http://localhost:8080/gogobuy/messages';
 
   constructor(private http: HttpClient) { }
 
@@ -36,7 +36,7 @@ export class MessageService {
   }
 
   // 管理者發送 SSE 公告
-  setGlobalNotice(req: { msg: string, time?: string, minutes?: number }): Observable<any> {
+  setGlobalNotice(req: { content: string, expiredAt?: string }): Observable<any> {
     const url = 'http://localhost:8080/api/sse/set-notice';
     return this.http.post(url, req, { responseType: 'text' });
   }

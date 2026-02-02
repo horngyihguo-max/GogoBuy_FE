@@ -63,45 +63,47 @@
       @switch (currentView) {
 
       @case ('announce') {
-        <p-table [value]="historyNotices" [paginator]="true" [rows]="10" [loading]="loading" [rowHover]="true"
-          styleClass="p-datatable-striped" [tableStyle]="{ 'min-width': '50rem' }">
-          <ng-template pTemplate="header">
-            <tr>
-              <th pSortableColumn="id" style="width:10%">ID <p-sortIcon field="id"></p-sortIcon></th>
-              <th pSortableColumn="displayTitle" style="width:20%">標題 <p-sortIcon field="displayTitle"></p-sortIcon></th>
-              <th pSortableColumn="displayContent" style="width:30%">內容</th>
-              <th pSortableColumn="displayLink" style="width:15%">連結</th>
-              <th pSortableColumn="createdAt" style="width:15%">建立時間 <p-sortIcon field="createdAt"></p-sortIcon></th>
-              <th pSortableColumn="expiredAt" style="width:10%">過期時間 <p-sortIcon field="expiredAt"></p-sortIcon></th>
-            </tr>
-          </ng-template>
-          <ng-template pTemplate="body" let-notice>
-            <tr>
-              <td><span class="text-gray-500">#{{ notice.id }}</span></td>
-              <td class="font-bold text-gray-900">{{ notice.displayTitle }}</td>
-              <td class="text-gray-700">
-                <div class="line-clamp-2" [title]="notice.displayContent">{{ notice.displayContent }}</div>
-              </td>
-              <td>
-                @if (notice.displayLink) {
-                  <a [href]="notice.displayLink" target="_blank" class="text-blue-600 hover:underline text-sm truncate block max-w-[150px]">{{ notice.displayLink }}</a>
-                } @else {
-                  <span class="text-gray-400">-</span>
-                }
-              </td>
-              <td class="text-sm text-gray-600">{{ notice.createdAt | date:'yyyy-MM-dd HH:mm' }}</td>
-              <td class="text-sm text-gray-600">{{ notice.expiredAt ? (notice.expiredAt | date:'yyyy-MM-dd HH:mm') : '無期限' }}</td>
-            </tr>
-          </ng-template>
-          <ng-template pTemplate="emptymessage">
-            <tr>
-              <td colspan="6" class="text-center p-8 text-gray-500">
-                <i class="pi pi-history text-4xl mb-2 block"></i>
-                目前沒有歷史公告
-              </td>
-            </tr>
-          </ng-template>
-        </p-table>
+      <p-table [value]="historyNotices" [paginator]="true" [rows]="10" [loading]="loading" [rowHover]="true"
+        styleClass="p-datatable-striped" [tableStyle]="{ 'min-width': '50rem' }">
+        <ng-template pTemplate="header">
+          <tr>
+            <th pSortableColumn="id" style="width:10%">ID <p-sortIcon field="id"></p-sortIcon></th>
+            <th pSortableColumn="displayTitle" style="width:20%">標題 <p-sortIcon field="displayTitle"></p-sortIcon></th>
+            <th pSortableColumn="displayContent" style="width:30%">內容</th>
+            <th pSortableColumn="displayLink" style="width:15%">連結</th>
+            <th pSortableColumn="createdAt" style="width:15%">建立時間 <p-sortIcon field="createdAt"></p-sortIcon></th>
+            <th pSortableColumn="expiredAt" style="width:10%">過期時間 <p-sortIcon field="expiredAt"></p-sortIcon></th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-notice>
+          <tr>
+            <td><span class="text-gray-500">#{{ notice.id }}</span></td>
+            <td class="font-bold text-gray-900">{{ notice.displayTitle }}</td>
+            <td class="text-gray-700">
+              <div class="line-clamp-2" [title]="notice.displayContent">{{ notice.displayContent }}</div>
+            </td>
+            <td>
+              @if (notice.displayLink) {
+              <a [href]="notice.displayLink" target="_blank"
+                class="text-blue-600 hover:underline text-sm truncate block max-w-[150px]">{{ notice.displayLink }}</a>
+              } @else {
+              <span class="text-gray-400">-</span>
+              }
+            </td>
+            <td class="text-sm text-gray-600">{{ notice.createdAt | date:'yyyy-MM-dd HH:mm' }}</td>
+            <td class="text-sm text-gray-600">{{ notice.expiredAt ? (notice.expiredAt | date:'yyyy-MM-dd HH:mm') : '無期限'
+              }}</td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="6" class="text-center p-8 text-gray-500">
+              <i class="pi pi-history text-4xl mb-2 block"></i>
+              目前沒有歷史公告
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
       }
 
       @case ('stores') {
@@ -263,13 +265,13 @@
         autoResize="autoResize" class="w-full"></textarea>
     </div>
     <div class="flex flex-col gap-2">
-      <label for="targetUrl" class="font-bold">相關連結 (選填)</label>
+      <label for="targetUrl" class="font-bold">相關連結</label>
       <input pInputText id="targetUrl" [(ngModel)]="announceData.targetUrl" placeholder="https://..." />
     </div>
     <div class="flex flex-col gap-2">
-      <label for="expiredAt" class="font-bold">過期時間 (選填)</label>
-      <p-calendar [(ngModel)]="announceDate" dateFormat="yy-mm-dd" [showIcon]="true" placeholder="選擇日期"
-        appendTo="body"></p-calendar>
+      <label for="expiredAt" class="font-bold">過期時間</label>
+      <p-datepicker inputId="calendar-12h" [(ngModel)]="announceDate" hourFormat="12" [showTime]="true"
+        [showIcon]="true" placeholder="選擇日期" appendTo="body"></p-datepicker>
     </div>
   </div>
   <ng-template pTemplate="footer">

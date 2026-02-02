@@ -11,7 +11,7 @@ import { BadgeModule } from 'primeng/badge';
 import { forkJoin, map } from 'rxjs';
 import { MessageService, NotifiMesReq, NotifiCategoryEnum } from '../@service/message.service';
 import { DialogModule } from 'primeng/dialog';
-import { CalendarModule } from 'primeng/calendar';
+import { DatePickerModule } from 'primeng/datepicker';
 import { InputTextModule } from 'primeng/inputtext';
 import { TextareaModule } from 'primeng/textarea';
 import { TieredMenu } from 'primeng/tieredmenu';
@@ -33,7 +33,7 @@ import Swal from 'sweetalert2';
     MenuModule,
     BadgeModule,
     DialogModule,
-    CalendarModule,
+    DatePickerModule,
     InputTextModule,
     TextareaModule,
     TieredMenu,
@@ -230,10 +230,10 @@ export class DashboardComponent {
     const msgString = JSON.stringify(payloadMsgObj);
 
     // 3. 呼叫 Service
-    // 注意: setGlobalNotice 參數是 { msg, time?, minutes? }
+    // 注意: setGlobalNotice 參數是 { content, expiredAt? }
     this.messageService.setGlobalNotice({
-      msg: msgString,
-      time: timeStr
+      content: msgString,
+      expiredAt: timeStr
     }).subscribe({
       next: () => {
         // res 是純字串 (String return from Backend)
@@ -243,7 +243,7 @@ export class DashboardComponent {
       },
       error: (err) => {
         console.error(err);
-        Swal.fire('發送失敗', '請確認後端連線或參數', 'error');
+        Swal.fire('發送失敗', err, 'error');
       }
     });
   }

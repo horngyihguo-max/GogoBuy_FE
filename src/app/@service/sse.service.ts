@@ -37,9 +37,7 @@ export class SseService {
     if (raw) {
       try {
         const list = JSON.parse(raw);
-        this.notifications = Array.isArray(list)
-          ? list.filter(n => n?.id !== 'SYSTEM_NOTICE')
-          : [];
+        this.notifications = Array.isArray(list) ? list : [];
         this.emit();
       } catch { }
     }
@@ -69,7 +67,7 @@ export class SseService {
     // 公告（SYSTEM_NOTICE）
     this.es.addEventListener('SYSTEM_NOTICE', (event: any) => {
       this.zone.run(() => {
-        this.upsertSystemNotice(event.data);
+        this.addSystemNotice(event.data);
       });
     });
 
@@ -143,14 +141,13 @@ export class SseService {
   private emit() {
     this.notificationsSubject.next(this.notifications);
 
-    // 未讀數排除系統公告
+    // 未讀數 (不再排除系統公告)
     this.unreadCountSubject.next(
-      this.notifications.filter(n => !n.isRead && n.id !== 'SYSTEM_NOTICE').length
+      this.notifications.filter(n => !n.isRead).length
     );
 
-    // 快取也排除系統公告（你原本就有）
-    const cacheList = this.notifications.filter(n => n.id !== 'SYSTEM_NOTICE');
-    localStorage.setItem('notifications_cache', JSON.stringify(cacheList));
+    // 快取 (不再排除系統公告)
+    localStorage.setItem('notifications_cache', JSON.stringify(this.notifications));
   }
 
 
@@ -173,7 +170,7 @@ export class SseService {
     };
   }
 
-  private upsertSystemNotice(raw: string) {
+  private addSystemNotice(raw: string) {
     let data: any;
     try {
       data = JSON.parse(raw);
@@ -181,7 +178,8 @@ export class SseService {
       data = { message: raw };
     }
 
-    const id = 'SYSTEM_NOTICE';
+    // 生成唯一ID，確保每則公告都是獨立的
+    const id = this.fallbackId();
 
     const item = {
       id,
@@ -192,11 +190,8 @@ export class SseService {
       link: data.link ?? null,
     };
 
-    const exists = this.notifications.some(n => n.id === id);
-
-    this.notifications = exists
-      ? this.notifications.map(n => (n.id === id ? { ...n, ...item } : n))
-      : [item, ...this.notifications];
+    // 直接將新公告加入列表最上方
+    this.notifications = [item, ...this.notifications];
 
     this.cleanup();
     this.emit();
