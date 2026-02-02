@@ -122,43 +122,43 @@
       </div>
     </div>
 
-    <div class="bg-white py-[32px] px-[16px] mt-[16px] font-bold text-2xl flex flex-col gap-3">
+    <div class="bg-white py-[32px] px-[16px] mt-[16px] font-bold text-2xl flex flex-col gap-6">
       付款方式
       <br>
-      <div class="flex flex-row gap-2">
-        <input type="radio">
-        <label>現金</label>
+      <div class="flex flex-row gap-4">
+        <input type="radio" id="CASH" name="payment" value="CASH">
+        <label for="CASH">現金</label>
       </div>
 
-      <div class="flex flex-row gap-2">
-        <input type="radio">
-        <label>LinePay</label>
+      <div class="flex flex-row gap-4">
+        <input type="radio" id="LINEPAY" name="payment" value="LINEPAY">
+        <label for="LINEPAY"><img src="/LINEPAY.webp" class="h-[60px] w-[210px]"></label>
       </div>
 
-      <div class="flex flex-row gap-2">
-        <input type="radio">
-        <label>信用卡</label>
+      <!-- <div class="flex flex-row gap-4">
+        <input type="radio" id="CARD" name="payment" value="CARD" disabled>
+        <label for="CARD"><img src="/CArD.webp" class="h-[60px] w-[210px]"></label>
+      </div> -->
+
+      <!-- <div class="flex flex-row gap-4">
+        <input type="radio" id="TWPAY" name="payment" value="TWPAY" disabled>
+        <label for="TWPAY"><img src="/twpay-logo.png" class="h-[60px] w-[210px]"></label>
+      </div> -->
+
+      <!-- <div class="flex flex-row gap-4">
+        <input type="radio" id="PAYPAL" name="payment" value="PAYPAL" disabled>
+        <label for="PAYPAL"><img src="/pp_h_rgb.jpg" class="h-[60px] w-[210px]"></label>
+      </div> -->
+
+      <div class="flex flex-row gap-4">
+        <input type="radio" id="GREEN" name="payment" value="GREEN">
+        <label for="GREEN"><img src="/Ecpay_logo.svg.png" class="h-[60px] w-[210px]"></label>
       </div>
 
-      <div class="flex flex-row gap-2">
-        <input type="radio">
-        <label>台灣Pay</label>
-      </div>
-
-      <div class="flex flex-row gap-2">
-        <input type="radio">
-        <label>PayPal</label>
-      </div>
-
-      <div class="flex flex-row gap-2">
-        <input type="radio">
-        <label>綠界支付</label>
-      </div>
-
-      <div class="flex flex-row gap-2">
-        <input type="radio">
-        <label>支付寶</label>
-      </div>
+      <!-- <div class="flex flex-row gap-4">
+        <input type="radio" id="ALIPAY" name="payment" value="ALIPAY" disabled>
+        <label for="ALIPAY"><img src="/ALIPAY.png" class="h-[60px] w-[210px]"></label>
+      </div> -->
     </div>
   </section>
 

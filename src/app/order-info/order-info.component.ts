@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { MenuItem, MessageService } from 'primeng/api';
 import { StepsModule } from 'primeng/steps';
 import { ToastModule } from 'primeng/toast';
+import { FormsModule } from "@angular/forms";
 
 export interface orders {
   id: number;
@@ -41,7 +42,8 @@ const fakeOrder: orders = {
   selector: 'app-order-info',
   imports: [
     StepsModule,
-    ToastModule
+    ToastModule,
+    FormsModule
   ],
   providers: [MessageService],
   templateUrl: './order-info.component.html',

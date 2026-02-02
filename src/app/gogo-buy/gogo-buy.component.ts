@@ -126,6 +126,7 @@ export class GogoBuyComponent {
   visibleStores = computed(() => {
     const limit = this.storeStage() === 0 ? this.storeInitial : this.storeExpanded;
     return this.auths.store().slice(0, limit);
+
   });
 
   storeCtaLabel = computed(() => this.storeStage() === 0 ? '查看更多' : '查看全部');
@@ -164,6 +165,7 @@ export class GogoBuyComponent {
     // 店家
     if (this.auths.store().length == 0) {
       this.auths.performSearch('');
+
     }
 
     // 假資料，待後端串接
@@ -327,6 +329,8 @@ export class GogoBuyComponent {
     if (this.idleTimer) {
       clearTimeout(this.idleTimer);
     }
+    for (const url of this.objectUrlPool) URL.revokeObjectURL(url);
+    this.objectUrlPool = [];
   }
 
   // event.page 是頁數d
@@ -757,5 +761,49 @@ export class GogoBuyComponent {
     return `${d.getFullYear()}/${pad(d.getMonth() + 1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
   }
 
+  private objectUrlPool: string[] = [];
+
+  storeImgSrc(store: any): string {
+    const img = store?.image;
+
+    // 1) null/空字串 → 直接用 fallback
+    if (!img) return `https://picsum.photos/800/600?random=${store?.id ?? Math.random()}`;
+
+    // 2) string：可能是 URL / dataURL / base64
+    if (typeof img === 'string') {
+      const s = img.trim();
+
+      // 已經是可用的 src
+      if (s.startsWith('http://') || s.startsWith('https://') || s.startsWith('/') || s.startsWith('data:image/')) {
+        return s;
+      }
+
+      // 看起來像純 base64（iVBORw0K...），幫它補 dataURL 前綴
+      const looksLikeBase64 = s.length > 50 && /^[A-Za-z0-9+/=\r\n]+$/.test(s);
+      if (looksLikeBase64) return `data:image/png;base64,${s}`;
+
+      // 其他亂碼（例如你之前看到的 �PNG）就只能 fallback
+      return `https://picsum.photos/800/600?random=${store?.id ?? Math.random()}`;
+    }
+
+    // 3) number[]：byte array → 轉成 blob: URL
+    if (Array.isArray(img) && img.length > 0 && typeof img[0] === 'number') {
+      const blob = new Blob([new Uint8Array(img)], { type: 'image/png' });
+      const url = URL.createObjectURL(blob);
+      this.objectUrlPool.push(url);
+      return url;
+    }
+
+    // 4) 常見包裝：{ data: number[] } / { bytes: number[] }
+    const maybeArr = img?.data ?? img?.bytes;
+    if (Array.isArray(maybeArr) && maybeArr.length > 0 && typeof maybeArr[0] === 'number') {
+      const blob = new Blob([new Uint8Array(maybeArr)], { type: 'image/png' });
+      const url = URL.createObjectURL(blob);
+      this.objectUrlPool.push(url);
+      return url;
+    }
+
+    return `https://picsum.photos/800/600?random=${store?.id ?? Math.random()}`;
+  }
 
 }
