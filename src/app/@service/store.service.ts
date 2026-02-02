@@ -7,6 +7,8 @@ export class StoreService {
 
   constructor() { }
 
+  wishId!: number;
+
   storeData: Stores = {
     id: 0,
     name: '',
@@ -77,7 +79,7 @@ export interface OperatingHoursVoList {
 
 export interface MenuVoList {
   id: number,
-  categoryId: number;
+  categoryId: any;
   name: string;
   description?: string;
   basePrice: number | null;

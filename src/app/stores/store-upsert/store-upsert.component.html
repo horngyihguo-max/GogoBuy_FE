@@ -6,20 +6,20 @@
   <div class="grid grid-cols-1 md:grid-cols-2 gap-y-8 gap-x-6 text-lg">
 
     <div class="w-full flex">
-      <!-- 左側 icon -->
-      <div class="h-12 flex items-center px-3 border border-gray-300 border-r-0 rounded-l-lg text-slate-700 bg-white">
+      <div class="h-12 flex items-center px-3 border border-gray-300 border-r-0 rounded-l-lg bg-white text-slate-700">
         <i class="pi pi-shop"></i>
       </div>
 
-      <!-- 右側 input -->
       <p-floatLabel variant="on" class="flex-1">
-        <p-autoComplete [(ngModel)]="storeData.name" [suggestions]="filteredStores" (completeMethod)="searchStore($event)"
-          (onSelect)="onStoreSelect($event)" optionLabel="name" inputId="storeName" class="w-full"
-          inputStyleClass=" w-full h-12 border border-gray-300 border-l-0 rounded-r-lg pl-3
-            focus:!border-[#662222] focus:!shadow-none outline-none transition-all"/>
+        <p-autoComplete [(ngModel)]="storeData.name" [suggestions]="filteredStores"
+          (completeMethod)="searchStore($event)" (onSelect)="onStoreSelect($event)" optionLabel="name"
+          inputId="storeName" class="w-full" inputStyleClass="w-full h-12 border border-gray-300 border-l-0 rounded-r-lg pl-3
+            focus:!border-[#662222] focus:!shadow-none outline-none transition-all" />
+
         <label for="storeName">店家名稱</label>
       </p-floatLabel>
     </div>
+
 
     <div class="flex flex-col gap-2">
       <p-inputgroup class="h-12">
@@ -61,27 +61,10 @@
         <p-inputgroup-addon class="bg-gray-50! text-slate-700! border-r-0!">
           <i class="pi pi-tag"></i>
         </p-inputgroup-addon>
-        <p-floatlabel variant="on" class="w-full md:w-56">
-          <p-select [(ngModel)]="storeData.type" id="type" [options]="groupedType" [group]="true" optionLabel="label"
-            optionValue="value" class="w-full" styleClass="w-full border border-gray-300
-            border-l-0 focus:!border-[#662222] focus:!ring-0 outline-none rounded-r-xl transition-all
-            flex items-center">
-            <ng-template #group let-group>
-              <div class="flex items-center gap-2 py-1 bg-gray-50 -mx-2 px-3 border-b border-gray-100">
-                <div class="w-1 h-3 bg-[#662222]/60 rounded-full"></div>
-                <span class="font-bold text-[#662222] text-base uppercase tracking-wider">{{ group.label }}</span>
-              </div>
-            </ng-template>
-
-            <ng-template #item let-item>
-              <div class="flex items-center pl-4 py-1">
-                <span class="text-gray-800  text-base">{{ item.label }}</span>
-              </div>
-            </ng-template>
-          </p-select>
-
-          <label for="type" class="text-gray-800 text-base">店家類型</label>
-        </p-floatlabel>
+        <p-floatlabel class="w-full md:w-56" variant="on">
+          <p-select [(ngModel)]="storeData.type" inputId="on_label" [options]="groupedType" optionLabel="name" class="w-full" />
+          <label for="on_label">On Label</label>
+      </p-floatlabel>
       </p-inputgroup>
     </div>
 
@@ -153,28 +136,30 @@
           </div>
         </div>
 
-        <div class="flex flex-wrap lg:flex-nowrap items-center gap-4">
-          <div class="flex-1 min-w-[150px]">
-            <label class="block mb-1 text-base font-bold text-gray-800 uppercase">開始營業</label>
-            <p-datepicker [(ngModel)]="slot.openTime" [timeOnly]="true" hourFormat="24" [showIcon]="true"
-              iconDisplay="input" styleClass="w-full h-11" placeholder="00:00">
-              <ng-template #inputicon let-clickCallBack="clickCallBack">
-                <i class="pi pi-clock cursor-pointer text-[#662222]" (click)="clickCallBack($event)"></i>
-              </ng-template>
-            </p-datepicker>
+        <div class="flex flex-wrap items-center gap-6">
+
+          <div class="flex-1 min-w-[200px]">
+            <label class="block mb-2 text-sm font-bold text-gray-700 uppercase">開始營業</label>
+            <div class="flex items-center gap-2">
+              <p-select [options]="hours" [(ngModel)]="slot.openHour"
+                        placeholder="時" styleClass="h-11 flex items-center"></p-select>
+              <span class="font-bold">:</span>
+              <p-select [options]="minutes" [(ngModel)]="slot.openMinute"
+                        placeholder="分" styleClass="h-11 flex items-center"></p-select>
+            </div>
           </div>
 
-          <div class="pt-5 text-gray-300 hidden lg:block">—</div>
-
-          <div class="flex-1 min-w-[150px]">
-            <label class="block mb-1 text-base font-bold text-gray-800 uppercase">打烊時間</label>
-            <p-datepicker [(ngModel)]="slot.closeTime" [timeOnly]="true" hourFormat="24" [showIcon]="true"
-              iconDisplay="input" styleClass="w-full h-11" placeholder="00:00">
-              <ng-template #inputicon let-clickCallBack="clickCallBack">
-                <i class="pi pi-clock cursor-pointer text-[#662222]" (click)="clickCallBack($event)"></i>
-              </ng-template>
-            </p-datepicker>
+          <div class="flex-1 min-w-[200px]">
+            <label class="block mb-2 text-sm font-bold text-gray-700 uppercase">打烊時間</label>
+            <div class="flex items-center gap-2">
+              <p-select [options]="hours" [(ngModel)]="slot.closeHour"
+                        placeholder="時" styleClass="h-11 flex items-center"></p-select>
+              <span class="font-bold">:</span>
+              <p-select [options]="minutes" [(ngModel)]="slot.closeMinute"
+                        placeholder="分" styleClass="h-11 flex items-center"></p-select>
+            </div>
           </div>
+
         </div>
       </div>
       }
@@ -255,7 +240,7 @@
       </div>
       <div class="w-full max-w-xs space-y-3">
         <div class="relative group mx-auto border-2 border border-gray-300 rounded-2xl overflow-hidden bg-gray-50
-        hover:border-[#662222] transition-all w-128 h-72">
+        hover:border-[#662222] transition-all w-full max-w-lg aspect-video">
           @if (storeData.image) {
           <img [src]="storeData.image" class="w-full h-full object-contain" />
           <div

@@ -1,5 +1,5 @@
 import { FeeDescriptionVoList, StoreService } from './../../@service/store.service';
-import { Component, ElementRef, HostListener, QueryList, ViewChildren } from '@angular/core';
+import { Component, ElementRef, HostListener, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { StepperModule } from 'primeng/stepper';
 import { ButtonModule } from 'primeng/button';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
@@ -52,6 +52,7 @@ export class StoreComponent {
   ) { }
 
   id!: number;
+  wishId!: number;
 
   // 開啟dialog
   displayStoreInfoDialog = false;
@@ -65,6 +66,7 @@ export class StoreComponent {
   displayDeleteProduct = false;
   displayDeleteProductSpec = false;
   displayExistenceSpec = false;
+  displayUnableDelete = false;
 
   selectedProduct!: MenuVoList;
   selectedCategoryId: number | null = null;
@@ -108,6 +110,11 @@ export class StoreComponent {
   newPId: number = 0;
   searchKeyword: string = '';
 
+  // 加入現有規格 dialog 暫存勾選的規格
+  selectSpecs: ProductOptionGroupsVoList[] = [];
+  // 給 加入現有規格 dialog 顯示用的
+  availableSpec: ProductOptionGroupsVoList[] = [];
+
   isEditMode = false;
 
   // 是否嘗試過提交
@@ -119,7 +126,7 @@ export class StoreComponent {
       id: 0,
       name: '',
       description: '',
-      categoryId: 0,
+      categoryId: null,
       basePrice: null,
       image: '',
       available: true,
@@ -150,15 +157,14 @@ export class StoreComponent {
     return {
       id: 0,
       name: '',
-      priceLevel: []
+      priceLevel: [],
     };
   }
 
   getApplicableSpecs(item: MenuVoList) {
-    if (!item.unusual){
+    if (!item.unusual) {
       return;
     }
-
     const unusualIds = Object.keys(item.unusual).map(id => Number(id));
     return this.storeData.productOptionGroupsVoList.filter(group =>
       unusualIds.includes(group.id) &&
@@ -199,28 +205,32 @@ export class StoreComponent {
 
   ngOnInit() {
     this.id = Number(this.route.snapshot.paramMap.get('id'));
+    this.wishId = this.storeService.wishId;
 
-    this.http.getApi(`http://localhost:8080/gogobuy/store/searchId?id=${this.id}`)
-      .subscribe((res: any) => {
-        console.log("res", res);
+    if (this.id !== 0) {
+      this.http.getApi(`http://localhost:8080/gogobuy/store/searchId?id=${this.id}`)
+        .subscribe((res: any) => {
 
-        if (res.storeList && res.storeList.length > 0) {
-          this.storeData = res.storeList[0];
-          this.storeData.menuCategoriesVoList = res.menuCategoriesVoList;
-          this.storeData.productOptionGroupsVoList = res.productOptionGroupsVoList;
-          this.storeData.operatingHoursVoList = res.operatingHoursVoList.map((item: any) => ({
-            ...item,
-            openTime: item.openTime?.slice(0, 5),
-            closeTime: item.closeTime?.slice(0, 5)
-          }));
-          this.storeData.feeDescription = res.feeDescriptionVoList;
-          this.storeData.menuVoList = res.menuVoList;
-          this.filteredProducts = [...this.storeData.menuVoList];
-          console.log("storeDatastoreData", this.storeData);
-          this.newPId = this.storeData.menuVoList.length + 1;
-          this.newSpecId = this.storeData.productOptionGroupsVoList.length + 1;
-        }
-      });
+          if (res.storeList && res.storeList.length > 0) {
+            this.storeData = res.storeList[0];
+            this.storeData.menuCategoriesVoList = res.menuCategoriesVoList;
+            this.storeData.productOptionGroupsVoList = res.productOptionGroupsVoList;
+            this.storeData.operatingHoursVoList = res.operatingHoursVoList.map((item: any) => ({
+              ...item,
+              openTime: item.openTime?.slice(0, 5),
+              closeTime: item.closeTime?.slice(0, 5)
+            }));
+            this.storeData.feeDescription = res.feeDescriptionVoList;
+            this.storeData.menuVoList = res.menuVoList;
+            this.rebuildApplicableCategoryIds();
+            this.filteredProducts = [...this.storeData.menuVoList];
+            console.log("storeDatastoreData", this.storeData);
+            this.newPId = this.storeData.menuVoList.length + 1;
+            this.newSpecId = this.storeData.productOptionGroupsVoList.length + 1;
+            this.newCateId = this.storeData.menuCategoriesVoList.length + 1;
+          }
+        });
+    }
     this.filteredProducts = [...this.storeData.menuVoList];
     console.log("filteredProductsMenu2:", this.filteredProducts);
 
@@ -275,26 +285,51 @@ export class StoreComponent {
     }
   }
 
-  // 變數
+  // 變數 星期一 10:00-13:00 , 15:00-20:00
   get groupedOperatingHours() {
-    const grouped = this.storeData.operatingHoursVoList.reduce((acc, curr) => {
-      const existing = acc.find(item => item.week === curr.week);
-      const timeString = `${curr.openTime} - ${curr.closeTime}`;
+    const grouped = [] as { week: number, times: string[] }[];
 
-      if (existing) {
-        existing.times.push(timeString);
-      } else {
-        acc.push({
-          week: curr.week,
-          times: [timeString]
-        });
-      }
-      return acc;
-    }, [] as { week: number, times: string[] }[]);
+    this.storeData.operatingHoursVoList.forEach(item => {
+      const timeString = `${item.openTime} - ${item.closeTime}`;
+      const weeks = Array.isArray(item.week) ? item.week : [item.week];
 
-    // 星期一到日排序
+      weeks.forEach(w => {
+        const existing = grouped.find(g => g.week === w);
+        if (existing) {
+          existing.times.push(timeString);
+        } else {
+          grouped.push({ week: w, times: [timeString] });
+        }
+      });
+    });
+
+    // 星期一到星期日排序
     return grouped.sort((a, b) => a.week - b.week);
   }
+
+
+
+  // 營業時間 轉換 從
+  normalizeOperatingHours(): OperatingHoursVoList[] {
+    const result: OperatingHoursVoList[] = [];
+
+    this.storeData.operatingHoursVoList.forEach(item => {
+      if (Array.isArray(item.week)) {
+        item.week.forEach(w => {
+          result.push({
+            week: w,
+            openTime: item.openTime,
+            closeTime: item.closeTime
+          });
+        });
+      } else {
+        result.push(item);
+      }
+    });
+
+    return result;
+  }
+
 
   // 商品分類 ---------------------------------------------------------
   addCategories() {
@@ -321,6 +356,17 @@ export class StoreComponent {
     const index = this.tempCateIndex;
 
     if (target.id) {
+      const hasLinkProduct = this.storeData.menuVoList.some(
+        product => product.categoryId === target.id)
+
+      if (hasLinkProduct) {
+        this.displayDeleteCategories = false;
+        this.displayUnableDelete = true;
+        return;
+      }
+    };
+
+    if (target.id) {
       this.storeData.menuCategoriesVoList = this.storeData.menuCategoriesVoList.filter(
         item => item.id !== target.id
       );
@@ -331,6 +377,10 @@ export class StoreComponent {
     this.displayDeleteCategories = false;
     this.tempCateTarget = null;
     this.tempCateIndex = -1;
+  }
+
+  UnableDelete() {
+    this.displayUnableDelete = false;
   }
 
   addPriceLevel() {
@@ -388,6 +438,8 @@ export class StoreComponent {
     this.applyFilters();
   }
 
+
+
   // 規格 ---------------------------------------------------------
   addSpecs() {
     this.isEditMode = false;
@@ -400,15 +452,12 @@ export class StoreComponent {
   editSpec(spec: ProductOptionGroupsVoList, index: number) {
     this.isEditMode = true;
     this.editingSpecIndex = index;
-    this.currentGroup = { ...spec };
+    this.currentGroup = JSON.parse(JSON.stringify(spec));
 
-    if (spec.applicableCategoryIds) {
-      this.selectedSpecsCategories = this.storeData.menuCategoriesVoList.filter(cate => {
-        if (cate.id !== undefined) {
-          return spec.applicableCategoryIds?.includes(cate.id);
-        }
-        return false;
-      });
+    if (spec.applicableCategoryIds && spec.applicableCategoryIds.length > 0) {
+      this.selectedSpecsCategories = this.storeData.menuCategoriesVoList.filter(cate =>
+        cate.id !== undefined && spec.applicableCategoryIds!.includes(cate.id)
+      );
     } else {
       this.selectedSpecsCategories = [];
     }
@@ -452,10 +501,10 @@ export class StoreComponent {
   }
 
   isCateSelected(cate: any): boolean {
-    if (!this.selectedSpecsCategories || this.selectedSpecsCategories.length === 0) {
+    if (!this.selectedSpecsCategories || !cate) {
       return false;
     }
-    return this.selectedSpecsCategories.some(selected => selected.name === cate.name);
+    return this.selectedSpecsCategories.some(selected => selected.id === cate.id);
   }
 
   saveSpec() {
@@ -486,8 +535,33 @@ export class StoreComponent {
     this.displaySpecsDialog = false;
     this.currentGroup = this.getNewGroups();
     this.isEditMode = false;
-    this.editingSpecIndex = -1;
     this.submitted = false;
+    this.editingSpecIndex = -1;
+  }
+
+  rebuildApplicableCategoryIds() {
+    if (!this.storeData.productOptionGroupsVoList || !this.storeData.menuVoList) {
+      return;
+    }
+    this.storeData.menuVoList.forEach(menu => {
+      if (menu.unusual) {
+        Object.keys(menu.unusual).forEach(specIdStr => {
+          const specId = Number(specIdStr);
+          const specGroup = this.storeData.productOptionGroupsVoList.find(g => g.id === specId);
+
+          if (specGroup) {
+            if (!specGroup.applicableCategoryIds) {
+              specGroup.applicableCategoryIds = [];
+            }
+            if (!specGroup.applicableCategoryIds.includes(menu.categoryId)) {
+              specGroup.applicableCategoryIds.push(menu.categoryId);
+            }
+          }
+
+        });
+      }
+
+    });
   }
 
   // search ---------------------------------------------------------
@@ -516,17 +590,16 @@ export class StoreComponent {
       ? this.storeData.menuCategoriesVoList[0].id
       : null as any as number;
 
-    this.currentProduct = {
-      id: 0,
-      name: '',
-      description: '',
-      basePrice: 0,
-      categoryId: defaultCategoryId, // 設定正確的預設 ID (例如 60)
-      image: '',
-      available: true,
-      unusual: {}
-    };
+    this.currentProduct = this.getNewProduct();
     this.displayProductDialog = true;
+
+    setTimeout(() => {
+      if (this.storeData.menuCategoriesVoList.length === 1) {
+        this.currentProduct.categoryId =
+          this.storeData.menuCategoriesVoList[0].id;
+        this.onCategoryChange(); // 同步規格
+      }
+    });
   }
 
   // 商品圖片
@@ -538,7 +611,7 @@ export class StoreComponent {
       this.selectedFile = file;
       const reader = new FileReader();
       reader.onload = (e) => {
-        this.storeData.image = e.target?.result as string;
+        this.currentProduct.image = e.target?.result as string;
       };
       reader.readAsDataURL(file);
     }
@@ -547,35 +620,93 @@ export class StoreComponent {
   removeImage(event: Event) {
     event.preventDefault();
     event.stopPropagation();
-    this.storeData.image = null;
+    this.currentProduct.image = '';
     this.selectedFile = null;
   }
 
   // 新增商品時 選擇category 帶入 optionGroup ---------------------------------
   onCategoryChange() {
     const selectedId = this.currentProduct.categoryId;
+    this.currentProduct.unusual = {};
+
     if (!selectedId) {
       this.filteredSpecsForProduct = [];
-      this.currentProduct.unusual = {};
+      if (!this.isEditMode) {
+        this.currentProduct.unusual = {};
+      }
       return;
     }
+
     this.filteredSpecsForProduct = this.storeData.productOptionGroupsVoList.filter(spec =>
       spec.applicableCategoryIds?.includes(selectedId)
     );
 
-    const autoSelectSpec = this.filteredSpecsForProduct.reduce((acc, spec) => {
-      if (spec.id) {
-        acc[spec.id.toString()] = 'true';
-      }
-      return acc;
-    }, {} as { [key: string]: string });
-
-    this.currentProduct.unusual = autoSelectSpec;
+    if (!this.isEditMode) {
+      const updatedUnusual: { [key: string]: string } = { ...this.currentProduct.unusual };
+      this.filteredSpecsForProduct.forEach(spec => {
+        if (!updatedUnusual[spec.id]) {
+          updatedUnusual[spec.id] = 'true';
+        }
+      });
+      this.currentProduct.unusual = updatedUnusual;
+    }
   }
+
+
+
 
   // 單一商品的規格配置 ---------------------------------------------------------
   openExistenceSpec() {
+    this.selectSpecs = [];
+    const existingIds = Object.keys(this.currentProduct.unusual || {});
+    this.availableSpec = this.storeData.productOptionGroupsVoList.filter(
+      spec => !existingIds.includes(spec.id.toString())
+    );
     this.displayExistenceSpec = true;
+  }
+
+  toggleSpecSelect(spec: ProductOptionGroupsVoList) {
+    const index = this.selectSpecs.findIndex(s => s.id === spec.id);
+    if (index > -1) {
+      this.selectSpecs = this.selectSpecs.filter(s => s.id !== spec.id);
+    } else {
+      this.selectSpecs = [...this.selectSpecs, spec];
+    }
+    console.log('當前選中：', this.selectSpecs);
+  }
+
+  // 一鍵套用規格
+  selectAllSpecs() {
+    const existingIds = Object.keys(this.currentProduct.unusual || {});
+    this.selectSpecs = this.storeData.productOptionGroupsVoList.filter(
+      spec => !existingIds.includes(spec.id.toString())
+    );
+  }
+
+  applySelectedSpecs() {
+    if (this.selectSpecs.length > 0) {
+      if (!this.currentProduct.unusual) {
+        this.currentProduct.unusual = {};
+      }
+
+      this.selectSpecs.forEach(spec => {
+        const specIdStr = spec.id.toString();
+        if (!this.currentProduct.unusual![specIdStr]) {
+          this.currentProduct.unusual![specIdStr] = spec.name;
+          if (!this.filteredOptionGroups.some(g => g.id === spec.id)) {
+            this.filteredOptionGroups.push(spec);
+          }
+        }
+      });
+    }
+    this.displayExistenceSpec = false;
+  }
+
+  isSpecSelected(specId: any): boolean {
+    if (!this.selectSpecs || this.selectSpecs.length == 0) {
+      return false;
+    }
+    return this.selectSpecs.some(s => s.id === specId);
   }
 
   openProductSpecDelete(group: any) {
@@ -589,7 +720,7 @@ export class StoreComponent {
     const id = this.tempProductSpecTarget.id.toString();
 
     if (this.currentProduct.unusual && this.currentProduct.unusual[id]) {
-      const { [id]: _, ...rest } = this.currentProduct.unusual; // _是變數
+      const { [id]: _, ...rest } = this.currentProduct.unusual;
       this.currentProduct.unusual = rest;
     }
 
@@ -599,12 +730,13 @@ export class StoreComponent {
 
   // 變數
   get filteredOptionGroups() {
-    if (!this.currentProduct.categoryId) {
-      return []
-    }
-    return this.storeData.productOptionGroupsVoList.filter(group => {
-      return group.applicableCategoryIds?.includes(this.currentProduct.categoryId)
-    })
+    if (!this.currentProduct.unusual) return [];
+
+    const ids = Object.keys(this.currentProduct.unusual).map(Number);
+
+    return this.storeData.productOptionGroupsVoList.filter(group =>
+      ids.includes(group.id)
+    );
   }
 
   openItemDialog(groupIndex: number, itemIndex: number | null = null) {
@@ -638,7 +770,6 @@ export class StoreComponent {
   }
 
   saveProduct() {
-    console.log('當前分類 ID:', this.currentProduct.categoryId);
     this.submitted = true;
     const isNameValid = !!this.currentProduct.name?.trim();
     const isCategoryValid = !!this.currentProduct.categoryId;
@@ -663,8 +794,6 @@ export class StoreComponent {
       this.storeData.menuVoList = [...this.storeData.menuVoList, newProduct];
     }
 
-    console.log("this.storeData.menuVoList", this.storeData.menuVoList);
-
     this.sortProduct();
     this.displayProductDialog = false;
     this.submitted = false;
@@ -674,11 +803,13 @@ export class StoreComponent {
   editProduct(product: MenuVoList) {
     this.isEditMode = true;
     this.currentProduct = { ...product };
-    console.log("this.currentProduct", this.currentProduct);
 
-    this.onCategoryChange();
+    this.currentProduct.unusual = this.currentProduct.unusual ? { ...this.currentProduct.unusual } : {};
+
     this.displayProductDialog = true;
   }
+
+
 
   // 刪除商品 ---------------------------------------------------------
   openDeleteProduct(traget: MenuVoList, index: number) {
@@ -704,6 +835,15 @@ export class StoreComponent {
     this.displayDeleteProduct = false;
     this.tempProductTarget = null;
     this.tempProductIndex = -1;
+  }
+
+  // 商品分類滾動效果
+  @ViewChild('categoryNav') categoryNav!: ElementRef;
+  scrollNav(distance: number) {
+    this.categoryNav.nativeElement.scrollBy({
+      left: distance,
+      behavior: 'smooth'
+    });
   }
 
   // 商品列排序 ---------------------------------------------(已不需要
@@ -736,18 +876,25 @@ export class StoreComponent {
         memo: this.storeData.memo,
         image: this.storeData.image,
         publish: this.storeData.publish,
-        createdBy: 'A01',
-        operatingHoursVoList: this.storeData.operatingHoursVoList,
+        createdBy: 'SystemManager',
+        operatingHoursVoList: this.normalizeOperatingHours(),
         fee_description: this.storeData.feeDescription,
-        menuVoList: this.storeData.menuVoList,
-        menuCategoriesVoList: this.storeData.menuCategoriesVoList,
+        menuCategoriesVoList: this.storeData.menuCategoriesVoList.map(category => ({
+          name: category.name,
+          priceLevel: category.priceLevel,
+          menuVo: this.storeData.menuVoList.filter(item => item.categoryId === category.id)
+            .map(product => ({
+              ...product,
+              unusual: product.unusual ? [product.unusual] : []
+            }))
+        })),
         productOptionGroupsVoList: this.storeData.productOptionGroupsVoList
       }
       console.log("payload(create):", payload);
-      this.http.postApi('http://localhost:8080/gogobuy/store/create', payload)
-        .subscribe((res: any) => {
-          console.log("create store:" + res);
-        });
+      // this.http.postApi('http://localhost:8080/gogobuy/store/create', payload)
+      //   .subscribe((res: any) => {
+      //     console.log("create store:", res);
+      //   });
     } else {
       const payload = {
         ...this.storeData, storesname: this.storeData.name, fee_description: this.storeData.feeDescription,
@@ -755,19 +902,27 @@ export class StoreComponent {
       }
       console.log("payload(update):", payload);
 
-      this.http.postApi(`http://localhost:8080/gogobuy/store/update?id=${this.storeData.id}`, payload)
-        .subscribe((res: any) => {
-          console.log("update store:", res);
-        });
+      // this.http.postApi(`http://localhost:8080/gogobuy/store/update?id=${this.storeData.id}`, payload)
+      //   .subscribe((res: any) => {
+      //     console.log("update store:", res);
+      //   });
     }
     this.storeService.clearCurrentStore();
-    // this.displaySaveDialog = true;
+    this.displaySaveDialog = true;
     sessionStorage.removeItem('temp_order_info');
   }
 
   closeSaveDialog() {
+    console.log('wishId', this.wishId);
+
     this.displaySaveDialog = false;
-    this.router.navigate(['../../store_info', this.id]);
+    if (!this.wishId || this.wishId == undefined) {
+      this.router.navigate(['../../store_info', this.id]);
+    } else {
+      this.router.navigate(['../../../gogobuy-event/gogbuy-event'], {
+        queryParams: { wish_id: this.wishId }
+      })
+    }
   }
 
   // 假資料 ---------------------------------------------------------
