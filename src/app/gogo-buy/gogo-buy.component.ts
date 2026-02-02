@@ -714,7 +714,7 @@ export class GogoBuyComponent {
     // 額外加一個「全部」
     return [
       { label: `全部`, value: 'ALL' },
-      ...unique.map(t => ({ label: `${t} (${count.get(t)})`, value: t })),
+      ...unique.map(t => ({ label: `${t}`, value: t })),
     ];
   });
 

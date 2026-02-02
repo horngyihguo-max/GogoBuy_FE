@@ -1,6 +1,44 @@
 import { Router } from '@angular/router';
 import { Component } from '@angular/core';
 import { computed, signal } from '@angular/core';
+import { CartService } from '../../@service/cart.service';
+import Swal from 'sweetalert2';
+type SelectedOpt = { optionName: string; value: string; extraPrice?: number };
+
+interface CartItem {
+  id: number;
+  eventsId: number;
+  userId: string;
+  menuId: number;
+  quantity: number;
+  selectedOption: string;
+  personalMemo: string;
+  orderTime: string;
+  pickupStatus: string;
+  pickupTime: string | null;
+  subtotal: number;
+  weight: number;
+  deleted: boolean;
+}
+
+interface CartGroup {
+  eventsId: number;
+  eventName: string | null;
+  storeName: string | null;
+  storeLogo: string | null;
+  totalAmount: number;
+  totalQuantity: number;
+  latestOrderTime: string;
+  status: string | null;
+  canModify: boolean;
+  items: CartItem[];
+}
+
+interface CartRes {
+  code: number;
+  message: string;
+  cartData: CartGroup[];
+}
 
 type CartSummary = {
   id: string;
@@ -19,10 +57,27 @@ type CartSummary = {
   styleUrl: './cart-page.component.scss'
 })
 export class CartPageComponent {
+  res?: CartRes;
+  cartData = signal<CartGroup[]>([]);
   constructor(
     public router: Router,
+    private cart: CartService,
   ) {
+  }
 
+  ngOnInit(): void {
+    const user = JSON.parse(localStorage.getItem('user_info') || '{}');
+    const userId = user.id;
+    if (!userId) return;
+
+    this.cart.getCart(userId).subscribe({
+      next: (r: CartRes) => {
+        this.res = r;
+        this.cartData.set(r.cartData);
+        console.log(this.res);
+      },
+      error: (err: any) => console.error('getCart failed:', err)
+    });
   }
 
   // carts = signal<CartSummary[]>([]);
@@ -53,13 +108,48 @@ export class CartPageComponent {
     )
   );
 
-  checkout(id: string) {
-    this.router.navigate(['/user/orders/info'])
-    console.log('checkout', id);
+  removeCart(eventsId: number) {
+    const user = JSON.parse(localStorage.getItem('user_info') || '{}');
+    const userId: string = user.id;
+
+    if (!userId) return;
+    Swal.fire({
+      title: "確定刪除訂單?",
+      text: "刪除後無法復原!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "是的，刪除!",
+      cancelButtonText: "取消"
+    }).then((result) => {
+      if (result.isConfirmed) {
+        Swal.fire({
+          title: "刪除!",
+          text: "訂單已刪除完成.",
+          icon: "success"
+        });
+        {
+          this.cart.deleteOrderByUserIdAndEventsId(userId, eventsId).subscribe({
+            next: (res: any) => {
+              if (res.code == 200) {
+                this.cartData.update(list => list.filter(item => item.eventsId !== eventsId));
+              } else {
+                console.error('delete failed:', res.message);
+              }
+            },
+            error: (err: any) => console.error('delete failed:', err)
+          });
+        }
+      }
+    });
+
   }
 
-  removeCart(id: string) {
-    this.carts.update(list => list.filter(x => x.id !== id));
+
+  checkout(id: number) {
+    this.router.navigate(['/user/orders/info']);
+    console.log('checkout', id);
   }
 
   /* 轉換ISO8601日期格式 */

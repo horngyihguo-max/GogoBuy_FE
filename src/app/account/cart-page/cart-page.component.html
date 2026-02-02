@@ -1,64 +1,65 @@
-<section class="max-w-[1440px] mx-auto p-4">
+<section class="max-w-[1440px] mx-auto p-4 h-dvh">
   <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
 
-    @for (cart of cartsSorted(); track cart.id) {
-    <article class="bg-white rounded-2xl border border-slate-100 shadow-xl p-4 h-[210px] flex flex-col justify-between">
+    @if (!cartData() || cartData().length === 0) {
+    <div class="text-center text-slate-500 py-16 col-span-full">
+      目前沒有購物車
+    </div>
+    } @else {
 
-      <!-- 右上時間 -->
-      <div class="flex justify-end text-sm text-slate-600">
-        {{ formatDateTime(cart.updatedAt) }}
+    @for (item of cartData(); track item.eventsId) {
+    <article class="bg-white rounded-2xl border border-slate-100 shadow-xl p-4 flex flex-col justify-between">
+
+      <div class="flex justify-between text-base text-black">
+        <span>{{ item.eventName ?? '（未命名團購）' }}</span>
+        <span>{{ formatDateTime(item.latestOrderTime) }}</span>
       </div>
 
       <!-- 中間 -->
       <div class="flex flex-col items-center text-center gap-2 -mt-2">
-        <div class="w-16 h-16 rounded-full border border-slate-200 flex items-center justify-center">
-          @if(cart.img){
-          <img [src]="cart.img" [alt]="cart.storeName" class="w-full h-full object-cover" />
+        <div class="w-16 h-16 rounded-full border border-slate-200 flex items-center justify-center overflow-hidden">
+          @if (item.storeLogo) {
+          <img [src]="item.storeLogo" [alt]="item.storeName ?? 'store'" class="w-full h-full object-cover" />
           } @else {
           <span class="text-xs text-slate-500">LOGO</span>
           }
         </div>
 
-        <div class="text-sm font-semibold text-slate-900">
-          {{ cart.itemCount }} 項商品
+        <div class="text-base font-semibold text-slate-900">
+          {{ item.totalQuantity }} 項商品
         </div>
 
-        <div class="text-sm text-slate-700">
-          {{ cart.storeName }}
-          @if (cart.storeBranch) {
-          <span> {{ cart.storeBranch }}</span>
-          }
+        <div class="text-base text-slate-700">
+          {{ item.storeName ?? '（未知店家）' }}
         </div>
       </div>
 
       <!-- 底部 -->
-      <div class="flex items-end justify-between">
-        <div class="text-2xl font-black text-slate-900">
-          共 {{ cart.total }} 元
-        </div>
+      <div class="mt-4 divide-y divide-gray-200 font-normal">
+        <div class="flex items-end justify-between">
+          <div class="text-xl font-black text-slate-900">
+            共 {{ item.totalAmount }} 元
+          </div>
 
-        <div class="flex items-center gap-3">
-          <button type="button"
-            class="px-4 py-2 rounded-full bg-sky-600 text-white font-bold hover:bg-sky-700 active:scale-[0.98]"
-            (click)="checkout(cart.id)">
-            立即結帳
-          </button>
+          <div class="flex items-center gap-3">
+            <button type="button"
+              class="px-4 py-2 rounded-full bg-sky-600 text-white font-bold hover:bg-sky-700 active:scale-[0.98]"
+              (click)="checkout(item.eventsId)">
+              立即結帳
+            </button>
 
-          <button type="button" class="p-2 rounded-full text-rose-500 hover:bg-rose-50" (click)="removeCart(cart.id)"
-            aria-label="刪除購物車">
-            🗑️
-          </button>
+            <button type="button" class="p-2 rounded-full text-rose-500 hover:bg-rose-50"
+              (click)="removeCart(item.eventsId)" aria-label="刪除購物車">
+              <i class="pi pi-trash"></i>
+            </button>
+          </div>
         </div>
       </div>
 
     </article>
     }
 
-  </div>
+    }
 
-  @if (cartsSorted().length === 0) {
-  <div class="text-center text-slate-500 py-16">
-    目前沒有購物車
   </div>
-  }
 </section>

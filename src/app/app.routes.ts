@@ -47,7 +47,7 @@ export const routes: Routes = [
       { path: 'orders/info', component: OrderInfoComponent, title: '訂單詳情', data: { breadcrumb: '訂單詳情' } },
       { path: 'wishes', component: WishesComponent, title: '願望清單', data: { breadcrumb: '許願池' } },
       { path: 'notifications', component: NotificationsComponent, title: '通知中心', data: { breadcrumb: '通知' } },
-      { path: 'cart', component: CartPageComponent, title: '購物車', data: { breadcrumb: '購物車' } },
+      { path: 'cart', component: CartPageComponent, title: '購物車', data: { breadcrumb: '購物車' }, canActivate: [authGuard] },
     ]
   },
 
