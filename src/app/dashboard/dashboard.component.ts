@@ -14,6 +14,7 @@ import { DialogModule } from 'primeng/dialog';
 import { CalendarModule } from 'primeng/calendar';
 import { InputTextModule } from 'primeng/inputtext';
 import { TextareaModule } from 'primeng/textarea';
+import { TieredMenu } from 'primeng/tieredmenu';
 import { FormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
 
@@ -35,6 +36,7 @@ import Swal from 'sweetalert2';
     CalendarModule,
     InputTextModule,
     TextareaModule,
+    TieredMenu,
     FormsModule
   ],
   templateUrl: './dashboard.component.html',
@@ -46,6 +48,7 @@ export class DashboardComponent {
   events: any[] = [];
   users: any[] = [];
   loading = false;
+  items: any[] | undefined;
 
   currentView: 'announce' | 'stores' | 'events' | 'users' = 'announce';
 
@@ -74,6 +77,24 @@ export class DashboardComponent {
   ) { }
 
   ngOnInit() {
+
+    this.items = [
+      {
+        label: '權限',
+        icon: 'pi pi-user-edit',
+        items: [
+          {
+            label: '升級為管理員',
+            icon: 'pi pi-crown',
+          },
+          {
+            label: '調整為一般用戶',
+            icon: 'pi pi-user',
+          },
+
+        ]
+      }];
+
     this.loadData();
     this.loadHistory(); // 載入歷史公告
   }
