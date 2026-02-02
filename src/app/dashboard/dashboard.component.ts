@@ -61,6 +61,7 @@ export class DashboardComponent {
 
   // 公告相關變數
   displayAnnounceDialog = false;
+  historyNotices: any[] = []; // 歷史公告列表
   announceData: Partial<NotifiMesReq> = {
     title: '',
     content: '',
@@ -95,10 +96,45 @@ export class DashboardComponent {
       }];
 
     this.loadData();
+    this.loadHistory(); // 載入歷史公告
   }
 
   setView(view: any) {
     this.currentView = view;
+  }
+
+  // 載入歷史公告
+  loadHistory() {
+    this.messageService.getGlobalNoticeHistory().subscribe({
+      next: (data) => {
+        // data 是 SystemNotice Array
+        // content 可能是 JSON String，嘗試解析
+        this.historyNotices = data.map((item: any) => {
+          let parsedContent = item.content;
+          let parsedTitle = '系統公告';
+          let parsedLink = '';
+
+          try {
+            const obj = JSON.parse(item.content);
+            if (obj && typeof obj === 'object') {
+              parsedTitle = obj.title || '系統公告';
+              parsedContent = obj.content || item.content;
+              parsedLink = obj.link || '';
+            }
+          } catch (e) {
+            // 不是 JSON，就直接顯示原始字串
+          }
+
+          return {
+            ...item,
+            displayTitle: parsedTitle,
+            displayContent: parsedContent,
+            displayLink: parsedLink
+          };
+        });
+      },
+      error: (err) => console.error('Load history failed', err)
+    });
   }
 
   loadData() {
@@ -176,28 +212,38 @@ export class DashboardComponent {
       return;
     }
 
-    // 處理日期
+    // 1. 處理日期 -> 轉成 backend 要求的 LocalDateTime 格式
+    let timeStr: string | undefined = undefined;
     if (this.announceDate) {
-      // 簡單格式化 YYYY-MM-DD (視後端需求調整)
-      const year = this.announceDate.getFullYear();
-      const month = String(this.announceDate.getMonth() + 1).padStart(2, '0');
-      const day = String(this.announceDate.getDate()).padStart(2, '0');
-      this.announceData.expiredAt = `${year}-${month}-${day}`;
+      // 格式為: YYYY-MM-DDTHH:mm:ss
+      const iso = this.announceDate.toISOString(); // e.g., 2023-10-27T10:00:00.000Z
+      timeStr = iso.split('.')[0]; // 拿掉毫秒, 變成 2023-10-27T10:00:00
     }
 
-    // 呼叫 Service
-    this.messageService.create(this.announceData as NotifiMesReq).subscribe({
-      next: (res) => {
-        if (res.code === 200 || res.message === 'Success') { // Adjust based on actual Backend response structure
-          Swal.fire('公告發送成功', '', 'success');
-          this.displayAnnounceDialog = false;
-        } else {
-          Swal.fire('發送失敗', res.message || '未知錯誤', 'error');
-        }
+    // 2. 組合 msg 內容並轉換成JSON格式內容以讓 SSE 收到後能解析成 title/content/link
+    const payloadMsgObj = {
+      title: this.announceData.title,
+      content: this.announceData.content,
+      link: this.announceData.targetUrl,
+      createdAt: new Date().toLocaleString()
+    };
+    const msgString = JSON.stringify(payloadMsgObj);
+
+    // 3. 呼叫 Service
+    // 注意: setGlobalNotice 參數是 { msg, time?, minutes? }
+    this.messageService.setGlobalNotice({
+      msg: msgString,
+      time: timeStr
+    }).subscribe({
+      next: () => {
+        // res 是純字串 (String return from Backend)
+        Swal.fire('公告發送成功');
+        this.displayAnnounceDialog = false;
+        this.loadHistory(); // 重新載入歷史
       },
       error: (err) => {
         console.error(err);
-        Swal.fire('發送失敗', '請稍後再試', 'error');
+        Swal.fire('發送失敗', '請確認後端連線或參數', 'error');
       }
     });
   }
