@@ -286,6 +286,15 @@ export class FollowGroupComponent {
     return this.calcFinalUnitPrice() * this.quantity;
   }
 
+  // 取得當前時間
+  static getTaiwanNow(): Date {
+    const now = new Date();
+    const taipeiString = now.toLocaleString('en-US', {
+      timeZone: 'Asia/Taipei',
+    });
+    return new Date(taipeiString);
+  }
+
   ngOnInit(): void {
     this.userId = String(localStorage.getItem('user_id') || '');
     this.groupId = Number(this.route.snapshot.paramMap.get('id') || 0);
@@ -328,6 +337,15 @@ export class FollowGroupComponent {
       this.toastWarn('錯誤', '找不到團資料');
       this.goBack();
       return;
+    } else {
+      // 現在時間
+      const now = new Date();
+      const target = new Date(g.endTime);
+      if (now.getTime() > target.getTime()) {
+        this.toastWarn('超時', '此團已過期');
+        this.router.navigate(['/gogobuy/home']);
+        return;
+      }
     }
 
     this.applyGroup(g);
@@ -539,7 +557,6 @@ export class FollowGroupComponent {
   }
 
   isSoldOut(p: any): boolean {
-    // 你菜單資料有的欄位可能叫 soldOut 或 available，兩個都兼容
     if (!p) return false;
     if (p.soldOut === true) return true;
     if (p.available === false) return true;
@@ -547,7 +564,7 @@ export class FollowGroupComponent {
   }
 
   // =========================
-  // 訂單暫存（最小可行）
+  // 訂單暫存
   // =========================
   orderItems: Array<{
     menuId: number;
@@ -689,23 +706,30 @@ export class FollowGroupComponent {
   }
 
   // =====================================================
-  // dialog HTML 需要的「操作方法」
+  // dialog
   // =====================================================
 
   // （在菜單卡片上點擊商品時呼叫它）
   openProductDialog(product: any): void {
+    if (!product) return;
+
     this.selectedProduct = product;
-    this.productDialogVisible = true;
 
-    this.quantity = 1;
-
-    // 規格初始化
-    const cid = Number(product?.categoryId || 0);
+    // 1) 規格：一定要有預設（標準 +0）
+    const cid = Number(product.categoryId || 0);
     this.priceLevels = this.getPriceLevelsByCategoryId(cid);
+
+    // 預設：優先挑 price=0，沒有就用 getDefaultPriceLevel（它也會兜底）
     this.selectedPriceLevel = this.getDefaultPriceLevel(cid);
 
-    // 選項初始化（從 unusual 決定要顯示哪些 option groups）
+    // 2) 選項：只看 unusual 的 id
     this.initOptionsByProduct(product);
+
+    // 3) 數量預設 1
+    this.quantity = 1;
+
+    // 4) 打開 dialog
+    this.productDialogVisible = true;
   }
 
   closeProductDialog(): void {
@@ -737,8 +761,21 @@ export class FollowGroupComponent {
     this.quantity = next;
   }
 
-  // 單選
+  // 單選（最多1個）
+  // - required: true  => 不能取消（一定要有一個）
+  // - required: false => 點同一個可取消
   selectSingleOption(group: ProductOptionGroup, item: ProductOptionItem): void {
+    const picked = this.selectedSingleOptionMap[group.id];
+
+    const isSame = !!picked && Number(picked.id) === Number(item.id);
+
+    // 可選的單選：點同一個就取消
+    if (isSame && !group.required) {
+      delete this.selectedSingleOptionMap[group.id];
+      return;
+    }
+
+    // 其他情況：照常選取
     this.selectedSingleOptionMap[group.id] = item;
   }
 
@@ -792,6 +829,33 @@ export class FollowGroupComponent {
     }
   }
 
+  isAddonSelected(item: ProductOptionItem): boolean {
+    return this.selectedAddons.some((x) => Number(x.id) === Number(item.id));
+  }
+
+  toggleAddon(item: ProductOptionItem): void {
+    if (!item) return;
+
+    // 已選 → 取消
+    if (this.isAddonSelected(item)) {
+      this.selectedAddons = this.selectedAddons.filter(
+        (x) => Number(x.id) !== Number(item.id),
+      );
+      return;
+    }
+
+    // 未選 → 檢查上限
+    if (
+      this.addonMaxSelection > 0 &&
+      this.selectedAddons.length >= this.addonMaxSelection
+    ) {
+      this.toastWarn('已達上限', `最多只能選 ${this.addonMaxSelection} 個`);
+      return;
+    }
+
+    this.selectedAddons = [...this.selectedAddons, item];
+  }
+
   // 計算「單價」（base + spec + options）
   calcFinalUnitPrice(): number {
     if (!this.selectedProduct) return 0;
@@ -817,7 +881,7 @@ export class FollowGroupComponent {
   addToOrder(): void {
     if (!this.selectedProduct) return;
 
-    // required 單選如果沒選到（理論上你 init 已幫必選預選第一個）
+    // required 單選如果沒選到（理論上 init 已幫必選預選第一個）
     const requiredNotPicked = this.singleOptionGroups.some(
       (g) => g.required && !this.selectedSingleOptionMap[g.id],
     );
@@ -885,6 +949,7 @@ export class FollowGroupComponent {
 
         selectedOptionList,
       });
+      console.log('加入餐點：' + JSON.stringify(this.orderItems));
     }
 
     this.toastSuccess(
@@ -933,12 +998,18 @@ export class FollowGroupComponent {
     const ag = addonGroup as ProductOptionGroup | null;
 
     if (ag && ag.items.length > 0) {
+      this.addonGroupName = ag.name;
+      this.addonRequired = !!ag.required;
+
       this.addonMaxSelection = Number(ag.maxSelection ?? 0);
 
       this.addonOptions = ag.items;
       this.availableAddons = [...ag.items];
       this.selectedAddons = [];
     } else {
+      this.addonGroupName = '';
+      this.addonRequired = false;
+
       this.addonMaxSelection = 0;
       this.addonOptions = [];
       this.availableAddons = [];
@@ -965,6 +1036,9 @@ export class FollowGroupComponent {
         : [],
     }));
   }
+
+  addonGroupName = '';
+  addonRequired = false;
 
   private extractGroupIdsFromUnusual(unusual: any): number[] {
     if (!unusual || typeof unusual !== 'object') return [];
@@ -1217,13 +1291,14 @@ export class FollowGroupComponent {
           shippingFee: 0,
           limitation: 200,
           splitType: 'EQUAL',
-          endTime: '2026-01-31T21:20:30',
+          endTime: '2026-02-20T21:20:30',
           announcement:
             '每杯買二送一～每杯買二送一～每杯買二送一～每杯買二送一～每杯買二送一～',
           storesId: 40,
           recommendList: '[123,124]',
           tempMenuList: '[122,123,124]',
-          recommendDescription: '強推雞尾酒強推雞尾酒強推雞尾酒強推雞尾酒強推雞尾酒強推雞尾酒強推雞尾酒強推雞尾酒強推雞尾酒強推雞尾酒強推雞尾酒強推雞尾酒強推雞尾酒強推雞尾酒',
+          recommendDescription:
+            '強推雞尾酒強推雞尾酒強推雞尾酒強推雞尾酒強推雞尾酒強推雞尾酒強推雞尾酒強推雞尾酒強推雞尾酒強推雞尾酒強推雞尾酒強推雞尾酒強推雞尾酒強推雞尾酒',
           totalOrderAmount: 100,
           deleted: 0,
         },
