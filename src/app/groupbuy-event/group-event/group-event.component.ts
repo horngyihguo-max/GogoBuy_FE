@@ -177,7 +177,8 @@ export class GroupEventComponent {
 
 
   displaySource: any[] = [];  // 給 PickList 顯示用的實體陣列
-  selectedItems: any[] = [];  // 目標清單
+  paddingItem = { id: 'BOTTOM_PADDING', isPadding: true };
+  selectedItems: any[] = [this.paddingItem];  // 目標清單
   // 監控 Tab 切換 (假設你在 p-tabs 綁定了 (valueChange) 或透過 activeTab 的 setter)
   private _activeTab: any;
   get activeTab() { return this._activeTab; }
@@ -187,24 +188,67 @@ export class GroupEventComponent {
   }
   // 更新顯示清單的方法
   updateDisplaySource() {
-    // 關鍵：從總清單過濾，且要排除已經在「已選擇」裡面的東西
     this.displaySource = this.menuVoList.filter(item =>
-        item.categoryId == this._activeTab &&
-        !this.selectedItems.some(s => s.id === item.id)
+      item.categoryId == this._activeTab &&
+      !this.selectedItems.some(s => s.id === item.id)
     );
   }
   // 選中
   onMoveToTarget(event: any) {
-      // PrimeNG 會自動更新 target 陣列的內容，但我們需要確保 Reference 更新
-      this.selectedItems = [...this.selectedItems];
-      this.updateDisplaySource();
+    this.fixPaddingPosition();
   }
-
-  // 取消選中
+  // 取消選中 (從 Target 搬回 Source)
   onMoveToSource(event: any) {
-      this.selectedItems = [...this.selectedItems];
-      this.updateDisplaySource();
+    this.fixPaddingPosition();
   }
+  isItemInTarget(product: any): boolean {    // 檢查這個項目是否在已選清單中
+    return this.selectedItems.some(item => item.id === product.id);
+  }
+  onMoveAllToSource(event: any) {
+    this.fixPaddingPosition();
+  }
+  onMoveAllToTarget(event: any) {
+    this.fixPaddingPosition();
+  }
+  private fixPaddingPosition() {
+    // 給 PrimeNG 內建邏輯 50ms 的緩衝，確保它跑完
+    setTimeout(() => {
+      // 1. 抓出目前兩個清單中「真正」的產品 (排除墊片)
+      const allProductsInSource = this.displaySource.filter(item => !item.isPadding);
+      const allProductsInTarget = this.selectedItems.filter(item => !item.isPadding);
+
+      // 2. 校正來源區：絕對不能有墊片
+      this.displaySource = [...allProductsInSource];
+
+      // 3. 校正目標區：[真正的產品] + [墊片永遠在最後]
+      // 使用新物件解構，確保觸發 Angular 的渲染更新
+      this.selectedItems = [...allProductsInTarget, { ...this.paddingItem }];
+      this.updateDisplaySource();
+    }, 50);
+  }
+  getPaddingHeight() {
+    const containerHeight = 18; // 總高度 18rem
+    const itemCount = this.selectedItems.filter(i => !i.isPadding).length;
+    const occupiedHeight = itemCount * 3.5;    // 假設一個項目加上間距大約佔 3.5rem
+    const remaining = containerHeight - occupiedHeight;
+    return `${Math.max(remaining, 3)}rem`;  // 最小高度設為 3rem
+  }
+  removeItem(product: any, event: MouseEvent) {
+    // 阻止事件冒泡，防止觸發 PickList 的選取效果
+    event.stopPropagation();
+
+    // 1. 將項目從已選清單移除
+    this.selectedItems = this.selectedItems.filter(item => item.id !== product.id);
+
+    // 2. 將項目加回來源清單 (如果不在裡面的話)
+    if (!this.displaySource.find(item => item.id === product.id)) {
+        this.displaySource = [...this.displaySource, product];
+    }
+
+    // 3. 執行你寫好的校正與滾動邏輯
+    this.fixPaddingPosition();
+    this.updateDisplaySource();
+}
 
   goTo(){
     this.router.navigate(['/gogobuy/home']);

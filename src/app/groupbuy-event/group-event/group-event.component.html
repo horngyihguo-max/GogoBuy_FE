@@ -94,47 +94,84 @@
         <div class="event-div each-div">
           <div class="div-title">編輯開團菜單</div>
 
-          <p-tabs [(value)]="activeTab" class="div-content">
-            <div class="flex bg-white z-10">
-              <div class="relative flex-1 overflow-hidden">
-                <!-- TabList -->
-                <p-tablist class="flex h-full items-center overflow-x-auto whitespace-nowrap
-                                  custom-scrollbar hide-scrollbar">
+          <!-- <p-tabs [(value)]="activeTab" class="div-content flex flex-row h-full">
+            <div class="bg-white z-10 w-56 shrink-0 border-r">
+              <div class="h-full overflow-y-auto custom-scrollbar">
+                <p-tablist class=" flex flex-col gap-2 py-2 ">
                   @for (cate of menuCategoriesVoList; track $index) {
-                    <p-tab [value]="cate.id">{{ cate.name }}</p-tab>
+                    <p-tab [value]="cate.id" class="justify-start" >
+                      {{ cate.name }}
+                    </p-tab>
                   }
                 </p-tablist>
               </div>
+            </div> -->
+          <div class="flex flex-col md:flex-row h-full bg-gray-100">
+            <div class="flex w-full flex-shrink-0 bg-gray-100 overflow-x-auto
+                        md:flex-col md:w-30 md:overflow-x-hidden md:overflow-y-auto">
+              @for(cate of menuCategoriesVoList; track $index){
+                <button class="relative py-4 px-6 transition-all duration-200
+                               rounded-t-xl
+                               md:rounded-tr-none md:rounded-l-xl"
+                  (click)="activeTab = cate.id"                    [class.active-tab]="activeTab === cate.id"
+                  [class.text-[#662222]]="activeTab === cate.id"   [class.font-bold]="activeTab === cate.id"
+                  [class.bg-white]="activeTab === cate.id" [class.border-transparent]="activeTab !== cate.id">
+                  {{cate.name}}
+                  @if(activeTab == cate.id) {
+                    <div class="hidden md:block absolute -right-[2px] top-0 h-full w-[2px] bg-white z-20"></div>
+                  }
+                </button>
+              }
             </div>
 
-            <div class="bg-white flex-1 overflow-y-auto pt-2 pb-4 px-4 custom-scrollbar">
-              <p-tabpanel [value]="activeTab">
-                <div>
-                  <p-pickList
-                    [source]="displaySource"           [target]="selectedItems"
-                    [showSourceControls]="false"       [showTargetControls]="false"
-                    sourceHeader="可用項目"             targetHeader="已選項目"
-                    [dragdrop]="true"                  [responsive]="true"
-                    [sourceStyle]="{'height':'15rem'}" [targetStyle]="{'height':'15rem'}"
-                    dataKey="id" (onMoveToTarget)="onMoveToTarget($event)" (onMoveToSource)="onMoveToSource($event)">
-
+            <div class="flex-1 overflow-y-auto pt-2 pb-4 px-4 bg-white custom-scrollbar rounded-r-xl">
+              <!-- <p-tabpanel [value]="activeTab"> -->
+                @if(activeTab){
+                <p-pickList [source]="displaySource" [target]="selectedItems"
+                  [showSourceControls]="false" [showTargetControls]="false"
+                  sourceHeader="可用項目" targetHeader="已選項目"
+                  [dragdrop]="true" [responsive]="false"
+                  [sourceStyle]="{ height: '18rem' }" [targetStyle]="{ height: '18rem' }"
+                  dataKey="id" [metaKeySelection]="false" class="responsive-picklist">
                     <ng-template let-product pTemplate="item">
-                      <div class="flex flex-wrap p-2 align-items-center gap-3">
-                        <div class="flex-1 flex flex-column gap-2">
-                          <span class="font-bold">{{ product.name }}</span>
-                          <div class="flex align-items-center gap-2">
-                            <i class="pi pi-tag text-sm"></i>
-                            <span>$ {{ product.price }}</span>
+                      @if (product.isPadding) {
+                        <div class="dynamic-padding"
+                            [class.can-hover]="selectedItems.length === 1"
+                            [style.height]="getPaddingHeight()">
+
+                          @if (selectedItems.length === 1) {
+                            <span>請拖曳項目至此</span>
+                          } @else {
+                            <div class="plus-icon">
+                              <i class="pi pi-plus"></i>
+                            </div>
+                          }
+
+                        </div>
+                      } @else {
+                        <div class="product-item">
+                          @if (isItemInTarget(product)) {
+                            <div class="remove-badge" (click)="removeItem(product, $event)">
+                              <i class="pi pi-minus"></i>
+                            </div>
+                          }
+                          <div class="flex flex-column gap-2">
+                            <span class="font-bold">{{ product.name }}</span>
+                            <div class="flex align-items-center gap-2">
+                              <i class="pi pi-tag text-sm"></i>
+                              <span>$ {{ product.price }}</span>
+                            </div>
                           </div>
                         </div>
-                      </div>
+                      }
                     </ng-template>
                   </p-pickList>
 
-                </div>
-              </p-tabpanel>
+              <!-- </p-tabpanel> -->
+            }
             </div>
-          </p-tabs>
+          </div>
+          <!-- </p-tabs> -->
 
         </div>
         <div class="event-div each-div">
