@@ -12,6 +12,8 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { FormsModule } from "@angular/forms";
+import { DatePickerModule } from 'primeng/datepicker';
+import { PrimeNG } from 'primeng/config';
 
 
 @Component({
@@ -19,7 +21,7 @@ import { FormsModule } from "@angular/forms";
   imports: [
     CommonModule, Dialog, PickListModule, DragDropModule,
     InputGroupModule, InputGroupAddonModule, InputNumberModule, FloatLabelModule,
-    FormsModule
+    FormsModule, DatePickerModule
 ],
   templateUrl: './group-event.component.html',
   styleUrl: './group-event.component.scss'
@@ -30,6 +32,7 @@ export class GroupEventComponent {
     private http:HttpService,
     private router:Router,
     private route:ActivatedRoute,
+    private primeng: PrimeNG
   ){};
 
   storeList:Stores | null=null;
@@ -40,6 +43,8 @@ export class GroupEventComponent {
   feeDescriptionVoList:FeeDescriptionVoList[]=[];
 
   eventName!:string;
+  endTime!:Date;
+  announcement!:string;
   type!:string;
   tempMenu:number[]=[];  //存品項id
   recommend:number[]=[];  //存推薦id
@@ -52,6 +57,19 @@ export class GroupEventComponent {
   operateString!:string;
   nextOperating!:string;
   ngOnInit(): void {
+    // 設定中文語系
+    this.primeng.setTranslation({
+      dayNames: ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"],
+      dayNamesShort: ["週日", "週一", "週二", "週三", "週四", "週五", "週六"],
+      dayNamesMin: ["日", "一", "二", "三", "四", "五", "六"],
+      monthNames: ["一月","二月","三月","四月","五月","六月","七月","八月","九月","十月","十一月","十二月"],
+      monthNamesShort: ["一", "二", "三", "四", "五", "六", "七", "八", "九", "十", "十一", "十二"],
+      today: '今天',
+      clear: '清除',
+      dateFormat: 'yy/mm/dd',
+      weekHeader: '週'
+    });
+
     const now = new Date();
     const dateString=now.toString();
     const weekday = dateString.split(' ')[0];
@@ -196,8 +214,6 @@ export class GroupEventComponent {
   close(){
     this.splitOpen=false;
   }
-
-
   openDialog:boolean=false;
   dialog(){
     this.openDialog=true;
