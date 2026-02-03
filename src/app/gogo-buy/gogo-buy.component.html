@@ -392,8 +392,9 @@
                           @let current = $any(each);
                           @let prev = $index > 0 ? $any(store.feeDescription[$index - 1]) : null;
                           @if($index == 0) {
-                          0 ~ {{ current.km }} 公里:
-                          } @else {
+                          0 ~ {{ current.km }} 公里：
+                          }
+                          @else {
                           {{ prev.km }} ~ {{ current.km }} 公里:
                           }
                           <span class="font-bold">
