@@ -48,6 +48,10 @@
   }
 }
 
+.setting-span{
+  @apply w-[25vw] pb-2 w-full md:w-[25vw];
+}
+
 
 /* 1. 確保外層包裹容器高度跟隨 */
 :host ::ng-deep .p-picklist-listwrapper {

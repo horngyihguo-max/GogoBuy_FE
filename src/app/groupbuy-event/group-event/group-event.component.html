@@ -15,7 +15,7 @@
 }@else {
   <div class="area">
     <div class="mt-[20px] area-block">
-      <img [src]="storeList.image ? storeList.image : 'no-product-image.jpg'"
+      <img [src]="storeList?.image ? storeList?.image : 'no-product-image.jpg'"
            (error)="$any($event.target).src = 'no-product-image.jpg'" crossorigin="anonymous"
             class="rounded-t-lg aspect-[3/2] object-cover
               lg:rounded-l-lg lg:rounded-tr-none lg:mr-[20px]">
@@ -183,7 +183,7 @@
             </div>
             <div class="w-full bg-white h-fit flex flex-col mt-2 rounded-lg">
               <div class="flex flex-col md:flex md:flex-row">
-                <div class="font-bold pt-4 pl-4 lg:w-30 md:pl-10">推薦品項：</div>
+                <div class="pt-4 pl-4 lg:w-30 md:pl-10">推薦品項：</div>
                 <div class="truncate pt-4 pb-2 px-2 flex-1">
                   @for(item of menuVoList;track $index){
                     @for(id of recommend;track $index){
@@ -195,14 +195,15 @@
                 </div>
               </div>
               <div class="flex-1 flex flex-col md:flex-row">
-                <div class="font-bold py-2 pl-4 lg:w-30 md:text-right md:pl-10">說明：</div>
-                <div class="flex-1 flex flex-col"> <textarea
-                    class="flex-1 m-2 p-1 border-1 rounded-md resize-none overflow-y-auto"
-                    [(ngModel)]="recommendDescription"
-                    maxlength="200"
-                    placeholder="請輸入說明 (限 200 字)">
+                <div class="py-2 pl-4 lg:w-30 md:text-right md:pl-10">說明：</div>
+                <div class="flex-1 flex flex-col">
+                  <textarea
+                    class="flex-1 m-2 p-1 border-1 border-gray-400/70 rounded-md resize-none
+                     overflow-y-auto placeholder:text-gray-500"
+                    [(ngModel)]="recommendDescription" maxlength="200"
+                    placeholder="請輸入說明 (限 200 字)" rows="3"
+                    style="min-height: 90px;">
                   </textarea>
-
                   <div class="text-right text-xs text-gray-400 mr-3 mb-1">
                     {{ recommendDescription?.length || 0 }} / 200
                   </div>
@@ -214,21 +215,21 @@
         <div class="event-div each-div">
           <div class="div-title">填寫開團資料</div>
           <div class="div-content">
-            <table class="w-full table-fixed">
-              <tr>
-                <td>
+            <div class="w-full">
+              <label class="flex flex-col md:flex-row md:justify-between">
+                <span class="setting-span md:pr-2">
                   <p-inputgroup>
                     <p-inputgroup-addon>
                       <i class="pi pi-home"></i>
                     </p-inputgroup-addon>
                     <p-floatlabel variant="on" autocomplete="off">
                       <input type="text" class="border border-gray-300 outline-none w-full p-2 pl-3 rounded-r-md transition-all bg-white
-                        focus:!border-2 focus:!border-[#662222] focus:!shadow-none" [(ngModel)]="eventName" />
-                      <label>店家名稱</label>
+                        focus:!border-2 focus:!border-[#662222] focus:!shadow-none" [(ngModel)]="eventName" maxlength="200" />
+                      <label>店家名稱(限 50 字)</label>
                     </p-floatlabel>
                   </p-inputgroup>
-                </td>
-                <td>
+                </span>
+                <span class="setting-span md:px-2">
                   <p-inputgroup>
                     <p-inputgroup-addon>
                       <i class="pi pi-dollar"></i>
@@ -239,10 +240,46 @@
                       <label>成團門檻金額(最小金額為1元)</label>
                     </p-floatlabel>
                   </p-inputgroup>
-                </td>
-                <td></td>
-              </tr>
-            </table>
+                </span>
+                <span class="setting-span md:pl-2">
+                  <p-inputgroup class="w-full">
+                    <p-inputgroup-addon>
+                      <i class="pi pi-clock"></i>
+                    </p-inputgroup-addon>
+                    <p-floatlabel variant="on" style="flex: 1 1 auto; display: block;">
+                      <p-datepicker [(ngModel)]="endTime" [showTime]="true" hourFormat="24"
+                        [showSeconds]="false" appendTo="body"
+                        [fluid]="true" styleClass="w-full" [style]="{'width': '100%', 'display': 'flex'}"
+                        inputStyleClass="w-full border border-gray-300 outline-none p-2 pl-3 !rounded-r-md
+                        !rounded-l-none bg-white focus:!border-2 focus:!border-[#662222]">
+                      </p-datepicker>
+                      <label for="end_time">截止日期與時間</label>
+                    </p-floatlabel>
+                  </p-inputgroup>
+                </span>
+              </label>
+              <label class="w-full">
+                  <p-inputgroup class="w-full">
+                    <p-inputgroup-addon>
+                      <i class="pi pi-megaphone"></i>
+                    </p-inputgroup-addon>
+                    <div class="flex-1 flex flex-col border border-gray-300 rounded-r-md bg-white">
+                      <p-floatlabel variant="on" class="w-full">
+                        <textarea id="announcement"
+                          class="w-full p-2 border-none outline-none resize-none overflow-y-auto"
+                          [(ngModel)]="announcement"
+                          maxlength="500" rows="3"
+                          style="min-height: 110px;">
+                        </textarea>
+                        <label for="announcement">團長公告</label>
+                      </p-floatlabel>
+                      <div class="text-right text-[10px] text-gray-400 pr-2 pb-1 bg-white">
+                        {{ announcement?.length || 0 }} / 500
+                      </div>
+                    </div>
+                  </p-inputgroup>
+              </label>
+            </div>
           </div>
         </div>
       </div>
