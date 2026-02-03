@@ -39,6 +39,7 @@ export class StoreUpsertComponent {
   ) { }
 
   id!: number;
+  wishId!: number;
   storeList: any[] = [];
   filteredStores: any[] = [];
   displayAlertDialog: boolean = false;
@@ -69,10 +70,8 @@ export class StoreUpsertComponent {
           }
           return city;
         });
-      if (this.storeData && this.storeData.address) {
-        this.parseAddressToFields();
-      }
     });
+    this.parseAddressToFields();
   }
 
   updateFullAddress() {
@@ -86,25 +85,6 @@ export class StoreUpsertComponent {
   onCityChange() {
     this.selectedDistrict = null;
     this.updateFullAddress();
-  }
-
-  parseAddress() {
-    const fullAddr = this.storeData.address;
-
-    this.selectedCity = this.cityOptions.find(c => fullAddr.startsWith(c.name));
-
-    if (this.selectedCity) {
-      const remaining = fullAddr.replace(this.selectedCity.name, '');
-      this.selectedDistrict = this.selectedCity.districts.find((d: any) => remaining.startsWith(d.name));
-
-      if (this.selectedDistrict) {
-        this.detailAddress = remaining.replace(this.selectedDistrict.name, '');
-      } else {
-        this.detailAddress = remaining;
-      }
-    } else {
-      this.detailAddress = fullAddr;
-    }
   }
 
   // 經營類別
@@ -125,72 +105,14 @@ export class StoreUpsertComponent {
 
   // 店家的類型 type
   groupedType = [
-    {
-      label: '1. 熟食餐點',
-      items: [
-        { label: '異國料理', value: '異國料理' },
-        { label: '在地小吃', value: '在地小吃' },
-        { label: '健康舒食', value: '健康舒食' },
-        { label: '素食料理', value: '素食料理' },
-        { label: '宵夜點心', value: '宵夜點心' },
-        { label: '便當', value: '便當' }
-      ]
-    },
-    {
-      label: '2. 飲品與甜點',
-      items: [
-        { label: '手搖飲', value: '手搖飲' },
-        { label: '咖啡下午茶', value: '咖啡下午茶' },
-        { label: '冰品', value: '冰品' }
-      ]
-    },
-    {
-      label: '3. 即時生活用品',
-      items: [
-        { label: '生鮮雜貨', value: '生鮮雜貨' },
-        { label: '藥妝雜貨', value: '藥妝雜貨' },
-        { label: '生活用品', value: '生活用品' }
-      ]
-    },
-    {
-      label: '4. 冷凍與加工食品',
-      items: [
-        { label: '冷凍庫存', value: '冷凍庫存' },
-        { label: '生鮮直送', value: '生鮮直送' },
-        { label: '零嘴點心', value: '零嘴點心' }
-      ]
-    },
-    {
-      label: '5. 家居與生活用品',
-      items: [
-        { label: '廚房用具', value: '廚房用具' },
-        { label: '清潔用品', value: '清潔用品' },
-        { label: '收納神器', value: '收納神器' }
-      ]
-    },
-    {
-      label: '6. 美妝與服飾配件',
-      items: [
-        { label: '服飾', value: '服飾' },
-        { label: '鞋包配件', value: '鞋包配件' },
-        { label: '保養護理', value: '保養護理' }
-      ]
-    },
-    {
-      label: '7. 母嬰與寵物用品',
-      items: [
-        { label: '母嬰用品', value: '母嬰用品' },
-        { label: '寵物專區', value: '寵物專區' }
-      ]
-    },
-    {
-      label: '8. 運動與休閒娛樂',
-      items: [
-        { label: '運動器材', value: '運動器材' },
-        { label: '戶外露營', value: '戶外露營' },
-        { label: '文具辦公', value: '文具辦公' }
-      ]
-    }
+    { name: '熟食餐點', code: '熟食餐點' },
+    { name: '飲品與甜點', code: '飲品與甜點' },
+    { name: '即時生活用品', code: '即時生活用品' },
+    { name: '冷凍與加工食品', code: '冷凍與加工食品' },
+    { name: '家居與生活用品', code: '家居與生活用品' },
+    { name: '美妝與服飾配件', code: '美妝與服飾配件' },
+    { name: '母嬰與寵物用品', code: '母嬰與寵物用品' },
+    { name: '運動與休閒娛樂', code: '運動與休閒娛樂' }
   ];
 
   // 送 service 店家資訊
@@ -231,27 +153,24 @@ export class StoreUpsertComponent {
     const selected = event.value;
     const fullAddress = selected.address;
     this.id = selected.id;
-
     this.storeData = { ...selected };
-
     this.http.getApi(`http://localhost:8080/gogobuy/store/searchId?id=${this.id}`)
-        .subscribe((res: any) => {
-          if (res.storeList && res.storeList.length > 0) {
-            this.storeData = { ...res.storeList[0] };
-            if (typeof this.storeData.feeDescription === 'string') {
-              this.storeData.feeDescription = JSON.parse(this.storeData.feeDescription);
-            }
-
-            this.convertVoToTimeSlots(res.operatingHoursVoList || []);
-            this.parseAddressToFields();
-            console.log("this.storeData:", this.storeData);
-          }
-        });
+      .subscribe((res: any) => {
+        if (res.storeList && res.storeList.length > 0) {
+          this.storeData = { ...res.storeList[0] };
+        }
+      });
+      if (typeof this.storeData.feeDescription === 'string') {
+        this.storeData.feeDescription = JSON.parse(this.storeData.feeDescription);
+      }
+      this.parseAddressToFields();
+      this.convertVoToTimeSlots(this.storeData.operatingHoursVoList || []);
   }
 
   // 將完整地址拆分成 縣市/行政區域/路巷號
   parseAddressToFields() {
     if (!this.storeData.address) return;
+    if (!this.storeData.address || typeof this.storeData.address !== 'string') return;
 
     const regex = /^(\D+?[縣市])(\D+?[區鄉鎮市])(.*)$/;
     const match = this.storeData.address.match(regex);
@@ -267,14 +186,12 @@ export class StoreUpsertComponent {
         this.onCityChange();
 
         this.selectedDistrict = this.selectedCity.AreaList.find(
-          (a: any) => a.AreaName === districtName
-        );
+          (a: any) => a.AreaName === districtName);
       }
       this.detailAddress = restAddress.trim();
     } else {
       this.detailAddress = this.storeData.address;
     }
-    this.updateFullAddress();
   }
 
   // session ---------------------------------------------------------
@@ -289,6 +206,15 @@ export class StoreUpsertComponent {
 
   ngOnInit(): void {
     this.loadTaiwanDistricts();
+    this.initTimeOptions();
+
+    this.route.queryParams.subscribe(params => {
+      if (params['wish_title']) {
+        this.storeData.name = params['wish_title'];
+        this.wishId = params['wish_id'];
+      }
+    })
+
     this.http.getApi('http://localhost:8080/gogobuy/store/all').subscribe((res: any) => {
       this.storeList = res.storeList;
       console.log("this.storeList", this.storeList);
@@ -314,7 +240,9 @@ export class StoreUpsertComponent {
       // session 讀取資料
       const savedData = sessionStorage.getItem('temp_order_info');
       if (savedData) {
-        this.storeData = JSON.parse(savedData);
+        const parsed = JSON.parse(savedData);
+        this.storeData = parsed;
+        this.convertVoToTimeSlots(parsed.operatingHoursVoList || []);
         // service 讀取資料
       } else if (this.storeService.storeData && this.storeService.storeData.name !== '') {
         const source = this.storeService.storeData;
@@ -350,6 +278,11 @@ export class StoreUpsertComponent {
 
   // 時間轉換 從 {weel:1}{week:2} 變成 week:[1,2]
   private convertVoToTimeSlots(voList: any[]) {
+    if (!voList || voList.length === 0) {
+      this.timeSlots = [this.createDefaultSlot()];
+      return;
+    }
+
     const map = new Map<string, number[]>();
 
     voList.forEach(vo => {
@@ -357,29 +290,40 @@ export class StoreUpsertComponent {
       if (!map.has(key)) {
         map.set(key, []);
       }
-      map.get(key)?.push(vo.week);
+      // 這裡要判斷後端過來的 week 是不是已經被包成陣列了
+      if (Array.isArray(vo.week)) {
+        map.get(key)?.push(...vo.week);
+      } else {
+        map.get(key)?.push(vo.week);
+      }
     });
 
     const newSlots: TimeSlotUI[] = [];
     map.forEach((weeks, timeKey) => {
       const [openStr, closeStr] = timeKey.split('-');
+      const [openH, openM] = (openStr || '09:00').split(':');
+      const [closeH, closeM] = (closeStr || '18:00').split(':');
+
       newSlots.push({
-        selectedWeeks: weeks.sort((a, b) => a - b),
-        openTime: this.parseTimeToDate(openStr),
-        closeTime: this.parseTimeToDate(closeStr)
+        selectedWeeks: [...new Set(weeks)].sort((a, b) => a - b), // 使用 Set 去重
+        openHour: openH.padStart(2, '0'),
+        openMinute: openM.padStart(2, '0'),
+        closeHour: closeH.padStart(2, '0'),
+        closeMinute: closeM.padStart(2, '0')
       });
     });
-    this.timeSlots = newSlots.length > 0 ? newSlots : [{ selectedWeeks: [], openTime: null, closeTime: null }];
+
+    this.timeSlots = newSlots.length > 0 ? newSlots : [this.createDefaultSlot()];
   }
 
-  private parseTimeToDate(timeStr: string): Date {
-    if (!timeStr) return new Date();
-    const parts = timeStr.split(':');
-    const h = Number(parts[0]);
-    const m = Number(parts[1]);
-    const d = new Date();
-    d.setHours(h, m, 0, 0);
-    return d;
+  createDefaultSlot(): TimeSlotUI {
+    return {
+      selectedWeeks: [],
+      openHour: '09',
+      openMinute: '00',
+      closeHour: '18',
+      closeMinute: '00'
+    };
   }
 
   // 上傳照片
@@ -416,11 +360,7 @@ export class StoreUpsertComponent {
 
   // 營業時間
   addTimeSlot() {
-    this.timeSlots.push({
-      selectedWeeks: [],
-      openTime: null,
-      closeTime: null
-    });
+    this.timeSlots.push(this.createDefaultSlot());
   }
 
   removeTimeSlot(index: number) {
@@ -435,6 +375,15 @@ export class StoreUpsertComponent {
     const m = date.getMinutes().toString().padStart(2, '0');
     return `${h}:${m}`;
   }
+
+  hours: string[] = [];
+  minutes: string[] = [];
+
+  initTimeOptions() {
+    this.hours = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0'));
+    this.minutes = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0'));
+  }
+
 
   // 運費級距
   addFeeRow() {
@@ -473,7 +422,6 @@ export class StoreUpsertComponent {
 
   // 下一步
   onSubmit() {
-    const finalVoList: any[] = [];
     const missingFields: string[] = [];
 
     if (!this.storeData.name) missingFields.push('商店名稱');
@@ -482,17 +430,12 @@ export class StoreUpsertComponent {
     if (!this.storeData.category) missingFields.push('經營類別');
     if (!this.storeData.type) missingFields.push('商店類型');
 
-    this.timeSlots.forEach(slot => {
-      const openStr = this.formatTime(slot.openTime);
-      const closeStr = this.formatTime(slot.closeTime);
-
-      slot.selectedWeeks.forEach(w => {
-        finalVoList.push({
-          week: w,
-          openTime: openStr,
-          closeTime: closeStr
-        });
-      });
+    const finalVoList = this.timeSlots.map(slot => {
+      return {
+        week: slot.selectedWeeks && slot.selectedWeeks.length > 0 ? slot.selectedWeeks : [],
+        openTime: `${slot.openHour || '00'}:${slot.openMinute || '00'}`,
+        closeTime: `${slot.closeHour || '00'}:${slot.closeMinute || '00'}`
+      };
     });
 
     if (finalVoList.length === 0) {
@@ -529,6 +472,10 @@ export interface Category {
 
 export interface TimeSlotUI {
   selectedWeeks: number[];
-  openTime: Date | null;
-  closeTime: Date | null;
+  // openTime: Date | null;
+  // closeTime: Date | null;
+  openHour: string;
+  openMinute: string;
+  closeHour: string;
+  closeMinute: string;
 }

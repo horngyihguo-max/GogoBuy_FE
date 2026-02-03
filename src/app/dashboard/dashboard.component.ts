@@ -237,7 +237,15 @@ export class DashboardComponent {
     }).subscribe({
       next: () => {
         // res 是純字串 (String return from Backend)
-        Swal.fire('公告發送成功');
+        Swal.fire({
+          icon: "success",
+          title: "公告發送成功!",
+          toast: true,
+          position: 'top',
+          showConfirmButton: false,
+          timer: 2000,
+          timerProgressBar: true,
+        });
         this.displayAnnounceDialog = false;
         this.loadHistory(); // 重新載入歷史
       },
