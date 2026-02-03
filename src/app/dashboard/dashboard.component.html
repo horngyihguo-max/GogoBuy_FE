@@ -79,8 +79,9 @@
           <tr>
             <td><span class="text-gray-500">#{{ notice.id }}</span></td>
             <td class="font-bold text-gray-900">{{ notice.displayTitle }}</td>
-            <td class="text-gray-700">
-              <div class="line-clamp-2" [title]="notice.displayContent">{{ notice.displayContent }}</div>
+            <td class="text-gray-700 font-semibold">
+              <div class=" line-clamp-2" [title]="notice.displayContent">{{ notice.displayContent }}
+              </div>
             </td>
             <td>
               @if (notice.displayLink) {
@@ -90,8 +91,8 @@
               <span class="text-gray-400">-</span>
               }
             </td>
-            <td class="text-sm text-gray-600">{{ notice.createdAt | date:'yyyy-MM-dd HH:mm' }}</td>
-            <td class="text-sm text-gray-600">{{ notice.expiredAt ? (notice.expiredAt | date:'yyyy-MM-dd HH:mm') : '無期限'
+            <td class="text-sm text-gray-700">{{ notice.createdAt | date:'yyyy-MM-dd HH:mm' }}</td>
+            <td class="text-sm text-gray-700">{{ notice.expiredAt ? (notice.expiredAt | date:'yyyy-MM-dd HH:mm') : '無期限'
               }}</td>
           </tr>
         </ng-template>
@@ -150,7 +151,7 @@
           <tr>
             <th pSortableColumn="id" style="width:10%">ID <p-sortIcon field="id"></p-sortIcon></th>
             <th pSortableColumn="eventName" style="width:25%">活動名稱 <p-sortIcon field="eventName"></p-sortIcon></th>
-            <th pSortableColumn="storeId" style="width:10%">店家ID <p-sortIcon field="storeId"></p-sortIcon></th>
+            <th pSortableColumn="storeName" style="width:20%">店家名稱 <p-sortIcon field="storeName"></p-sortIcon></th>
             <th pSortableColumn="nickname" style="width:15%">開團者 <p-sortIcon field="nickname"></p-sortIcon></th>
             <th pSortableColumn="status" style="width:15%">狀態 <p-sortIcon field="status"></p-sortIcon></th>
             <th style="width:25%">操作</th>
@@ -160,7 +161,7 @@
           <tr>
             <td><span class="text-gray-500">#{{ event.id }}</span></td>
             <td class="font-semibold text-gray-900">{{ event.eventName || '未命名活動' }}</td>
-            <td>{{ event.storeId || event.storesId }}</td>
+            <td class="font-semibold text-gray-900">{{ event.storeName }}</td>
             <td>
               <div class="flex items-center gap-2">
                 <p-avatar [image]="event.avatarUrl" shape="circle" size="normal"></p-avatar>
@@ -209,22 +210,23 @@
                 <span class="font-bold text-gray-900">{{ user.nickname }}</span>
               </div>
             </td>
-            <td class="text-gray-600">{{ user.email }}</td>
+            <td class="font-semibold text-gray-700">{{ user.email }}</td>
             <td>
               @if (user.role === 'admin') {
               <span
-                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-base font-bold bg-purple-100 text-purple-800">
+                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-base font-bold bg-amber-300 text-gray-800">
                 管理員
               </span>
               } @else {
               <span
-                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-base font-bold bg-amber-300 text-gray-800">
+                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-base font-bold bg-purple-100 text-purple-800">
                 一般用戶
               </span>
               }
             </td>
             <td>
-              <p-tag [value]="user.provider" [severity]="getSeverity(user.provider)" [rounded]="true"></p-tag>
+              <p-tag class="text-base" [value]="user.provider" [severity]="getSeverity(user.provider)"
+                [rounded]="true"></p-tag>
             </td>
             <td>
               <p-button (click)="menu.toggle($event)" icon="pi pi-pencil"

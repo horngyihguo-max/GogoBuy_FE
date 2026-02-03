@@ -11,14 +11,16 @@ import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { FloatLabelModule } from 'primeng/floatlabel';
+import { FormsModule } from "@angular/forms";
 
 
 @Component({
   selector: 'app-group-event',
   imports: [
     CommonModule, Dialog, PickListModule, DragDropModule,
-    InputGroupModule, InputGroupAddonModule, InputNumberModule, FloatLabelModule
-  ],
+    InputGroupModule, InputGroupAddonModule, InputNumberModule, FloatLabelModule,
+    FormsModule
+],
   templateUrl: './group-event.component.html',
   styleUrl: './group-event.component.scss'
 })
@@ -36,6 +38,13 @@ export class GroupEventComponent {
   menuCategoriesVoList:MenuCategoriesVoList[]=[];
   productOptionGroupsVoList:ProductOptionGroupsVoList[]=[];
   feeDescriptionVoList:FeeDescriptionVoList[]=[];
+
+  eventName!:string;
+  type!:string;
+  tempMenu:number[]=[];  //存品項id
+  recommend:number[]=[];  //存推薦id
+  recommendDescription!:string;
+  limitation!:number;
 
   userId!:string;
   storeId!:number;
@@ -61,10 +70,17 @@ export class GroupEventComponent {
     this.userId=String(localStorage.getItem('user_id'));
     this.storeId=Number(this.route.snapshot.paramMap.get('id'));
     this.http.getApi('http://localhost:8080/gogobuy/store/searchId?id='+this.storeId).subscribe((res:any)=>{
-      this.storeList=res.storeList[0];
-      this.storeList!.image = "https://picsum.photos/240/160?random=16";
-      this.menuVoList=res.menuVoList;
-      this.menuCategoriesVoList=res.menuCategoriesVoList;
+      // 1. 先判斷 res 是否存在且 storeList 有資料
+      if (!res || !res.storeList || res.storeList.length === 0) {
+        console.error('找不到店家資料或 API 異常');
+        return;
+      }
+      this.storeList = res.storeList[0];
+      if (this.storeList) {
+        this.type=this.storeList.type;
+      }
+      this.menuVoList = res.menuVoList || [];
+      this.menuCategoriesVoList = res.menuCategoriesVoList || [];
       if (this.menuCategoriesVoList.length > 0) {
         const categoryMap = new Map(
           this.menuCategoriesVoList.map(cat => [cat.id, cat])
@@ -83,7 +99,7 @@ export class GroupEventComponent {
           }
           cate.basePrice=perPrice;
         }
-        this.activeTab = this.menuCategoriesVoList[0].id;
+        this.activeTab = this.menuCategoriesVoList[0]?.id;
       }
       this.productOptionGroupsVoList=res.productOptionGroupsVoList;
       this.feeDescriptionVoList=res.FeeDescription;
@@ -162,10 +178,11 @@ export class GroupEventComponent {
     return "近期無營業時段";  // 繞了一圈 7 天都沒資料
   }
 
-  open = false;
+
+  splitOpen = false;
   toggle(event: MouseEvent) {
     event.stopPropagation();
-    this.open = !this.open;
+    this.splitOpen = !this.splitOpen;
   }
   choice!: string;
   choose(choice:string){
@@ -174,11 +191,12 @@ export class GroupEventComponent {
     }else{
       this.choice="權重制";
     }
-    this.open=false;
+    this.splitOpen=false;
   }
   close(){
-    this.open=false;
+    this.splitOpen=false;
   }
+
 
   openDialog:boolean=false;
   dialog(){
@@ -218,12 +236,19 @@ export class GroupEventComponent {
   }
   // 取消選中 (從 Target 搬回 Source)
   onMoveToSource(event: any) {
+    const movedItems = event.items;
+    movedItems.forEach((item: any) => {
+      this.recommend = this.recommend.filter(id => id !== item.id);
+    });
+    this.fixTabAndRecommend(event);
     this.fixPaddingPosition();
   }
   isItemInTarget(product: any): boolean {    // 檢查這個項目是否在已選清單中
     return this.selectedItems.some(item => item.id === product.id);
   }
   onMoveAllToSource(event: any) {
+    this.recommend=[];
+    this.fixTabAndRecommend(event);
     this.fixPaddingPosition();
   }
   onMoveAllToTarget(event: any) {
@@ -232,18 +257,38 @@ export class GroupEventComponent {
   fixPaddingPosition() {
     // 給 PrimeNG 內建邏輯 50ms 的緩衝，確保它跑完
     setTimeout(() => {
-      // 1. 抓出目前兩個清單中「真正」的產品 (排除墊片)
+      // 抓出目前兩個清單中「真正」的產品 (排除墊片)
       const allProductsInSource = this.displaySource.filter(item => !item.isPadding);
       const allProductsInTarget = this.selectedItems.filter(item => !item.isPadding);
 
-      // 2. 校正來源區：絕對不能有墊片
+      // 校正來源區(不能有墊片)
       this.displaySource = [...allProductsInSource];
 
-      // 3. 校正目標區：[真正的產品] + [墊片永遠在最後]
+      // 校正目標區：[真正的產品] + [墊片永遠在最後]
       // 使用新物件解構，確保觸發 Angular 的渲染更新
       this.selectedItems = [...allProductsInTarget, { ...this.paddingItem }];
       this.updateDisplaySource();
     }, 50);
+  }
+  private fixTabAndRecommend(event:any){
+    if(event && event.items && Array.isArray(event.items)){
+      const movedItems = event.items.filter((item: any) => !item.isPadding);
+      movedItems.forEach((item:any) => item.isRecommended=false);
+      const tabSet = new Set(movedItems.map((item: any) => item.categoryId));
+      if(tabSet.size==1){
+        // 從 Set 中取出第一個（也是唯一一個）值
+        const singleCategoryId = tabSet.values().next().value;
+        // 確保不把 paddingItem 的 ID 誤存進去 (墊片沒有 categoryId)
+        if (singleCategoryId !== undefined) {
+          this.activeTab = singleCategoryId;
+        }
+      }else{
+        this.activeTab=this.menuCategoriesVoList[0].id;
+      }
+    }else if(event && event.categoryId){
+      this.activeTab=event.categoryId;
+      event.isRecommended=false;
+    }
   }
   getPaddingHeight() {
     const containerHeight = 18; // 總高度 18rem
@@ -255,21 +300,42 @@ export class GroupEventComponent {
   removeItem(product: any, event: MouseEvent) {
     // 阻止事件冒泡，防止觸發 PickList 的選取效果
     event.stopPropagation();
-
-    // 1. 將項目從已選清單移除
-    this.selectedItems = this.selectedItems.filter(item => item.id !== product.id);
-
-    // 2. 將項目加回來源清單 (如果不在裡面的話)
+    // 將項目從已選清單移除
+    this.selectedItems = this.selectedItems.filter(item => item.id != product.id);
+    this.recommend=this.recommend.filter(id => id != product.id);
+    // 將項目加回來源清單 (如果不在裡面的話)
     if (!this.displaySource.find(item => item.id === product.id)) {
         this.displaySource = [...this.displaySource, product];
     }
-
-    // 3. 執行你寫好的校正與滾動邏輯
+    this.fixTabAndRecommend(product);
     this.fixPaddingPosition();
     this.updateDisplaySource();
-}
+  }
+  toggleRecommend(product: any, event: MouseEvent) {
+    // 阻止事件冒泡，避免觸發 PickList 的選取/拖拽動作
+    event.stopPropagation();
+    // 切換選中狀態
+    product.isRecommended = !product.isRecommended;
+    if (product.isRecommended==true) {
+      this.recommend.push(product.id);
+    }else{
+      this.recommend = this.recommend.filter(id => id != product.id);
+    }
+  }
 
-  goTo(){
+  saveData() {
+    if (this.recommendDescription && this.recommendDescription.length > 200) {
+      // 雖然有 maxlength，但保險起見還是可以做一次裁切
+      this.recommendDescription = this.recommendDescription.substring(0, 200);
+    }
+  }
+  goHome(){
     this.router.navigate(['/gogobuy/home']);
+  }
+  save(){
+    this.tempMenu=[...this.selectedItems];
+    if(this.limitation<1){
+
+    }
   }
 }

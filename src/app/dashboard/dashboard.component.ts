@@ -161,13 +161,17 @@ export class DashboardComponent {
         // 建立一個快速查詢 Map: [userId, avatarUrl]
         const avatarMap = new Map(processedUsers.map((u: any) => [u.id, u.avatarUrl]));
 
+        // 建立店家查詢 Map: [storeId, storeName]
+        const storeMap = new Map(stores.map((s: any) => [s.id, s.name]));
+
         // 3. 處理 Event 資料 (並將頭像塞入)
         const rawEvents = Array.isArray(res.events) ? res.events :
           (res.events.groupsSearchViewList || res.events.groupbuyEvents || res.events.eventList || []);
 
         const eventsWithAvatar = rawEvents.map((event: any) => ({
           ...event,
-          avatarUrl: avatarMap.get(event.hostId) || defaultAvatar
+          avatarUrl: avatarMap.get(event.hostId) || defaultAvatar,
+          storeName: storeMap.get(event.storeId || event.storesId) || '未知店家'
         }));
 
         return { stores, processedUsers, eventsWithAvatar };
@@ -188,8 +192,8 @@ export class DashboardComponent {
 
   getSeverity(status: string) {
     switch (status) {
-      case 'GOOGLE': return 'success';
-      default: return 'info';
+      case 'GOOGLE': return 'info';
+      default: return 'success';
     }
   }
 
@@ -250,7 +254,6 @@ export class DashboardComponent {
         this.loadHistory(); // 重新載入歷史
       },
       error: (err) => {
-        console.error(err);
         Swal.fire('發送失敗', err, 'error');
       }
     });
