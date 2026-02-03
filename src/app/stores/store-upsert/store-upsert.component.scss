@@ -42,3 +42,12 @@ input:-webkit-autofill:focus {
   transition: background-color 5000s ease-in-out 0s;
 }
 
+:host ::ng-deep .p-autocomplete {
+  display: flex;
+  width: 100%;
+}
+
+:host ::ng-deep .p-inputtext {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
