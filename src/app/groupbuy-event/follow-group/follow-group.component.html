@@ -766,10 +766,12 @@
             </div>
 
             <button
-              class="cursor-pointer px-6 py-3 2xl:mr-0 mr-10 rounded-full bg-red-900 text-white font-extrabold active:scale-95 transition disabled:opacity-40 disabled:cursor-not-allowed"
+              class="cursor-pointer px-6 py-3 rounded-full bg-red-900 text-white font-extrabold active:scale-95 transition disabled:opacity-40 disabled:cursor-not-allowed"
               [disabled]="orderSubtotal <= 0"
+              (click)="openOrderDetailDialog()"
             >
-              下一步
+              訂單詳情
+              <i class="pi pi-angle-right ml-2"></i>
             </button>
           </div>
         </div>
@@ -804,111 +806,115 @@
 
   <!-- ===== Body ===== -->
   <div class="h-full flex flex-col">
-    <!-- ===== Tabs ===== -->
-    <p-tabView [(activeIndex)]="detailTabIndex" class="shrink-0 text-[23px]">
-      <p-tabPanel header="店家資料"></p-tabPanel>
-      <p-tabPanel header="訂購資訊"></p-tabPanel>
-    </p-tabView>
+    <!-- ===== Tabs (PrimeNG v18) ===== -->
+    <p-tabs [(value)]="detailTabValue" class="shrink-0 text-[23px]">
+      <p-tablist>
+        <p-tab value="store">店家資料</p-tab>
+        <p-tab value="order">訂購資訊</p-tab>
+      </p-tablist>
 
-    <!-- ===== Content（可滾） ===== -->
-    <div class="grow overflow-y-auto pr-1 text-[20px] text-gray-700">
-      <!-- ===== Tab：店家資訊 ===== -->
-      @if (detailTabIndex === 0) {
-        <div class="space-y-6">
-          <!-- 基本資訊 -->
-          <section>
-            <div class="text-gray-500 font-semibold mb-2">基本資訊</div>
-            <div class="space-y-2">
-              <div>
-                <span class="text-gray-500 font-semibold">店名：</span>
-                <span class="font-extrabold text-red-950">{{
-                  store?.name
-                }}</span>
-              </div>
-              <div>
-                <span class="text-gray-500 font-semibold">類型：</span>
-                <span class="font-semibold">{{ store?.type || "—" }}</span>
-              </div>
-              <div>
-                <span class="text-gray-500 font-semibold">分類：</span>
-                <span class="font-semibold">{{
-                  getCategoryName(store?.category) || "—"
-                }}</span>
-              </div>
-              <div>
-                <span class="text-gray-500 font-semibold">電話：</span>
-                <span class="font-semibold">{{ store?.phone || "—" }}</span>
-              </div>
-              <div>
-                <span class="text-gray-500 font-semibold">地址：</span>
-                <span class="font-semibold">{{ store?.address || "—" }}</span>
-              </div>
-            </div>
-          </section>
-
-          <!-- 營業時間 -->
-          <section>
-            <div class="text-gray-500 font-semibold mb-2">營業時間</div>
-
-            @if (getGroupedOperatingHours().length) {
-              <div class="space-y-3">
-                @for (g of getGroupedOperatingHours(); track g.dayLabel) {
-                  <div class="flex gap-4">
-                    <div class="w-12 shrink-0 font-extrabold text-red-900">
-                      {{ g.dayLabel }}
-                    </div>
-                    <div class="space-y-1">
-                      @for (t of g.times; track t) {
-                        <div class="font-semibold text-gray-800">
-                          {{ t }}
-                        </div>
-                      }
-                    </div>
-                  </div>
-                }
-              </div>
-            } @else {
-              <div class="text-gray-500">（無營業時間資料）</div>
-            }
-          </section>
-        </div>
-      }
-
-      <!-- ===== Tab：訂購資訊 ===== -->
-      @if (detailTabIndex === 1) {
-        <div class="space-y-6">
-          <!-- 注意事項 -->
-          <section>
-            <div class="text-gray-500 font-semibold mb-2">注意事項</div>
-            <div class="font-semibold">
-              {{ store?.memo || "（無）" }}
-            </div>
-          </section>
-
-          <!-- 運費 -->
-          <section>
-            <div class="text-gray-500 font-semibold mb-2">運費規則</div>
-
-            @if (store?.feeDescriptionVoList?.length) {
+      <!-- ===== Content（可滾） ===== -->
+      <p-tabpanels class="grow overflow-y-auto pr-1 text-[20px] text-gray-700">
+        <!-- ===== Tab：店家資訊 ===== -->
+        <p-tabpanel value="store">
+          <div class="space-y-6">
+            <!-- 基本資訊 -->
+            <section>
+              <div class="text-gray-500 font-semibold mb-2">基本資訊</div>
               <div class="space-y-2">
-                @for (f of store.feeDescriptionVoList; track $index) {
-                  <div
-                    class="flex items-center justify-between bg-white/70 border border-white rounded-xl px-3 py-2"
-                  >
-                    <div class="font-semibold">{{ f.distance }} km</div>
-                    <div class="font-extrabold text-red-900">${{ f.fee }}</div>
-                  </div>
-                }
+                <div>
+                  <span class="text-gray-500 font-semibold">店名：</span>
+                  <span class="font-extrabold text-red-950">
+                    {{ store?.name }}
+                  </span>
+                </div>
+                <div>
+                  <span class="text-gray-500 font-semibold">類型：</span>
+                  <span class="font-semibold">{{ store?.type || "—" }}</span>
+                </div>
+                <div>
+                  <span class="text-gray-500 font-semibold">分類：</span>
+                  <span class="font-semibold">
+                    {{ getCategoryName(store?.category) || "—" }}
+                  </span>
+                </div>
+                <div>
+                  <span class="text-gray-500 font-semibold">電話：</span>
+                  <span class="font-semibold">{{ store?.phone || "—" }}</span>
+                </div>
+                <div>
+                  <span class="text-gray-500 font-semibold">地址：</span>
+                  <span class="font-semibold">{{ store?.address || "—" }}</span>
+                </div>
               </div>
-            } @else {
-              <div class="text-gray-500">（無運費資料）</div>
-            }
-          </section>
-        </div>
-      }
+            </section>
 
-      <div class="h-4"></div>
-    </div>
+            <!-- 營業時間 -->
+            <section>
+              <div class="text-gray-500 font-semibold mb-2">營業時間</div>
+
+              @if (getGroupedOperatingHours().length) {
+                <div class="space-y-3">
+                  @for (g of getGroupedOperatingHours(); track g.dayLabel) {
+                    <div class="flex gap-4">
+                      <div class="w-12 shrink-0 font-extrabold text-red-900">
+                        {{ g.dayLabel }}
+                      </div>
+                      <div class="space-y-1">
+                        @for (t of g.times; track t) {
+                          <div class="font-semibold text-gray-800">
+                            {{ t }}
+                          </div>
+                        }
+                      </div>
+                    </div>
+                  }
+                </div>
+              } @else {
+                <div class="text-gray-500">（無營業時間資料）</div>
+              }
+            </section>
+          </div>
+        </p-tabpanel>
+
+        <!-- ===== Tab：訂購資訊 ===== -->
+        <p-tabpanel value="order">
+          <div class="space-y-6">
+            <!-- 注意事項 -->
+            <section>
+              <div class="text-gray-500 font-semibold mb-2">注意事項</div>
+              <div class="font-semibold">
+                {{ store?.memo || "（無）" }}
+              </div>
+            </section>
+
+            <!-- 運費 -->
+            <section>
+              <div class="text-gray-500 font-semibold mb-2">運費規則</div>
+
+              @if (store?.feeDescriptionVoList?.length) {
+                <div class="space-y-2">
+                  @for (f of store.feeDescriptionVoList; track $index) {
+                    <div
+                      class="flex items-center justify-between bg-white/70 border border-white rounded-xl px-3 py-2"
+                    >
+                      <div class="font-semibold">{{ f.distance }} km</div>
+                      <div class="font-extrabold text-red-900">
+                        ${{ f.fee }}
+                      </div>
+                    </div>
+                  }
+                </div>
+              } @else {
+                <div class="text-gray-500">（無運費資料）</div>
+              }
+            </section>
+
+            <div class="h-4"></div>
+          </div>
+        </p-tabpanel>
+      </p-tabpanels>
+    </p-tabs>
   </div>
 </p-dialog>
 
@@ -1142,17 +1148,196 @@
             </div>
           </div>
 
-          <!-- 右：加入購物車 -->
+          <!-- 右：加入訂單 -->
           <button
             type="button"
             class="cursor-pointer px-6 py-3 rounded-full font-extrabold shadow-sm transition enabled:bg-red-900 enabled:text-white enabled:hover:bg-red-950 enabled:active:scale-95 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed"
             [disabled]="selectedProduct.available === false"
             (click)="addToOrder()"
           >
-            放入購物車
+            加入訂單
           </button>
         </div>
       </div>
     </div>
   }
+</p-dialog>
+
+<p-dialog
+  [(visible)]="orderDetailDialogVisible"
+  [modal]="true"
+  [dismissableMask]="true"
+  [draggable]="false"
+  [resizable]="false"
+  appendTo="body"
+  [style]="{ width: '720px', maxWidth: '95vw', height: '78vh' }"
+>
+  <ng-template pTemplate="header">
+    <div class="text-xl font-extrabold text-red-900">訂單詳情</div>
+  </ng-template>
+
+  <!-- 外層：上可滾、下固定 -->
+  <div class="h-full flex flex-col">
+    <!-- 可滾內容 -->
+    <div class="grow overflow-y-auto pr-[6px]">
+      @if (orderItems.length === 0) {
+        <div class="text-gray-500 font-semibold p-4">（尚未點餐）</div>
+      } @else {
+        <div class="space-y-3 p-1">
+          @for (it of orderItems; track makeOrderKey(it)) {
+            <div
+              class="rounded-2xl bg-white border border-black/5 shadow-sm p-4"
+            >
+              <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0">
+                  <div
+                    class="text-xl font-extrabold text-gray-900 truncate"
+                  >
+                    {{ it.name }}
+                  </div>
+
+                  <div class="mt-1 text-lg text-gray-500">
+                    規格：<span class="font-semibold text-gray-700">{{
+                      it.specName
+                    }}</span>
+                    @if (it.specExtraPrice && it.specExtraPrice > 0) {
+                      <span class="ml-1 text-gray-400"
+                        >(+{{ it.specExtraPrice }})</span
+                      >
+                    }
+                  </div>
+
+                  <div class="mt-1 text-lg text-gray-500">
+                    選項：<span class="font-semibold text-gray-700">{{
+                      formatOptionSummary(it)
+                    }}</span>
+                  </div>
+
+                  <div class="mt-2 text-lg text-gray-500">
+                    單價：
+                    <span class="font-extrabold text-red-900"
+                      >${{ it.finalUnitPrice }}</span
+                    >
+                    <span class="mx-2 text-gray-300">|</span>
+                    小計：
+                    <span class="font-extrabold text-gray-900"
+                      >${{ getLineSubtotal(it) }}</span
+                    >
+                  </div>
+                </div>
+
+                <!-- 右側操作 -->
+                <div class="shrink-0 flex flex-col items-end gap-2">
+                  <button
+                    type="button"
+                    class="cursor-pointer px-3 py-2 rounded-full bg-gray-100 font-extrabold active:scale-95 transition"
+                    (click)="editLine($index)"
+                  >
+                    修改
+                  </button>
+
+                  <button
+                    type="button"
+                    class="cursor-pointer px-3 py-2 rounded-full bg-red-900 text-white font-extrabold active:scale-95 transition"
+                    (click)="removeLine($index)"
+                  >
+                    移除
+                  </button>
+                </div>
+              </div>
+
+              <!-- 數量控制列 -->
+              <div class="mt-3 flex items-center justify-between">
+                <div class="text-lg text-gray-500 font-semibold">數量</div>
+
+                <div class="flex items-center gap-2">
+                  <button
+                    type="button"
+                    class="cursor-pointer w-10 h-10 rounded-full bg-gray-100 font-extrabold active:scale-95 transition"
+                    (click)="decreaseLineQty($index)"
+                  >
+                    -
+                  </button>
+
+                  <div class="w-10 text-center font-extrabold text-gray-900">
+                    {{ it.quantity }}
+                  </div>
+
+                  <button
+                    type="button"
+                    class="cursor-pointer w-10 h-10 rounded-full bg-gray-100 font-extrabold active:scale-95 transition"
+                    (click)="increaseLineQty($index)"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- 備註 -->
+      <div
+        class="mt-4 rounded-2xl bg-white/80 border border-black/5 shadow-sm p-4"
+      >
+        <div class="text-lg font-extrabold text-gray-900 mb-2">
+          備註（personalMemo）
+        </div>
+        <textarea
+          class="w-full min-h-[90px] rounded-xl border border-black/10 p-3 outline-none focus:border-red-900/40 bg-white"
+          placeholder="例如：要吸管 / 不要香菜 / 晚點取..."
+          [(ngModel)]="personalMemo"
+        ></textarea>
+        <div class="mt-2 text-sm text-gray-500">
+          ※ 備註會保留，回到點餐頁再新增餐點也不會消失
+        </div>
+      </div>
+
+      <!-- 總金額 -->
+      <div
+        class="mt-4 rounded-2xl bg-white/80 border border-black/5 shadow-sm p-4"
+      >
+        <div class="flex items-end justify-between">
+          <div>
+            <div class="text-lg font-semibold text-gray-500">訂單總金額</div>
+            <div class="text-[26px] font-extrabold text-gray-900">
+              ${{ orderSubtotal }}
+            </div>
+            <div class="text-sm text-gray-500 mt-1">（尚未計入運費）</div>
+          </div>
+
+          <div class="text-lg text-gray-500 font-semibold">
+            運費：{{ group?.shippingFee }} 元
+          </div>
+        </div>
+      </div>
+
+      <div class="h-4"></div>
+    </div>
+
+    <!-- 底部固定操作列 -->
+    <div
+      class="shrink-0 border-t border-black/10 bg-white/95 backdrop-blur p-4"
+    >
+      <div class="flex items-center justify-between gap-3">
+        <button
+          type="button"
+          class="px-6 py-3 rounded-full bg-gray-100 text-gray-900 font-extrabold active:scale-95 transition"
+          (click)="closeOrderDetailDialog()"
+        >
+          上一步
+        </button>
+
+        <button
+          type="button"
+          class="cursor-pointer px-6 py-3 rounded-full bg-red-900 text-white font-extrabold active:scale-95 transition disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed"
+          [disabled]="orderItems.length === 0"
+          (click)="submitOrder()"
+        >
+          確認送出
+        </button>
+      </div>
+    </div>
+  </div>
 </p-dialog>

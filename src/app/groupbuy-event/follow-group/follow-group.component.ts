@@ -1,11 +1,13 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../@service/auth.service';
 import { HttpService } from '../../@service/http.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
-import { TabViewModule } from 'primeng/tabview';
+// import { TabViewModule } from 'primeng/tabview';
+import { TabsModule } from 'primeng/tabs';
 import { PaginatorModule } from 'primeng/paginator';
 import { AccordionModule } from 'primeng/accordion';
 import { TooltipModule } from 'primeng/tooltip';
@@ -43,13 +45,15 @@ type ProductOptionGroup = {
     DialogModule,
     ButtonModule,
     CommonModule,
+    FormsModule,
     // Drag-drop directives
-    CdkDrag,
-    CdkDropList,
-    CdkDropListGroup,
+    // CdkDrag,
+    // CdkDropList,
+    // CdkDropListGroup,
     AccordionModule,
     TooltipModule,
-    TabViewModule,
+    // TabViewModule,
+    TabsModule,
     PaginatorModule,
   ],
   templateUrl: './follow-group.component.html',
@@ -308,8 +312,95 @@ export class FollowGroupComponent {
     this.loadGroupById(this.groupId);
   }
 
+  // TODO 取得既存訂單
+  loadExistingOrder(groupId: number, userId: string): void {
+    // const url = `http://localhost:8080/gogobuy/getAllOrdersByUserIdAndEventsId?user_id=${userId}&events_id=${groupId}`;
+
+    // this.http.getApi(url).subscribe({
+    //   next: (res: any) => {
+    //     // =========================
+    //     // 沒資料：後端回 404 結構
+    //     // =========================
+    //     if (res?.code === 404) {
+    //       this.hasExistingOrder = false;
+    //       this.existingOrderId = null;
+    //       this.orderItems = [];
+    //       this.personalMemo = '';
+    //       this.toastSuccess('讀取成功', '未有既存訂單');
+    //       this.isLoading = false;
+    //       return;
+    //     }
+
+    //     // =========================
+    //     // 有資料：視為既存訂單
+    //     // =========================
+    //     this.hasExistingOrder = true;
+    //     this.existingOrderId = res?.id ?? null;
+    //     this.personalMemo = res?.personalMemo ?? '';
+
+    //     this.applyOrderToOrderItems(res);
+    //     this.toastSuccess('讀取成功', '取得既有訂單成功');
+    //     this.isLoading = false;
+    //   },
+    //   error: () => {
+    //     this.toastWarn('讀取失敗', '取得既有訂單失敗');
+    //     this.router.navigate(['/gogobuy/home']);
+    //     this.isLoading = false;
+    //   },
+    // });
+
+    // =========================
+    // 假資料（之後接 API 再換回上面）
+    const res = this.getMockOrderResponse();
+    // =========================
+    // 沒資料：模擬後端回 404
+    if (res?.code === 404) {
+      this.hasExistingOrder = false;
+      this.existingOrderId = null;
+      this.orderItems = [];
+      this.personalMemo = '';
+      this.toastSuccess('讀取成功', '未有既存訂單');
+      this.isLoading = false;
+      return;
+    }
+    // =========================
+    // 有資料：視為既存訂單
+    this.hasExistingOrder = true;
+    this.existingOrderId = res?.id ?? null;
+    this.personalMemo = res?.personalMemo ?? '';
+
+    this.applyOrderToOrderItems(res);
+    this.toastSuccess('讀取成功', '取得既有訂單成功');
+    // 店家菜單 ready 後，補齊既存訂單顯示（品名/價格/單價）
+    this.hydrateOrderItemsFromStore();
+    this.isLoading = false;
+  }
+
+  // 把 GET 到的 menuList 灌回 orderItems（先放最小資料，價格/品名之後補）
+  applyOrderToOrderItems(order: any): void {
+    const list = Array.isArray(order?.menuList) ? order.menuList : [];
+
+    this.orderItems = list.map((m: any) => {
+      return {
+        menuId: Number(m.menuId),
+        name: '', // 之後用 menuId 去 store.menuVoList 補
+        quantity: Number(m.quantity || 1),
+
+        specName: m?.specName ?? '標準',
+        specExtraPrice: 0, // 之後補
+
+        basePrice: 0, // 之後補
+        finalUnitPrice: 0, // 之後補（base + spec + options）
+
+        selectedOptionList: Array.isArray(m?.selectedOptionList)
+          ? m.selectedOptionList
+          : [],
+      };
+    });
+  }
+
   // =========================
-  // 抓團 + 店家資料（先假資料，後面換 API）
+  // TODO 抓團 + 店家資料（先假資料，後面換 API）
   // =========================
   loadGroupById(id: number): void {
     this.isLoading = true;
@@ -317,13 +408,24 @@ export class FollowGroupComponent {
     // =============================================
     // GROUP（後端上線後使用）
     // this.http
-    //   .getApi(`http://localhost:8080/gogobuy/event/getEventsByEventsId?id=${id}`)
+    //   .getApi(
+    //     `http://localhost:8080/gogobuy/event/getEventsByEventsId?id=${id}`,
+    //   )
     //   .subscribe((res: any) => {
     //     const g = res?.groupbuyEvents?.[0] as GroupbuyEvents | undefined;
     //     if (!g) {
     //       this.toastWarn('錯誤', '找不到團資料');
     //       this.goBack();
     //       return;
+    //     } else {
+    //       // 現在時間
+    //       const now = new Date();
+    //       const target = new Date(g.endTime);
+    //       if (now.getTime() > target.getTime()) {
+    //         this.toastWarn('超時', '此團已過期');
+    //         this.router.navigate(['/gogobuy/home']);
+    //         return;
+    //       }
     //     }
     //     this.applyGroup(g);
     //     this.loadStoreById(g.storesId);
@@ -355,6 +457,7 @@ export class FollowGroupComponent {
     this.loadStoreById(this.storeId);
   }
 
+  // TODO 讀取店家資訊
   loadStoreById(id: number): void {
     this.isLoading = true;
 
@@ -372,6 +475,7 @@ export class FollowGroupComponent {
     const sRes = this.getMockResponse();
     this.store = this.normalizeStoreResponse(sRes);
     this.afterLoaded();
+    this.loadExistingOrder(this.groupId, this.userId);
   }
 
   // 套用團資料：解析 tempMenuList / recommendList + 基本防呆
@@ -388,6 +492,166 @@ export class FollowGroupComponent {
     this.allowedMenuIds = this.parseIdList(g.tempMenuList);
     this.recommendMenuIds = this.parseIdList(g.recommendList);
     // allowedMenuIds 空陣列代表「顯示全部」
+  }
+
+  // =========================
+  // 訂單詳情 Dialog
+  // =========================
+  orderDetailDialogVisible = false;
+
+  // 修改餐點（編輯模式）
+  editingOrderIndex: number | null = null;
+
+  openOrderDetailDialog(): void {
+    this.orderDetailDialogVisible = true;
+  }
+
+  closeOrderDetailDialog(): void {
+    this.orderDetailDialogVisible = false;
+    // 不清 personalMemo、不清 orderItems
+  }
+
+  // 每筆小計
+  getLineSubtotal(it: any): number {
+    return Number(it?.finalUnitPrice || 0) * Number(it?.quantity || 0);
+  }
+
+  increaseLineQty(index: number): void {
+    if (index < 0 || index >= this.orderItems.length) return;
+    this.orderItems[index].quantity += 1;
+  }
+
+  async decreaseLineQty(index: number): Promise<void> {
+    if (index < 0 || index >= this.orderItems.length) return;
+
+    const item = this.orderItems[index];
+
+    // 數量為 1，再按 - 會變成移除 → 先確認
+    if (item.quantity <= 1) {
+      const ok = await this.confirmRemoveItem(item.name);
+      if (!ok) return;
+
+      this.orderItems.splice(index, 1);
+      return;
+    }
+
+    // 正常減少
+    item.quantity -= 1;
+  }
+
+  async removeLine(index: number): Promise<void> {
+    if (index < 0 || index >= this.orderItems.length) return;
+
+    const item = this.orderItems[index];
+
+    const ok = await this.confirmRemoveItem(item.name);
+    if (!ok) return;
+
+    this.orderItems.splice(index, 1);
+  }
+
+  // 顯示用：選項摘要
+  formatOptionSummary(it: any): string {
+    const list = Array.isArray(it?.selectedOptionList)
+      ? it.selectedOptionList
+      : [];
+    if (!list.length) return '無';
+    return list
+      .map(
+        (o: any) =>
+          `${o.optionName}:${o.value}${o.extraPrice ? `(+${o.extraPrice})` : ''}`,
+      )
+      .join('、');
+  }
+
+  // 用 menuId 找商品（供「修改」帶入）
+  findProductByMenuId(menuId: number): any | null {
+    const all = (this as any).storeMenus || (this as any).menuList || [];
+    const p = all.find((x: any) => Number(x?.id) === Number(menuId));
+    return p || null;
+  }
+
+  // 點「修改」：開商品 dialog 並帶入原本那筆的選擇
+  editLine(index: number): void {
+    if (index < 0 || index >= this.orderItems.length) return;
+
+    const it = this.orderItems[index];
+    const p = this.findProductByMenuId(Number(it.menuId));
+
+    if (!p) {
+      this.toastWarn('無法修改', '找不到該商品的菜單資料，先略過修改功能');
+      return;
+    }
+
+    this.editingOrderIndex = index;
+
+    // 開 dialog（會 init 規格/選項/數量）
+    this.openProductDialog(p);
+
+    // 規格帶入（如果 priceLevels 沒有同名規格，補進去）
+    const specName = String(it?.specName || '標準');
+    const specExtraPrice = Number(it?.specExtraPrice || 0);
+
+    const found = this.priceLevels.find((lv) => lv.name === specName);
+    if (!found) {
+      this.priceLevels = [
+        { name: specName, price: specExtraPrice },
+        ...this.priceLevels,
+      ];
+    }
+    this.selectedPriceLevel = { name: specName, price: specExtraPrice };
+
+    // 數量帶入
+    this.quantity = Number(it?.quantity || 1);
+
+    // 單選/加料帶入（用 optionName/value 去匹配群組與項目名稱）
+    const selectedOptionList = Array.isArray(it?.selectedOptionList)
+      ? it.selectedOptionList
+      : [];
+
+    // 單選：用群組 name 比對 optionName
+    this.singleOptionGroups.forEach((g) => {
+      const match = selectedOptionList.find(
+        (o: any) => String(o.optionName) === String(g.name),
+      );
+      if (!match) {
+        if (!g.required) delete this.selectedSingleOptionMap[g.id];
+        return;
+      }
+      const picked = g.items.find(
+        (x) => String(x.name) === String(match.value),
+      );
+      if (picked) this.selectedSingleOptionMap[g.id] = picked;
+    });
+
+    // 加料：addToOrder() 存的是 optionName='加料'（或群組名），這裡兩種都嘗試
+    this.selectedAddons = [];
+    selectedOptionList.forEach((o: any) => {
+      const name = String(o.optionName);
+      if (name === '加料' || name === String(this.addonGroupName || '')) {
+        const picked = this.addonOptions.find(
+          (a) => String(a.name) === String(o.value),
+        );
+        if (picked) this.selectedAddons.push(picked);
+      }
+    });
+  }
+
+  // TODO 送出（先組 payload，之後再接 API）
+  submitOrder(): void {
+    if ((this.orderItems?.length || 0) === 0) {
+      this.toastWarn('尚未點餐', '請先點餐後再送出');
+      return;
+    }
+
+    const eventsId = this.groupId;
+    const userId = this.userId;
+
+    const payload = this.buildOrderPostPayload(eventsId, userId);
+
+    // 暫時先 console 看結果，之後接 API
+    console.log('order payload:', JSON.stringify(payload));
+    this.toastSuccess('已建立送出資料', '（尚未串接 API）');
   }
 
   category: any[] = [
@@ -425,8 +689,6 @@ export class FollowGroupComponent {
 
     this.buildOpenStatus();
     this.buildMenuGroups();
-
-    this.isLoading = false;
   }
 
   // =========================
@@ -485,6 +747,61 @@ export class FollowGroupComponent {
     }));
   }
 
+  // 既存訂單補齊：用 menuId 去店家 menuVoList 找品名/價格，並重算單價
+  hydrateOrderItemsFromStore(): void {
+    if (!this.store) return;
+
+    const allMenus: any[] = Array.isArray(this.store.menuVoList)
+      ? this.store.menuVoList
+      : [];
+
+    if (!allMenus.length || !this.orderItems?.length) return;
+
+    const getSpecExtra = (product: any, specName: string): number => {
+      const categoryId = Number(product?.categoryId || 0);
+
+      const levels = this.getPriceLevelsByCategoryId
+        ? this.getPriceLevelsByCategoryId(categoryId)
+        : [];
+
+      const found = Array.isArray(levels)
+        ? levels.find((lv: any) => String(lv?.name) === String(specName))
+        : null;
+
+      return Number(found?.price ?? 0);
+    };
+
+    const getOptionExtra = (selectedOptionList: any[]): number => {
+      if (!Array.isArray(selectedOptionList)) return 0;
+      return selectedOptionList.reduce(
+        (sum, o) => sum + Number(o?.extraPrice ?? 0),
+        0,
+      );
+    };
+
+    //用 map 回填（畫面一定更新）
+    this.orderItems = this.orderItems.map((it) => {
+      const product = allMenus.find(
+        (p: any) => Number(p?.id) === Number(it.menuId),
+      );
+
+      // 找不到商品（店家刪菜單/限制不含這個 menuId）就先維持原狀
+      if (!product) return it;
+
+      const base = Number(product?.basePrice ?? 0);
+      const specExtra = getSpecExtra(product, it.specName || '標準');
+      const optExtra = getOptionExtra(it.selectedOptionList);
+
+      return {
+        ...it,
+        name: String(product?.name ?? ''),
+        basePrice: base,
+        specExtraPrice: specExtra,
+        finalUnitPrice: base + specExtra + optExtra,
+      };
+    });
+  }
+
   // =========================
   // 規格（priceLevel）處理：一定要有預設「標準 +0」
   // =========================
@@ -523,16 +840,6 @@ export class FollowGroupComponent {
   // ====== 訂單（先最小可行，後面做加入訂單再補）======
   cartTotal = 0;
 
-  goNextStep(): void {
-    if (this.cartTotal <= 0) {
-      this.toastWarn('尚未選購', '請先點餐後再下一步');
-      return;
-    }
-
-    // TODO：之後做「下一步 dialog」
-    this.toastSuccess('下一步', '（待完成）');
-  }
-
   // 商品卡：封面圖
   getProductImage(p: any): string {
     const img = p?.image;
@@ -566,6 +873,10 @@ export class FollowGroupComponent {
   // =========================
   // 訂單暫存
   // =========================
+  existingOrderId: any = null; // 回傳id，可能 number / array / object（先吃得下）
+  hasExistingOrder = false; // 方便 UI 或邏輯判斷
+  personalMemo = ''; // 備註
+
   orderItems: Array<{
     menuId: number;
     name: string;
@@ -688,7 +999,7 @@ export class FollowGroupComponent {
     return Number(found?.quantity || 0);
   }
 
-  private makeOrderKey(x: {
+  makeOrderKey(x: {
     menuId: number;
     specName: string;
     selectedOptionList: Array<{
@@ -709,7 +1020,7 @@ export class FollowGroupComponent {
   // dialog
   // =====================================================
 
-  // （在菜單卡片上點擊商品時呼叫它）
+  // 在菜單卡片上點擊商品時呼叫它
   openProductDialog(product: any): void {
     if (!product) return;
 
@@ -748,6 +1059,8 @@ export class FollowGroupComponent {
     this.addonMaxSelection = 0;
 
     this.quantity = 1;
+    this.productDialogVisible = false;
+    this.editingOrderIndex = null;
   }
 
   selectPriceLevel(lv: PriceLevel): void {
@@ -933,23 +1246,49 @@ export class FollowGroupComponent {
 
     const idx = this.orderItems.findIndex((x) => this.makeOrderKey(x) === key);
 
+    const newItem = {
+      menuId: Number(this.selectedProduct.id),
+      name: String(this.selectedProduct?.name || ''),
+      quantity: this.quantity,
+
+      specName,
+      specExtraPrice,
+
+      basePrice: base,
+      finalUnitPrice,
+
+      selectedOptionList,
+    };
+
+    // 編輯模式：先更新原本 index，再看要不要合併
+    if (this.editingOrderIndex !== null) {
+      const editIdx = this.editingOrderIndex;
+
+      // 先把原本那筆改成新的
+      this.orderItems[editIdx] = newItem as any;
+
+      // 如果改完後跟其他筆 key 一樣，就合併（避免重複）
+      const targetKey = this.makeOrderKey(newItem as any);
+      const dupIdx = this.orderItems.findIndex(
+        (x, i) => i !== editIdx && this.makeOrderKey(x as any) === targetKey,
+      );
+
+      if (dupIdx >= 0) {
+        this.orderItems[dupIdx].quantity += this.orderItems[editIdx].quantity;
+        this.orderItems.splice(editIdx, 1);
+      }
+
+      this.editingOrderIndex = null;
+      this.toastSuccess('已更新', `${this.selectedProduct?.name || ''}`);
+      this.closeProductDialog();
+      return;
+    }
+
+    // 非編輯：原本加入/合併邏輯
     if (idx >= 0) {
       this.orderItems[idx].quantity += this.quantity;
     } else {
-      this.orderItems.push({
-        menuId: Number(this.selectedProduct.id),
-        name: String(this.selectedProduct?.name || ''),
-        quantity: this.quantity,
-
-        specName,
-        specExtraPrice,
-
-        basePrice: base,
-        finalUnitPrice,
-
-        selectedOptionList,
-      });
-      console.log('加入餐點：' + JSON.stringify(this.orderItems));
+      this.orderItems.push(newItem as any);
     }
 
     this.toastSuccess(
@@ -958,6 +1297,9 @@ export class FollowGroupComponent {
     );
     this.closeProductDialog();
   }
+
+  // 紀錄訂單是否被更動過
+  isDirty = false;
 
   // 初始化選項：用 product.unusual 的 key 當作「要顯示的 groupId」
   private initOptionsByProduct(product: any): void {
@@ -1081,6 +1423,30 @@ export class FollowGroupComponent {
     });
   }
 
+  async confirmRemoveItem(itemName?: string): Promise<boolean> {
+    const result = await Swal.fire({
+      title: '確定要移除餐點嗎？',
+      text: itemName
+        ? `「${itemName}」將會從訂單中移除`
+        : '此餐點將會從訂單中移除',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: '確定移除',
+      cancelButtonText: '取消',
+      reverseButtons: true,
+      focusCancel: true,
+      confirmButtonColor: '#7f1d1d',
+      didOpen: () => {
+        const container = document.querySelector(
+          '.swal2-container',
+        ) as HTMLElement | null;
+        if (container) container.style.zIndex = '20000';
+      },
+    });
+
+    return result.isConfirmed;
+  }
+
   toHHmm(timeStr: any): string {
     if (!timeStr) return '';
     const s = String(timeStr);
@@ -1104,7 +1470,7 @@ export class FollowGroupComponent {
     window.history.back();
   }
 
-  // 解析收到的Response
+  // 解析收到的店家 Response
   normalizeStoreResponse(res: any): any {
     const base = res?.storeList?.[0] ?? null;
     if (!base) return null;
@@ -1246,7 +1612,7 @@ export class FollowGroupComponent {
   }
 
   // 畫面美化/標籤 ==================================================
-  detailTabIndex = 0;
+  detailTabValue = 'store';
 
   // 是否達標
   get isReached(): boolean {
@@ -1270,6 +1636,23 @@ export class FollowGroupComponent {
     if (limit <= 0) return 100;
     const p = (total / limit) * 100;
     return Math.min(100, Math.max(0, Math.round(p)));
+  }
+
+  // 建構POST資料
+  buildOrderPostPayload(eventsId: number, userId: string): any {
+    return {
+      id: this.hasExistingOrder ? this.existingOrderId : 't01',
+      eventsId,
+      userId,
+      menuList: this.orderItems.map((it) => ({
+        menuId: it.menuId,
+        quantity: it.quantity,
+        specName: it.specName ?? null,
+        selectedOptionList: it.selectedOptionList ?? [],
+      })),
+      personalMemo: this.personalMemo || '',
+      weight: 0.1,
+    };
   }
 
   // =========================
@@ -1541,31 +1924,75 @@ export class FollowGroupComponent {
     };
   }
 
-  // POST格式對照（參考用）
+  // 取得既存訂單資料
+  getMockOrderResponse(): any {
+    // 模擬未有既存資料
+    // return {
+    //   code: 404,
+    //   message: '未找到資料',
+    // };
+
+    // 模擬已有既存資料
+    return {
+      id: 123,
+      eventsId: 8,
+      userId: 'string',
+      menuList: [
+        {
+          menuId: 124,
+          quantity: 1,
+          specName: '標準',
+          selectedOptionList: [
+            {
+              optionName: '冰塊',
+              value: '少冰',
+            },
+            {
+              optionName: '基酒更換',
+              value: '換成伏特加 (Vodka)',
+              extraPrice: 30,
+            },
+          ],
+        },
+      ],
+      personalMemo: '要吸管',
+      weight: 0.1,
+    };
+  }
+
+  // POST 格式對照（參考用）
   orderPost = {
-    id: 0,
-    eventsId: 8,
-    userId: 'string',
+    id: 't01', // 完全新資料POST時寫"t01" (字串)
+    eventsId: 8, // 團 id
+    userId: 'string', // 下單者
     menuList: [
       {
-        menuId: 20,
-        quantity: 1,
-        specName: '標準',
-        specExtraPrice: 0,
-        basePrice: 50,
-        finalUnitPrice: 60,
+        menuId: 20, // 商品 id
+        quantity: 1, // 此商品買幾份
+        specName: '標準', // 規格名稱（例：標準 / 加大，有可能會是 null）
         selectedOptionList: [
-          { optionName: '糖度', value: '半糖' },
-          { optionName: '冰塊', value: '微冰' },
-          { optionName: '加料', value: '椰果', extraPrice: 10 },
+          {
+            optionName: '糖度',
+            value: '半糖',
+          },
+          {
+            optionName: '冰塊',
+            value: '微冰',
+          },
+          {
+            optionName: '加料',
+            value: '椰果',
+            extraPrice: 10,
+          },
         ],
       },
     ],
-    personalMemo: '要吸管',
-    orderTime: '2026-01-28T01:48:38.263Z',
-    subtotal: 60,
-    weight: 0.1,
+    personalMemo: '要吸管', // 整單備註
+    weight: 0.1, // 暫時沒用
   };
+
+  // 測試用變數
+  test = {};
 }
 
 // 團的資料的interface
