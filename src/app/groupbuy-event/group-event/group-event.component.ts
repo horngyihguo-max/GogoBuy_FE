@@ -14,6 +14,7 @@ import { FloatLabelModule } from 'primeng/floatlabel';
 import { FormsModule } from "@angular/forms";
 import { DatePickerModule } from 'primeng/datepicker';
 import { PrimeNG } from 'primeng/config';
+import Swal from 'sweetalert2';
 
 
 @Component({
@@ -56,7 +57,13 @@ export class GroupEventComponent {
   isOpen!:boolean;
   operateString!:string;
   nextOperating!:string;
+  isPreview!:boolean;
+  useAll!:boolean;
+  minDate: Date = new Date();
   ngOnInit(): void {
+    this.isPreview=false;
+    this.useAll=false;
+    this.minDate = new Date();
     // 設定中文語系
     this.primeng.setTranslation({
       dayNames: ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"],
@@ -99,23 +106,28 @@ export class GroupEventComponent {
       }
       this.menuVoList = res.menuVoList || [];
       this.menuCategoriesVoList = res.menuCategoriesVoList || [];
-      if (this.menuCategoriesVoList.length > 0) {
+      if (this.menuCategoriesVoList?.length > 0) {
         const categoryMap = new Map(
           this.menuCategoriesVoList.map(cat => [cat.id, cat])
         );
         for (const cate of this.menuVoList) {
-          const perPrice:PriceLevel[]=[];
           const matchedCategory = categoryMap.get(cate.categoryId);
-          if (matchedCategory?.priceLevel) {
+          const perPrice: PriceLevel[] = [];
+          const base = Number(cate.basePrice) || 0;
+          if (matchedCategory?.priceLevel && matchedCategory.priceLevel.length > 0) {
             matchedCategory.priceLevel.forEach(level => {
-              const base = cate?.basePrice ?? 0;
               perPrice.push({
-                name:level.name,
-                price:(level.price ?? 0) + base
+                name: level.name,
+                price: (level.price || 0) + base
               });
             });
+          } else {
+            perPrice.push({
+              name: '單價',
+              price: base
+            });
           }
-          cate.basePrice=perPrice;
+          cate.basePrice = perPrice;
         }
         this.activeTab = this.menuCategoriesVoList[0]?.id;
       }
@@ -221,14 +233,19 @@ export class GroupEventComponent {
   isConfirmed!:boolean;
   onCheckChange(event: any) {
     this.isConfirmed = event.target.checked;
-    console.log('當前勾選狀態:', this.isConfirmed);
-
-    if (this.isConfirmed) {
-      // 這裡可以寫：當勾選後要做的事
-    }
   }
 
 
+  useAllChange(event:any){
+    this.useAll=event.target.checked;
+    if(this.useAll){
+      this.selectedItems=this.menuVoList;
+      this.updateDisplaySource();
+    }else{
+      this.selectedItems=[this.paddingItem];
+      this.updateDisplaySource();
+    }
+  }
   displaySource: any[] = [];  // 給 PickList 顯示用的實體陣列
   paddingItem = { id: 'BOTTOM_PADDING', isPadding: true };
   selectedItems: any[] = [this.paddingItem];  // 目標清單
@@ -256,6 +273,7 @@ export class GroupEventComponent {
     movedItems.forEach((item: any) => {
       this.recommend = this.recommend.filter(id => id !== item.id);
     });
+    this.useAll=false;
     this.fixTabAndRecommend(event);
     this.fixPaddingPosition();
   }
@@ -264,6 +282,7 @@ export class GroupEventComponent {
   }
   onMoveAllToSource(event: any) {
     this.recommend=[];
+    this.useAll=false;
     this.fixTabAndRecommend(event);
     this.fixPaddingPosition();
   }
@@ -323,6 +342,7 @@ export class GroupEventComponent {
     if (!this.displaySource.find(item => item.id === product.id)) {
         this.displaySource = [...this.displaySource, product];
     }
+    this.useAll=false;
     this.fixTabAndRecommend(product);
     this.fixPaddingPosition();
     this.updateDisplaySource();
@@ -339,6 +359,22 @@ export class GroupEventComponent {
     }
   }
 
+
+  // 當時間改變時觸發
+  onTimeChange(selectedDate: Date) {
+    const now = new Date();
+
+    // 如果選中的時間點小於當前時間
+    if (selectedDate && selectedDate < now) {
+      // 強制重設為「現在」
+      this.endTime = new Date();
+
+      // 選用：彈出警告告知使用者
+      // this.showAlert('無效時間', '結束時間不能設定在過去！');
+    }
+  }
+
+
   saveData() {
     if (this.recommendDescription && this.recommendDescription.length > 200) {
       // 雖然有 maxlength，但保險起見還是可以做一次裁切
@@ -348,10 +384,47 @@ export class GroupEventComponent {
   goHome(){
     this.router.navigate(['/gogobuy/home']);
   }
-  save(){
-    this.tempMenu=[...this.selectedItems];
-    if(this.limitation<1){
+  cancel(){
 
+  }
+  goCheck(){
+    this.tempMenu=[...this.selectedItems];
+    const missingFields: string[] = [];
+    if (!this.eventName) missingFields.push('開團名稱');
+    if (!this.choice) missingFields.push('運費拆帳方式');
+    if (!this.isConfirmed) missingFields.push('同意拆帳規則');
+    if (!this.tempMenu) missingFields.push('菜單品項')
+    if(this.limitation && this.limitation<1){
+      missingFields.push('成團門檻金額至少為1');
+    }else if(!this.limitation){
+      missingFields.push('成團門檻金額');
     }
+    if (!this.endTime) missingFields.push('截止日期與時間');
+    const now=new Date();
+    if (this.endTime.getTime()<now.getTime()){
+      missingFields.push('截止時間已過請重新輸入');
+    }
+
+    if (missingFields.length > 0) {    // 如果有漏填，觸發 Swal 警告
+      const fieldList = missingFields.join('、'); // 將陣列轉為 "欄位A、欄位B"
+      this.showAlert('資料未填寫完整', `請輸入以下欄位：${fieldList}`);
+      return; // 攔截，不執行後續邏輯
+    }
+
+    // 通過檢查
+    this.isPreview=true;
+  }
+  showAlert(title: string, text: string) {
+    Swal.fire({
+      icon: 'warning',
+      title: title,
+      text: text,
+      confirmButtonColor: '#7F1D1D',
+      confirmButtonText: '我知道了',
+      didOpen: () => {
+        const c = document.querySelector('.swal2-container') as HTMLElement | null;
+        if (c) c.style.zIndex = '20000';
+      },
+    });
   }
 }

@@ -52,6 +52,12 @@
   @apply w-[25vw] pb-2 w-full md:w-[25vw];
 }
 
+.Btn{
+  @apply w-[13vw] bg-[#F4E7E1] text-[#662222] border-1 border-[#662222] rounded-3xl h-[7vh] min-w-[100px] font-bold transition-all
+    hover:bg-[#662222]/20 hover:text-[#662222] hover:border-[#662222] hover:scale-[1.05]
+    active:bg-white active:text-[#662222] active:scale-[0.85]
+}
+
 
 /* 1. 確保外層包裹容器高度跟隨 */
 :host ::ng-deep .p-picklist-listwrapper {
@@ -262,10 +268,50 @@
 }
 
 
-.p-floatlabel:has(input:focus) label {
+:host ::ng-deep .p-floatlabel:has(.p-focus) label,
+:host ::ng-deep .p-floatlabel:has(textarea:focus) label,
+:host ::ng-deep .p-floatlabel:has(input:focus) label {
   color: #662222 !important;
   font-weight: 600;
 }
-::ng-deep .p-floatlabel:has(.p-focus) label {
-  color: #662222 !important;
+:host ::ng-deep .p-floatlabel {
+  --p-floatlabel-focus-color: #662222;
+}
+:host ::ng-deep .p-datepicker:not(.p-disabled).p-focus + label {
+    color: #662222 !important;
+}
+
+
+/* 針對 PrimeNG 18 選中日期圓圈的終極覆蓋 */
+:host ::ng-deep .my-local-panel .p-datepicker-calendar td .p-datepicker-date.p-highlight {
+    background-color: #662222 !important; /* 強制背景深紅 */
+    color: #ffffff !important;           /* 強制文字白色 */
+}
+/* 如果還是沒變，直接修改它引用的變數 */
+:host ::ng-deep .my-local-panel {
+    --p-datepicker-date-selected-background: #662222 !important;
+    --p-datepicker-date-selected-color: #ffffff !important;
+}
+/* 針對滑鼠懸停 (Hover) 時的圓圈顏色，也順便統一 */
+:host ::ng-deep .my-local-panel .p-datepicker-calendar td > span:not(.p-highlight):hover {
+    background-color: #fce7e7 !important; /* 淡淡的紅 */
+    color: #662222 !important;
+}
+
+/* 2. 「今天」的圈圈 (通常是外框線) */
+:host ::ng-deep .my-local-panel .p-datepicker-calendar td.p-datepicker-today > span {
+    border: 1px solid #662222 !important; /* 把綠框改成紅框 */
+    color: #662222 !important;            /* 文字也改紅 */
+    background-color: transparent !important;
+}
+
+/* 3. 時間選擇器的數字 (針對 21:35 那排數字) */
+:host ::ng-deep .my-local-panel .p-datepicker-timepicker span {
+    color: #662222 !important;
+}
+
+/* 4. 針對所有綠色箭頭 (SVG) */
+:host ::ng-deep .my-local-panel svg {
+    color: #662222 !important; /* 強制把所有圖標改紅 */
+    fill: #662222 !important;
 }
