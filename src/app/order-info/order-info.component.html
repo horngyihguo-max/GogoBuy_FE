@@ -1,173 +1,100 @@
 <section class="max-w-[1440px] mx-auto p-4">
-  <!-- 購物車 -->
-  @if (mode == 'host'){
   <div class="relative flex items-center mb-4 mt-5">
     <a class="absolute left-1/2 -translate-x-1/2 text-3xl font-bold">
-      購物車(開團者版本)
+      購物車({{ mode == 'host' ? '開團者版本' : '跟團者版本' }})
     </a>
-    <p class="ml-auto font-normal text-lg ">
+    <p class="ml-auto font-normal text-lg">
       更新時間：{{ formatDateTime(latestOrderTime) }}
     </p>
   </div>
-  }@else {
-  <div class="relative flex items-center mb-4 mt-5">
-    <a class="absolute left-1/2 -translate-x-1/2 text-3xl font-bold">
-      購物車(跟團者版本)
-    </a>
-    <p class="ml-auto font-normal text-lg ">
-      更新時間：{{ formatDateTime(latestOrderTime) }}
-    </p>
-  </div>
-  }
 </section>
 
-<!-- 進度條 -->
-@if (mode == 'host'){
 <div class="card">
   <p-toast></p-toast>
-  <p-steps [model]="host" [readonly]="true" [activeIndex]="activeIndex"
-    [styleClass]="'ggb-progress is-host completed-' + activeIndex" [style.--ggb-count]="host?.length || 1"
-    [style.--ggb-progress]="progressRatio">
+  <p-steps [model]="mode == 'host' ? host : member" [readonly]="true" [activeIndex]="activeIndex"
+    [styleClass]="'ggb-progress ' + (mode == 'host' ? 'is-host completed-' : 'is-member completed-') + activeIndex"
+    [style.--ggb-count]="(mode == 'host' ? host?.length : member?.length) || 1" [style.--ggb-progress]="progressRatio">
   </p-steps>
 </div>
-} @else {
-<div class="card">
-  <p-toast></p-toast>
-  <p-steps [model]="member" [readonly]="true" [activeIndex]="activeIndex"
-    [styleClass]="'ggb-progress is-member completed-' + activeIndex">
-  </p-steps>
-</div>
-}
 
-
-<!-- 分頁 -->
 <div class="Outline mt-4">
   @switch (activeIndex) {
-  <!-- 第0頁(個人訂單詳情/團長總訂單詳情(帶新增判斷)) -->
   @case (0) {
-  <!-- 如果使用者ID與開團者ID相同進入開團者頁面(結單)，如果不同則進入跟團者頁面(送單) -->
-  @if (mode == 'host'){
   <section class="max-w-[1440px] mx-auto p-4">
     <div class="bg-white py-[32px] px-[16px] mt-[16px] font-bold text-2xl rounded-lg shadow-sm">
-      團購名稱：
-      <p class="font-normal text-lg">{{ eventName }}</p>
-      <br>
-      商店名稱：
-      <p class="font-normal text-lg">{{ storeName }}</p>
+      團購名稱：<p class="font-normal text-lg">{{ eventName }}</p><br>
+      商店名稱：<p class="font-normal text-lg">{{ storeName }}</p>
     </div>
-    <div class="bg-white py-[32px] px-[16px] mt-[16px] font-bold text-2xl rounded-lg shadow-sm">
-      餐點明細
-      @if (res?.orders?.length) {
-      @for (order of res.orders; track order.id) {
-      <div class="mt-4 divide-y divide-gray-200 font-normal">
-        <div class="py-4">
-          <div class="justify-items-end">
-            <p class="font-bold text-md">點單者：{{ order.userNickname }}</p>
+
+    <div class="bg-white py-[24px] px-[16px] mt-[16px] rounded-2xl shadow-sm">
+      <div class="text-[20px] font-extrabold text-slate-900">購物內容</div>
+
+      @if (groupedOrders.length) {
+      @for (g of groupedOrders; track g.key) {
+      <div class="mt-4 border-t border-slate-100 pt-4">
+        <button type="button" class="w-full flex items-center gap-3" (click)="toggleGroup(g.key)">
+          <div class="w-10 h-10 rounded-full bg-sky-500 text-white flex items-center justify-center font-bold">
+            {{ g.nickname?.[0] ?? 'U' }}
           </div>
-          <p class="flex items-center justify-between font-bold">
-            <span class="text-[#E07A3F]">{{ order.menuName }}</span>
-            <span>
-              {{ order.quantity }} 份 共 ${{ order.subtotal }} 元
-              <button type="button" class="w-10 h-10 inline-flex items-center justify-center rounded-full text-rose-500 hover:bg-rose-50
-                cursor-pointer" (click)="removeorder(order.id)" aria-label="刪除品項">
+          <div class="font-bold text-[18px] text-slate-900">{{ g.nickname }}</div>
+          <div class="ml-auto flex items-center gap-3 text-slate-700">
+            <div class="font-semibold">${{ g.totalAmount }} / {{ g.totalQty }} 份</div>
+            <i class="pi" [ngClass]="isGroupOpen(g.key) ? 'pi-angle-up' : 'pi-angle-down'"></i>
+          </div>
+        </button>
+
+        @if (isGroupOpen(g.key)) {
+        <div class="mt-3 space-y-3">
+          @for (order of g.orders; track order.id) {
+          <div class="bg-slate-50 rounded-xl px-5 py-4 flex items-start gap-4">
+            <div class="flex-1">
+              <div class="font-bold text-slate-900">{{ order.menuName }}</div>
+              <div class="mt-2 text-[14px] text-slate-500">
+                {{ formatSelectedOptionList(order.parsedOptions) }}
+              </div>
+            </div>
+            <div class="flex items-center gap-3">
+              <button type="button"
+                class="w-9 h-9 rounded-full bg-slate-300 text-white flex items-center justify-center hover:bg-slate-400"
+                (click)="removeorder(order.id)">
                 <i class="pi pi-trash"></i>
               </button>
-            </span>
-          </p>
-          <p class="text-base text-gray-500">{{ formatSelectedOptionList(order.parsedOptions) }}</p>
+            </div>
+          </div>
+          }
         </div>
+        }
       </div>
       }
-      }
 
-      <!-- <span>{{' {use user_id and event_id get personal_order} '}}</span> -->
-      <br>
-      <a class="cursor-pointer text-[#E07A3F] text-lg text-red-700" (click)="gotoshop()">
-        繼續加購(返回加購頁面)
-      </a>
-    </div>
-    <div class="bg-white py-[32px] px-[16px] mt-[16px] font-bold text-2xl rounded-lg shadow-sm">
-      <p class="flex items-center justify-between font-bold">
-        <span>餐點總計</span>
-        <span>${{totalAmount}}元</span>
-      </p>
+      @if (mode == 'host') {
+      <div class="mt-6 flex flex-col items-center gap-3 text-slate-600">
+        <button type="button" class="flex items-center gap-2 hover:underline" (click)="reloadOrders()">
+          <i class="pi pi-refresh"></i> 重新取得團員訂單
+        </button>
+      </div>
+      }
+      } @else {
+      <div class="text-center text-slate-500 py-10">目前沒有購物內容</div>
+      }
     </div>
   </section>
+
   <section class="max-w-[1340px] mx-auto p-4">
     <div class="h-[60px] mt-[16px] rounded-lg shadow-sm flex flex-row gap-4">
-      <div class=" bg-gray-300 flex-1 text-center font-bold flex items-center justify-center cursor-pointer"
+      <div class="bg-gray-300 flex-1 text-center font-bold flex items-center justify-center cursor-pointer"
         (click)="backtocart()">
         <span class="font-bold text-2xl">返回購物車</span>
       </div>
 
       <div class="flex-1 text-center font-bold flex items-center justify-center cursor-pointer bg-[#769902]"
-        (click)="nextStep()">
-        <span class="font-bold text-white text-2xl">下一步</span>
+        (click)="mode == 'host' ? nextStep() : submitOrder()">
+        <span class="font-bold text-white text-2xl">
+          {{ mode == 'host' ? '下一步' : '送單' }}
+        </span>
       </div>
     </div>
   </section>
-
-  } @else {
-  <section class="max-w-[1440px] mx-auto p-4">
-    <div class="bg-white py-[32px] px-[16px] mt-[16px] font-bold text-2xl rounded-lg shadow-sm">
-      團購名稱：
-      <p class="font-normal text-lg">{{ eventName }}</p>
-      <br>
-      商店名稱：
-      <p class="font-normal text-lg">{{ storeName }}</p>
-    </div>
-    <div class="bg-white py-[32px] px-[16px] mt-[16px] font-bold text-2xl rounded-lg shadow-sm">
-      餐點明細
-      @if (res?.orders?.length) {
-      @for (order of res.orders; track order.id) {
-      <div class="mt-4 divide-y divide-gray-200 font-normal">
-        <div class="py-4">
-          <div class="justify-items-end">
-            <p class="font-bold text-md">點單者：{{ auth.user.nickname }}</p>
-          </div>
-          <p class="flex items-center justify-between font-bold">
-            <span class="text-[#E07A3F]">{{ order.menuName }}</span>
-            <span>{{ order.quantity }} 份 共 ${{ order.subtotal }} 元
-              <button type="button" class="w-10 h-10 inline-flex items-center justify-center rounded-full text-rose-500 hover:bg-rose-50
-                cursor-pointer" (click)="removeorder(order.id)" aria-label="刪除品項">
-                <i class="pi pi-trash"></i>
-              </button>
-            </span>
-          </p>
-          <p class="text-base text-gray-500">{{ formatSelectedOptionList(order.parsedOptions) }}</p>
-        </div>
-      </div>
-      }
-      }
-
-      <!-- <span>{{' {use user_id and event_id get personal_order} '}}</span> -->
-      <br>
-      <a class="cursor-pointer text-[#E07A3F] text-lg text-red-700" (click)="gotoshop()">
-        繼續加購(返回加購頁面)
-      </a>
-    </div>
-    <div class="bg-white py-[32px] px-[16px] mt-[16px] font-bold text-2xl rounded-lg shadow-sm">
-      <p class="flex items-center justify-between font-bold">
-        <span>餐點總計</span>
-        <span>${{totalAmount}}元</span>
-      </p>
-    </div>
-  </section>
-
-  <!-- TODO 如果不是團長ID這裡直接顯示送單給團長-->
-  <section class="max-w-[1340px] mx-auto p-4">
-    <div class="h-[60px] mt-[16px] rounded-lg shadow-sm flex flex-row gap-4">
-      <div class=" bg-gray-300 flex-1 text-center font-bold flex items-center justify-center cursor-pointer"
-        (click)="backtocart()">
-        <span class="font-bold text-2xl">返回購物車</span>
-      </div>
-
-      <div class="flex-1 text-center font-bold flex items-center justify-center cursor-pointer bg-[#769902]">
-        <span class="font-bold text-white text-2xl">送單</span>
-      </div>
-    </div>
-  </section>
-  }
   }
 
   <!-- 第1頁(團長結帳方式) -->

@@ -37,6 +37,7 @@ interface CartGroup {
   canModify: boolean;
   items: CartItem[];
   isHost?: boolean;
+  hostLogo: any;
 }
 
 
@@ -175,6 +176,8 @@ export class CartPageComponent {
             store_id: item.storesId ?? '',
             latestOrderTime: item.latestOrderTime ?? '',
             totalAmount: item.totalAmount ?? '',
+            storeLogo: item.storeLogo ?? '',
+            hostLogo: item.hostLogo ?? '',
             // 身分判斷結果
             mode, // 'host' | 'member'
           }
