@@ -447,6 +447,14 @@ export class OrderInfoComponent implements OnInit {
       next: (data: any) => {
         this.res = data;
         this.recalcTotalAmount();
+        Swal.fire({
+          toast: true,
+          position: 'top',
+          icon: 'success',
+          title: '已更新最新訂單',
+          showConfirmButton: false,
+          timer: 1200,
+        });
       },
       error: (err: any) => console.error('API error:', err),
     });

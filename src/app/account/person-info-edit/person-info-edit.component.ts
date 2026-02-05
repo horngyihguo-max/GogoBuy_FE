@@ -209,10 +209,13 @@ export class PersonInfoEditComponent {
           this.auth.setUser({ ...this.auth.user, ...payload });
           this.auth.refreshUser();
           Swal.fire({
-            title: '儲存成功',
+            title: '儲存成功...返回個人頁面中',
             icon: 'success',
-            timer: 1000,
-            showConfirmButton: false
+            timer: 2000,
+            showConfirmButton: false,
+            timerProgressBar: true,
+          }).then(() => {
+            this.router.navigate(['/user/profile']);
           });
         }
       },
