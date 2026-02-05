@@ -33,11 +33,10 @@ import { CdkDrag } from '@angular/cdk/drag-drop';
     ImageModule, ButtonModule,
     InputTextModule, ScrollPanelModule,
     TableModule, SelectButtonModule, CommonModule,
-    DialogModule, ButtonModule, RouterLink,
+    DialogModule, ButtonModule,
     InputGroupModule, InputGroupAddonModule, FloatLabelModule,
     InputNumberModule, SelectModule, InputTextModule,
     IconFieldModule, InputIconModule, CheckboxModule,
-    CdkDrag
   ],
   templateUrl: './store.component.html',
   styleUrl: './store.component.scss'
@@ -52,6 +51,7 @@ export class StoreComponent {
   ) { }
 
   id!: number;
+  userId = '';
   wishId!: number;
 
   // 開啟dialog
@@ -185,7 +185,7 @@ export class StoreComponent {
     memo: '',
     image: null as Blob | string | null,
     publish: false,
-    createdBy: 'A01',
+    createdBy: this.userId,
     operatingHoursVoList: [] as OperatingHoursVoList[],
     feeDescription: [] as FeeDescriptionVoList[],
     menuVoList: [] as MenuVoList[],
@@ -919,7 +919,7 @@ export class StoreComponent {
         memo: this.storeData.memo,
         image: this.storeData.image,
         publish: this.storeData.publish,
-        createdBy: 'SystemManager',
+        createdBy: this.userId,
         operatingHoursVoList: this.normalizeOperatingHours(),
         fee_description: this.storeData.feeDescription,
         menuCategoriesVoList: this.storeData.menuCategoriesVoList.map(category => ({
@@ -941,7 +941,7 @@ export class StoreComponent {
     } else {
       const payload = {
         ...this.storeData, storesname: this.storeData.name, fee_description: this.storeData.feeDescription,
-        createdBy: 'SystemManager',
+        createdBy: this.userId,
       }
       console.log("payload(update):", payload);
 

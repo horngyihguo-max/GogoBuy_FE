@@ -22,6 +22,7 @@ import { StoreListComponent } from './stores/store-list/store-list.component';
 import { OrderInfoComponent } from './order-info/order-info.component';
 import { GroupEventComponent } from './groupbuy-event/group-event/group-event.component';
 import { FollowGroupComponent } from './groupbuy-event/follow-group/follow-group.component';
+import { MyStoresComponent } from './account/my-stores/my-stores.component';
 
 export const routes: Routes = [
   // 1. 公開頁面與首頁
@@ -48,6 +49,7 @@ export const routes: Routes = [
       { path: 'wishes', component: WishesComponent, title: '願望清單', data: { breadcrumb: '許願池' } },
       { path: 'notifications', component: NotificationsComponent, title: '通知中心', data: { breadcrumb: '通知' } },
       { path: 'cart', component: CartPageComponent, title: '購物車', data: { breadcrumb: '購物車' }, canActivate: [authGuard] },
+      { path: 'my_store', component: MyStoresComponent, title: '我的店家', data: { breadcrumb: '我的店家' } },
     ]
   },
 

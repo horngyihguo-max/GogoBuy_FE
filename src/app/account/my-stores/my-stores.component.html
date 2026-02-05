@@ -1,0 +1,71 @@
+<body class="bg-slate-50 text-slate-800 antialiased h-svh">
+  <!-- 訂單 -->
+
+  <div class="max-w-4xl mx-auto py-12 px-6 lg:py-20">
+    <p-tabs [(value)]="activeTab">
+
+      <!-- 訂單分頁名稱 -->
+      <p-tablist class="text-lg">
+        <p-tab value="myCreate">我的店家</p-tab>
+        <p-tab value="nonPublic">未公開店家</p-tab>
+      </p-tablist>
+
+      <!-- 切換到該value，顯示對應畫面 -->
+      <p-tabpanels>
+        <p-tabpanel value="myCreate">
+          <ng-container
+            *ngTemplateOutlet="storeList; context: { $implicit: allStores, openValues: publicStoreExpandedIds }">
+          </ng-container>
+        </p-tabpanel>
+
+        <p-tabpanel value="nonPublic">
+          <ng-container
+            *ngTemplateOutlet="storeList; context: { $implicit: privateStores, openValues: privateStoreExpandedIds }">
+          </ng-container>
+        </p-tabpanel>
+      </p-tabpanels>
+    </p-tabs>
+  </div>
+</body>
+
+<!--  -->
+<ng-template #storeList let-stores let-openValues="openValues">
+  <p-accordion [value]="openValues" [multiple]="true">
+    @for (s of stores; track s.id) {
+    <p-accordion-panel [value]="s.id">
+      <p-accordion-header>
+        <div class="flex items-center justify-start gap-4">
+          @if(s.image){
+          <img [src]="s.image" class="w-12 h-12 object-cover rounded" *ngIf="s.image" />
+          }@else{
+          <img src="Store Default Cover Image.webp" class="h-20 object-cover rounded" />
+          }
+          <div class="text-lg">
+            <p class="font-bold">{{ s.name }}</p>
+            @if(isStoreOpen(s)){
+            <p-tag severity="success" value="營業中" />
+            }@else{
+            <p-tag severity="warn" value="已打烊" />
+            }
+          </div>
+        </div>
+      </p-accordion-header>
+
+      <p-accordion-content>
+        <p>電話：{{ s.phone }}</p>
+        <p>地址：{{ s.address }}</p>
+      </p-accordion-content>
+    </p-accordion-panel>
+    } @empty {
+    <div class="p-8 text-center font-bold text-slate-700">
+      @if(activeTab === 'myCreate'){
+      <p>目前尚未建立店家</p>
+      <a routerLink="/manager/store_upsert" class="text-[#662222] hover:underline">+ 建立新店家</a>
+      }@else{
+        <p>目前無未公開店家</p>
+      }
+    </div>
+    }
+  </p-accordion>
+  <div>ss</div>
+</ng-template>

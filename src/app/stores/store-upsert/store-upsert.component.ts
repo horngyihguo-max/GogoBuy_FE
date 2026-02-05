@@ -38,6 +38,7 @@ export class StoreUpsertComponent {
     private http: HttpService,
   ) { }
 
+  userId = '';
   id!: number;
   wishId!: number;
   storeList: any[] = [];
@@ -132,7 +133,7 @@ export class StoreUpsertComponent {
     publish: true,
     category: '',
     image: '' as any,
-    createdBy: 'A01',
+    createdBy: this.userId,
     operatingHoursVoList: [
       {
         week: [null as number | null],
@@ -211,6 +212,7 @@ export class StoreUpsertComponent {
   }
 
   ngOnInit(): void {
+    this.userId = String(localStorage.getItem('user_id') || '');
     this.loadTaiwanDistricts();
     this.initTimeOptions();
 
@@ -410,7 +412,7 @@ export class StoreUpsertComponent {
   // 取消
   cancelStore() {
     sessionStorage.removeItem('temp_order_info');
-    this.storeData = this.storeData = {
+    this.storeData = this.storeService.storeData = {
       id: 0,
       name: '',
       phone: '',
@@ -420,7 +422,7 @@ export class StoreUpsertComponent {
       memo: '',
       image: null as Blob | string | null,
       publish: false,
-      createdBy: 'A01',
+      createdBy: '',
       operatingHoursVoList: [],
       feeDescription: [] as FeeDescriptionVoList[],
       menuVoList: [] as MenuVoList[],
