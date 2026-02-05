@@ -184,7 +184,7 @@ export class StoreComponent {
     type: '',
     memo: '',
     image: null as Blob | string | null,
-    publish: false,
+    publish: true,
     createdBy: this.userId,
     operatingHoursVoList: [] as OperatingHoursVoList[],
     feeDescription: [] as FeeDescriptionVoList[],
@@ -206,6 +206,7 @@ export class StoreComponent {
   }
 
   ngOnInit() {
+    this.userId = String(localStorage.getItem('user_id') || '');
     this.id = Number(this.route.snapshot.paramMap.get('id'));
     this.wishId = this.storeService.wishId;
 
@@ -937,29 +938,78 @@ export class StoreComponent {
       this.http.postApi('http://localhost:8080/gogobuy/store/create', payload)
         .subscribe((res: any) => {
           console.log("create store:", res);
+          if (res.code === 200) {
+            console.log('有進來200');
+
+            this.http.getApi('http://localhost:8080/gogobuy/store/all').subscribe((all: any) => {
+              const myStores = all.storeList.filter((s: any) => s.createdBy === this.userId);
+              if (myStores && myStores.length > 0) {
+                const latestStore = myStores.reduce((prev: any, current: any) => (prev.id > current.id) ? prev : current);
+                this.id = latestStore.id;
+                console.log('成功取得新 ID:', this.id);
+                this.afterSaveSuccess();
+              } else {
+                this.router.navigate(['gogobuy/home']);
+              }
+            });
+          } else {
+            console.log(res.message);
+          }
         });
     } else {
       const payload = {
-        ...this.storeData, storesname: this.storeData.name, fee_description: this.storeData.feeDescription,
+        ...this.storeData, storesname: this.storeData.name,
+        phone: this.storeData.phone,
+        address: this.storeData.address,
+        category: this.storeData.category,
+        type: this.storeData.type,
+        memo: this.storeData.memo,
+        image: this.storeData.image,
+        publish: this.storeData.publish,
         createdBy: this.userId,
+        operatingHoursVoList: this.normalizeOperatingHours(),
+        fee_description: this.storeData.feeDescription,
+        menuCategoriesVoList: this.storeData.menuCategoriesVoList.map(category => ({
+          name: category.name,
+          priceLevel: category.priceLevel,
+          menuVo: this.storeData.menuVoList.filter(item => item.categoryId === category.id)
+            .map(product => ({
+              ...product,
+              unusual: product.unusual ? [product.unusual] : []
+            }))
+        })),
+        productOptionGroupsVoList: this.storeData.productOptionGroupsVoList
       }
       console.log("payload(update):", payload);
 
       this.http.postApi(`http://localhost:8080/gogobuy/store/update?id=${this.storeData.id}`, payload)
         .subscribe((res: any) => {
-          console.log("update store:", res);
+          if (res.code === 200) {
+            console.log("update store:", res);
+            this.id = this.storeData.id;
+            this.afterSaveSuccess();
+          } else {
+            console.error('更新失敗:', res.message);
+          }
         });
     }
-    this.storeService.clearCurrentStore();
+  }
+
+  private afterSaveSuccess() {
     this.displaySaveDialog = true;
+    this.storeService.clearCurrentStore();
     sessionStorage.removeItem('temp_order_info');
   }
 
   closeSaveDialog() {
+    console.log('closeSaveDialog() this.id', this.id);
     this.displaySaveDialog = false;
     if (!this.wishId) {
+      console.log('no wish');
+
       this.router.navigate(['/management/store_info', this.id]);
     } else {
+      console.log('have wish');
       this.router.navigate(['/groupbuy-event/group-event', this.id], {
         queryParams: { wish_id: this.wishId }
       });

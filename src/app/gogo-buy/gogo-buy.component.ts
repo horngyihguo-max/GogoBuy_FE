@@ -18,7 +18,7 @@ import { PanelModule } from 'primeng/panel';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { AuthService } from '../@service/auth.service';
 import { SelectModule } from 'primeng/select';
-import { FeeDescriptionVoList } from '../@service/store.service';
+import { FeeDescriptionVoList, StoreService } from '../@service/store.service';
 
 
 export type Stores = {
@@ -117,7 +117,8 @@ export class GogoBuyComponent {
     public router: Router,
     private http: HttpService,
     private sanitizer: DomSanitizer,
-    public auths: AuthService
+    public auths: AuthService,
+    private storeService: StoreService,
   ) { }
 
   readonly storeStage = signal<0 | 1>(0);
@@ -629,6 +630,7 @@ export class GogoBuyComponent {
     clearTimeout(this.idleTimer);
     this.visible = false;
     this.enableScroll();
+    this.storeService.clearCurrentStore();
     this.router.navigate(['/management/store_upsert']);
   }
   goStoreInfo(storeId: number) {
