@@ -68,15 +68,13 @@
             <span class="text-[#E07A3F]">{{ order.menuName }}</span>
             <span>
               {{ order.quantity }} 份 共 ${{ order.subtotal }} 元
-              <button type="button"
-                class="w-10 h-10 inline-flex items-center justify-center rounded-full text-rose-500 hover:bg-rose-50
-                cursor-pointer"
-                (click)="removeorder(order.id)" aria-label="刪除品項">
+              <button type="button" class="w-10 h-10 inline-flex items-center justify-center rounded-full text-rose-500 hover:bg-rose-50
+                cursor-pointer" (click)="removeorder(order.id)" aria-label="刪除品項">
                 <i class="pi pi-trash"></i>
               </button>
             </span>
           </p>
-          <p class="text-base text-gray-500">{{ formatSelectedOption(order.selectedOption) }}</p>
+          <p class="text-base text-gray-500">{{ formatSelectedOptionList(order.parsedOptions) }}</p>
         </div>
       </div>
       }
@@ -130,15 +128,13 @@
           <p class="flex items-center justify-between font-bold">
             <span class="text-[#E07A3F]">{{ order.menuName }}</span>
             <span>{{ order.quantity }} 份 共 ${{ order.subtotal }} 元
-              <button type="button"
-                class="w-10 h-10 inline-flex items-center justify-center rounded-full text-rose-500 hover:bg-rose-50
-                cursor-pointer"
-                (click)="removeorder(order.id)" aria-label="刪除品項">
+              <button type="button" class="w-10 h-10 inline-flex items-center justify-center rounded-full text-rose-500 hover:bg-rose-50
+                cursor-pointer" (click)="removeorder(order.id)" aria-label="刪除品項">
                 <i class="pi pi-trash"></i>
               </button>
             </span>
           </p>
-          <p class="text-base text-gray-500">{{ formatSelectedOption(order.selectedOption) }}</p>
+          <p class="text-base text-gray-500">{{ formatSelectedOptionList(order.parsedOptions) }}</p>
         </div>
       </div>
       }

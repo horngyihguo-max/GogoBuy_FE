@@ -42,7 +42,7 @@ export class LoginComponent {
 
   // 切換模式
   toggleMode() {
-    this.pageMode = this.pageMode === 'login' ? 'register' : 'login';
+    this.pageMode = this.pageMode == 'login' ? 'register' : 'login';
     this.resetForm();
   }
 
@@ -87,7 +87,7 @@ export class LoginComponent {
 
     this.auth.register(payload).subscribe({
       next: (res: any) => {
-        if (res.code === 200) {
+        if (res.code == 200) {
           localStorage.setItem('user_session', payload.email);
           Swal.fire({
             title: "創建帳號成功",
@@ -172,7 +172,7 @@ export class LoginComponent {
             const eyeIcon = document.getElementById('eye-icon');
 
             toggleBtn?.addEventListener('click', () => {
-              const isPwd = pwdInput.type === 'password';
+              const isPwd = pwdInput.type == 'password';
               const newType = isPwd ? 'text' : 'password';
 
               pwdInput.type = newType;

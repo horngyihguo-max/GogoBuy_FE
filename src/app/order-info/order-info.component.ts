@@ -16,28 +16,30 @@ import Swal from 'sweetalert2';
 
 type SelectedOpt = { optionName: string; value: string; extraPrice?: number };
 
-interface OrderDto {
-  id: number;
-  eventsId: number;
-  userId: string;
-  menuId: number;
-  quantity: number;
-  selectedOption: string;
-  personalMemo: string;
-  orderTime: string;
-  pickupStatus: string;
-  pickupTime: string | null;
-  subtotal: number;
-  weight: number;
-  deleted: boolean;
-  menuName?: string;
-  parsedOptions?: SelectedOpt[];
-}
-
-interface OrdersRes {
+interface OrdersResNew {
   code: number;
   message: string;
-  orders: OrderDto[];
+  ordersDto?: {
+    id: number;
+    eventsId: number;
+    userId: string;
+    menuList: Array<{
+      menuId: number;
+      quantity: number;
+      specName?: string;
+      selectedOptionList?: SelectedOpt[];
+    }>;
+    personalMemo?: string;
+    orderTime: string;
+    pickupStatus: string;
+    pickupTime: string | null;
+    subtotal: number;
+    weight: number;
+    deleted: boolean;
+  };
+
+  // 如果你後端「host 查全部」是多筆，建議也先兼容：
+  ordersDtoList?: OrdersResNew["ordersDto"][];
 }
 
 interface MenuItemDto {
@@ -54,28 +56,22 @@ interface MenuRes {
 }
 
 
-type OrderVM = orders & {
-  menuName?: string;
-  parsedOptions?: SelectedOpt[];
-};
-
-export interface orders {
+interface OrderLineVM {
   id: number;
-  events_id: number;
-  user_id: string;
-  menu_id: number;
-  quantity: number;
-  selected_option: string;
-  personal_memo: string;
-  order_time: Date;
-  pickup_status: string;
-  pickup_time: Date;
-  subtotal: number;
+  eventsId: number;
+  userId: string;
+  personalMemo: string;
+  orderTime: string;
+  pickupStatus: string;
+  pickupTime: string | null;
   weight: number;
-  is_deleted: boolean;
-};
-
-
+  deleted: boolean;
+  menuId: number;
+  quantity: number;
+  specName?: string;
+  selectedOptionList: SelectedOpt[];
+  menuName?: string;
+}
 
 @Component({
   selector: 'app-order-info',
@@ -150,20 +146,29 @@ export class OrderInfoComponent implements OnInit {
 
       orders$.pipe(
         tap((x: any) => console.log('[RAW ordersRes]', this.mode, x)),
-        switchMap((ordersRes: OrdersRes) => {
+        switchMap((ordersRes: any) => {
           const raw: any = ordersRes;
-          const orders = (raw.orders ?? raw.ordersSearchViewList ?? []).map((o: any) => this.normalizeOrder(o));
 
+          // ✅ 1) host：已展開（你貼的 getOrdersAll 回來就是這個）
+          const listFromHost = Array.isArray(raw.ordersSearchViewList)
+            ? raw.ordersSearchViewList.map((o: any) => this.normalizeOrder(o))
+            : [];
 
-          // 先把 menuId 轉 number，並且濾掉 NaN / undefined
+          // ✅ 2) member：ordersDto.menuList 需要展開
+          const listFromMember = raw.ordersDto
+            ? this.flattenOrdersDto(raw.ordersDto) // 回傳 OrderDto[]（已展開）
+            : [];
+
+          // ✅ 以「有資料的那一種」為準（避免兩者同時存在時混亂）
+          const orders = listFromHost.length > 0 ? listFromHost : listFromMember;
+
           const menuIds: number[] = Array.from(
             new Set(
               orders
-                .map((o: { menuId: any; }) => Number(o.menuId))
-                .filter((id: unknown): id is number => Number.isFinite(id))
+                .map((o: any) => Number(o.menuId))
+                .filter((id: any) => Number.isFinite(id))
             )
           );
-
 
           if (menuIds.length === 0) {
             return of({ orders, menuMap: new Map<number, MenuItemDto>() });
@@ -178,29 +183,55 @@ export class OrderInfoComponent implements OnInit {
           );
         }),
         map(({ orders, menuMap }) => {
-          const mergedOrders = orders.map((o: { menuId: any; selectedOption: string; }) => ({
+          const mergedOrders = orders.map((o: { menuId: any; }) => ({
             ...o,
             menuName: menuMap.get(o.menuId)?.name ?? `menuId:${o.menuId}`,
-            parsedOptions: this.safeParseSelectedOption(o.selectedOption),
           }));
-          return { code: 200, message: 'ok', orders: mergedOrders } as OrdersRes;
+          // 你原本 this.res 想長得像 {orders: []}，那就保持
+          return { code: 200, message: 'ok', orders: mergedOrders };
         })
       ).subscribe({
         next: (data: any) => {
           this.res = data;
           console.log('mode=', this.mode, data.orders?.[0]);
+          this.recalcTotalAmount();
         },
         error: (err: any) => console.error('API error:', err),
       });
-
     });
-
   }
 
 
+  private flattenOrdersDto(dto: any): any[] {
+    const base = {
+      id: dto.id ?? dto.orderId,
+      eventsId: dto.eventsId ?? dto.eventId,
+      userId: dto.userId ?? dto.user_id ?? '',
+      personalMemo: dto.personalMemo ?? dto.personal_memo ?? '',
+      orderTime: dto.orderTime ?? dto.order_time,
+      pickupStatus: dto.pickupStatus ?? dto.pickup_status,
+      pickupTime: dto.pickupTime ?? dto.pickup_time ?? null,
+      subtotal: dto.subtotal ?? 0,
+      weight: dto.weight ?? 0,
+      deleted: dto.deleted ?? dto.is_deleted ?? false,
+    };
+
+    const menuList = Array.isArray(dto.menuList) ? dto.menuList : [];
+    return menuList.map((m: any) => ({
+      ...base,
+      menuId: Number(m.menuId ?? m.menu_id),
+      quantity: Number(m.quantity ?? 0),
+      selectedOptionList: Array.isArray(m.selectedOptionList) ? m.selectedOptionList : [],
+      specName: m.specName ?? '',
+    }));
+  }
+
   private normalizeOrder(o: any) {
-    const selectedOptionList = o.selectedOptionList;
-    const selectedOption = o.selectedOption ?? o.selected_option;
+    const list = Array.isArray(o.selectedOptionList) ? o.selectedOptionList : null;
+    const rawStr = o.selectedOption ?? o.selected_option;
+    const parsedOptions: SelectedOpt[] = list
+      ? list
+      : this.safeParseSelectedOption(rawStr ?? '[]');
 
     return {
       id: o.id ?? o.orderId,
@@ -214,13 +245,12 @@ export class OrderInfoComponent implements OnInit {
       pickupStatus: o.pickupStatus ?? o.pickup_status,
       pickupTime: o.pickupTime ?? o.pickup_time ?? null,
       deleted: o.deleted ?? o.is_deleted ?? false,
-      userNickname: o.userNickname ?? o.user_nickname ?? o.hostNickname ?? null,
+      hostNickname: o.hostNickname ?? o.userNickname ?? o.user_nickname ?? null,
+      parsedOptions,
       menuName: o.menuName ?? null,
-      selectedOption: Array.isArray(selectedOptionList)
-        ? JSON.stringify(selectedOptionList)
-        : (selectedOption ?? '[]'),
     };
   }
+
 
 
   private safeParseSelectedOption(raw: string): SelectedOpt[] {
@@ -277,12 +307,13 @@ export class OrderInfoComponent implements OnInit {
   }
 
 
-  formatSelectedOption(raw: any): string {
-    const opts = this.parseSelectedOption(raw);
-    return opts
+  formatSelectedOptionList(list: SelectedOpt[]): string {
+    return (list ?? [])
       .map(o => `${o.optionName}:${o.value}${o.extraPrice ? `(+${o.extraPrice})` : ''}`)
       .join('、');
   }
+
+
 
 
   /* 轉換ISO8601日期格式 */

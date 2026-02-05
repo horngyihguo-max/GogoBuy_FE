@@ -204,7 +204,7 @@ export class PersonInfoEditComponent {
 
     this.auth.updateProfile(userId, payload).subscribe({
       next: (res: any) => {
-        if (res.code === 200) {
+        if (res.code == 200) {
           this.auth.connectPhone(userId, this.editInfo.phone).subscribe();
           this.auth.setUser({ ...this.auth.user, ...payload });
           this.auth.refreshUser();
@@ -259,7 +259,7 @@ export class PersonInfoEditComponent {
         const inputEmail = value.trim().toLowerCase();
         const currentEmail = (this.user?.email || this.editInfo?.email || '').trim().toLowerCase();
 
-        if (inputEmail === currentEmail) {
+        if (inputEmail == currentEmail) {
           return Swal.showValidationMessage('新信箱不可與目前信箱相同');
         }
         return inputEmail;

@@ -95,10 +95,10 @@ export class NearbyBarComponent implements OnInit, OnDestroy {
     this.radius.set(next);
 
     // 半徑改變就重查
-    if (this.mode() === 'auto' && this.lastLatLng) {
+    if (this.mode() == 'auto' && this.lastLatLng) {
       this.fetchByGeo(this.lastLatLng.lat, this.lastLatLng.lng);
     }
-    if (this.mode() === 'manual' && this.address().trim()) {
+    if (this.mode() == 'manual' && this.address().trim()) {
       this.fetchByAddress(this.address().trim());
     }
   }

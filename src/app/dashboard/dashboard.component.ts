@@ -116,7 +116,7 @@ export class DashboardComponent {
 
           try {
             const obj = JSON.parse(item.content);
-            if (obj && typeof obj === 'object') {
+            if (obj && typeof obj == 'object') {
               parsedTitle = obj.title || '系統公告';
               parsedContent = obj.content || item.content;
               parsedLink = obj.link || '';

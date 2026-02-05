@@ -93,7 +93,7 @@ export class CartPageComponent {
             this.cart.getEventsByEventsId(g.eventsId).pipe(
               map((ev: any) => {
                 const event = ev.groupbuyEvents?.[0];
-                return { ...g, isHost: !!event && event.hostId === userId };
+                return { ...g, isHost: !!event && event.hostId == userId };
               }),
               catchError(() => of({ ...g, isHost: false }))
             )

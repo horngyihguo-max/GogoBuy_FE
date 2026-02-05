@@ -211,7 +211,7 @@ export class AuthService {
 
     return this.https.patchApi(url, updateDto).pipe(
       tap((res: any) => {
-        if (res.code === 200) {
+        if (res.code == 200) {
 
           // 取得目前暫存在 localStorage 的完整資料
           const currentUser = JSON.parse(localStorage.getItem('user_info') || '{}');
@@ -358,7 +358,7 @@ export class AuthService {
           return;
         }
         // 有輸入但找不到店家 → 開團清空
-        if (processedList.length === 0) {
+        if (processedList.length == 0) {
           this.events.set([]);
           return;
         }
