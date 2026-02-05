@@ -12,6 +12,7 @@ import { HttpService } from '../@service/http.service';
 import { of } from 'rxjs';
 import { tap, switchMap, map } from 'rxjs/operators';
 import Swal from 'sweetalert2';
+import { CommonModule } from '@angular/common';
 
 
 type SelectedOpt = { optionName: string; value: string; extraPrice?: number };
@@ -73,13 +74,33 @@ interface OrderLineVM {
   menuName?: string;
 }
 
+type OrderVM = {
+  id: number;
+  hostNickname?: string;
+  menuName: string;
+  quantity: number;
+  subtotal: number;
+  parsedOptions?: any; // 你原本就有 formatSelectedOptionList(order.parsedOptions)
+  userId?: string;
+};
+
+type OrderGroupVM = {
+  key: string;          // 唯一key（用userId或nickname）
+  nickname: string;
+  totalAmount: number;
+  totalQty: number;
+  orders: OrderVM[];
+};
+
+
 @Component({
   selector: 'app-order-info',
   imports: [
     StepsModule,
     ToastModule,
     FormsModule,
-    JsonPipe
+    JsonPipe,
+    CommonModule
   ],
   providers: [MessageService],
   templateUrl: './order-info.component.html',
@@ -99,6 +120,8 @@ export class OrderInfoComponent implements OnInit {
   activeIndex: number = 0;
   menuDate: any;
   res: any;
+  storeLogo: any;
+  hostLogo: any;
 
 
   constructor(
@@ -120,84 +143,18 @@ export class OrderInfoComponent implements OnInit {
     this.member = [
       { label: 'Confirmation' }
     ];
-    this.route.queryParamMap.subscribe(q => {
-      this.mode = (q.get('mode') == 'host') ? 'host' : 'member';
-    });
-    this.auth.user$.subscribe
-
     // 載入cart傳入開團訂單詳情
     this.route.queryParamMap.subscribe(params => {
       this.mode = (params.get('mode') == 'host') ? 'host' : 'member';
-
       this.userId = params.get('user_id') || '';
       this.eventsId = Number(params.get('events_id') || 0);
-
       this.eventName = params.get('eventName') || '';
       this.storeName = params.get('storeName') || '';
       this.latestOrderTime = params.get('latestOrderTime') || '';
       this.totalAmount = params.get('totalAmount') || '';
-
-      if (!this.eventsId) return;
-      if (this.mode == 'member' && !this.userId) return;
-
-      const orders$ = (this.mode == 'host')
-        ? this.cart.getOrdersAll(this.eventsId)
-        : this.cart.getOrders(this.userId, this.eventsId);
-
-      orders$.pipe(
-        tap((x: any) => console.log('[RAW ordersRes]', this.mode, x)),
-        switchMap((ordersRes: any) => {
-          const raw: any = ordersRes;
-
-          // ✅ 1) host：已展開（你貼的 getOrdersAll 回來就是這個）
-          const listFromHost = Array.isArray(raw.ordersSearchViewList)
-            ? raw.ordersSearchViewList.map((o: any) => this.normalizeOrder(o))
-            : [];
-
-          // ✅ 2) member：ordersDto.menuList 需要展開
-          const listFromMember = raw.ordersDto
-            ? this.flattenOrdersDto(raw.ordersDto) // 回傳 OrderDto[]（已展開）
-            : [];
-
-          // ✅ 以「有資料的那一種」為準（避免兩者同時存在時混亂）
-          const orders = listFromHost.length > 0 ? listFromHost : listFromMember;
-
-          const menuIds: number[] = Array.from(
-            new Set(
-              orders
-                .map((o: any) => Number(o.menuId))
-                .filter((id: any) => Number.isFinite(id))
-            )
-          );
-
-          if (menuIds.length === 0) {
-            return of({ orders, menuMap: new Map<number, MenuItemDto>() });
-          }
-
-          return this.cart.getMenuByMenuId(menuIds).pipe(
-            map((menuRes: MenuRes) => {
-              const menuMap = new Map<number, MenuItemDto>();
-              for (const m of menuRes.menuList ?? []) menuMap.set(m.id, m);
-              return { orders, menuMap };
-            })
-          );
-        }),
-        map(({ orders, menuMap }) => {
-          const mergedOrders = orders.map((o: { menuId: any; }) => ({
-            ...o,
-            menuName: menuMap.get(o.menuId)?.name ?? `menuId:${o.menuId}`,
-          }));
-          // 你原本 this.res 想長得像 {orders: []}，那就保持
-          return { code: 200, message: 'ok', orders: mergedOrders };
-        })
-      ).subscribe({
-        next: (data: any) => {
-          this.res = data;
-          console.log('mode=', this.mode, data.orders?.[0]);
-          this.recalcTotalAmount();
-        },
-        error: (err: any) => console.error('API error:', err),
-      });
+      this.storeLogo = params.get('storeLogo') || '';
+      this.hostLogo = params.get('hostLogo') || '';
+      this.loadOrders();
     });
   }
 
@@ -388,7 +345,145 @@ export class OrderInfoComponent implements OnInit {
     this.totalAmount = String(sum);
   }
 
+  expandedGroup: Record<string, boolean> = {}; // 展開狀態（每個人一個）
 
+  get groupedOrders(): OrderGroupVM[] {
+    const orders: OrderVM[] = this.res?.orders ?? [];
+    const map = new Map<string, OrderGroupVM>();
+
+    for (const o of orders) {
+      const nickname = (this.mode === 'host')
+        ? (o.hostNickname ?? '（未知）')
+        : (this.auth.user?.nickname ?? '（未知）');
+
+      const key = o.userId ?? nickname; // 若你有userId就用它，沒有就用nickname
+
+      if (!map.has(key)) {
+        map.set(key, {
+          key,
+          nickname,
+          totalAmount: 0,
+          totalQty: 0,
+          orders: [],
+        });
+      }
+
+      const g = map.get(key)!;
+      g.orders.push(o);
+      g.totalAmount += Number(o.subtotal ?? 0);
+      g.totalQty += Number(o.quantity ?? 0);
+    }
+
+    // 預設：第一個自動展開（你也可以改成全展開）
+    const arr = Array.from(map.values());
+    if (arr[0] && this.expandedGroup[arr[0].key] === undefined) {
+      this.expandedGroup[arr[0].key] = true;
+    }
+    return arr;
+  }
+
+  toggleGroup(key: string) {
+    this.expandedGroup[key] = !this.expandedGroup[key];
+  }
+
+  isGroupOpen(key: string) {
+    return !!this.expandedGroup[key];
+  }
+
+  reloadOrders() {
+    this.loadOrders();
+  }
+  private loadOrders() {
+    if (!this.eventsId) return;
+    if (this.mode === 'member' && !this.userId) return;
+
+    const orders$ = (this.mode === 'host')
+      ? this.cart.getOrdersAll(this.eventsId)
+      : this.cart.getOrders(this.userId, this.eventsId);
+
+    orders$.pipe(
+      tap((x: any) => console.log('[RAW ordersRes]', this.mode, x)),
+      switchMap((ordersRes: any) => {
+        const raw: any = ordersRes;
+
+        const listFromHost = Array.isArray(raw.ordersSearchViewList)
+          ? raw.ordersSearchViewList.map((o: any) => this.normalizeOrder(o))
+          : [];
+
+        const listFromMember = raw.ordersDto
+          ? this.flattenOrdersDto(raw.ordersDto)
+          : [];
+
+        const orders = listFromHost.length > 0 ? listFromHost : listFromMember;
+
+        const menuIds: number[] = Array.from(
+          new Set(
+            orders
+              .map((o: any) => Number(o.menuId))
+              .filter((id: any) => Number.isFinite(id))
+          )
+        );
+
+        if (menuIds.length === 0) {
+          return of({ orders, menuMap: new Map<number, MenuItemDto>() });
+        }
+
+        return this.cart.getMenuByMenuId(menuIds).pipe(
+          map((menuRes: MenuRes) => {
+            const menuMap = new Map<number, MenuItemDto>();
+            for (const m of menuRes.menuList ?? []) menuMap.set(m.id, m);
+            return { orders, menuMap };
+          })
+        );
+      }),
+      map(({ orders, menuMap }) => {
+        const mergedOrders = orders.map((o: any) => ({
+          ...o,
+          menuName: menuMap.get(o.menuId)?.name ?? `menuId:${o.menuId}`,
+        }));
+        return { code: 200, message: 'ok', orders: mergedOrders };
+      })
+    ).subscribe({
+      next: (data: any) => {
+        this.res = data;
+        this.recalcTotalAmount();
+      },
+      error: (err: any) => console.error('API error:', err),
+    });
+  }
+
+  submitOrder() {
+    Swal.fire({
+      title: "確定送出訂單?",
+      text: "送出訂單後無法取消!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "是的，送出!",
+      cancelButtonText: "取消"
+    }).then((result) => {
+      if (result.isConfirmed) {
+        Swal.fire({
+          title: "送出!",
+          text: "訂單已送出",
+          icon: "success",
+          showCancelButton: true,
+          confirmButtonColor: "#3085d6",
+          cancelButtonColor: "rgb(24, 173, 54)",
+          confirmButtonText: "返回首頁",
+          cancelButtonText: "返回購物車"
+        }).then((result) => {
+          if (result.isConfirmed) {
+            this.router.navigate(['/gogobuy/home'])
+          } else if (result.dismiss === Swal.DismissReason.cancel) {
+            this.router.navigate(['/user/cart'])
+          }
+        })
+
+      }
+    });
+  }
 }
 
 
