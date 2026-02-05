@@ -427,7 +427,7 @@ export class AuthService {
 
   // 查詢全部開團
   getallevent() {
-    return this.https.getApi(`http://localhost:8080/gogobuy/getAll`);
+    return this.https.getApi(`http://localhost:8080/gogobuy/event/getAll`);
   }
 
   // 查詢全部user
