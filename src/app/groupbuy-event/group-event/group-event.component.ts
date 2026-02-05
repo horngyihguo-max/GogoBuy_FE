@@ -15,21 +15,42 @@ import { FormsModule } from "@angular/forms";
 import { DatePickerModule } from 'primeng/datepicker';
 import { PrimeNG } from 'primeng/config';
 import Swal from 'sweetalert2';
+import { TabsModule } from 'primeng/tabs';
+
 
 
 @Component({
+  template: `
+    <div class="card">
+      <p-tabs value="0" scrollable>
+        <p-tablist>
+          @for (tab of scrollableTabs; track tab.value) {
+              <p-tab [value]="tab.value">
+                  {{ tab.title }}
+              </p-tab>
+          }
+        </p-tablist>
+        <p-tabpanels>
+          @for (tab of scrollableTabs; track tab.value) {
+              <p-tabpanel [value]="tab.value">
+                  <p class="m-0">{{ tab.content }}</p>
+              </p-tabpanel>
+          }
+        </p-tabpanels>
+      </p-tabs>
+    </div>`,
+  standalone: true,
   selector: 'app-group-event',
   imports: [
     CommonModule, Dialog, PickListModule, DragDropModule,
     InputGroupModule, InputGroupAddonModule, InputNumberModule, FloatLabelModule,
-    FormsModule, DatePickerModule
+    FormsModule, DatePickerModule, TabsModule
 ],
   templateUrl: './group-event.component.html',
   styleUrl: './group-event.component.scss'
 })
 export class GroupEventComponent {
   constructor(
-    private auth:AuthService,
     private http:HttpService,
     private router:Router,
     private route:ActivatedRoute,
@@ -44,7 +65,8 @@ export class GroupEventComponent {
   feeDescriptionVoList:FeeDescriptionVoList[]=[];
 
   eventName!:string;
-  endTime!:Date;
+  endTime:Date | null = null;
+  splitType!:string;
   announcement!:string;
   type!:string;
   tempMenu:number[]=[];  //存品項id
@@ -60,10 +82,10 @@ export class GroupEventComponent {
   isPreview!:boolean;
   useAll!:boolean;
   minDate: Date = new Date();
+  previewTab!:number;
   ngOnInit(): void {
     this.isPreview=false;
     this.useAll=false;
-    this.minDate = new Date();
     // 設定中文語系
     this.primeng.setTranslation({
       dayNames: ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"],
@@ -181,16 +203,13 @@ export class GroupEventComponent {
 
   getFutureOpenTime(currentDay: number): string {
     const weekNames = ["", "週一", "週二", "週三", "週四", "週五", "週六", "週日"];
-
     if (!this.operatingHoursVoList || this.operatingHoursVoList.length === 0) {
       return "近期無營業時段";
     }
-
     // offset 代表「幾天後」，從 1 (明天) 開始找，最多找 7 天 (繞一週)
     for (let offset = 1; offset <= 7; offset++) {
       // 循環公式：確保週日(7)加 1 天後會回到週一(1)
       const targetWeek = (Number(currentDay) + offset - 1) % 7 + 1;
-
       const nextList = this.operatingHoursVoList
         .filter(each => Number(each.week) === targetWeek)
         .sort((a, b) => a.openTime.localeCompare(b.openTime));
@@ -218,8 +237,10 @@ export class GroupEventComponent {
   choose(choice:string){
     if(choice=="EQUAL"){
       this.choice="平分制";
+      this.splitType="EQUAL";
     }else{
       this.choice="權重制";
+      this.splitType="WEIGHT";
     }
     this.splitOpen=false;
   }
@@ -240,35 +261,37 @@ export class GroupEventComponent {
     this.useAll=event.target.checked;
     if(this.useAll){
       this.selectedItems=this.menuVoList;
-      this.updateDisplaySource();
+      this.updateDisplaySource();  //雖然fixPaddingPosition裡已經有呼叫updateDisplaySource，但為避免畫面延遲，先自己呼叫一次
+      this.fixPaddingPosition();
     }else{
+      this.selectedItems.map(item=>item.isRecommended=false);
       this.selectedItems=[this.paddingItem];
+      this.recommend=[];
       this.updateDisplaySource();
+      this.fixPaddingPosition();
     }
   }
   displaySource: any[] = [];  // 給 PickList 顯示用的實體陣列
   paddingItem = { id: 'BOTTOM_PADDING', isPadding: true };
   selectedItems: any[] = [this.paddingItem];  // 目標清單
-  // 監控 Tab 切換 (假設你在 p-tabs 綁定了 (valueChange) 或透過 activeTab 的 setter)
+  // 監控 Tab 切換 (在 p-tabs 綁定了 (valueChange) 或透過 activeTab 的 setter)
   private _activeTab: any;
   get activeTab() { return this._activeTab; }
   set activeTab(val: any) {
     this._activeTab = val;
     this.updateDisplaySource(); // 每次切換 Tab 就更新一次
   }
-  // 更新顯示清單的方法
-  updateDisplaySource() {
+  updateDisplaySource() {  // 更新顯示清單的方法
     this.displaySource = this.menuVoList.filter(item =>
       item.categoryId == this._activeTab &&
       !this.selectedItems.some(s => s.id === item.id)
     );
   }
-  // 選中
-  onMoveToTarget(event: any) {
+  onMoveToTarget(event: any) {  // 選中
     this.fixPaddingPosition();
   }
-  // 取消選中 (從 Target 搬回 Source)
-  onMoveToSource(event: any) {
+  onMoveToSource(event: any) {  // 取消選中 (從 Target 搬回 Source)
+    console.log(event.items);
     const movedItems = event.items;
     movedItems.forEach((item: any) => {
       this.recommend = this.recommend.filter(id => id !== item.id);
@@ -303,7 +326,7 @@ export class GroupEventComponent {
       // 使用新物件解構，確保觸發 Angular 的渲染更新
       this.selectedItems = [...allProductsInTarget, { ...this.paddingItem }];
       this.updateDisplaySource();
-    }, 50);
+    }, 10);
   }
   private fixTabAndRecommend(event:any){
     if(event && event.items && Array.isArray(event.items)){
@@ -360,35 +383,48 @@ export class GroupEventComponent {
   }
 
 
-  // 當時間改變時觸發
-  onTimeChange(selectedDate: Date) {
+  handleOnShow() {
+    if (!this.endTime) {
+      const nextMinute = new Date();
+      nextMinute.setMinutes(nextMinute.getMinutes() + 1);
+      nextMinute.setSeconds(0);
+      nextMinute.setMilliseconds(0);
+      // 設定初始預設時間
+      this.endTime = new Date(nextMinute);
+      // 同步更新 minDate 防止選回過去
+      this.minDate = new Date(nextMinute);
+    }
+  }
+  onTimeChange(value: Date) {
     const now = new Date();
-
-    // 如果選中的時間點小於當前時間
-    if (selectedDate && selectedDate < now) {
-      // 強制重設為「現在」
-      this.endTime = new Date();
-
-      // 選用：彈出警告告知使用者
-      // this.showAlert('無效時間', '結束時間不能設定在過去！');
+    if (value && value < now) {
+      const nextMinute = new Date();
+      nextMinute.setMinutes(nextMinute.getMinutes() + 1);
+      this.endTime = new Date(nextMinute);
     }
   }
 
 
-  saveData() {
-    if (this.recommendDescription && this.recommendDescription.length > 200) {
-      // 雖然有 maxlength，但保險起見還是可以做一次裁切
-      this.recommendDescription = this.recommendDescription.substring(0, 200);
-    }
+  get uniqueTabs() {
+    const uniqueIds = [...new Set(this.selectedItems.map(item => item.categoryId))];
+    return uniqueIds.map(catId => {
+      const category = this.menuCategoriesVoList.find(cat => cat.id === catId);
+      return {
+        id: catId,
+        categoryName: category?.name
+      };
+    });
   }
+
+
   goHome(){
     this.router.navigate(['/gogobuy/home']);
   }
   cancel(){
-
+    this.router.navigate(['/management/store_info',this.storeId]);
   }
   goCheck(){
-    this.tempMenu=[...this.selectedItems];
+    this.tempMenu=this.selectedItems.filter(item=>item.id!==this.paddingItem.id).map(item=>item.id);
     const missingFields: string[] = [];
     if (!this.eventName) missingFields.push('開團名稱');
     if (!this.choice) missingFields.push('運費拆帳方式');
@@ -398,21 +434,34 @@ export class GroupEventComponent {
       missingFields.push('成團門檻金額至少為1');
     }else if(!this.limitation){
       missingFields.push('成團門檻金額');
+    }else if(this.limitation%1!=0){
+      missingFields.push('請輸入新台幣整數金額(須為阿拉伯數字)');
     }
-    if (!this.endTime) missingFields.push('截止日期與時間');
-    const now=new Date();
-    if (this.endTime.getTime()<now.getTime()){
-      missingFields.push('截止時間已過請重新輸入');
+    if (!this.endTime) {
+      missingFields.push('截止日期與時間');
+    } else {
+      const now = new Date();
+      // 如果要排除「當下」，通常是因為 endTime 只選擇到分鐘
+      // 將比對精準度設在「分鐘」
+      const endTimestamp = Math.floor(this.endTime.getTime() / 60000); // 取得分鐘數
+      const nowTimestamp = Math.floor(now.getTime() / 60000);
+      if (endTimestamp === nowTimestamp) {
+        missingFields.push('截止時間不可為當下時間');
+      } else if (endTimestamp < nowTimestamp) {
+        missingFields.push('截止時間已過請重新輸入');
+      }
     }
-
     if (missingFields.length > 0) {    // 如果有漏填，觸發 Swal 警告
       const fieldList = missingFields.join('、'); // 將陣列轉為 "欄位A、欄位B"
       this.showAlert('資料未填寫完整', `請輸入以下欄位：${fieldList}`);
       return; // 攔截，不執行後續邏輯
     }
-
     // 通過檢查
     this.isPreview=true;
+    const tabs = this.uniqueTabs;
+    if (tabs && tabs.length > 0) {
+      this.previewTab = tabs[0].id;
+    }
   }
   showAlert(title: string, text: string) {
     Swal.fire({
@@ -426,5 +475,68 @@ export class GroupEventComponent {
         if (c) c.style.zIndex = '20000';
       },
     });
+  }
+
+  revise(){
+    this.isPreview=false;
+  }
+  addEvent(){
+    const missingFields: string[] = [];
+    if (!this.endTime) {
+      missingFields.push('截止日期與時間');
+    } else {
+      const now = new Date();
+      // 如果要排除「當下」，通常是因為 endTime 只選擇到分鐘
+      // 將比對精準度設在「分鐘」
+      const endTimestamp = Math.floor(this.endTime.getTime() / 60000); // 取得分鐘數
+      const nowTimestamp = Math.floor(now.getTime() / 60000);
+      if (endTimestamp === nowTimestamp) {
+        missingFields.push('截止時間不可為當下時間');
+      } else if (endTimestamp < nowTimestamp) {
+        missingFields.push('截止時間已過請重新輸入');
+      }
+    }
+    if (missingFields.length > 0) {    // Swal 警告
+      const fieldList = missingFields.join('、'); // 將陣列轉為 "欄位A、欄位B"
+      this.showAlert('資料未填寫完整', `請輸入以下欄位：${fieldList}`);
+      return; // 攔截，不執行後續邏輯
+    }
+    const end=this.formatToFullDateTime(this.endTime);
+    const req={
+      id:0,
+      hostId:this.userId,
+      storesId:this.storeId,
+      eventName:this.eventName,
+      endTime:end,
+      status: "OPEN",
+      shippingFee: 0,
+      splitType: this.splitType,
+      announcement: this.announcement,
+      type: this.type,
+      tempMenuList: [...this.tempMenu],
+      recommendList: [...this.recommend],
+      recommendDescription: this.recommendDescription,
+      totalOrderAmount: 0,
+      limitation: this.limitation,
+      deleted: false
+    }
+    this.http.postApi('http://localhost:8080/gogobuy/addEvent', req).subscribe({
+      next: (res) => {
+        console.log('新增成功', res);
+      },
+      error: (err) => {
+        console.error('新增失敗', err);
+      }
+    });
+  }
+  formatToFullDateTime(date: Date | null): string {
+    if (!date) return '';
+    const d = new Date(date);
+    const YYYY = d.getFullYear();
+    const MM = String(d.getMonth() + 1).padStart(2, '0');
+    const DD = String(d.getDate()).padStart(2, '0');
+    const hh = String(d.getHours()).padStart(2, '0');
+    const mm = String(d.getMinutes()).padStart(2, '0');
+    return `${YYYY}-${MM}-${DD}T${hh}:${mm}:00`;
   }
 }

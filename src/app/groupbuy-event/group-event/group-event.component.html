@@ -12,305 +12,430 @@
   </div>
 </div>
 }@else {
-<div class="area">
-  <div class="mt-[20px] area-block">
-    <img [src]="storeList?.image ? storeList?.image : 'no-product-image.jpg'"
-      (error)="$any($event.target).src = 'no-product-image.jpg'" crossorigin="anonymous" class="rounded-t-lg aspect-[3/2] object-cover md:max-h-[200px] lg:max-h-[30vh]
-              lg:rounded-l-lg lg:rounded-tr-none lg:mr-[20px]">
-    <div class="py-[20px] ml-[10px] flex-1 min-w-0 h-full
-                  lg:my-[0px] lg:flex lg:flex-col lg:justify-center lg:align-center">
-      <p class="storeName">{{storeList?.name}}</p>
-      <table class="store-table">
-        <tr>
-          <td><i class="pi pi-phone td-icon"></i></td>
-          <td>{{storeList?.phone}}</td>
-        </tr>
-        <tr>
-          <td><i class="pi pi-address-book td-icon"></i></td>
-          <td>{{storeList?.address}}</td>
-        </tr>
-      </table>
-      <label class="ml-[10px] mt-[20px]">
-        <span class="px-2 py-0.5 rounded text-base font-medium"
-          [ngClass]="isOpen ? 'bg-emerald-400/20 text-green-800' : 'bg-red-100 text-red-800'">
-          {{ isOpen ? '● 營業中' : '○ 休息中' }}
-        </span>
-        <span class="ml-[20px]">{{operateString}}</span>
-      </label>
-      <div class="ml-[10px] mt-[5px] text-small text-gray-500">{{nextOperating}}</div>
+  <div class="area">
+    <div class="mt-[20px] area-block">
+      <img [src]="storeList?.image ? storeList?.image : 'no-product-image.jpg'"
+        (error)="$any($event.target).src = 'no-product-image.jpg'"
+        class="rounded-t-lg aspect-[3/2] object-cover
+         md:rounded-l-lg md:rounded-tr-none
+         lg:max-h-[30vh] lg:rounded-l-lg lg:rounded-tr-none lg:mr-[20px]">
+      <div class="py-[20px] ml-[10px] flex-1 min-w-0 h-full
+                    lg:my-[0px] lg:flex lg:flex-col lg:justify-center lg:align-center">
+        <p class="storeName">{{storeList?.name}}</p>
+        <table class="store-table">
+          <tr>
+            <td><i class="pi pi-phone td-icon"></i></td><td>{{storeList?.phone}}</td>
+          </tr>
+          <tr>
+            <td><i class="pi pi-address-book td-icon"></i></td><td>{{storeList?.address}}</td>
+          </tr>
+        </table>
+        <label class="ml-[10px] mt-[20px]">
+          <span class="px-2 py-0.5 rounded text-base font-medium"
+                [ngClass]="isOpen ? 'bg-emerald-400/20 text-green-800' : 'bg-red-100 text-red-800'">
+            {{ isOpen ? '● 營業中' : '○ 休息中' }}
+          </span>
+          <span class="ml-[20px]">{{operateString}}</span>
+        </label>
+        <div class="ml-[10px] mt-[5px] text-small text-gray-500">{{nextOperating}}</div>
+      </div>
     </div>
   </div>
-</div>
-<div class="area">
-  <div class="my-[20px] area-block">
-    <div class="w-full px-4 lg:pl-8">
-      <div class="text-[#662222] font-bold text-2xl
-                    lg:text-3xl event-div">開團資料設定</div>
-      <div class="event-div each-div">
-        <div class="div-title">請選擇拆帳模式</div>
-        <div class="div-content sm:flex sm:gap-15 lg:flex lg:gap-30">
-          <div class="relative inline-block"> <!-- 下拉選單 -->
-            <button (click)="toggle($event)" class="w-64 px-4 py-2 bg-white text-[#662222] rounded-md flex justify-between items-center
-                        lg:w-80"> <!-- 觸發按鈕 -->
-              {{choice || "運費拆帳方式"}}
-              <span class="transition-transform duration-200" [class.rotate-180]="splitOpen">▼</span>
-            </button>
-            @if(splitOpen){
-            <!-- ================= 桌機下拉 ================= -->
-            <div class="hidden sm:block absolute mt-2 w-full bg-white rounded-md shadow-lg z-50 animate-fade-in"
-              (click)="$event.stopPropagation()">
-              <div class="px-4 py-2 hover:bg-gray-100 cursor-pointer" (click)="choose('EQUAL')">平分制</div>
-              <div class="px-4 py-2 hover:bg-gray-100 cursor-pointer" (click)="choose('WEIGHT')">權重制</div>
-            </div>
-            <!-- ================= 手機 Bottom Sheet ================= -->
-            <div class="sm:hidden fixed inset-0 z-[1102] bg-black/50 backdrop-blur-sm"></div> <!-- 背景遮罩 -->
-            <div class="sm:hidden fixed inset-0 z-[1102] flex items-end" (click)="close()">
-              <div class="relative w-full max-h-[85vh] bg-white rounded-t-xl px-5 pt-4 pb-6
-                            shadow-2xl animate-slide-up" (click)="$event.stopPropagation()"> <!-- 底部選單 -->
-                <h3 class="text-base font-semibold text-gray-900 mb-4">請選擇拆帳模式</h3>
-                <button class="w-full flex items-center justify-between py-4 px-3 rounded-xl
-                              transition hover:bg-gray-100 active:bg-gray-200" (click)="choose('EQUAL')">
-                  <span>平分制</span>
+  @if(!isPreview){
+    <div class="area">
+      <div class="my-[20px] area-block">
+        <div class="w-full px-4 lg:pl-8">
+          <div class="text-[#662222] font-bold text-2xl
+                      lg:text-3xl event-div">開團資料設定</div>
+          <div class="event-div each-div">
+            <div class="div-title">請選擇拆帳模式</div>
+            <div class="div-content sm:flex sm:gap-15 lg:flex lg:gap-30">
+              <div class="relative inline-block"> <!-- 下拉選單 -->
+                <button (click)="toggle($event)"
+                  class="w-64 px-4 py-2 bg-white text-[#662222] rounded-md flex justify-between items-center
+                          lg:w-80"> <!-- 觸發按鈕 -->
+                  {{choice || "運費拆帳方式"}}
+                  <span class="transition-transform duration-200" [class.rotate-180]="splitOpen">▼</span>
                 </button>
-                <button class="w-full flex items-center justify-between py-4 px-3 rounded-xl
-                              transition hover:bg-gray-100 active:bg-gray-200" (click)="choose('WEIGHT')">
-                  <span>權重制</span>
-                </button>
-                <button class="mt-6 w-full py-3 rounded-xl text-gray-600 bg-gray-100 active:bg-gray-200"
-                  (click)="close()">取消</button>
+                @if(splitOpen){
+                  <!-- ================= 桌機下拉 ================= -->
+                  <div class="hidden sm:block absolute mt-2 w-full bg-white rounded-md shadow-lg z-50 animate-fade-in"
+                    (click)="$event.stopPropagation()">
+                    <div class="px-4 py-2 hover:bg-gray-100 cursor-pointer" (click)="choose('EQUAL')">平分制</div>
+                    <div class="px-4 py-2 hover:bg-gray-100 cursor-pointer" (click)="choose('WEIGHT')">權重制</div>
+                  </div>
+                  <!-- ================= 手機 Bottom Sheet ================= -->
+                  <div class="sm:hidden fixed inset-0 z-[1102] bg-black/50 backdrop-blur-sm"></div> <!-- 背景遮罩 -->
+                  <div class="sm:hidden fixed inset-0 z-[1102] flex items-end" (click)="close()">
+                    <div class="relative w-full max-h-[85vh] bg-white rounded-t-xl px-5 pt-4 pb-6
+                              shadow-2xl animate-slide-up" (click)="$event.stopPropagation()"> <!-- 底部選單 -->
+                      <h3 class="text-base font-semibold text-gray-900 mb-4">請選擇拆帳模式</h3>
+                      <button class="w-full flex items-center justify-between py-4 px-3 rounded-xl
+                                transition hover:bg-gray-100 active:bg-gray-200" (click)="choose('EQUAL')">
+                        <span>平分制</span>
+                      </button>
+                      <button class="w-full flex items-center justify-between py-4 px-3 rounded-xl
+                                transition hover:bg-gray-100 active:bg-gray-200" (click)="choose('WEIGHT')">
+                        <span>權重制</span>
+                      </button>
+                      <button class="mt-6 w-full py-3 rounded-xl text-gray-600 bg-gray-100 active:bg-gray-200"
+                        (click)="close()">取消</button>
+                    </div>
+                  </div>
+                }
+              </div>
+              <div class="flex items-center gap-3 cursor-pointer group w-64 lg:w-auto">
+                <input type="checkbox" [checked]="isConfirmed" (change)="onCheckChange($event)"
+                      class="w-4 h-4 rounded border-gray-300 text-[#662222] focus:ring-[#662222]">
+                <span class="text-base font-bold group-hover:text-[#662222] transition-colors" (click)="dialog()">
+                  我已詳閱並同意「隨機餘數分配」等拆帳規則
+                </span>
               </div>
             </div>
-            }
           </div>
-          <div class="flex items-center gap-3 cursor-pointer group w-64 lg:w-auto">
-            <input type="checkbox" [checked]="isConfirmed" (change)="onCheckChange($event)"
-              class="w-4 h-4 rounded border-gray-300 text-[#662222] focus:ring-[#662222]">
-            <span class="text-base font-bold group-hover:text-[#662222] transition-colors" (click)="dialog()">
-              我已詳閱並同意「隨機餘數分配」等拆帳規則
-            </span>
-          </div>
-        </div>
-      </div>
-      <div class="event-div each-div">
-        <div class="div-title">編輯開團菜單</div>
-        <div class="div-content">
-          <div class="w-full ml-8 my-4">
-            <label>
-              <input type="checkbox" class="w-4 h-4 rounded border-gray-300 mr-4" [checked]="useAll"
-                (change)="useAllChange($event)">
-              <span class="text-lg">套用所有品項</span>
-            </label>
-          </div>
-          <div class="flex flex-col lg:flex-row h-full bg-gray-100 rounded-lg">
-            <div class="flex w-full flex-shrink-0 bg-gray-100 overflow-x-auto
-                          lg:flex-col lg:w-30 lg:overflow-x-hidden lg:overflow-y-auto">
-              @for(cate of menuCategoriesVoList; track $index){
-              <button class="relative py-4 px-6 transition-all duration-200
-                                rounded-t-xl
-                                lg:rounded-tr-none lg:rounded-l-xl" (click)="activeTab = cate.id"
-                [class.active-tab]="activeTab === cate.id" [class.text-[#662222]]="activeTab === cate.id"
-                [class.font-bold]="activeTab === cate.id" [class.bg-white]="activeTab === cate.id"
-                [class.border-transparent]="activeTab !== cate.id">
-                {{cate.name}}
-                @if(activeTab == cate.id) {
-                <div class="hidden lg:block absolute -right-[2px] top-0 h-full w-[2px] bg-white z-20"></div>
-                }
-              </button>
-              }
-            </div>
-            <div class="flex-1 overflow-y-auto pt-2 pb-4 px-4 bg-white custom-scrollbar rounded-r-xl">
-              @if(activeTab){
-              <p-pickList [source]="displaySource" [target]="selectedItems" (onMoveToTarget)="onMoveToTarget($event)"
-                (onMoveToSource)="onMoveToSource($event)" (onMoveAllToTarget)="onMoveAllToTarget($event)"
-                (onMoveAllToSource)="onMoveAllToSource($event)" (onSourceReorder)="fixPaddingPosition()"
-                (onTargetReorder)="fixPaddingPosition()" (onSourceSelect)="fixPaddingPosition()"
-                [showSourceControls]="false" [showTargetControls]="false" sourceHeader="可選品項" targetHeader="已選品項"
-                [dragdrop]="true" [responsive]="false" [sourceStyle]="{ height: '18rem' }"
-                [targetStyle]="{ height: '18rem' }" dataKey="id" [metaKeySelection]="false" class="responsive-picklist">
-                <ng-template let-product pTemplate="item">
-                  @if (product.isPadding) {
-                  <div class="dynamic-padding" [class.can-hover]="selectedItems.length === 1"
-                    [style.height]="getPaddingHeight()">
-
-                    @if (selectedItems.length === 1) {
-                    <span>請拖曳項目至此</span>
-                    } @else {
-                    <div class="plus-icon">
-                      <i class="pi pi-plus"></i>
-                    </div>
-                    }
-                  </div>
-                  } @else {
-                  <div class="product-item md:min-w-[270px]">
-                    @if (isItemInTarget(product)) {
-                    <div class="remove-badge" (click)="removeItem(product, $event)">
-                      <i class="pi pi-minus"></i>
-                    </div>
-                    }
-                    <img [src]="product.image ? product.image : 'no-product-image.jpg'"
-                      (error)="$any($event.target).src = 'no-product-image.jpg'"
-                      class="w-[100px] md:w-[60px] aspect-square object-cover rounded-sm mr-2">
-                    <div class=" flex flex-col w-full lg:flex-1">
-                      <div class="flex justify-between">
-                        <div class="font-bold">{{ product.name }}<i class="pi pi-tag text-sm"></i></div>
-                        @if (isItemInTarget(product)) {
-                        <div>
-                          <button type="button" (click)="toggleRecommend(product, $event)"
-                            [class.recommended-active]="product.isRecommended" class="bg-[#662222]/20 w-[105px] rounded-2xl border-[1px]
-                                             border-[#662222]/20 px-2 py-1 transition-colors
-                                             hover:bg-[#662222]/50 hover:text-white hover:border-[#662222]/50">
-                            @if(product.isRecommended){
-                            <i class="pi pi-times"></i>
-                            }@else{
-                            <i class="pi pi-plus"></i>
-                            }
-                            <span class="ml-[5px]">{{ product.isRecommended ? '取消推薦' : '推薦' }}</span>
-                          </button>
-                        </div>
-                        }
-                      </div>
-                      <div class="flex flex-col sm:flex-row sm:align-items-center sm:gap-3">
-                        @for(each of product.basePrice;track $index){
-                        <span class="sm:border-r sm:pr-1 sm:border-gray-300">{{each.name}} ${{ each.price }}</span>
-                        }
-                      </div>
-                    </div>
-                  </div>
+          <div class="event-div each-div">
+            <div class="div-title">編輯開團菜單</div>
+            <div class="div-content">
+              <div class="w-full ml-8 my-4">
+                <label>
+                  <input type="checkbox" class="w-4 h-4 rounded border-gray-300 mr-4"  [checked]="useAll" (change)="useAllChange($event)">
+                  <span class="text-lg">套用所有品項</span>
+                </label>
+              </div>
+              <div class="flex flex-col lg:flex-row h-full bg-gray-100 rounded-lg">
+                <div class="flex w-full flex-shrink-0 bg-gray-100 overflow-x-auto
+                            lg:flex-col lg:w-30 lg:overflow-x-hidden lg:overflow-y-auto">
+                  @for(cate of menuCategoriesVoList; track $index){
+                    <button class="relative py-4 px-6 transition-all duration-200
+                                  rounded-t-xl
+                                  lg:rounded-tr-none lg:rounded-l-xl"
+                      (click)="activeTab = cate.id"                    [class.active-tab]="activeTab === cate.id"
+                      [class.text-[#662222]]="activeTab === cate.id"   [class.font-bold]="activeTab === cate.id"
+                      [class.bg-white]="activeTab === cate.id" [class.border-transparent]="activeTab !== cate.id">
+                      {{cate.name}}
+                      @if(activeTab == cate.id) {
+                        <div class="hidden lg:block absolute -right-[2px] top-0 h-full w-[2px] bg-white z-20"></div>
+                      }
+                    </button>
                   }
-                </ng-template>
-              </p-pickList>
-              }
-            </div>
-          </div>
-          <div class="w-full bg-white h-fit flex flex-col mt-2 rounded-lg">
-            <div class="flex flex-col md:flex md:flex-row">
-              <div class="pt-4 pl-4 lg:w-30 md:pl-10">推薦品項：</div>
-              <div class="truncate pt-4 pb-2 px-2 flex-1">
-                @for(item of menuVoList;track $index){
-                @for(id of recommend;track $index){
-                @if(item.id==id){
-                {{item.name}}、
-                }
-                }
-                }
-              </div>
-            </div>
-            <div class="flex-1 flex flex-col md:flex-row">
-              <div class="py-2 pl-4 lg:w-30 md:text-right md:pl-10">說明：</div>
-              <div class="flex-1 flex flex-col">
-                <textarea class="flex-1 m-2 p-1 border-1 border-gray-400/70 rounded-md resize-none
-                     overflow-y-auto placeholder:text-gray-500" [(ngModel)]="recommendDescription" maxlength="200"
-                  placeholder="請輸入說明 (限 200 字)" rows="3" style="min-height: 90px;">
-                  </textarea>
-                <div class="text-right text-xs text-gray-400 mr-3 mb-1">
-                  {{ recommendDescription?.length || 0 }} / 200
+                </div>
+                <div class="flex-1 overflow-y-auto pt-2 pb-4 px-4 bg-white custom-scrollbar rounded-r-xl">
+                  @if(activeTab){
+                    <p-pickList
+                      [source]="displaySource"                        [target]="selectedItems"
+                      (onMoveToTarget)="onMoveToTarget($event)"       (onMoveToSource)="onMoveToSource($event)"
+                      (onMoveAllToTarget)="onMoveAllToTarget($event)" (onMoveAllToSource)="onMoveAllToSource($event)"
+                      (onSourceReorder)="fixPaddingPosition()"        (onTargetReorder)="fixPaddingPosition()" (onSourceSelect)="fixPaddingPosition()"
+                      [showSourceControls]="false"                    [showTargetControls]="false"
+                      sourceHeader="可選品項"                          targetHeader="已選品項"
+                      [dragdrop]="true"                               [responsive]="false"
+                      [sourceStyle]="{ height: '18rem' }"             [targetStyle]="{ height: '18rem' }"
+                      dataKey="id" [metaKeySelection]="false" class="responsive-picklist">
+                        <ng-template let-product pTemplate="item">
+                          @if (product.isPadding) {
+                            <div class="dynamic-padding"
+                                [class.can-hover]="selectedItems.length === 1"
+                                [style.height]="getPaddingHeight()">
+
+                              @if (selectedItems.length === 1) {
+                                <span>請拖曳項目至此</span>
+                              } @else {
+                                <div class="plus-icon">
+                                  <i class="pi pi-plus"></i>
+                                </div>
+                              }
+                            </div>
+                          } @else {
+                            <div class="product-item md:min-w-[270px]">
+                              @if (isItemInTarget(product)) {
+                                <div class="remove-badge" (click)="removeItem(product, $event)">
+                                  <i class="pi pi-minus"></i>
+                                </div>
+                              }
+                              <img [src]="product.image ? product.image : 'no-product-image.jpg'"
+                                  (error)="$any($event.target).src = 'no-product-image.jpg'"
+                                    class="w-[100px] md:w-[60px] aspect-square object-cover rounded-sm mr-2">
+                              <div class=" flex flex-col w-full lg:flex-1">
+                                <div class="flex justify-between">
+                                  <div class="font-bold">{{ product.name }}<i class="pi pi-tag text-sm"></i></div>
+                                  @if (isItemInTarget(product)) {
+                                    <div>
+                                      <button type="button" (click)="toggleRecommend(product, $event)"
+                                        [class.recommended-active]="product.isRecommended"
+                                        class="bg-[#662222]/20 w-[105px] rounded-2xl border-[1px]
+                                              border-[#662222]/20 px-2 py-1 transition-colors
+                                              hover:bg-[#662222]/50 hover:text-white hover:border-[#662222]/50">
+                                        @if(product.isRecommended){
+                                          <i class="pi pi-times"></i>
+                                        }@else{
+                                          <i class="pi pi-plus"></i>
+                                        }
+                                        <span class="ml-[5px]">{{ product.isRecommended ? '取消推薦' : '推薦' }}</span>
+                                      </button>
+                                    </div>
+                                  }
+                                </div>
+                                <div class="flex flex-col sm:flex-row sm:align-items-center sm:gap-3">
+                                  @for(each of product.basePrice;track $index){
+                                    <span class="sm:border-r sm:pr-1 sm:border-gray-300">{{each.name}} ${{ each.price }}</span>
+                                  }
+                                </div>
+                              </div>
+                            </div>
+                          }
+                        </ng-template>
+                    </p-pickList>
+                  }
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="event-div each-div pb-4 sm:pb-6 md:pb-8">
-        <div class="div-title">填寫開團資料</div>
-        <div class="div-content w-full">
-          <div class="flex flex-col md:flex-row md:justify-between">
-            <span class="setting-span md:pr-2">
-              <!-- <div class="text-[15px] pr-2 pb-1">
-                  開團名稱：
-                </div> -->
-              <p-inputgroup>
-                <p-inputgroup-addon>
-                  <i class="pi pi-home"></i>
-                </p-inputgroup-addon>
-                <div class="flex-1 flex flex-col border border-gray-300 rounded-r-md bg-white">
-                  <p-floatlabel variant="on" autocomplete="off">
-                    <input type="text"
-                      class="border-none outline-none w-full p-2 pl-3 rounded-r-md transition-all bg-white"
-                      [class.p-filled]="!!eventName" [(ngModel)]="eventName" maxlength="50" />
-                    <label>開團名稱</label>
-                  </p-floatlabel>
+              <div class="w-full bg-white h-auto flex flex-col mt-4 rounded-lg pt-4 px-4">
+                <div class="flex flex-col md:flex-row md:items-start mb-3">
+                  <div class="font-bold text-gray-700 md:w-24 shrink-0">推薦品項：</div>
+                  <div class="text-gray-600 flex-1 mt-1 md:mt-0">
+                    @for(item of menuVoList; track $index) {
+                      @for(id of recommend; track $index) {
+                        @if(item.id == id) {
+                          <span class="inline-block bg-white px-2 py-1 rounded border border-gray-200 text-xs mr-2 mb-2">{{item.name}}</span>
+                        }
+                      }
+                    }
+                  </div>
                 </div>
-              </p-inputgroup>
-              <div class="text-right text-[10px] text-gray-400 pr-2 pb-1">
-                {{ eventName?.length || 0 }} / 50
-              </div>
-            </span>
-            <span class="setting-span md:px-2">
-              <!-- <div class="text-[15px] pr-2 pb-1">
-                  成團門檻金額：
-                </div> -->
-              <p-inputgroup>
-                <p-inputgroup-addon>
-                  <i class="pi pi-dollar"></i>
-                </p-inputgroup-addon>
-                <div class="flex-1 flex flex-col border border-gray-300 rounded-r-md bg-white">
-                  <p-floatlabel variant="on" autocomplete="off">
-                    <input type="text" class="border-none outline-none w-full p-2 pl-3 rounded-r-md transition-all bg-white
-                        focus:!border-2 focus:!border-[#662222] focus:!shadow-none" [class.p-filled]="!!limitation"
-                      [(ngModel)]="limitation" />
-                    <label>成團金額門檻</label>
-                  </p-floatlabel>
-                </div>
-              </p-inputgroup>
-              <div class="md:text-center text-[15px] text-gray-400 pr-2 pb-1">
-                請輸入阿拉伯數字，最小金額為1元
-              </div>
-            </span>
-            <span class="setting-span md:pl-2">
-              <!-- <div class="text-[15px] pr-2 pb-1">
-                  結束時間：
-                </div> -->
-              <p-inputgroup class="w-full">
-                <p-inputgroup-addon>
-                  <i class="pi pi-clock"></i>
-                </p-inputgroup-addon>
-                <div class="flex-1 flex flex-col border border-gray-300 rounded-r-md bg-white">
-                  <p-floatlabel variant="on" style="flex: 1 1 auto; display: block;">
-                    <p-datepicker [(ngModel)]="endTime" [showTime]="true" hourFormat="24" [minDate]="minDate"
-                      [showSeconds]="false" panelStyleClass="my-local-panel" [class.p-filled]="!!endTime" [fluid]="true"
-                      styleClass="w-full" [style]="{'width': '100%', 'display': 'flex'}" inputStyleClass="w-full border-none outline-none p-2 pl-3 !rounded-r-md
-                        !rounded-l-none bg-white focus:!border-2 focus:!border-[#662222]"
-                      (ngModelChange)="onTimeChange($event)">
-                    </p-datepicker>
-                    <label>結束時間</label>
-                  </p-floatlabel>
-                </div>
-              </p-inputgroup>
-              <div class="md:text-center text-[15px] text-gray-400 pr-2 pb-1"></div>
-            </span>
-          </div>
-          <label class="w-full">
-            <!-- <div class="text-[15px] pr-2 pb-1">
-                公告事項：
-              </div> -->
-            <p-inputgroup class="w-full">
-              <p-inputgroup-addon>
-                <i class="pi pi-megaphone"></i>
-              </p-inputgroup-addon>
-              <div class="flex-1 flex flex-col border border-gray-300 rounded-r-md bg-white">
-                <p-floatlabel variant="on" class="w-full">
-                  <textarea id="announcement" class="w-full p-2 border-none outline-none resize-none overflow-y-auto"
-                    [(ngModel)]="announcement" [class.p-filled]="!!announcement" maxlength="500" rows="2"
-                    style="min-height: 80px;">
+                <div class="flex flex-col md:flex-row md:items-start">
+                  <div class="font-bold text-gray-700 md:w-24 shrink-0">推薦說明：</div>
+                  <div class="flex flex-col flex-1">
+                    <textarea
+                      class="border-1 border-gray-400/70 rounded-md resize-none p-1
+                      overflow-y-auto placeholder:text-gray-500"
+                      [(ngModel)]="recommendDescription" maxlength="200"
+                      placeholder="請輸入說明 (限 200 字)" rows="3"
+                      style="min-height: 90px;">
                     </textarea>
-                  <label for="announcement">團長公告</label>
-                </p-floatlabel>
+                    <div class="text-right text-xs text-gray-400 mt-2 mr-3 mb-1">
+                      {{ recommendDescription?.length || 0 }} / 200
+                    </div>
+                  </div>
+                </div>
               </div>
-            </p-inputgroup>
-            <div class="text-right text-[10px] text-gray-400 pr-2 pb-1">
-              {{ announcement?.length || 0 }} / 500
             </div>
-          </label>
+          </div>
+          <div class="event-div each-div pb-4 sm:pb-6 md:pb-8">
+            <div class="div-title">填寫開團資料</div>
+            <div class="div-content w-full">
+              <div class="flex flex-col md:flex-row md:justify-between">
+                <span class="setting-span md:pr-2">
+                  <!-- <div class="text-[15px] pr-2 pb-1">
+                    開團名稱：
+                  </div> -->
+                  <p-inputgroup>
+                    <p-inputgroup-addon>
+                      <i class="pi pi-home"></i>
+                    </p-inputgroup-addon>
+                    <div class="flex-1 flex flex-col border border-gray-300 rounded-r-md bg-white">
+                      <p-floatlabel variant="on" autocomplete="off">
+                        <input type="text" class="border-none outline-none w-full p-2 pl-3 rounded-r-md transition-all bg-white"
+                          [class.p-filled]="!!eventName" [(ngModel)]="eventName" maxlength="50" />
+                        <label>開團名稱</label>
+                        </p-floatlabel>
+                    </div>
+                  </p-inputgroup>
+                  <div class="text-right text-[10px] text-gray-400 pr-2 pb-1">
+                    {{ eventName?.length || 0 }} / 50
+                  </div>
+                </span>
+                <span class="setting-span md:px-2">
+                  <!-- <div class="text-[15px] pr-2 pb-1">
+                    成團門檻金額：
+                  </div> -->
+                  <p-inputgroup>
+                    <p-inputgroup-addon>
+                      <i class="pi pi-dollar"></i>
+                    </p-inputgroup-addon>
+                    <div class="flex-1 flex flex-col border border-gray-300 rounded-r-md bg-white">
+                      <p-floatlabel variant="on" autocomplete="off">
+                        <input type="text" class="border-none outline-none w-full p-2 pl-3 rounded-r-md transition-all bg-white
+                          focus:!border-2 focus:!border-[#662222] focus:!shadow-none"
+                          [class.p-filled]="!!limitation" [(ngModel)]="limitation" />
+                        <label>成團金額門檻</label>
+                      </p-floatlabel>
+                    </div>
+                  </p-inputgroup>
+                  <div class="md:text-center text-[15px] text-gray-400 pr-2 pb-1">
+                    請輸入阿拉伯數字，最小金額為1元
+                  </div>
+                </span>
+                <span class="setting-span md:pl-2">
+                  <!-- <div class="text-[15px] pr-2 pb-1">
+                    結束時間：
+                  </div> -->
+                  <p-inputgroup class="w-full">
+                    <p-inputgroup-addon>
+                      <i class="pi pi-clock"></i>
+                    </p-inputgroup-addon>
+                    <div class="flex-1 flex flex-col border border-gray-300 rounded-r-md bg-white">
+                      <p-floatlabel variant="on" style="flex: 1 1 auto; display: block;">
+                        <p-datepicker [(ngModel)]="endTime" [showTime]="true" hourFormat="24" [minDate]="minDate"
+                          [showSeconds]="false" panelStyleClass="my-local-panel" [class.p-filled]="!!endTime"
+                          [fluid]="true" styleClass="w-full" [style]="{'width': '100%', 'display': 'flex'}"
+                          inputStyleClass="w-full border-none outline-none p-2 pl-3 !rounded-r-md
+                          !rounded-l-none bg-white focus:!border-2 focus:!border-[#662222]"
+                          (ngModelChange)="onTimeChange($event)" (onShow)="handleOnShow()">
+                        </p-datepicker>
+                        <label>結束時間</label>
+                      </p-floatlabel>
+                    </div>
+                  </p-inputgroup>
+                  <div class="md:text-center text-[15px] text-gray-400 pr-2 pb-1"></div>
+                </span>
+              </div>
+              <label class="w-full">
+                <!-- <div class="text-[15px] pr-2 pb-1">
+                  公告事項：
+                </div> -->
+                <p-inputgroup class="w-full">
+                  <p-inputgroup-addon>
+                    <i class="pi pi-megaphone"></i>
+                  </p-inputgroup-addon>
+                  <div class="flex-1 flex flex-col border border-gray-300 rounded-r-md bg-white">
+                    <p-floatlabel variant="on" class="w-full">
+                      <textarea id="announcement"
+                        class="w-full p-2 border-none outline-none resize-none overflow-y-auto"
+                        [(ngModel)]="announcement" [class.p-filled]="!!announcement"
+                        maxlength="500" rows="2"
+                        style="min-height: 80px;">
+                      </textarea>
+                      <label for="announcement">團長公告</label>
+                    </p-floatlabel>
+                  </div>
+                </p-inputgroup>
+                <div class="text-right text-[10px] text-gray-400 pr-2 pb-1">
+                  {{ announcement?.length || 0 }} / 500
+                </div>
+              </label>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-</div>
-<div class="event-div each-div pb-4 sm:pb-6 md:pb-8 flex justify-around">
-  <button (click)="cancel()" class="Btn"><i class="pi pi-arrow-left mr-1"></i>取消填寫</button>
-  <button (click)="goCheck()" class="Btn">送出預覽<i class="pi pi-arrow-right ml-1"></i></button>
-</div>
+    <div class="event-div each-div pb-4 sm:pb-6 md:pb-8 flex justify-around">
+      <button (click)="cancel()" class="Btn"><i class="pi pi-arrow-left mr-1"></i>取消填寫</button>
+      <button (click)="goCheck()" class="Btn">送出預覽<i class="pi pi-arrow-right ml-1"></i></button>
+    </div>
+  }@else if(isPreview) {
+    <div class="area">
+      <div class="my-[20px] area-block">
+        <div class="w-full px-4 lg:pl-8">
+          <div class="text-[#662222] font-bold text-2xl
+                      lg:text-3xl event-div">開團資料確認</div>
+          <div class="event-div each-div">
+            <div class="div-title">拆帳模式</div>
+            <div class="div-content">
+              <span>您已選擇 </span><span class="text-lg font-bold mr-4">{{choice}}</span>
+              <span class="text-sm text-red-500">(已同意拆帳聲明)</span>
+            </div>
+          </div>
+          <div class="event-div each-div">
+            <div class="div-title">開團菜單</div>
+            <div class="div-content">
+              @if(selectedItems && selectedItems.length>=2){
+                <p-tabs [(value)]="previewTab" #menuTabs class="flex flex-col flex-1 overflow-hidden h-[300px]">
+                  <div class="flex bg-white">
+                    <div class="relative flex-1 overflow-hidden">
+                      <!-- TabList -->
+                      <p-tablist class="flex h-full items-center overflow-x-auto whitespace-nowrap
+                              pr-20 custom-scrollbar hide-scrollbar">
+                        @for (type of uniqueTabs; track $index) {
+                          <p-tab [value]="type.id">{{ type.categoryName }}</p-tab>
+                        }
+                      </p-tablist>
+                      <!-- 右側漸層遮罩（提示還有內容） -->
+                      <div class="pointer-events-none absolute top-0 right-0 h-full w-16
+                              bg-gradient-to-l from-white via-white/80 to-transparent"></div>
+                    </div>
+                  </div>
+                  <div class="flex-1 overflow-y-auto pt-2 pb-4 px-4 custom-scrollbar bg-white">
+                    <p-tabpanel [value]="previewTab" class="md:grid md:grid-cols-2">
+                      @for(item of selectedItems;track $index){
+                        @if(item.categoryId==previewTab){
+                          <div class="product-item md:min-w-[270px]">
+                            <img [src]="item.image ? item.image : 'no-product-image.jpg'"
+                                (error)="$any($event.target).src = 'no-product-image.jpg'"
+                                  class="w-[100px] md:w-[60px] aspect-square object-cover rounded-sm mr-2">
+                            <div class=" flex flex-col w-full lg:flex-1">
+                              <div class="flex justify-between">
+                                <div class="font-bold">{{ item.name }}<i class="pi pi-tag text-sm"></i></div>
+                              </div>
+                              <div class="flex flex-col sm:flex-row sm:align-items-center sm:gap-3">
+                                @for(each of item.basePrice;track $index){
+                                  <span class="sm:border-r sm:pr-1 sm:border-gray-300">{{each.name}} ${{ each.price }}</span>
+                                }
+                              </div>
+                            </div>
+                          </div>
+                        }
+                      }
+                    </p-tabpanel>
+                  </div>
+                </p-tabs>
+                <div class="w-full bg-white h-auto flex flex-col mt-4 rounded-lg pt-4 px-4">
+                  <div class="flex flex-col md:flex-row md:items-start mb-3">
+                    <div class="font-bold text-gray-700 md:w-24 shrink-0">推薦品項：</div>
+                    <div class="text-gray-600 flex-1 mt-1 md:mt-0">
+                      @for(item of menuVoList; track $index) {
+                        @for(id of recommend; track $index) {
+                          @if(item.id == id) {
+                            <span class="inline-block bg-white px-2 py-1 rounded border border-gray-200 text-xs mr-2 mb-2">{{item.name}}</span>
+                          }
+                        }
+                      }
+                    </div>
+                  </div>
+                  <div class="flex flex-col md:flex-row md:items-start">
+                    <div class="font-bold text-gray-700 md:w-24 shrink-0">推薦說明：</div>
+                    <div class="flex-1 p-1 overflow-y-auto break-words whitespace-pre-wrap text-gray-600">
+                      {{ recommendDescription }}</div>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+          <div class="event-div each-div pb-4 sm:pb-6 md:pb-8">
+            <div class="div-title">填寫開團資料</div>
+            <div class="div-content w-full">
+              <div class="flex flex-col md:flex-row md:justify-between">
+                <span class="setting-span md:pr-2">
+                  <div class="pr-2 pb-1">
+                    <span class="text-[#662222]">開團名稱：</span>
+                    <span class="font-bold">{{eventName}}</span></div>
+                </span>
+                <span class="setting-span md:px-2">
+                  <div class="pr-2 pb-1">
+                    <span class="text-[#662222]">成團門檻金額：</span>
+                    <span class="font-bold">{{limitation}}</span></div>
+                </span>
+                <span class="setting-span md:pl-2">
+                  <div class="pr-2 pb-1">
+                    <span class="text-[#662222]">結束時間：</span>
+                    <span class="font-bold">{{endTime | date: 'yyyy/MM/dd　HH:mm' }}</span></div>
+                </span>
+              </div>
+              <label class="w-full">
+                <div class="pr-2 pb-1">
+                  <span class="text-[#662222]">公告事項：</span>
+                  <span class="font-bold">{{announcement}}</span></div>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="event-div each-div pb-4 sm:pb-6 md:pb-8 flex justify-around">
+      <button (click)="revise()" class="Btn"><i class="pi pi-arrow-left mr-1"></i>返回修改</button>
+      <button (click)="addEvent()" class="Btn">確認儲存<i class="pi pi-arrow-right ml-1"></i></button>
+    </div>
+  }
 }
+
 
 
 
