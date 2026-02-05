@@ -108,9 +108,10 @@ export class LoginComponent {
       error: (err: any) => {
         console.log(err?.message);
         Swal.fire({
-          title: err?.message || "註冊失敗",
-          icon: "error",
-          timer: 2000,
+          icon: 'warning',
+          title: '信箱已被使用',
+          text: '請改用其他信箱，或使用「忘記密碼」找回帳號。',
+          confirmButtonText: '我知道了',
         });
       },
     });

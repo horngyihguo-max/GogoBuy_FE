@@ -381,7 +381,7 @@ export class GogoBuyComponent {
         storeName: s?.name ?? e.storeName ?? '未知店家',
         storeType: s?.type ?? '',
         storeAddress: s?.address ?? '',
-        displayImage: e.image || s?.image || '',
+        displayImage: s?.image || e.image || '',
       };
     });
   });
