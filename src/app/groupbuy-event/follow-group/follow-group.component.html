@@ -824,8 +824,8 @@
               <div class="space-y-2">
                 <div>
                   <span class="text-gray-500 font-semibold">店名：</span>
-                  <span class="font-extrabold text-red-950">
-                    {{ store?.name }}
+                  <span class="font-extrabold text-red-950"
+                    >{{ store?.name }}
                   </span>
                 </div>
                 <div>
@@ -834,8 +834,8 @@
                 </div>
                 <div>
                   <span class="text-gray-500 font-semibold">分類：</span>
-                  <span class="font-semibold">
-                    {{ getCategoryName(store?.category) || "—" }}
+                  <span class="font-semibold"
+                    >{{ getCategoryName(store?.category) || "—" }}
                   </span>
                 </div>
                 <div>
@@ -1190,13 +1190,11 @@
             >
               <div class="flex items-start justify-between gap-3">
                 <div class="min-w-0">
-                  <div
-                    class="text-xl font-extrabold text-gray-900 truncate"
-                  >
+                  <div class="text-xl font-extrabold text-gray-900 truncate">
                     {{ it.name }}
                   </div>
 
-                  <div class="mt-1 text-lg text-gray-500">
+                  <div class="mt-1 text-base md:text-lg text-gray-500">
                     規格：<span class="font-semibold text-gray-700">{{
                       it.specName
                     }}</span>
@@ -1207,13 +1205,13 @@
                     }
                   </div>
 
-                  <div class="mt-1 text-lg text-gray-500">
+                  <div class="mt-1 text-base md:text-lg text-gray-500">
                     選項：<span class="font-semibold text-gray-700">{{
                       formatOptionSummary(it)
                     }}</span>
                   </div>
 
-                  <div class="mt-2 text-lg text-gray-500">
+                  <div class="mt-2 text-base md:text-lg text-gray-500">
                     單價：
                     <span class="font-extrabold text-red-900"
                       >${{ it.finalUnitPrice }}</span
@@ -1332,7 +1330,7 @@
         <button
           type="button"
           class="cursor-pointer px-6 py-3 rounded-full bg-red-900 text-white font-extrabold active:scale-95 transition disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed"
-          [disabled]="orderItems.length === 0"
+          [disabled]="orderItems.length === 0 || !isOrderChanged"
           (click)="submitOrder()"
         >
           確認送出

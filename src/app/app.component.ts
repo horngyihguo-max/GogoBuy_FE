@@ -146,7 +146,7 @@ export class AppComponent {
 
       const userRole = user.role;
 
-      return userRole === 'admin';
+      return userRole == 'admin';
     } catch {
       return false;
     }
@@ -193,9 +193,9 @@ export class AppComponent {
       this.auths.events.set(this.auths.eventsAll());
       return;
     }
-    if (mode === 'store') return this.auths.performSearch(q);
-    if (mode === 'host') return this.auths.performEventSearch(q);
-    if (mode === 'event') return this.auths.filterEventsByName(q);
+    if (mode == 'store') return this.auths.performSearch(q);
+    if (mode == 'host') return this.auths.performEventSearch(q);
+    if (mode == 'event') return this.auths.filterEventsByName(q);
   }
 
   // 用戶頭向下拉選單
@@ -381,11 +381,11 @@ export class AppComponent {
   onNearbyRadiusChange(v: 5 | 10 | 15 | 20) {
     this.nearbyRadiusKm.set(v);
 
-    if (this.geoMode() === 'auto' && this.lastLatLng) {
+    if (this.geoMode() == 'auto' && this.lastLatLng) {
       this.fetchNearbyByGeo(this.lastLatLng.lat, this.lastLatLng.lng);
     }
 
-    if (this.geoMode() === 'manual' && this.manualAddress().trim()) {
+    if (this.geoMode() == 'manual' && this.manualAddress().trim()) {
       this.fetchNearbyByAddress(this.manualAddress().trim());
     }
   }

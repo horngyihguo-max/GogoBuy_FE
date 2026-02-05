@@ -204,15 +204,18 @@ export class PersonInfoEditComponent {
 
     this.auth.updateProfile(userId, payload).subscribe({
       next: (res: any) => {
-        if (res.code === 200) {
+        if (res.code == 200) {
           this.auth.connectPhone(userId, this.editInfo.phone).subscribe();
           this.auth.setUser({ ...this.auth.user, ...payload });
           this.auth.refreshUser();
           Swal.fire({
-            title: '儲存成功',
+            title: '儲存成功...返回個人頁面中',
             icon: 'success',
-            timer: 1000,
-            showConfirmButton: false
+            timer: 2000,
+            showConfirmButton: false,
+            timerProgressBar: true,
+          }).then(() => {
+            this.router.navigate(['/user/profile']);
           });
         }
       },
@@ -259,7 +262,7 @@ export class PersonInfoEditComponent {
         const inputEmail = value.trim().toLowerCase();
         const currentEmail = (this.user?.email || this.editInfo?.email || '').trim().toLowerCase();
 
-        if (inputEmail === currentEmail) {
+        if (inputEmail == currentEmail) {
           return Swal.showValidationMessage('新信箱不可與目前信箱相同');
         }
         return inputEmail;

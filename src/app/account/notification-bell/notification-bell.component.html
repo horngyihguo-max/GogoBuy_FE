@@ -1,4 +1,4 @@
-@if (mode === 'dropdown') {
+@if (mode == 'dropdown') {
 <p-popover #pop styleClass="w-80" appendTo="body">
   <div class="p-2">
     <div class="flex items-center justify-between">
@@ -15,7 +15,7 @@
 
     <div class="mt-3 space-y-2 max-h-80 overflow-y-auto">
       @if (notifications$ | async; as notifications) { @if (notifications.length
-      === 0) {
+      == 0) {
       <div class="text-[15px] text-slate-500 py-6 text-center">
         目前沒有通知
       </div>

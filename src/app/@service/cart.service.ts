@@ -44,7 +44,7 @@ export class CartService {
       params = params.append('temp_menu', String(id));
     }
     return this.https.getApi(
-      'http://localhost:8080/gogobuy/getMenuByMenuId', { params }
+      'http://localhost:8080/gogobuy/event/getMenuByMenuId', { params }
     );
   }
 
@@ -52,7 +52,7 @@ export class CartService {
   // 取得用戶跟團訂單品項
   getOrders(userId: string, eventsId: number) {
     const url =
-      `http://localhost:8080/gogobuy/getAllOrdersByUserIdAndEventsId?user_id=${encodeURIComponent(userId)}&events_id=${eventsId}`;
+      `http://localhost:8080/gogobuy/event/getAllOrdersByUserIdAndEventsId?user_id=${encodeURIComponent(userId)}&events_id=${eventsId}`;
     return this.https.getApi(url);
   }
 
@@ -61,7 +61,7 @@ export class CartService {
   // body 不需要資料，所以傳 null
   deleteOrderByUserIdAndEventsId(userId: string, eventsId: number) {
     const url =
-      `http://localhost:8080/gogobuy/deleteOrderByUserIdAndEventsId?user_id=${encodeURIComponent(userId)}&events_id=${eventsId}`;
+      `http://localhost:8080/gogobuy/event/deleteOrderByUserIdAndEventsId?user_id=${encodeURIComponent(userId)}&events_id=${eventsId}`;
 
     return this.https.postApi(url, null);
   }

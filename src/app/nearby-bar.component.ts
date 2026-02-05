@@ -38,7 +38,7 @@ export class NearbyBarComponent implements OnInit, OnDestroy {
   private lastFetchAt = 0;
 
   ngOnInit() {
-      this.startAuto();
+      this.startAutoOnce();
   }
 
   ngOnDestroy() {
@@ -49,38 +49,33 @@ export class NearbyBarComponent implements OnInit, OnDestroy {
     this.dialogVisible = true;
   }
 
-  startAuto() {
-    if (!navigator.geolocation) {
-      this.mode.set('manual');
-      this.status.set('此裝置不支援定位，請改用地址搜尋');
-      return;
-    }
-
-    this.mode.set('auto');
-    this.status.set('定位中...');
-
-    this.stopWatch();
-    this.watchId = navigator.geolocation.watchPosition(
-      (pos) => {
-        const lat = pos.coords.latitude;
-        const lng = pos.coords.longitude;
-        this.lastLatLng = { lat, lng };
-
-        const now = Date.now();
-        if (now - this.lastFetchAt < 10000) return;
-        this.lastFetchAt = now;
-
-        this.fetchByGeo(lat, lng);
-        this.dialogVisible = false;
-      },
-      () => {
-        this.mode.set('manual');
-        this.status.set('定位被拒絕/失敗，請改用地址搜尋');
-        this.stopWatch();
-      },
-      { enableHighAccuracy: true, maximumAge: 30000, timeout: 10000 }
-    );
+  startAutoOnce() {
+  if (!navigator.geolocation) {
+    this.mode.set('manual');
+    this.status.set('此裝置不支援定位，請改用地址搜尋');
+    return;
   }
+
+  this.mode.set('auto');
+  this.status.set('定位中...');
+
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
+      this.lastLatLng = { lat, lng };
+      this.fetchByGeo(lat, lng);
+      this.dialogVisible = false;
+      this.status.set('完成');
+    },
+    () => {
+      this.mode.set('manual');
+      this.status.set('定位被拒絕/失敗，請改用地址搜尋');
+    },
+    { enableHighAccuracy: true, maximumAge: 30000, timeout: 10000 }
+  );
+}
+
 
   stopWatch() {
     if (this.watchId != null) {
@@ -95,10 +90,10 @@ export class NearbyBarComponent implements OnInit, OnDestroy {
     this.radius.set(next);
 
     // 半徑改變就重查
-    if (this.mode() === 'auto' && this.lastLatLng) {
+    if (this.mode() == 'auto' && this.lastLatLng) {
       this.fetchByGeo(this.lastLatLng.lat, this.lastLatLng.lng);
     }
-    if (this.mode() === 'manual' && this.address().trim()) {
+    if (this.mode() == 'manual' && this.address().trim()) {
       this.fetchByAddress(this.address().trim());
     }
   }

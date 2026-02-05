@@ -21,7 +21,10 @@
     @apply w-[100vw]
   }
   .td-icon{
-    @apply w-[24px] text-lg
+    @apply text-lg md:max-w-[8px]
+  }
+  td{
+    @apply text-lg
   }
 }
 
@@ -297,20 +300,17 @@
     background-color: #fce7e7 !important; /* 淡淡的紅 */
     color: #662222 !important;
 }
-
-/* 2. 「今天」的圈圈 (通常是外框線) */
+/* 「今天」的圈圈 (通常是外框線) */
 :host ::ng-deep .my-local-panel .p-datepicker-calendar td.p-datepicker-today > span {
     border: 1px solid #662222 !important; /* 把綠框改成紅框 */
     color: #662222 !important;            /* 文字也改紅 */
     background-color: transparent !important;
 }
-
-/* 3. 時間選擇器的數字 (針對 21:35 那排數字) */
+/* 時間選擇器的數字 */
 :host ::ng-deep .my-local-panel .p-datepicker-timepicker span {
     color: #662222 !important;
 }
-
-/* 4. 針對所有綠色箭頭 (SVG) */
+/* 針對所有綠色箭頭 (SVG) */
 :host ::ng-deep .my-local-panel svg {
     color: #662222 !important; /* 強制把所有圖標改紅 */
     fill: #662222 !important;

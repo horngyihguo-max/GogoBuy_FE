@@ -37,6 +37,7 @@ interface CartGroup {
   canModify: boolean;
   items: CartItem[];
   isHost?: boolean;
+  hostLogo: any;
 }
 
 
@@ -93,7 +94,7 @@ export class CartPageComponent {
             this.cart.getEventsByEventsId(g.eventsId).pipe(
               map((ev: any) => {
                 const event = ev.groupbuyEvents?.[0];
-                return { ...g, isHost: !!event && event.hostId === userId };
+                return { ...g, isHost: !!event && event.hostId == userId };
               }),
               catchError(() => of({ ...g, isHost: false }))
             )
@@ -175,6 +176,8 @@ export class CartPageComponent {
             store_id: item.storesId ?? '',
             latestOrderTime: item.latestOrderTime ?? '',
             totalAmount: item.totalAmount ?? '',
+            storeLogo: item.storeLogo ?? '',
+            hostLogo: item.hostLogo ?? '',
             // 身分判斷結果
             mode, // 'host' | 'member'
           }
