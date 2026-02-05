@@ -1,5 +1,3 @@
-import { OperatingHoursVoList } from './../../@service/store.service';
-
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { AccordionModule } from 'primeng/accordion';
@@ -7,9 +5,10 @@ import { ButtonModule } from 'primeng/button';
 import { TabsModule } from 'primeng/tabs';
 import { TagModule } from 'primeng/tag';
 import { HttpService } from '../../@service/http.service';
-import { Stores } from '../../@service/store.service';
-import { RouterLink } from "@angular/router";
-import { scheduled } from 'rxjs';
+import { Router, RouterLink } from "@angular/router";
+import { forkJoin } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
+import { StoreService } from '../../@service/store.service';
 
 @Component({
   selector: 'app-my-stores',
@@ -38,6 +37,8 @@ export class MyStoresComponent {
 
   constructor(
     private http: HttpService,
+    private router: Router,
+    private storeService: StoreService,
   ) { }
 
   ngOnInit(): void {
@@ -45,31 +46,44 @@ export class MyStoresComponent {
     console.log("userId", this.userId);
 
     this.http.getApi('http://localhost:8080/gogobuy/store/all').subscribe((res: any) => {
-      if (res && Array.isArray(res.storeList)) {
+      if (res && res.storeList) {
         const myAllStores = res.storeList.filter((item: any) => item.createdBy === this.userId);
 
+        myAllStores.forEach((store: any) => {
+          this.http.getApi(`http://localhost:8080/gogobuy/store/searchId?id=${store.id}`).subscribe((detail: any) => {
+            store.operatingHoursVoList = detail.operatingHoursVoList;
+          });
+        });
         this.allStores = myAllStores;
         this.privateStores = myAllStores.filter((s: any) => s.publish === false);
       }
     });
   }
 
-  isStoreOpen(store: any){
-    if(store.force_closed){
+  addStore(){
+    this.storeService.clearCurrentStore();
+    this.router.navigate(['/management/store_upsert']);
+  }
+
+  isStoreOpen(store: any) {
+    if (store.force_closed) {
       return false;
     }
-    if(!store.operatingHoursVoList || store.operatingHoursVoList.length === 0){
+    if (!store.operatingHoursVoList || store.operatingHoursVoList.length === 0) {
       return false;
     }
     const now = new Date();
-    const currentDay = now.getDate() === 0 ? 7 : now.getDate();
+    const currentDay = now.getDay() === 0 ? 7 : now.getDay();
     const currentTime = now.getHours().toString().padStart(2, '0') + ":" +
       now.getMinutes().toString().padStart(2, '0');
 
     const todaySchedules = store.operatingHoursVoList.filter((h: any) => h.week === currentDay);
 
     return todaySchedules.some((s: any) => {
-      return currentTime >= s.startTime && currentTime <= s.endTime;
+      const start = s.openTime?.substring(0, 5);
+      const end = s.closeTime?.substring(0, 5);
+
+      return currentTime >= start && currentTime <= end;
     })
   }
 

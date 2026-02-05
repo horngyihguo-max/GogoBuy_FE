@@ -197,6 +197,13 @@ export class DashboardComponent {
     }
   }
 
+  getEventSeverity(status: string) {
+    switch (status) {
+      case 'FINISHED': return 'info';
+      default: return 'success';
+    }
+  }
+
   storeGetServerity(category: string) {
     switch (category) {
       case 'fast': return 'info';

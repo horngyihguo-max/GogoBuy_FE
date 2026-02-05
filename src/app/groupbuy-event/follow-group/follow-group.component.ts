@@ -272,7 +272,7 @@ export class FollowGroupComponent {
   singleOptionGroups: ProductOptionGroup[] = [];
   selectedSingleOptionMap: Record<number, ProductOptionItem> = {}; // groupId -> item
 
-  // 加料（drag-drop）
+  // 加料
   addonOptions: ProductOptionItem[] = []; // 只用來判斷是否顯示加料區（HTML 用 length）
   availableAddons: ProductOptionItem[] = [];
   selectedAddons: ProductOptionItem[] = [];
@@ -314,33 +314,15 @@ export class FollowGroupComponent {
 
   // TODO 取得既存訂單
   loadExistingOrder(groupId: number, userId: string): void {
+    // =========================
+    // 正式接 API 時
+    // =========================
     // const url = `http://localhost:8080/gogobuy/getAllOrdersByUserIdAndEventsId?user_id=${userId}&events_id=${groupId}`;
-
+    //
     // this.http.getApi(url).subscribe({
     //   next: (res: any) => {
-    //     // =========================
-    //     // 沒資料：後端回 404 結構
-    //     // =========================
-    //     if (res?.code === 404) {
-    //       this.hasExistingOrder = false;
-    //       this.existingOrderId = null;
-    //       this.orderItems = [];
-    //       this.personalMemo = '';
-    //       this.toastSuccess('讀取成功', '未有既存訂單');
-    //       this.isLoading = false;
-    //       return;
-    //     }
-
-    //     // =========================
-    //     // 有資料：視為既存訂單
-    //     // =========================
-    //     this.hasExistingOrder = true;
-    //     this.existingOrderId = res?.id ?? null;
-    //     this.personalMemo = res?.personalMemo ?? '';
-
-    //     this.applyOrderToOrderItems(res);
-    //     this.toastSuccess('讀取成功', '取得既有訂單成功');
-    //     this.isLoading = false;
+    //     const parsed = this.parseGetOrderResponse(res);
+    //     this.handleParsedExistingOrder(parsed);
     //   },
     //   error: () => {
     //     this.toastWarn('讀取失敗', '取得既有訂單失敗');
@@ -350,29 +332,65 @@ export class FollowGroupComponent {
     // });
 
     // =========================
-    // 假資料（之後接 API 再換回上面）
-    const res = this.getMockOrderResponse();
+    // 假資料
     // =========================
-    // 沒資料：模擬後端回 404
-    if (res?.code === 404) {
+    const res = this.getMockOrderResponse();
+    const parsed = this.parseGetOrderResponse(res);
+    this.handleParsedExistingOrder(parsed);
+  }
+
+  // 將後端回傳的「大包」解析成我要的格式
+  // 只取：code / message / ordersDto
+  private parseGetOrderResponse(res: any): {
+    code: number;
+    message: string;
+    ordersDto: any | null;
+  } {
+    const code = Number(res?.code ?? 0);
+    const message = String(res?.message ?? '');
+    // 沒資料
+    if (code === 404) {
+      return { code, message, ordersDto: null };
+    }
+    // 有資料：只抓 ordersDto
+    const ordersDto = res?.ordersDto ?? null;
+
+    return { code, message, ordersDto };
+  }
+
+  private handleParsedExistingOrder(parsed: {
+    code: number;
+    message: string;
+    ordersDto: any | null;
+  }): void {
+    // =========================
+    // 沒資料
+    // =========================
+    if (parsed.code === 404 || !parsed.ordersDto) {
       this.hasExistingOrder = false;
       this.existingOrderId = null;
       this.orderItems = [];
       this.personalMemo = '';
-      this.toastSuccess('讀取成功', '未有既存訂單');
+      console.log('讀取成功，但未有既存訂單');
+      // 既存資料不存在 → 快照清掉（避免 !isOrderChanged 判斷怪）
+      this.originalOrderSnapshot = null;
       this.isLoading = false;
       return;
     }
-    // =========================
-    // 有資料：視為既存訂單
-    this.hasExistingOrder = true;
-    this.existingOrderId = res?.id ?? null;
-    this.personalMemo = res?.personalMemo ?? '';
 
-    this.applyOrderToOrderItems(res);
-    this.toastSuccess('讀取成功', '取得既有訂單成功');
-    // 店家菜單 ready 後，補齊既存訂單顯示（品名/價格/單價）
+    // =========================
+    // 有資料：只用 ordersDto
+    // =========================
+    const dto = parsed.ordersDto;
+    this.hasExistingOrder = true;
+    this.existingOrderId = dto?.id ?? null;
+    this.personalMemo = dto?.personalMemo ?? '';
+    this.applyOrderToOrderItems(dto);
+    console.log('讀取成功，取得既有訂單');
+
+    // 店家菜單 ready 後，補齊品名/價格/單價
     this.hydrateOrderItemsFromStore();
+    // 建立快照：用來判斷「是否有修改」→ 決定送出鈕 disabled
     this.originalOrderSnapshot = this.buildOrderComparableSnapshot();
     this.isLoading = false;
   }
@@ -434,7 +452,7 @@ export class FollowGroupComponent {
   }
 
   // =========================
-  // TODO 抓團 + 店家資料（先假資料，後面換 API）
+  // TODO 抓團 + 店家資料
   // =========================
   loadGroupById(id: number): void {
     this.isLoading = true;
@@ -748,6 +766,7 @@ export class FollowGroupComponent {
     // 暫時先 console 看結果，之後接 API
     console.log('order payload:', JSON.stringify(payload));
     this.toastSuccess('已建立送出資料', '（尚未串接 API）');
+    this.router.navigate(['/user/cart']);
 
     // =========================
     // 正式接 API
@@ -758,7 +777,7 @@ export class FollowGroupComponent {
     //     // 送出成功
     //     this.toastSuccess('送出成功', '訂單已送出');
     //     // 先回首頁（之後要改到其他路由再改這）
-    //     this.router.navigate(['/home']);
+    //     this.router.navigate(['/gogobuy/home']);
     //   },
     //   error: (err) => {
     //     console.error('addOrders error:', err);
@@ -2061,7 +2080,7 @@ export class FollowGroupComponent {
     };
   }
 
-  // 取得既存訂單資料
+  // 取得既存訂單資料（假資料）
   getMockOrderResponse(): any {
     // 模擬未有既存資料
     // return {
@@ -2071,61 +2090,40 @@ export class FollowGroupComponent {
 
     // 模擬已有既存資料
     return {
-      eventsId: 8,
-      userId: 'string',
-      menuList: [
-        {
-          menuId: 124,
-          quantity: 1,
-          specName: '標準',
-          selectedOptionList: [
-            {
-              optionName: '冰塊',
-              value: '少冰',
-            },
-            {
-              optionName: '基酒更換',
-              value: '換成伏特加 (Vodka)',
-              extraPrice: 30,
-            },
-          ],
-        },
-      ],
-      personalMemo: '要吸管',
-      weight: 0.1,
-    };
-  }
-
-  // POST 格式對照（參考用）
-  orderPost = {
-    id: 't01', // 完全新資料POST時寫"t01" (字串)
-    eventsId: 8, // 團 id
-    userId: 'string', // 下單者
-    menuList: [
-      {
-        menuId: 20, // 商品 id
-        quantity: 1, // 此商品買幾份
-        specName: '標準', // 規格名稱（例：標準 / 加大，有可能會是 null）
-        selectedOptionList: [
+      code: 0,
+      message: 'OK',
+      // 其他欄位先不管
+      groupbuyEvents: [],
+      orders: [],
+      personalOrder: [],
+      menuList: [],
+      groupsSearchViewList: [],
+      ordersSearchViewList: [],
+      cartData: [],
+      // 只要這個
+      ordersDto: {
+        eventsId: 8,
+        userId: 'string',
+        menuList: [
           {
-            optionName: '糖度',
-            value: '半糖',
-          },
-          {
-            optionName: '冰塊',
-            value: '微冰',
-          },
-          {
-            optionName: '加料',
-            value: '椰果',
-            extraPrice: 10,
+            menuId: 124,
+            quantity: 1,
+            specName: '標準',
+            selectedOptionList: [
+              { optionName: '冰塊', value: '少冰' },
+              {
+                optionName: '基酒更換',
+                value: '換成伏特加 (Vodka)',
+                extraPrice: 30,
+              },
+            ],
           },
         ],
+        personalMemo: '要吸管',
+        weight: 0.1,
       },
-    ],
-    personalMemo: '要吸管', // 整單備註
-    weight: 0.1, // 暫時沒用
-  };
+    };
+  }
 
   // 測試用變數
   test = {};

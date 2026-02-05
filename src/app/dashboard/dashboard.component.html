@@ -170,7 +170,8 @@
               </div>
             </td>
             <td>
-              <p-tag [value]="event.status || '進行中'" [severity]="getSeverity(event.status)" [rounded]="true"></p-tag>
+              <p-tag [value]="event.status || '進行中'" [severity]="getEventSeverity(event.status)"
+                [rounded]="true"></p-tag>
             </td>
             <td>
               <p-button label="查看" icon="pi pi-eye"
