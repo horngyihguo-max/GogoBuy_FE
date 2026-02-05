@@ -86,10 +86,9 @@ export class LoginComponent {
     };
 
     this.auth.register(payload).subscribe({
-      next: (res) => {
+      next: (res: any) => {
         if (res.code === 200) {
           localStorage.setItem('user_session', payload.email);
-
           Swal.fire({
             title: "創建帳號成功",
             text: "請返回登入頁面登入",
@@ -97,10 +96,7 @@ export class LoginComponent {
             showConfirmButton: false,
             timer: 1000,
             timerProgressBar: true,
-          }).then(() => {
-            window.location.reload();
-          });
-
+          }).then(() => window.location.reload());
         } else {
           Swal.fire({
             title: "註冊失敗",
@@ -109,7 +105,7 @@ export class LoginComponent {
           });
         }
       },
-      error: (err) => {
+      error: (err: any) => {
         console.log(err?.message);
         Swal.fire({
           title: err?.message || "註冊失敗",
@@ -119,6 +115,7 @@ export class LoginComponent {
       },
     });
   }
+
 
 
   // 忘記密碼

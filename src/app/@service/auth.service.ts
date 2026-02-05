@@ -1,14 +1,10 @@
 import { Injectable, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Observable, tap } from 'rxjs';
+import { tap } from 'rxjs';
 import Swal from 'sweetalert2';
 import { HttpService } from './http.service';
 import { BehaviorSubject } from 'rxjs';
 
-export interface BasicRes {
-  code: number;
-  message: string;
-}
 
 /*
  * AuthService（目前同時包含三種功能）
@@ -199,12 +195,13 @@ export class AuthService {
   }
 
   // 註冊API
-  register(payload: any): Observable<BasicRes> {
-    return this.https.postApi<BasicRes>(
+  register(payload: any) {
+    return this.https.postApi(
       'http://localhost:8080/gogobuy/user/registration',
       payload
     );
   }
+
 
 
 
