@@ -46,7 +46,7 @@ export class SseService {
   // 只要呼叫一次就好（Bell 或 Page 呼叫都行）
   connect(userId: string) {
     if (!userId) return;
-    if (this.connectedUserId === userId && this.es) return; // 已連線就不重複連
+    if (this.connectedUserId == userId && this.es) return; // 已連線就不重複連
 
     this.disconnect();
     this.connectedUserId = userId;
@@ -116,7 +116,7 @@ export class SseService {
   // 讓 Bell / Page 共用已讀的操作
   markAsRead(id: string) {
     this.notifications = this.notifications.map((n) =>
-      n.id === id ? { ...n, isRead: true } : n
+      n.id == id ? { ...n, isRead: true } : n
     );
     this.emit();
   }
@@ -224,7 +224,7 @@ export class SseService {
   // createdAt 可能是字串（toLocaleString），先做容錯解析
   private parseTime(createdAt: any): number {
     if (!createdAt) return Date.now();
-    if (typeof createdAt === 'number') return createdAt;
+    if (typeof createdAt == 'number') return createdAt;
 
     const d = new Date(createdAt);
     const t = d.getTime();

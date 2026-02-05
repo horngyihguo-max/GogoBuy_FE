@@ -47,7 +47,7 @@ export class NotificationBellComponent implements OnInit {
     const link = n.link;
     if (!link) return;
 
-    if (typeof link === 'string' && /^https?:\/\//i.test(link)) {
+    if (typeof link == 'string' && /^https?:\/\//i.test(link)) {
       window.open(link, '_blank');
       return;
     }

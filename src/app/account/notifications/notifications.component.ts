@@ -26,7 +26,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     this.sub = this.sse.notifications$.subscribe((list: any[]) => {
       this.notifications = Array.isArray(list) ? list : [];
 
-      if (this.notifications.length === 0) this.first = 0;
+      if (this.notifications.length == 0) this.first = 0;
       else if (this.first >= this.notifications.length) {
         this.first = Math.floor((this.notifications.length - 1) / this.rows) * this.rows;
       }
@@ -55,7 +55,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     if (!link) return;
 
     // 外部連結：http/https 開新分頁（也可以改同分頁）
-    if (typeof link === 'string' && /^https?:\/\//i.test(link)) {
+    if (typeof link == 'string' && /^https?:\/\//i.test(link)) {
       window.open(link, '_blank');
       return;
     }
@@ -72,7 +72,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
   }
 
   get startIndex(): number {
-    return this.totalRecords === 0 ? 0 : this.first + 1;
+    return this.totalRecords == 0 ? 0 : this.first + 1;
   }
 
   get endIndex(): number {

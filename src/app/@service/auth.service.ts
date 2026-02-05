@@ -1,14 +1,10 @@
 import { Injectable, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Observable, tap } from 'rxjs';
+import { tap } from 'rxjs';
 import Swal from 'sweetalert2';
 import { HttpService } from './http.service';
 import { BehaviorSubject } from 'rxjs';
 
-export interface BasicRes {
-  code: number;
-  message: string;
-}
 
 /*
  * AuthService（目前同時包含三種功能）
@@ -199,12 +195,13 @@ export class AuthService {
   }
 
   // 註冊API
-  register(payload: any): Observable<BasicRes> {
-    return this.https.postApi<BasicRes>(
+  register(payload: any) {
+    return this.https.postApi(
       'http://localhost:8080/gogobuy/user/registration',
       payload
     );
   }
+
 
 
 
@@ -214,7 +211,7 @@ export class AuthService {
 
     return this.https.patchApi(url, updateDto).pipe(
       tap((res: any) => {
-        if (res.code === 200) {
+        if (res.code == 200) {
 
           // 取得目前暫存在 localStorage 的完整資料
           const currentUser = JSON.parse(localStorage.getItem('user_info') || '{}');
@@ -361,7 +358,7 @@ export class AuthService {
           return;
         }
         // 有輸入但找不到店家 → 開團清空
-        if (processedList.length === 0) {
+        if (processedList.length == 0) {
           this.events.set([]);
           return;
         }
@@ -427,7 +424,7 @@ export class AuthService {
 
   // 查詢全部開團
   getallevent() {
-    return this.https.getApi(`http://localhost:8080/gogobuy/getAll`);
+    return this.https.getApi(`http://localhost:8080/gogobuy/event/getAll`);
   }
 
   // 查詢全部user
