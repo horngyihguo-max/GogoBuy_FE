@@ -9,38 +9,22 @@ import { CartService } from '../@service/cart.service';
 import { ActivatedRoute } from '@angular/router';
 import { AuthService } from '../@service/auth.service';
 import { HttpService } from '../@service/http.service';
-import { of } from 'rxjs';
+import { forkJoin, of } from 'rxjs';
 import { tap, switchMap, map } from 'rxjs/operators';
 import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
+import { catchError } from 'rxjs/operators';
+
 
 
 type SelectedOpt = { optionName: string; value: string; extraPrice?: number };
 
-interface OrdersResNew {
+interface UserRes {
   code: number;
   message: string;
-  ordersDto?: {
-    id: number;
-    eventsId: number;
-    userId: string;
-    menuList: Array<{
-      menuId: number;
-      quantity: number;
-      specName?: string;
-      selectedOptionList?: SelectedOpt[];
-    }>;
-    personalMemo?: string;
-    orderTime: string;
-    pickupStatus: string;
-    pickupTime: string | null;
-    subtotal: number;
-    weight: number;
-    deleted: boolean;
-  };
-
-  // 如果你後端「host 查全部」是多筆，建議也先兼容：
-  ordersDtoList?: OrdersResNew["ordersDto"][];
+  id: string;
+  nickname: string;
+  avatarUrl: string | null;
 }
 
 interface MenuItemDto {
@@ -56,36 +40,18 @@ interface MenuRes {
   menuList: MenuItemDto[];
 }
 
-
-interface OrderLineVM {
-  id: number;
-  eventsId: number;
-  userId: string;
-  personalMemo: string;
-  orderTime: string;
-  pickupStatus: string;
-  pickupTime: string | null;
-  weight: number;
-  deleted: boolean;
-  menuId: number;
-  quantity: number;
-  specName?: string;
-  selectedOptionList: SelectedOpt[];
-  menuName?: string;
-}
-
 type OrderVM = {
   id: number;
   hostNickname?: string;
   menuName: string;
   quantity: number;
   subtotal: number;
-  parsedOptions?: any; // 你原本就有 formatSelectedOptionList(order.parsedOptions)
+  parsedOptions?: any;
   userId?: string;
 };
 
 type OrderGroupVM = {
-  key: string;          // 唯一key（用userId或nickname）
+  key: string;
   nickname: string;
   totalAmount: number;
   totalQty: number;
@@ -108,6 +74,8 @@ type OrderGroupVM = {
 })
 
 export class OrderInfoComponent implements OnInit {
+  avatarMap: Record<string, string> = {};
+  nicknameMap: Record<string, string> = {};
   mode: 'host' | 'member' = 'member';
   host: MenuItem[] | undefined;
   member: MenuItem[] | undefined;
@@ -307,7 +275,7 @@ export class OrderInfoComponent implements OnInit {
       });
       this.cart.deleteOrderById(orderId).subscribe({
         next: (res) => {
-          if (res.code === 200) {
+          if (res.code == 200) {
             this.res.orders = (this.res.orders ?? []).filter(
               (o: any) => (o.id ?? o.orderId) !== orderId
             );
@@ -352,7 +320,7 @@ export class OrderInfoComponent implements OnInit {
     const map = new Map<string, OrderGroupVM>();
 
     for (const o of orders) {
-      const nickname = (this.mode === 'host')
+      const nickname = (this.mode == 'host')
         ? (o.hostNickname ?? '（未知）')
         : (this.auth.user?.nickname ?? '（未知）');
 
@@ -376,7 +344,7 @@ export class OrderInfoComponent implements OnInit {
 
     // 預設：第一個自動展開（你也可以改成全展開）
     const arr = Array.from(map.values());
-    if (arr[0] && this.expandedGroup[arr[0].key] === undefined) {
+    if (arr[0] && this.expandedGroup[arr[0].key] == undefined) {
       this.expandedGroup[arr[0].key] = true;
     }
     return arr;
@@ -395,9 +363,9 @@ export class OrderInfoComponent implements OnInit {
   }
   private loadOrders() {
     if (!this.eventsId) return;
-    if (this.mode === 'member' && !this.userId) return;
+    if (this.mode == 'member' && !this.userId) return;
 
-    const orders$ = (this.mode === 'host')
+    const orders$ = (this.mode == 'host')
       ? this.cart.getOrdersAll(this.eventsId)
       : this.cart.getOrders(this.userId, this.eventsId);
 
@@ -424,7 +392,7 @@ export class OrderInfoComponent implements OnInit {
           )
         );
 
-        if (menuIds.length === 0) {
+        if (menuIds.length == 0) {
           return of({ orders, menuMap: new Map<number, MenuItemDto>() });
         }
 
@@ -442,6 +410,41 @@ export class OrderInfoComponent implements OnInit {
           menuName: menuMap.get(o.menuId)?.name ?? `menuId:${o.menuId}`,
         }));
         return { code: 200, message: 'ok', orders: mergedOrders };
+      }), switchMap((data: any) => {
+        // host 才需要抓全部人的頭像；member 只抓自己也行
+        const userIds: string[] = Array.from(
+          new Set(
+            (data.orders ?? [])
+              .map((o: any) => o.userId)
+              .filter((id: any): id is string => typeof id === 'string' && id.trim().length > 0)
+          )
+        );
+
+
+        if (userIds.length == 0) return of(data);
+
+        // 已抓過的就不要重抓
+        const needFetch = userIds.filter(id => !this.avatarMap[id]);
+        if (needFetch.length === 0) return of(data);
+
+        return forkJoin(
+          needFetch.map(id =>
+            this.cart.getUserById(id).pipe(
+              catchError(() => of(null))
+            )
+          )
+        ).pipe(
+          map((users: (UserRes | null)[]) => {
+            for (const u of users) {
+              if (u && u.code === 200) {
+                this.avatarMap[u.id] = u.avatarUrl ?? '';
+                this.nicknameMap[u.id] = u.nickname ?? '';
+              }
+            }
+            return data;
+          })
+        );
+
       })
     ).subscribe({
       next: (data: any) => {
@@ -484,7 +487,7 @@ export class OrderInfoComponent implements OnInit {
         }).then((result) => {
           if (result.isConfirmed) {
             this.router.navigate(['/gogobuy/home'])
-          } else if (result.dismiss === Swal.DismissReason.cancel) {
+          } else if (result.dismiss == Swal.DismissReason.cancel) {
             this.router.navigate(['/user/cart'])
           }
         })
