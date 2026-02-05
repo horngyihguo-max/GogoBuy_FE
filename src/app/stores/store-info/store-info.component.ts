@@ -142,7 +142,7 @@ export class StoreInfoComponent implements OnInit {
 
     // 3) publish 權限：publish=false 且不是建立者 → 擋掉
     if (this.store.publish === false) {
-      const createdBy = this.store.created_by || '';
+      const createdBy = this.store.created_by;
       if (!this.userId || createdBy !== this.userId) {
         this.toastWarn('不公開店家', '此為不公開店家');
         this.goBack();
