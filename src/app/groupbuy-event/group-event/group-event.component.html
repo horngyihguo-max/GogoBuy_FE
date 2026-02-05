@@ -1,26 +1,24 @@
 @if(!storeList){
-  <div class="min-h-screen flex flex-col bg-gray-50">
-    <div class="flex-1 flex flex-col justify-center items-center bg-[#F4E7E1] px-4 text-center">
-      <div class="text-6xl mb-4"><i class="pi pi-search !text-6xl text-[#662222]"></i></div>
-      <h2 class="text-2xl lg:text-4xl font-bold text-[#662222]">無店家資料</h2>
-      <p class="text-gray-500 mt-2 text-base lg:text-base">很抱歉，找不到您指定的店家資訊。</p>
-      <button class="mt-6 px-8 py-2 bg-[#662222] border-1 text-white rounded-full
+<div class="min-h-screen flex flex-col bg-gray-50">
+  <div class="flex-1 flex flex-col justify-center items-center bg-[#F4E7E1] px-4 text-center">
+    <div class="text-6xl mb-4"><i class="pi pi-search !text-6xl text-[#662222]"></i></div>
+    <h2 class="text-2xl lg:text-4xl font-bold text-[#662222]">無店家資料</h2>
+    <p class="text-gray-500 mt-2 text-base lg:text-base">很抱歉，找不到您指定的店家資訊。</p>
+    <button class="mt-6 px-8 py-2 bg-[#662222] border-1 text-white rounded-full
                       hover:bg-white hover:border-[#662222] hover:!text-[#662222]
-                      transition-all w-full lg:w-auto"
-              (click)="goHome()">
-        返回首頁
-      </button>
-    </div>
+                      transition-all w-full lg:w-auto" (click)="goHome()">
+      返回首頁
+    </button>
   </div>
+</div>
 }@else {
   <div class="area">
     <div class="mt-[20px] area-block">
       <img [src]="storeList?.image ? storeList?.image : 'no-product-image.jpg'"
-           (error)="$any($event.target).src = 'no-product-image.jpg'" crossorigin="anonymous"
-            class="rounded-t-lg aspect-[3/2] object-cover md:max-h-[200px] lg:max-h-[30vh]
-              lg:rounded-l-lg lg:rounded-tr-none lg:mr-[20px]">
+        (error)="$any($event.target).src = 'no-product-image.jpg'" crossorigin="anonymous" class="rounded-t-lg aspect-[3/2] object-cover md:max-h-[200px] lg:max-h-[30vh]
+                lg:rounded-l-lg lg:rounded-tr-none lg:mr-[20px]">
       <div class="py-[20px] ml-[10px] flex-1 min-w-0 h-full
-                  lg:my-[0px] lg:flex lg:flex-col lg:justify-center lg:align-center">
+                    lg:my-[0px] lg:flex lg:flex-col lg:justify-center lg:align-center">
         <p class="storeName">{{storeList?.name}}</p>
         <table class="store-table">
           <tr>
@@ -480,16 +478,13 @@
 
   <div class="mt-6 pt-4 border-t border-gray-100">
     <div class="flex justify-end gap-3 mt-6">
-      <button
-        (click)="isConfirmed=false; openDialog = false"
+      <button (click)="isConfirmed=false; openDialog = false"
         class="px-4 py-2 text-gray-500 rounded-full w-24 mr-4 border-1 border-[#662222] hover:scale-[1.05] active:scale-[0.95]">
         不同意</button>
-      <button
-        (click)="isConfirmed=true; openDialog=false"
+      <button (click)="isConfirmed=true; openDialog=false"
         class="px-8 py-2 rounded-full font-bold transition-all bg-[#662222] text-white border-1 border-[#662222] hover:scale-[1.05] active:scale-[0.95]">
         確認並同意
       </button>
     </div>
   </div>
 </p-dialog>
-
