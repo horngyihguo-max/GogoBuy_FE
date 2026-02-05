@@ -216,19 +216,39 @@ export class StoreUpsertComponent {
     this.loadTaiwanDistricts();
     this.initTimeOptions();
 
-    this.route.queryParams.subscribe(params => {
-      if (params['wish_title']) {
-        this.storeData.name = params['wish_title'];
-        this.wishId = params['wish_id'];
-      }
-    })
-
     this.http.getApi('http://localhost:8080/gogobuy/store/all').subscribe((res: any) => {
       this.storeList = res.storeList;
       console.log("this.storeList", this.storeList);
     });
 
     this.id = Number(this.route.snapshot.paramMap.get('id'));
+
+    // service 讀取資料
+    if (!this.wishId && this.storeService.storeData && this.storeService.storeData.name !== '') {
+      const source = this.storeService.storeData;
+      this.storeData = {
+        ...this.storeData,
+        ...source,
+        memo: source.memo ?? '',
+        image: source.image ?? null,
+        feeDescription: source.feeDescription ?? []
+      } as any;
+
+      this.parseAddressToFields();
+      this.convertVoToTimeSlots(source.operatingHoursVoList || []);
+    } else {
+      this.addTimeSlot();
+    }
+
+    this.route.queryParams.subscribe(params => {
+      if (params['wish_title']) {
+        setTimeout(() => {
+          this.storeData.name = params['wish_title'];
+          this.wishId = params['wish_id'];
+          console.log('延遲賦值成功');
+        }, 0);
+      }
+    })
 
     if (this.id !== 0 || this.id) {
       this.http.getApi(`http://localhost:8080/gogobuy/store/searchId?id=${this.id}`)
@@ -253,22 +273,6 @@ export class StoreUpsertComponent {
         this.convertVoToTimeSlots(parsed.operatingHoursVoList || []);
         this.parseAddressToFields();
       }
-    }
-    // service 讀取資料
-    if (this.storeService.storeData && this.storeService.storeData.name !== '') {
-      const source = this.storeService.storeData;
-      this.storeData = {
-        ...this.storeData,
-        ...source,
-        memo: source.memo ?? '',
-        image: source.image ?? null,
-        feeDescription: source.feeDescription ?? []
-      } as any;
-
-      this.parseAddressToFields();
-      this.convertVoToTimeSlots(source.operatingHoursVoList || []);
-    } else {
-      this.addTimeSlot();
     }
   }
 
