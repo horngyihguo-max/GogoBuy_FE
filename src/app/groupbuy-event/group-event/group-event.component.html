@@ -15,8 +15,10 @@
   <div class="area">
     <div class="mt-[20px] area-block">
       <img [src]="storeList?.image ? storeList?.image : 'no-product-image.jpg'"
-        (error)="$any($event.target).src = 'no-product-image.jpg'" crossorigin="anonymous" class="rounded-t-lg aspect-[3/2] object-cover md:max-h-[200px] lg:max-h-[30vh]
-                lg:rounded-l-lg lg:rounded-tr-none lg:mr-[20px]">
+        (error)="$any($event.target).src = 'no-product-image.jpg'"
+        class="rounded-t-lg aspect-[3/2] object-cover
+         md:rounded-l-lg md:rounded-tr-none
+         lg:max-h-[30vh] lg:rounded-l-lg lg:rounded-tr-none lg:mr-[20px]">
       <div class="py-[20px] ml-[10px] flex-1 min-w-0 h-full
                     lg:my-[0px] lg:flex lg:flex-col lg:justify-center lg:align-center">
         <p class="storeName">{{storeList?.name}}</p>
