@@ -473,4 +473,55 @@ export class AuthService {
     this.store.set(list);
     this.filterEventsByStoreIds(list.map((x: any) => x.id));
   }
+
+
+  // ==================== 管理者功能 API ====================
+
+  /**
+   * 軟刪除店家
+   * POST gogobuy/store/delete?id={id}
+   */
+  softDeleteStore(id: number) {
+    return this.https.postApi(`http://localhost:8080/gogobuy/store/delete?id=${id}`, {});
+  }
+
+  /**
+   * 完全刪除店家
+   * POST gogobuy/store/fulldelete?id={id}
+   */
+  hardDeleteStore(id: number) {
+    return this.https.postApi(`http://localhost:8080/gogobuy/store/fulldelete?id=${id}`, {});
+  }
+
+  /**
+   * 更新店家資訊 (後台用)
+   * POST gogobuy/store/update?id={id}
+   */
+  updateStore(id: number, payload: any) {
+    return this.https.postApi(`http://localhost:8080/gogobuy/store/update?id=${id}`, payload);
+  }
+
+  /**
+   * 強制結單 (後台用)
+   * POST gogobuy/event/closeEvent?id={id}&host_id={hostId}
+   */
+  forceCloseEvent(id: number, hostId: string) {
+    return this.https.postApi(`http://localhost:8080/gogobuy/event/closeEvent?id=${id}&host_id=${hostId}`, {});
+  }
+
+  /**
+   * 完全刪除活動 (後台用)
+   * POST gogobuy/event/deleteEventPhysically?id={id}
+   */
+  deleteEventPhysically(id: number) {
+    return this.https.postApi(`http://localhost:8080/gogobuy/event/deleteEventPhysically?id=${id}`, {});
+  }
+
+  /**
+   * 查詢活動訂單詳情 (後台用)
+   * GET gogobuy/event/getOrdersView?event_id={id}
+   */
+  getEventOrderView(eventId: number) {
+    return this.https.getApi(`http://localhost:8080/gogobuy/event/getOrdersView?event_id=${eventId}`);
+  }
 }

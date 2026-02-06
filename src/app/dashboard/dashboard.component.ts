@@ -238,7 +238,7 @@ export class DashboardComponent {
       timeStr = iso.split('.')[0]; // 拿掉毫秒, 變成 2023-10-27T10:00:00
     }
 
-    // 2. 組合 msg 內容並轉換成JSON格式內容以讓 SSE 收到後能解析成 title/content/link
+  // 2. 組合 msg 內容並轉換成JSON格式內容以讓 SSE 收到後能解析成 title/content/link
     const payloadMsgObj = {
       title: this.announceData.title,
       content: this.announceData.content,
@@ -269,6 +269,85 @@ export class DashboardComponent {
       },
       error: (err) => {
         Swal.fire('發送失敗', err, 'error');
+      }
+    });
+  }
+
+  // ==================== 管理操作功能 ====================
+
+  /**
+   * 刪除店家 (軟刪除)
+   */
+  onStoreDelete(store: any) {
+    Swal.fire({
+      title: '確定要刪除店家?',
+      text: `店家名稱: ${store.name}`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: '確定刪除',
+      cancelButtonText: '取消',
+      confirmButtonColor: '#d33'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.authService.softDeleteStore(store.id).subscribe({
+          next: () => {
+            Swal.fire('已刪除', '店家已標記為刪除狀態', 'success');
+            this.loadData();
+          },
+          error: (err) => Swal.fire('刪除失敗', err?.message, 'error')
+        });
+      }
+    });
+  }
+
+  /**
+   * 強制結單 (活動)
+   */
+  onEventClose(event: any) {
+    Swal.fire({
+      title: '確定要強制結單?',
+      text: `活動名稱: ${event.eventName}`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: '確定結單',
+      cancelButtonText: '取消'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // 需注意: 後端需 hostId，這裡假設可以是任意管理員操作，API內部可能校驗
+        // 若 API 強制要求 hostId 必須是發起人，這裡可能會報錯
+        // 暫時帶入 event.hostId 嘗試
+        this.authService.forceCloseEvent(event.id, event.hostId).subscribe({
+          next: () => {
+             Swal.fire('結單成功', '該活動已結束', 'success');
+             this.loadData();
+          },
+          error: (err) => Swal.fire('操作失敗', err?.message, 'error')
+        });
+      }
+    });
+  }
+
+  /**
+   * 刪除活動 (完全刪除)
+   */
+  onEventDelete(event: any) {
+    Swal.fire({
+      title: '確定要永久刪除此活動?',
+      text: '此操作無法復原!',
+      icon: 'error',
+      showCancelButton: true,
+      confirmButtonText: '永久刪除',
+      cancelButtonText: '取消',
+      confirmButtonColor: '#d33'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.authService.deleteEventPhysically(event.id).subscribe({
+          next: () => {
+            Swal.fire('已刪除', '活動資料已移除', 'success');
+            this.loadData();
+          },
+          error: (err) => Swal.fire('刪除失敗', err?.message, 'error')
+        });
       }
     });
   }
