@@ -24,6 +24,8 @@ import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { CheckboxModule } from 'primeng/checkbox';
 import { CdkDrag } from '@angular/cdk/drag-drop';
+import Swal from 'sweetalert2';
+import { ImageService } from '../../@service/image.service';
 
 @Component({
   selector: 'app-store',
@@ -48,6 +50,7 @@ export class StoreComponent {
     private router: Router,
     private route: ActivatedRoute,
     private storeService: StoreService,
+    private imageService: ImageService,
   ) { }
 
   id!: number;
@@ -628,25 +631,104 @@ export class StoreComponent {
   }
 
   // 商品圖片
-  selectedFile: File | null = null;
   onFileSelected(event: any) {
+    const input = event.target as HTMLInputElement;
     const file = event.target.files[0];
+    if (!file) return;
 
-    if (file) {
-      this.selectedFile = file;
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        this.currentProduct.image = e.target?.result as string;
-      };
-      reader.readAsDataURL(file);
+    if (!file.type.startsWith('image/')) {
+      Swal.fire({
+        toast: true,
+        position: 'top',
+        icon: 'error',
+        title: `只能上傳圖片檔喔!`,
+        showConfirmButton: false,
+        timer: 2000,
+      });
+      input.value = '';
+      return;
     }
+
+    if (file.size > 2000000) {
+      const sizeMB = (file.size / 1024 / 1024).toFixed(2);
+      Swal.fire({
+        toast: true,
+        position: 'top',
+        icon: 'error',
+        title: `圖片太大了(${sizeMB}MB)，請上傳 2MB 以下的圖片!`,
+        showConfirmButton: false,
+        timer: 2000,
+      });
+      input.value = '';
+      return;
+    }
+    // selectedFile
+    const localPreview = URL.createObjectURL(file);
+    const oldAvatar = this.currentProduct.image;
+    this.currentProduct.image = localPreview;
+
+    this.toastWarn('上傳中...', '請稍候');
+    this.imageService.upload('stores', file).subscribe({
+      next: (res) => {
+
+        this.currentProduct.image = res;
+
+        this.toastSuccess('上傳成功', '');
+        input.value = '';
+      },
+      error: (err) => {
+        console.error(err);
+        this.currentProduct.image = oldAvatar;
+
+        Swal.fire({
+          icon: 'error',
+          title: '上傳失敗',
+          text: err?.error ?? '請稍後再試',
+        });
+        input.value = '';
+      },
+      complete: () => {
+        if (localPreview?.startsWith('blob:')) URL.revokeObjectURL(localPreview);
+      },
+    });
+  }
+
+  toastWarn(title: string, text: string): void {
+    Swal.fire({
+      icon: 'warning',
+      title,
+      text,
+      // timer: 200,
+      showConfirmButton: false,
+      didOpen: () => {
+        const c = document.querySelector(
+          '.swal2-container',
+        ) as HTMLElement | null;
+        if (c) c.style.zIndex = '20000';
+      },
+    });
+  }
+
+  toastSuccess(title: string, text: string): void {
+    Swal.fire({
+      icon: 'success',
+      title,
+      text,
+      timer: 1000,
+      showConfirmButton: false,
+      didOpen: () => {
+        const c = document.querySelector(
+          '.swal2-container',
+        ) as HTMLElement | null;
+        if (c) c.style.zIndex = '20000';
+      },
+    });
   }
 
   removeImage(event: Event) {
     event.preventDefault();
     event.stopPropagation();
     this.currentProduct.image = '';
-    this.selectedFile = null;
   }
 
   // 新增商品時 選擇category 帶入 optionGroup ---------------------------------
@@ -908,7 +990,7 @@ export class StoreComponent {
   }
 
   // 存資料庫 ---------------------------------------------------------
-  onSaveAll() {
+  async onSaveAll() {
     this.displayPublishConfirm = false;
     if (this.storeData.id == 0) {
       const payload = {

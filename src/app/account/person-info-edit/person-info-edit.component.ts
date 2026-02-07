@@ -229,11 +229,6 @@ export class PersonInfoEditComponent {
     });
   }
 
-  private normalizeEmail(email: string) {
-    return (email ?? '').trim().toLowerCase();
-  }
-
-
   // 修改信箱
   async changeEmail(e?: Event) {
     e?.preventDefault();

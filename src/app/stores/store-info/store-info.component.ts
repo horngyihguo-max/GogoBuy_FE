@@ -116,6 +116,7 @@ export class StoreInfoComponent implements OnInit {
         console.log(res);
         const normalized = this.normalizeStoreResponse(res);
         this.store = normalized;
+        console.log(this.store);
         this.afterLoaded();
       });
 
@@ -129,23 +130,33 @@ export class StoreInfoComponent implements OnInit {
     // 1) 防呆：沒資料
     if (!this.store) {
       this.toastWarn('錯誤', '找不到店家資料');
-      this.goBack();
+      // 延遲再跳轉
+      setTimeout(() => {
+        this.goBack();
+      }, 2000);
       return;
     }
 
     // 2) deleted 擋掉
     if (this.store.deleted === true) {
       this.toastWarn('店家不存在', '此店家已不存在');
-      this.goBack();
+      // 延遲再跳轉
+      setTimeout(() => {
+        this.goBack();
+      }, 2000);
       return;
     }
 
     // 3) publish 權限：publish=false 且不是建立者 → 擋掉
     if (this.store.publish === false) {
-      const createdBy = this.store.created_by || '';
+      const createdBy = this.store.createdBy;
       if (!this.userId || createdBy !== this.userId) {
+        console.log('此為不公開店家');
         this.toastWarn('不公開店家', '此為不公開店家');
-        this.goBack();
+        // 延遲再跳轉
+        setTimeout(() => {
+          this.goBack();
+        }, 2000);
         return;
       }
     }
@@ -755,7 +766,7 @@ export class StoreInfoComponent implements OnInit {
           deleted: false,
           publish: true,
           force_closed: false,
-          created_by: 'SystemManager',
+          createdBy: 'SystemManager',
         },
       ],
       operatingHoursVoList: [

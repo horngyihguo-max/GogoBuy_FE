@@ -14,6 +14,8 @@ import { DialogModule } from 'primeng/dialog';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HttpService } from '../../@service/http.service';
 import { AutoCompleteModule } from 'primeng/autocomplete';
+import { ImageService } from '../../@service/image.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-store-upsert',
@@ -36,6 +38,7 @@ export class StoreUpsertComponent {
     private router: Router,
     private route: ActivatedRoute,
     private http: HttpService,
+    private imageService: ImageService,
   ) { }
 
   userId = '';
@@ -343,35 +346,106 @@ export class StoreUpsertComponent {
   }
 
   // 上傳照片
-  onImageUpload(event: any) {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e: any) => {
-        this.storeData.image = new Blob([e.target.result], { type: file.type });
-      };
-      reader.readAsArrayBuffer(file);
-    }
-  }
-  selectedFile: File | null = null;
   onFileSelected(event: any) {
+    const input = event.target as HTMLInputElement;
     const file = event.target.files[0];
+    if (!file) return;
 
-    if (file) {
-      this.selectedFile = file;
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        this.storeData.image = e.target?.result as string;
-      };
-      reader.readAsDataURL(file);
+    if (!file.type.startsWith('image/')) {
+      Swal.fire({
+        toast: true,
+        position: 'top',
+        icon: 'error',
+        title: `只能上傳圖片檔喔!`,
+        showConfirmButton: false,
+        timer: 2000,
+      });
+      input.value = '';
+      return;
     }
+
+    if (file.size > 2000000) {
+      const sizeMB = (file.size / 1024 / 1024).toFixed(2);
+      Swal.fire({
+        toast: true,
+        position: 'top',
+        icon: 'error',
+        title: `圖片太大了(${sizeMB}MB)，請上傳 2MB 以下的圖片!`,
+        showConfirmButton: false,
+        timer: 2000,
+      });
+      input.value = '';
+      return;
+    }
+    // selectedFile
+    const localPreview = URL.createObjectURL(file);
+    const oldAvatar = this.storeData.image;
+    this.storeData.image = localPreview;
+
+    this.toastWarn('上傳中...', '請稍候');
+
+    this.imageService.upload('stores', file).subscribe({
+      next: (res) => {
+        Swal.close();
+
+        this.storeData.image = res;
+
+        this.toastSuccess('上傳成功', '');
+        input.value = '';
+      },
+      error: (err) => {
+        console.error(err);
+        this.storeData.image = oldAvatar;
+
+        Swal.fire({
+          icon: 'error',
+          title: '上傳失敗',
+          text: err?.error ?? '請稍後再試',
+        });
+        input.value = '';
+      },
+      complete: () => {
+        if (localPreview?.startsWith('blob:')) URL.revokeObjectURL(localPreview);
+      },
+    });
+  }
+
+  toastWarn(title: string, text: string): void {
+    Swal.fire({
+      icon: 'warning',
+      title,
+      text,
+      // timer: 200,
+      showConfirmButton: false,
+      didOpen: () => {
+        const c = document.querySelector(
+          '.swal2-container',
+        ) as HTMLElement | null;
+        if (c) c.style.zIndex = '20000';
+      },
+    });
+  }
+
+  toastSuccess(title: string, text: string): void {
+    Swal.fire({
+      icon: 'success',
+      title,
+      text,
+      timer: 1000,
+      showConfirmButton: false,
+      didOpen: () => {
+        const c = document.querySelector(
+          '.swal2-container',
+        ) as HTMLElement | null;
+        if (c) c.style.zIndex = '20000';
+      },
+    });
   }
 
   removeImage(event: Event) {
     event.preventDefault();
     event.stopPropagation();
     this.storeData.image = null;
-    this.selectedFile = null;
   }
 
   // 營業時間
@@ -439,6 +513,8 @@ export class StoreUpsertComponent {
   // 下一步
   onSubmit() {
     const missingFields: string[] = [];
+
+    console.log(this.storeData.image);
 
     if (!this.storeData.name) missingFields.push('商店名稱');
     if (!this.storeData.address) missingFields.push('商店地址');
