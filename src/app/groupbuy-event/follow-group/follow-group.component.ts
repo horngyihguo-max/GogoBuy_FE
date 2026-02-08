@@ -20,6 +20,7 @@ import {
   transferArrayItem,
 } from '@angular/cdk/drag-drop';
 import Swal from 'sweetalert2';
+import { CartService } from '../../@service/cart.service';
 
 type TabMode = 'info' | 'order';
 
@@ -65,6 +66,7 @@ export class FollowGroupComponent {
     private http: HttpService,
     private router: Router,
     private route: ActivatedRoute,
+    private cart: CartService,
   ) {}
 
   // =========================
@@ -301,6 +303,7 @@ export class FollowGroupComponent {
   }
 
   ngOnInit(): void {
+    scroll(0, 0);
     this.userId = String(localStorage.getItem('user_id') || '');
     this.groupId = Number(this.route.snapshot.paramMap.get('id') || 0);
 
@@ -319,7 +322,7 @@ export class FollowGroupComponent {
     // 正式接 API 時
     // =========================
     const url = `http://localhost:8080/gogobuy/event/getAllOrdersByUserIdAndEventsId?user_id=${userId}&events_id=${groupId}`;
-    console.log("groupId是: "+groupId+" userId是: "+userId);
+    console.log('groupId是: ' + groupId + ' userId是: ' + userId);
     this.http.getApi(url).subscribe({
       next: (res: any) => {
         const parsed = this.parseGetOrderResponse(res);
@@ -632,25 +635,44 @@ export class FollowGroupComponent {
 
   // TODO 刪除整筆訂單（此團此人）
   deleteOrderApi(): void {
-    const url = 'http://localhost:8080/gogobuy/event/deleteOrder';
-    const params = {
-      user_id: String(this.userId),
-      events_id: String(this.groupId),
-    };
+    // const url = 'http://localhost:8080/gogobuy/event/deleteOrder';
+    // const params = {
+    //   user_id: String(this.userId),
+    //   events_id: String(this.groupId),
+    // };
 
-    this.http.postApi<any>(url, { params }).subscribe({
-      next: () => {
-        this.toastSuccess('已移除全部訂單', '此團訂單已清除');
-        // 關閉訂單詳情 dialog（停留本頁）
-        this.orderDetailDialogVisible = false;
-        // 刷新本頁狀態（不跳頁）
-        this.resetOrderStateAfterDelete();
-      },
-      error: (err) => {
-        console.error('deleteOrder error:', err);
-        this.toastWarn('移除失敗', '請稍後再試');
-      },
-    });
+    // this.http.postApi<any>(url, { params }).subscribe({
+    //   next: () => {
+    //     this.toastSuccess('已移除全部訂單', '此團訂單已清除');
+    //     // 關閉訂單詳情 dialog（停留本頁）
+    //     this.orderDetailDialogVisible = false;
+    //     // 刷新本頁狀態（不跳頁）
+    //     this.resetOrderStateAfterDelete();
+    //   },
+    //   error: (err) => {
+    //     console.error('deleteOrder error:', err);
+    //     this.toastWarn('移除失敗', '請稍後再試');
+    //   },
+    // });
+
+    this.cart
+      .deleteOrderByUserIdAndEventsId(this.userId, this.groupId)
+      .subscribe({
+        next: (res: any) => {
+          if (res.code == 200) {
+            this.toastSuccess('已移除全部訂單', '此團訂單已清除');
+            // 關閉訂單詳情 dialog（停留本頁）
+            this.orderDetailDialogVisible = false;
+            // 刷新本頁狀態（不跳頁）
+            this.resetOrderStateAfterDelete();
+          } else {
+            console.error('delete failed:', res.message);
+            this.orderDetailDialogVisible = false;
+            this.resetOrderStateAfterDelete();
+          }
+        },
+        error: (err: any) => console.error('delete failed:', err),
+      });
   }
 
   // 刪除後清資料
@@ -663,6 +685,34 @@ export class FollowGroupComponent {
     this.existingOrderId = null;
     this.originalOrderSnapshot = null;
     this.buildMenuGroups();
+    this.refreshGroupAmount();
+  }
+
+  refreshGroupAmount(): void {
+    const url = `http://localhost:8080/gogobuy/event/getEventsByEventsId?id=${this.groupId}`;
+
+    this.http.getApi(url).subscribe({
+      next: (res: any) => {
+        const g = res?.groupbuyEvents?.[0] as GroupbuyEvents | undefined;
+        if (!g) return;
+
+        // 只更新會影響「是否達標」那塊的欄位（避免動到你已解析好的清單）
+        if (this.group) {
+          this.group.totalOrderAmount = g.totalOrderAmount;
+          this.group.limitation = g.limitation;
+          this.group.shippingFee = g.shippingFee;
+          this.group.splitType = g.splitType;
+          this.group.status = g.status;
+        } else {
+          // 保險：如果 group 還沒初始化（通常不會），就整包套用
+          this.applyGroup(g);
+        }
+      },
+      error: () => {
+        // 刷新失敗不致命，至少不要讓頁面壞掉
+        console.warn('refreshGroupAmount failed');
+      },
+    });
   }
 
   // 顯示用：選項摘要
@@ -1520,10 +1570,30 @@ export class FollowGroupComponent {
   addonRequired = false;
 
   private extractGroupIdsFromUnusual(unusual: any): number[] {
-    if (!unusual || typeof unusual !== 'object') return [];
-    return Object.keys(unusual)
-      .map((k) => Number(k))
-      .filter((n) => Number.isFinite(n) && n > 0);
+    if (!unusual) return [];
+
+    // -------------------------
+    // 舊格式：{ '150': 'true', '151': 'true' }
+    // -------------------------
+    if (!Array.isArray(unusual) && typeof unusual === 'object') {
+      return Object.keys(unusual)
+        .map((k) => Number(k))
+        .filter((n) => Number.isFinite(n) && n > 0);
+    }
+
+    // -------------------------
+    // 新格式：[{ '150': 'true' }, { '151': 'true' }]
+    // -------------------------
+    if (Array.isArray(unusual)) {
+      return unusual
+        .flatMap((obj) =>
+          typeof obj === 'object' && obj !== null ? Object.keys(obj) : [],
+        )
+        .map((k) => Number(k))
+        .filter((n) => Number.isFinite(n) && n > 0);
+    }
+
+    return [];
   }
 
   // =========================
@@ -1813,6 +1883,30 @@ export class FollowGroupComponent {
       personalMemo: this.personalMemo || '',
       weight: 0.1,
     };
+  }
+
+  // unusual 新格式應對方法
+  private normalizeUnusual(unusual: any): number[] {
+    if (!unusual) return [];
+
+    // 舊格式：{ '150': 'true', '151': 'true' }
+    if (!Array.isArray(unusual) && typeof unusual === 'object') {
+      return Object.keys(unusual)
+        .map((k) => Number(k))
+        .filter((n) => !Number.isNaN(n));
+    }
+
+    // 新格式：[{ '150': 'true' }, { '151': 'true' }]
+    if (Array.isArray(unusual)) {
+      return unusual
+        .flatMap((obj) =>
+          typeof obj === 'object' && obj !== null ? Object.keys(obj) : [],
+        )
+        .map((k) => Number(k))
+        .filter((n) => !Number.isNaN(n));
+    }
+
+    return [];
   }
 
   // =========================

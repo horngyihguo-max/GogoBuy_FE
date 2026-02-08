@@ -104,7 +104,7 @@ export class StoreInfoComponent implements OnInit {
   }
 
   // =========================
-  // TODO 讀資料（先假資料，後面換 API）
+  // 讀資料（先假資料，後面換 API）
   // =========================
   loadStoreById(id: number): void {
     this.isLoading = true;
@@ -116,7 +116,7 @@ export class StoreInfoComponent implements OnInit {
         console.log(res);
         const normalized = this.normalizeStoreResponse(res);
         this.store = normalized;
-        console.log(this.store);
+        console.log(JSON.stringify(this.store));
         this.afterLoaded();
       });
 
@@ -658,13 +658,33 @@ export class StoreInfoComponent implements OnInit {
     if (!Array.isArray(all)) return [];
 
     const u = this.selectedProduct?.unusual;
-    if (!u || typeof u !== 'object') return [];
+    if (!u) return [];
 
-    const allowIds = Object.keys(u)
-      .map((k) => Number(k))
-      .filter((n) => !Number.isNaN(n));
+    let allowIds: number[] = [];
+
+    // =========================
+    // 舊格式：object { '150': 'true' }
+    // =========================
+    if (!Array.isArray(u) && typeof u === 'object') {
+      allowIds = Object.keys(u)
+        .map((k) => Number(k))
+        .filter((n) => !Number.isNaN(n));
+    }
+
+    // =========================
+    // 新格式：array [{ '150': 'true' }, { '151': 'true' }]
+    // =========================
+    if (Array.isArray(u)) {
+      allowIds = u
+        .flatMap((obj) =>
+          typeof obj === 'object' && obj !== null ? Object.keys(obj) : [],
+        )
+        .map((k) => Number(k))
+        .filter((n) => !Number.isNaN(n));
+    }
 
     if (!allowIds.length) return [];
+
     return all.filter((g: any) => allowIds.includes(Number(g?.id)));
   }
 
