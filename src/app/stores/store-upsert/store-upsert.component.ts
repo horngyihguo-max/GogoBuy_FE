@@ -382,15 +382,7 @@ export class StoreUpsertComponent {
     const oldAvatar = this.storeData.image;
     this.storeData.image = localPreview;
 
-    Swal.fire({
-      title: '上傳中...',
-      text: '請稍候',
-      allowOutsideClick: false,
-      allowEscapeKey: false,
-      didOpen: () => {
-        Swal.showLoading();
-      }
-    });
+    this.toastWarn('上傳中...', '請稍候');
 
     this.imageService.upload('stores', file).subscribe({
       next: (res) => {
@@ -398,7 +390,7 @@ export class StoreUpsertComponent {
 
         this.storeData.image = res;
 
-        Swal.fire({ icon: 'success', title: '上傳成功' });
+        this.toastSuccess('上傳成功', '');
         input.value = '';
       },
       error: (err) => {
@@ -414,6 +406,38 @@ export class StoreUpsertComponent {
       },
       complete: () => {
         if (localPreview?.startsWith('blob:')) URL.revokeObjectURL(localPreview);
+      },
+    });
+  }
+
+  toastWarn(title: string, text: string): void {
+    Swal.fire({
+      icon: 'warning',
+      title,
+      text,
+      // timer: 200,
+      showConfirmButton: false,
+      didOpen: () => {
+        const c = document.querySelector(
+          '.swal2-container',
+        ) as HTMLElement | null;
+        if (c) c.style.zIndex = '20000';
+      },
+    });
+  }
+
+  toastSuccess(title: string, text: string): void {
+    Swal.fire({
+      icon: 'success',
+      title,
+      text,
+      timer: 1000,
+      showConfirmButton: false,
+      didOpen: () => {
+        const c = document.querySelector(
+          '.swal2-container',
+        ) as HTMLElement | null;
+        if (c) c.style.zIndex = '20000';
       },
     });
   }
