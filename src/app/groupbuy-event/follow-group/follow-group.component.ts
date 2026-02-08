@@ -122,6 +122,7 @@ export class FollowGroupComponent {
   // 前往店家 =======================================
   goToStore() {
     this.router.navigate(['/management/store_info', this.storeId]);
+    console.log("前往店面: "+this.storeId);
   }
 
   // =========================
@@ -534,6 +535,7 @@ export class FollowGroupComponent {
   applyGroup(g: GroupbuyEvents): void {
     this.group = g;
     this.storeId = Number(g.storesId);
+    console.log("店家的ID是: "+this.storeId);
 
     if (g.deleted === true) {
       this.toastWarn('此團不存在', '此團已被刪除');
@@ -1833,7 +1835,7 @@ export class FollowGroupComponent {
           endTime: '2026-02-20T21:20:30',
           announcement:
             '每杯買二送一～每杯買二送一～每杯買二送一～每杯買二送一～每杯買二送一～',
-          storesId: 40,
+          storesId: 70,
           recommendList: '[123,124]',
           tempMenuList: '[122,123,124]',
           recommendDescription:
@@ -1851,7 +1853,7 @@ export class FollowGroupComponent {
       message: '成功',
       storeList: [
         {
-          id: 40,
+          id: 70,
           name: '微醺之夜餐酒館 (Vibe Night)',
           phone: '0423218888',
           address: '台中市西區公益路二段99號',
@@ -1871,7 +1873,7 @@ export class FollowGroupComponent {
       operatingHoursVoList: [
         {
           id: 61,
-          storesId: 40,
+          storesId: 70,
           week: 1,
           openTime: '11:00:00',
           closeTime: '14:30:00',
@@ -1879,7 +1881,7 @@ export class FollowGroupComponent {
         },
         {
           id: 62,
-          storesId: 40,
+          storesId: 70,
           week: 1,
           openTime: '17:30:00',
           closeTime: '22:00:00',
@@ -1887,7 +1889,7 @@ export class FollowGroupComponent {
         },
         {
           id: 63,
-          storesId: 40,
+          storesId: 70,
           week: 2,
           openTime: '11:00:00',
           closeTime: '22:00:00',
@@ -1895,7 +1897,7 @@ export class FollowGroupComponent {
         },
         {
           id: 64,
-          storesId: 40,
+          storesId: 70,
           week: 3,
           openTime: '00:00:00',
           closeTime: '00:00:00',
@@ -1903,7 +1905,7 @@ export class FollowGroupComponent {
         },
         {
           id: 65,
-          storesId: 40,
+          storesId: 70,
           week: 4,
           openTime: '11:00:00',
           closeTime: '22:00:00',
@@ -1911,7 +1913,7 @@ export class FollowGroupComponent {
         },
         {
           id: 68,
-          storesId: 40,
+          storesId: 70,
           week: 5,
           openTime: '18:00:00',
           closeTime: '02:00:00',
@@ -1919,7 +1921,7 @@ export class FollowGroupComponent {
         },
         {
           id: 69,
-          storesId: 40,
+          storesId: 70,
           week: 6,
           openTime: '18:00:00',
           closeTime: '04:00:00',
@@ -1927,7 +1929,7 @@ export class FollowGroupComponent {
         },
         {
           id: 70,
-          storesId: 40,
+          storesId: 70,
           week: 7,
           openTime: '18:00:00',
           closeTime: '00:00:00',
@@ -1937,7 +1939,7 @@ export class FollowGroupComponent {
       menuVoList: [
         {
           id: 122,
-          storesId: 40,
+          storesId: 70,
           categoryId: 1,
           name: '松露金箔薯條',
           description: '選用義大利頂級松露油與食用金箔裝飾',
@@ -1948,7 +1950,7 @@ export class FollowGroupComponent {
         },
         {
           id: 123,
-          storesId: 40,
+          storesId: 70,
           categoryId: 1,
           name: '紐奧良辣味雞翅翅翅翅翅翅翅',
           description:
@@ -1963,7 +1965,7 @@ export class FollowGroupComponent {
         },
         {
           id: 124,
-          storesId: 40,
+          storesId: 70,
           categoryId: 59,
           name: '午夜藍色夏威夷',
           description: '伏特加基底搭配藍柑橘糖漿，口感清爽',
@@ -1978,7 +1980,7 @@ export class FollowGroupComponent {
         },
         {
           id: 125,
-          storesId: 40,
+          storesId: 70,
           categoryId: 58,
           name: '深夜炸物大三元',
           description: '包含雞塊、洋蔥圈、起司條',
@@ -1991,13 +1993,13 @@ export class FollowGroupComponent {
       ],
       menuCategoriesVoList: [
         {
-          id: 1,
-          storesId: 40,
+          id: 158,
+          storesId: 70,
           name: '人氣單點小物',
         },
         {
-          id: 58,
-          storesId: 40,
+          id: 159,
+          storesId: 70,
           name: '深夜炸物拼盤',
           priceLevel: [
             {
@@ -2011,8 +2013,8 @@ export class FollowGroupComponent {
           ],
         },
         {
-          id: 59,
-          storesId: 40,
+          id: 160,
+          storesId: 70,
           name: '特調調酒系列',
           priceLevel: [
             {
@@ -2028,8 +2030,8 @@ export class FollowGroupComponent {
       ],
       productOptionGroupsVoList: [
         {
-          id: 22,
-          storesId: 40,
+          id: 145,
+          storesId: 70,
           name: '基酒更換',
           required: false,
           maxSelection: 1,
@@ -2045,8 +2047,8 @@ export class FollowGroupComponent {
           ],
         },
         {
-          id: 23,
-          storesId: 40,
+          id: 146,
+          storesId: 70,
           name: '冰塊份量',
           required: true,
           maxSelection: 1,
@@ -2057,8 +2059,8 @@ export class FollowGroupComponent {
           ],
         },
         {
-          id: 24,
-          storesId: 40,
+          id: 144,
+          storesId: 70,
           name: '加價沾醬 (可多選)',
           required: false,
           maxSelection: 3,
