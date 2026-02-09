@@ -248,7 +248,6 @@ export class StoreUpsertComponent {
         setTimeout(() => {
           this.storeData.name = params['wish_title'];
           this.wishId = params['wish_id'];
-          console.log('延遲賦值成功');
         }, 0);
       }
     })
@@ -264,7 +263,6 @@ export class StoreUpsertComponent {
 
             this.convertVoToTimeSlots(res.operatingHoursVoList || []);
             this.parseAddressToFields();
-            console.log("this.storeData:", this.storeData);
           }
         });
     } else {
@@ -277,6 +275,8 @@ export class StoreUpsertComponent {
         this.parseAddressToFields();
       }
     }
+    console.log('storeData ngOnInt', this.storeData);
+
   }
 
   // 從 service 拿到的資料 ( 新增店家又回來修改店家資訊 )
@@ -377,7 +377,6 @@ export class StoreUpsertComponent {
       input.value = '';
       return;
     }
-    // selectedFile
     const localPreview = URL.createObjectURL(file);
     const oldAvatar = this.storeData.image;
     this.storeData.image = localPreview;
@@ -514,8 +513,6 @@ export class StoreUpsertComponent {
   onSubmit() {
     const missingFields: string[] = [];
 
-    console.log(this.storeData.image);
-
     if (!this.storeData.name) missingFields.push('商店名稱');
     if (!this.storeData.address) missingFields.push('商店地址');
     if (!this.storeData.phone) missingFields.push('聯絡電話');
@@ -543,6 +540,7 @@ export class StoreUpsertComponent {
     this.storeData.operatingHoursVoList = finalVoList;
     const readyToSave = { ...this.storeData } as any;
 
+    this.storeService.wishId = this.wishId;
     this.storeService.storeData = readyToSave;
 
     console.log('同步到 Service 成功：', this.storeService.storeData);

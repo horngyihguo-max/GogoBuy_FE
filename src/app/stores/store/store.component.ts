@@ -72,6 +72,7 @@ export class StoreComponent {
   displayUnableDelete = false;
   displayUnableDeleteSpec = false;
   displayPublishConfirm = false
+  displaySaveFailedDialog = false;
 
   selectedProduct!: MenuVoList;
   selectedCategoryId: number | null = null;
@@ -124,6 +125,9 @@ export class StoreComponent {
 
   // 是否嘗試過提交
   submitted = false;
+
+  // res.message
+  resMessage!: string;
 
   // 清空欄位
   getNewProduct(): MenuVoList {
@@ -230,7 +234,6 @@ export class StoreComponent {
             });
             this.rebuildApplicableCategoryIds();
             this.filteredProducts = [...this.storeData.menuVoList];
-            console.log("storeDatastoreData", this.storeData);
             this.newPId = this.storeData.menuVoList.length + 1;
             this.newSpecId = this.storeData.productOptionGroupsVoList.length + 1;
             this.newCateId = this.storeData.menuCategoriesVoList.length + 1;
@@ -332,7 +335,6 @@ export class StoreComponent {
         result.push(item);
       }
     });
-
     return result;
   }
 
@@ -779,7 +781,6 @@ export class StoreComponent {
     } else {
       this.selectSpecs = [...this.selectSpecs, spec];
     }
-    console.log('當前選中：', this.selectSpecs);
   }
 
   // 一鍵套用規格
@@ -1021,14 +1022,12 @@ export class StoreComponent {
         .subscribe((res: any) => {
           console.log("create store:", res);
           if (res.code === 200) {
-            console.log('有進來200');
 
             this.http.getApi('http://localhost:8080/gogobuy/store/all').subscribe((all: any) => {
               const myStores = all.storeList.filter((s: any) => s.createdBy === this.userId);
               if (myStores && myStores.length > 0) {
                 const latestStore = myStores.reduce((prev: any, current: any) => (prev.id > current.id) ? prev : current);
                 this.id = latestStore.id;
-                console.log('成功取得新 ID:', this.id);
                 this.afterSaveSuccess();
               } else {
                 this.router.navigate(['gogobuy/home']);
@@ -1036,6 +1035,8 @@ export class StoreComponent {
             });
           } else {
             console.log(res.message);
+            this.resMessage = res.message;
+            this.displaySaveFailedDialog = true;
           }
         });
     } else {
