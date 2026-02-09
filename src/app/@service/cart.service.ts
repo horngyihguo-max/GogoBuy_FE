@@ -25,6 +25,12 @@ export class CartService {
     return this.https.getApi(`http://localhost:8080/gogobuy/event/getEventsByEventsId?id=${id}`);
   }
 
+  // 透過ID取得使用者資料(這裡只是要拿頭像)
+  getUserById(userId: string) {
+    return this.https.getApi(`http://localhost:8080/gogobuy/user/get-user?id=${userId}`);
+  }
+
+
   // 取得該團詳細訂單
   getOrdersAll(eventId: number) {
     return this.https.getApi(`http://localhost:8080/gogobuy/event/getOrdersView?event_id=${eventId}`);

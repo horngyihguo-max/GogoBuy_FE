@@ -104,7 +104,7 @@ export class StoreInfoComponent implements OnInit {
   }
 
   // =========================
-  // TODO 讀資料（先假資料，後面換 API）
+  // 讀資料（先假資料，後面換 API）
   // =========================
   loadStoreById(id: number): void {
     this.isLoading = true;
@@ -116,6 +116,7 @@ export class StoreInfoComponent implements OnInit {
         console.log(res);
         const normalized = this.normalizeStoreResponse(res);
         this.store = normalized;
+        console.log(JSON.stringify(this.store));
         this.afterLoaded();
       });
 
@@ -129,23 +130,33 @@ export class StoreInfoComponent implements OnInit {
     // 1) 防呆：沒資料
     if (!this.store) {
       this.toastWarn('錯誤', '找不到店家資料');
-      this.goBack();
+      // 延遲再跳轉
+      setTimeout(() => {
+        this.goBack();
+      }, 2000);
       return;
     }
 
     // 2) deleted 擋掉
     if (this.store.deleted === true) {
       this.toastWarn('店家不存在', '此店家已不存在');
-      this.goBack();
+      // 延遲再跳轉
+      setTimeout(() => {
+        this.goBack();
+      }, 2000);
       return;
     }
 
     // 3) publish 權限：publish=false 且不是建立者 → 擋掉
     if (this.store.publish === false) {
-      const createdBy = this.store.created_by || '';
+      const createdBy = this.store.createdBy;
       if (!this.userId || createdBy !== this.userId) {
+        console.log('此為不公開店家');
         this.toastWarn('不公開店家', '此為不公開店家');
-        this.goBack();
+        // 延遲再跳轉
+        setTimeout(() => {
+          this.goBack();
+        }, 2000);
         return;
       }
     }
@@ -647,13 +658,33 @@ export class StoreInfoComponent implements OnInit {
     if (!Array.isArray(all)) return [];
 
     const u = this.selectedProduct?.unusual;
-    if (!u || typeof u !== 'object') return [];
+    if (!u) return [];
 
-    const allowIds = Object.keys(u)
-      .map((k) => Number(k))
-      .filter((n) => !Number.isNaN(n));
+    let allowIds: number[] = [];
+
+    // =========================
+    // 舊格式：object { '150': 'true' }
+    // =========================
+    if (!Array.isArray(u) && typeof u === 'object') {
+      allowIds = Object.keys(u)
+        .map((k) => Number(k))
+        .filter((n) => !Number.isNaN(n));
+    }
+
+    // =========================
+    // 新格式：array [{ '150': 'true' }, { '151': 'true' }]
+    // =========================
+    if (Array.isArray(u)) {
+      allowIds = u
+        .flatMap((obj) =>
+          typeof obj === 'object' && obj !== null ? Object.keys(obj) : [],
+        )
+        .map((k) => Number(k))
+        .filter((n) => !Number.isNaN(n));
+    }
 
     if (!allowIds.length) return [];
+
     return all.filter((g: any) => allowIds.includes(Number(g?.id)));
   }
 
@@ -755,7 +786,7 @@ export class StoreInfoComponent implements OnInit {
           deleted: false,
           publish: true,
           force_closed: false,
-          created_by: 'SystemManager',
+          createdBy: 'SystemManager',
         },
       ],
       operatingHoursVoList: [

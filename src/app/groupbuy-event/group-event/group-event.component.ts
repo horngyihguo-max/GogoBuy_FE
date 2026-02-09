@@ -520,9 +520,9 @@ export class GroupEventComponent {
       limitation: this.limitation,
       deleted: false
     }
-    this.http.postApi('http://localhost:8080/gogobuy/addEvent', req).subscribe({
-      next: (res) => {
-        console.log('新增成功', res);
+    this.http.postApi('http://localhost:8080/gogobuy/event/addEvent', req).subscribe({
+      next: (res:any) => {
+        this.router.navigate(['/groupbuy-event/group-follow', res.id]);
       },
       error: (err) => {
         console.error('新增失敗', err);
