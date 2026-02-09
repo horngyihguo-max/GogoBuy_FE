@@ -9,19 +9,25 @@
       [autoplayInterval]="4000" [responsiveOptions]="responsiveOptions" [showNavigators]="false"
       [showIndicators]="!isMobile" (onPage)="onCarouselPage($event)">
       <ng-template pTemplate="item" let-banner let-i="index">
-        <div class="carousel-item-wrapper px-1" [class.is-center-item]="i === centerIndex">
-          <div class="banner relative overflow-hidden rounded-2xl h-[220px] md:h-[280px] lg:h-[320px]"
-            [class.is-center]="i === centerIndex">
+        <div class="carousel-item-wrapper px-1" [class.is-center-item]="i == centerIndex">
+          <a [href]="banner.link ? banner.link : 'javascript:void(0)'" [target]="banner.link ? '_blank' : '_self'"
+            [style.cursor]="banner.link ? 'pointer' : 'default'" class="block no-underline">
 
-            <img [src]="banner.image" [alt]="banner.title" class="w-full h-full object-cover" />
-            @if(!isMobile){
-            <div class="banner-mask absolute inset-0 bg-black/40 backdrop-blur-sm pointer-events-none"></div>
-            }
-            <div class="banner-title absolute bottom-4 left-4 z-10 text-white font-bold text-lg drop-shadow-md">
-              {{ banner.title }}
+            <div class="banner relative overflow-hidden rounded-2xl h-[220px] md:h-[280px] lg:h-[320px]"
+              [class.is-center]="i == centerIndex">
+
+              <img [src]="banner.image" [alt]="banner.title" class="w-full h-full object-cover" />
+
+              @if(!isMobile){
+              <div class="banner-mask absolute inset-0 bg-black/40 backdrop-blur-sm pointer-events-none"></div>
+              }
+
+              <div class="banner-title absolute bottom-4 left-4 z-10 text-white font-bold text-lg drop-shadow-md">
+                {{ banner.title }}
+              </div>
+
             </div>
-
-          </div>
+          </a>
         </div>
       </ng-template>
     </p-carousel>

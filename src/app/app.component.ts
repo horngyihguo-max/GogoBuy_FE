@@ -235,6 +235,7 @@ export class AppComponent {
   onUserClick(event: any, menu: any) {
     const items = this.filteredItems;
     if (items && items.length > 0) {
+      event.stopPropagation();
       menu.toggle(event);
     } else {
       console.log('選單內容為空');
@@ -323,7 +324,7 @@ export class AppComponent {
 
   // 使用定位（允許後即時搜尋）
   enableNearbyAuto() {
-    // ✅ 防止重複註冊 watchPosition
+    // 防止重複註冊 watchPosition
     if (this.watchId != null) {
       // 已經在追蹤了，就不要再開新的
       return;

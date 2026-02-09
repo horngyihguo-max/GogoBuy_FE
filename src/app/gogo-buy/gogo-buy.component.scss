@@ -148,7 +148,7 @@
 /* 1) viewport 內做 5% 空白，並裁切 */
 :host ::ng-deep .hero-carousel .p-carousel-viewport {
   overflow: hidden !important;
-  padding-top: 40px;
+  padding-top: 10px;
   padding-bottom: 40px;
 }
 
