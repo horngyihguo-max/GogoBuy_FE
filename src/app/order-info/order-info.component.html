@@ -76,13 +76,18 @@
               </button>
             </div>
           </div>
-
           }
         </div>
         }
       </div>
       }
 
+      <div class="mt-6 text-center">
+        <button type="button" class="px-6 py-3 rounded-lg bg-[#769902] text-white font-bold hover:bg-[#5f7a02]"
+          (click)="router.navigate(['groupbuy-event/group-follow', eventsId])">
+          加購更多商品
+        </button>
+      </div>
       @if (mode == 'host') {
       <div class="mt-6 flex flex-col items-center gap-3 text-slate-600">
         <button type="button" class="flex items-center gap-2 hover:underline" (click)="reloadOrders()">

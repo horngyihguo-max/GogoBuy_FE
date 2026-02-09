@@ -113,6 +113,9 @@ export class AppComponent {
   userAvatar = computed(() => {
     const u: any = this.user();
     if (!u) return null;
+    console.log(u.user_avatar_url)
+    console.log(u.avatar_url)
+    console.log(u.avatarUrl)
     return u.user_avatar_url || u.avatar_url || u.avatarUrl || '/default_avatar.png';
   });
 

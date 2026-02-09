@@ -72,23 +72,23 @@ export class AuthCallbackComponent implements OnInit {
           return;
         }
 
-        const googleAvatar = res.avatar_url || res.avatarUrl || '';
-        let finalAvatarUrl = googleAvatar;
+        const originalAvatar = res.avatar_url || res.avatarUrl || '';
+        let finalAvatarUrl = originalAvatar;
 
-        // ✅ 如果是 Google 頭像（不是 cloudinary）才轉存
-        if (googleAvatar && !this.isCloudinary(googleAvatar)) {
+        if (originalAvatar) {
           try {
-            const file = await this.urlToFile(googleAvatar);
+            // 不管是不是 Cloudinary，都轉存
+            const file = await this.urlToFile(originalAvatar);
             finalAvatarUrl = await this.uploadAvatarToCloudinary(file);
 
-            // ✅ 寫回 DB（根治 429）
+            // 寫回 DB
             this.updateAvatarInDb(userId, finalAvatarUrl);
           } catch (e) {
-            console.warn('Google avatar 轉存失敗（可能是 CORS）', e);
+            console.warn('Avatar 轉存到 Cloudinary 失敗，保留原 URL', e);
           }
         }
 
-        // ✅ 這裡只做最基本的 user 存放（其他欄位你照原本補回去）
+        // 存放 user 資料
         const formattedUser = {
           id: userId,
           nickname: res.nickname,

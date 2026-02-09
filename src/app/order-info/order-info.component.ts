@@ -48,6 +48,7 @@ type OrderVM = {
   subtotal: number;
   parsedOptions?: any;
   userId?: string;
+  eventId: number;
 };
 
 type OrderGroupVM = {
@@ -96,7 +97,6 @@ export class OrderInfoComponent implements OnInit {
     public messageService: MessageService,
     public cart: CartService,
     public auth: AuthService,
-    private https: HttpService,
     public router: Router,
     private route: ActivatedRoute,
   ) { }
@@ -318,7 +318,6 @@ export class OrderInfoComponent implements OnInit {
   get groupedOrders(): OrderGroupVM[] {
     const orders: OrderVM[] = this.res?.orders ?? [];
     const map = new Map<string, OrderGroupVM>();
-
     for (const o of orders) {
       const nickname = (this.mode == 'host')
         ? (o.hostNickname ?? '（未知）')
@@ -332,7 +331,7 @@ export class OrderInfoComponent implements OnInit {
           nickname,
           totalAmount: 0,
           totalQty: 0,
-          orders: [],
+          orders: []
         });
       }
 
