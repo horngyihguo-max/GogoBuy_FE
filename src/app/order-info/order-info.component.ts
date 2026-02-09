@@ -363,14 +363,27 @@ export class OrderInfoComponent implements OnInit {
   }
   private loadOrders() {
     if (!this.eventsId) return;
-    if (this.mode == 'member' && !this.userId) return;
 
-    const orders$ = (this.mode == 'host')
-      ? this.cart.getOrdersAll(this.eventsId)
-      : this.cart.getOrders(this.userId, this.eventsId);
+    const currentUserId =
+      this.mode == 'member'
+        ? this.auth.user?.id
+        : null;
+
+    let memberUserId: string | null = null;
+
+    if (this.mode === 'member') {
+      memberUserId =
+        this.userId ||
+        this.auth.user?.id ||
+        null;
+    }
+
+
+
+    const orders$ = this.cart.getOrdersAll(this.eventsId);
 
     orders$.pipe(
-      tap((x: any) => console.log('[RAW ordersRes]', this.mode, x)),
+      tap((x: any) => console.log('[RAW ordersRes]', x)),
       switchMap((ordersRes: any) => {
         const raw: any = ordersRes;
 
@@ -384,23 +397,37 @@ export class OrderInfoComponent implements OnInit {
 
         const orders = listFromHost.length > 0 ? listFromHost : listFromMember;
 
+        let filteredOrders = orders;
+
+        if (this.mode === 'member') {
+          // 只保留「跟團者自己的訂單」
+          const myUserId =
+            this.userId ||
+            this.auth.user?.id ||
+            orders[0]?.userId;
+
+          if (myUserId) {
+            filteredOrders = orders.filter((o: { userId: any; }) => o.userId === myUserId);
+          }
+        }
+
         const menuIds: number[] = Array.from(
           new Set(
-            orders
+            filteredOrders
               .map((o: any) => Number(o.menuId))
               .filter((id: any) => Number.isFinite(id))
           )
         );
 
         if (menuIds.length == 0) {
-          return of({ orders, menuMap: new Map<number, MenuItemDto>() });
+          return of({ orders: filteredOrders, menuMap: new Map<number, MenuItemDto>() });
         }
 
         return this.cart.getMenuByMenuId(menuIds).pipe(
           map((menuRes: MenuRes) => {
             const menuMap = new Map<number, MenuItemDto>();
             for (const m of menuRes.menuList ?? []) menuMap.set(m.id, m);
-            return { orders, menuMap };
+            return { orders: filteredOrders, menuMap };
           })
         );
       }),

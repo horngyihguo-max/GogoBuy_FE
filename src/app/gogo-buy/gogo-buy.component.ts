@@ -391,13 +391,15 @@ export class GogoBuyComponent {
   banners: Banner[] = [
     {
       image: 'fastFood.png',
-      title: '速食限時優惠'
+      title: '速食限時優惠',
+      link:'https://v19.primeng.org/carousel'
     },
     {
       //位置
       image: 'Bubble.png',
       //圖片無法顯示時文字
-      title: '揪團喝珍奶'
+      title: '揪團喝珍奶',
+      link:'https://v19.primeng.org/carousel'
     },
     {
       image: 'JapaneseFood.png',

@@ -1,19 +1,15 @@
 /* --- HEADER --- */
-/* 懸浮窗跟隨 */
-.topbar,
-.topbar-wrapper {
-  position: static;
-}
-
 /* header背景顏色和排版 */
 header {
   background-color: var(--brand-primary);
   border-bottom: 2px solid var(--brand-primary);
   padding: 0.3rem 2rem;
-  position: relative;
   top: 0;
+  left: 0;
+  width: 100%;
   z-index: 1000;
   display: flex;
+  position: fixed;
   justify-content: space-between;
   align-items: center;
 }
@@ -72,16 +68,18 @@ nav i.nav-icon:hover {
 /* --- MAIN --- */
 main {
   flex: 1;
+  padding-top:112px;
 }
 
 .marquee {
+  top: 64px;
   width: 100%;
   overflow: hidden;
   background: #f0f0f0;
   border: 1px solid #ccc;
   padding: 10px 0;
   z-index: 999;
-  position: relative;
+  position: fixed;
 }
 
 
@@ -245,6 +243,10 @@ footer {
     position: static;
   }
 
+main {
+  padding-top:0px;
+}
+
   header {
     position: relative;
     height: auto;
@@ -273,12 +275,7 @@ footer {
   }
 
   .marquee {
-    padding: 8px 0;
-  }
-
-  .marquee__item {
-    padding: 0 12px;
-    font-size: 0.9rem;
+    display: none;
   }
 
   .search-mobile {

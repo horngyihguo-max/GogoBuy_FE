@@ -1,3 +1,4 @@
+import { filter } from 'rxjs/operators';
 import { FeeDescriptionVoList, MenuCategoriesVoList, MenuVoList, OperatingHoursVoList, PriceLevel, ProductOptionGroupsVoList, Stores } from './../../@service/store.service';
 import { Component } from '@angular/core';
 import { AuthService } from '../../@service/auth.service';
@@ -127,7 +128,7 @@ export class GroupEventComponent {
       if (this.storeList) {
         this.type=this.storeList.type;
       }
-      this.menuVoList = res.menuVoList || [];
+      this.menuVoList = res.menuVoList.filter((item:any)=>item.available) || [];
       this.menuCategoriesVoList = res.menuCategoriesVoList || [];
       if (this.menuCategoriesVoList?.length > 0) {
         const categoryMap = new Map(
@@ -482,6 +483,10 @@ export class GroupEventComponent {
     this.isPreview=false;
   }
   addEvent(){
+    this.route.queryParams.subscribe(params => {  //若有wishId取來發通知
+      if(params['wish_id']){
+        this.wishId=Number(params['wish_id']);      }
+    });
     const missingFields: string[] = [];
     if (!this.endTime) {
       missingFields.push('截止日期與時間');
@@ -521,15 +526,12 @@ export class GroupEventComponent {
       limitation: this.limitation,
       deleted: false
     }
-    this.route.queryParams.subscribe(params => {  //若有wishId取來發通知
-      if(params['wish_id']){
-        this.wishId=Number(params['wish_id']);      }
-    });
     this.http.postApi('http://localhost:8080/gogobuy/event/addEvent', req).subscribe({
       next: (res: any) => {
+        console.log(res);
         if (res && res.id) {
           if (this.wishId) {  // 有許願，先結案再跳轉
-            const finishUrl = 'http://localhost:8080/gogobuy/wish/finish_wish?id=${this.wishId}&userId=${this.userId}&targetUrl=localhost:4200/groupbuy-event/group-follow/${res.id}';
+            const finishUrl = `http://localhost:8080/gogobuy/wish/finish_wish?id=${this.wishId}&userId=${this.userId}&targetUrl=http://localhost:4200/groupbuy-event/group-follow/${res.id}`;
             this.http.postApi(finishUrl, {}).subscribe({
               next: () => this.router.navigate(['/groupbuy-event/group-follow', res.id]),
               error: (err) => {
@@ -539,10 +541,14 @@ export class GroupEventComponent {
           } else {  // 沒有許願，直接跳轉
             this.router.navigate(['/groupbuy-event/group-follow', res.id]);
           }
+        }else if(res && res.code==400){
+          const error:string[]=[];
+          error.push(res.message);
+          if (error.length > 0) {    // Swal 警告
+            const fieldList = error.join('、'); // 將陣列轉為 "欄位A、欄位B"
+            this.showAlert('新增失敗', `${fieldList}`);
+          }
         }
-      },
-      error: (err: any) => {
-        console.error('新增失敗', err);
       }
     });
   }
