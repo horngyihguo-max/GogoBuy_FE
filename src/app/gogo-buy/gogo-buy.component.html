@@ -72,8 +72,7 @@
       <!-- group(放大) relative(讓內部圖片/遮罩以卡片為定位基準) overflow-hidden(圖片 hover 放大不會超出圓角)
        rounded-3xl(圓角) overflow-hidden(放大時隱藏超出範圍部分、避免破圖) transition-all duration-300(動畫平滑化)
        min-h-[200px](避免內容為 0 高導致圖片無法撐出卡片高度) cursor-pointer(滑鼠可點擊示意) -->
-      <div class="col-span-1 group cursor-pointer"
-        (click)="this.router.navigate(['groupbuy-event/group-follow/40'])">
+      <div class="col-span-1 group cursor-pointer" (click)="this.router.navigate(['groupbuy-event/group-follow/40'])">
 
         <!-- Image / Content Area -->
         <div class="relative overflow-hidden rounded-3xl min-h-[200px] shadow-md
@@ -98,24 +97,25 @@
               <br>
               {{ event.announcement }}
               <br>
-              {{ event.recommendDescription }}
+              <!-- {{ event.recommendDescription }} -->
             </h3>
-            
+
             <!-- Arrow Icon (Moved Back Inside Image) -->
             <div class="absolute bottom-6 right-6">
-                 <i class="pi pi-arrow-right text-white text-2xl opacity-0 group-hover:opacity-100 group-hover:translate-x-2 transition-all duration-300 drop-shadow-md"></i>
+              <i
+                class="pi pi-arrow-right text-white text-2xl opacity-0 group-hover:opacity-100 group-hover:translate-x-2 transition-all duration-300 drop-shadow-md"></i>
             </div>
           </div>
         </div>
 
         <!-- Info Area (Below) -->
         <div class="mt-4 px-1 flex flex-col gap-2">
-            <span class="text-slate-800 text-xl font-bold tracking-wide">
-              開團者：{{ event.nickname }}
-            </span>
-            <span class="text-slate-600 text-base font-medium">
-              結束時間：{{ formatDateTime(event.endTime) }}
-            </span>
+          <span class="text-slate-800 text-xl font-bold tracking-wide">
+            開團者：{{ event.nickname }}
+          </span>
+          <span class="text-slate-600 text-base font-medium">
+            結束時間：{{ formatDateTime(event.endTime) }}
+          </span>
         </div>
 
       </div>
