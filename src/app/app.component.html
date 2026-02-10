@@ -43,12 +43,17 @@
         </li>
         <li><i class="pi pi-cart-plus nav-icon cursor-pointer" style="font-size: 1.5rem" (click)="gocart()"></i></li>
         <li>
+          @if (isLoggedIn){
           @if (userAvatar()) {
           <img [src]="userAvatar()" alt="User Avatar" class="avatar-style"
             class="w-[24px] h-[25px] rounded-full cursor-pointer" (click)="onUserClick($event, menu)" />
           } @else {
           <i class="pi pi-user nav-icon cursor-pointer" style=" color: rgb(255, 255, 255); font-size: 1.5rem"
             (click)="menu.toggle($event)"></i>
+          }
+          } @else {
+          <i class="pi pi-user nav-icon cursor-pointer" style=" color: rgb(255, 255, 255); font-size: 1.5rem"
+            (click)="this.router.navigate(['gogobuy/login'])"></i>
           }
         </li>
       </ul>
