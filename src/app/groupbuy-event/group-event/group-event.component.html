@@ -291,13 +291,14 @@
                           [fluid]="true" styleClass="w-full" [style]="{'width': '100%', 'display': 'flex'}"
                           inputStyleClass="w-full border-none outline-none p-2 pl-3 !rounded-r-md
                           !rounded-l-none bg-white focus:!border-2 focus:!border-[#662222]"
-                          (ngModelChange)="onTimeChange($event)" (onShow)="handleOnShow()">
+                          (ngModelChange)="onTimeChange($event)" (onShow)="handleOnShow()" [readonlyInput]="false"
+                          [keepInvalid]="true" dateFormat="yy/mm/dd" (onBlur)="handleBlur()">
                         </p-datepicker>
                         <label>結束時間</label>
                       </p-floatlabel>
                     </div>
                   </p-inputgroup>
-                  <div class="md:text-center text-[15px] text-gray-400 pr-2 pb-1"></div>
+                  <div class="md:text-center text-[15px] text-gray-400 pr-2 pb-1">結束時間不得早於當下時間</div>
                 </span>
               </div>
               <label class="w-full">
