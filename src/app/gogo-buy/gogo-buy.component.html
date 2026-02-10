@@ -9,7 +9,7 @@
       [showIndicators]="!isMobile" (onPage)="onCarouselPage($event)">
       <ng-template pTemplate="item" let-banner let-i="index">
         <div class="carousel-item-wrapper px-1" [class.is-center-item]="i == centerIndex">
-          <a [href]="banner.link ? banner.link : ''" [target]="banner.link ? '_blank' : '_self'"
+          <a [href]="banner.link" [target]="banner.link"
             [style.cursor]="banner.link ? 'pointer' : 'default'" class="block no-underline">
             <div class="banner relative overflow-hidden rounded-2xl h-[220px] md:h-[280px] lg:h-[320px]"
               [class.is-center]="i == centerIndex">

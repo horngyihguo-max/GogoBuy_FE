@@ -2,10 +2,9 @@
   <header class="relative flex items-center px-4">
     <!-- 左：LOGO + nearby（怎麼變寬都不影響置中） -->
     <div class="flex items-center gap-3 flex-none">
-      <img routerLink="gogobuy" src="ggb3.png" class="logo cursor-pointer h-13">
-
-      @if (showSearch) {
-      <app-nearby-bar class="hidden md:block"></app-nearby-bar>
+      <img routerLink="gogobuy" src="ggb3.png" class="logo cursor-pointer h-13" pTooltip="點擊返回首頁"
+        tooltipPosition="bottom" [showDelay]="50"> @if (showSearch) {
+      <app-nearby-bar class="hidden md:block" pTooltip="搜尋附近商家"></app-nearby-bar>
       }
     </div>
 
@@ -45,10 +44,10 @@
         <li><i class="pi pi-cart-plus nav-icon cursor-pointer" style="font-size: 1.5rem" (click)="gocart()"></i></li>
         <li>
           @if (userAvatar()) {
-            <img [src]="userAvatar()" alt="User Avatar" class="avatar-style"
+          <img [src]="userAvatar()" alt="User Avatar" class="avatar-style"
             class="w-[24px] h-[25px] rounded-full cursor-pointer" (click)="onUserClick($event, menu)" />
           } @else {
-            <i class="pi pi-user nav-icon cursor-pointer" style=" color: rgb(255, 255, 255); font-size: 1.5rem"
+          <i class="pi pi-user nav-icon cursor-pointer" style=" color: rgb(255, 255, 255); font-size: 1.5rem"
             (click)="menu.toggle($event)"></i>
           }
         </li>
@@ -94,7 +93,7 @@
 
 
 <!-- main(顯示頁面，其他網頁主要修改) -->
-<main class="bg-[#F8FAFC]">
+<main class="bg-[#F8FAFC] flex-1">
   <router-outlet></router-outlet>
 </main>
 
