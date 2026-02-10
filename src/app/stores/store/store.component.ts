@@ -26,6 +26,8 @@ import { CheckboxModule } from 'primeng/checkbox';
 import { CdkDrag } from '@angular/cdk/drag-drop';
 import Swal from 'sweetalert2';
 import { ImageService } from '../../@service/image.service';
+import { FileUploadModule } from 'primeng/fileupload';
+import { ToastModule } from 'primeng/toast';
 
 @Component({
   selector: 'app-store',
@@ -39,6 +41,7 @@ import { ImageService } from '../../@service/image.service';
     InputGroupModule, InputGroupAddonModule, FloatLabelModule,
     InputNumberModule, SelectModule, InputTextModule,
     IconFieldModule, InputIconModule, CheckboxModule,
+    FileUploadModule, ToastModule
   ],
   templateUrl: './store.component.html',
   styleUrl: './store.component.scss'
@@ -418,6 +421,11 @@ export class StoreComponent {
       return;
     }
 
+    const e = this.storeData.menuCategoriesVoList.find(c => c.name === this.currentCategories.name)
+    if (e) {
+      return;
+    }
+
     if (this.isEditMode && this.editingIndex !== -1) {
       this.storeData.menuCategoriesVoList[this.editingIndex] = { ...this.currentCategories };
     } else {
@@ -616,20 +624,10 @@ export class StoreComponent {
   // 新增商品 ---------------------------------------------------------
   openNewProduct() {
     this.isEditMode = false;
-    const defaultCategoryId = this.storeData.menuCategoriesVoList.length > 0
-      ? this.storeData.menuCategoriesVoList[0].id
-      : null as any as number;
 
     this.currentProduct = this.getNewProduct();
     this.displayProductDialog = true;
 
-    setTimeout(() => {
-      if (this.storeData.menuCategoriesVoList.length === 1) {
-        this.currentProduct.categoryId =
-          this.storeData.menuCategoriesVoList[0].id;
-        this.onCategoryChange(); // 同步規格
-      }
-    });
   }
 
   // 商品圖片
@@ -700,7 +698,7 @@ export class StoreComponent {
       icon: 'warning',
       title,
       text,
-      // timer: 200,
+      timer: 1200,
       showConfirmButton: false,
       didOpen: () => {
         const c = document.querySelector(
@@ -1012,11 +1010,13 @@ export class StoreComponent {
           menuVo: this.storeData.menuVoList.filter(item => item.categoryId === category.id)
             .map(product => ({
               ...product,
-              unusual: product.unusual ? [product.unusual] : []
+              unusual: (Array.isArray(product.unusual) || !product.unusual || Object.keys(product.unusual).length === 0)
+                        ? null : product.unusual
             }))
         })),
         productOptionGroupsVoList: this.storeData.productOptionGroupsVoList
       }
+      this.toastWarn('上傳中...', '請稍候');
       console.log("payload(create):", payload);
       this.http.postApi('http://localhost:8080/gogobuy/store/create', payload)
         .subscribe((res: any) => {
@@ -1058,7 +1058,8 @@ export class StoreComponent {
           menuVo: this.storeData.menuVoList.filter(item => item.categoryId === category.id)
             .map(product => ({
               ...product,
-              unusual: product.unusual ? [product.unusual] : []
+              unusual: (Array.isArray(product.unusual) || !product.unusual || Object.keys(product.unusual).length === 0)
+                        ? null : product.unusual
             }))
         })),
         productOptionGroupsVoList: this.storeData.productOptionGroupsVoList
@@ -1088,11 +1089,8 @@ export class StoreComponent {
     console.log('closeSaveDialog() this.id', this.id);
     this.displaySaveDialog = false;
     if (!this.wishId) {
-      console.log('no wish');
-
       this.router.navigate(['/management/store_info', this.id]);
     } else {
-      console.log('have wish');
       this.router.navigate(['/groupbuy-event/group-event', this.id], {
         queryParams: { wish_id: this.wishId }
       });

@@ -9,7 +9,7 @@
           @if(storeData.image){
           <img [src]="storeData.image" alt="store" class="h-full w-full object-cover" />
           } @else {
-            <img src="Store Default Cover Image.webp" class="w-full h-full object-cover" />
+          <img src="Store Default Cover Image.webp" class="w-full h-full object-cover" />
           }
         </div>
 
@@ -336,9 +336,9 @@
   <div class="flex justify-center my-3 gap-10">
     <button type="button" class="flex items-center gap-2 px-8  py-4 bg-white text-[#662222] border border-[#662222]
       rounded-full font-medium shadow hover:bg-[#f3e5e0] active:scale-95 transition" (click)="goBack()">
-    <i class="pi pi-arrow-left text-sm"></i>
-    <span>上一步</span>
-  </button>
+      <i class="pi pi-arrow-left text-sm"></i>
+      <span>上一步</span>
+    </button>
     <button type="button" (click)="openPublic()" class="flex items-center gap-2 px-8 py-4 bg-[#662222] text-white rounded-full  font-medium
     shadow-lg hover:brightness-110 active:scale-95 transition">
       <i class="pi pi-save text-sm"></i>
@@ -496,6 +496,12 @@
       <small class="text-red-500 text-[10px] ml-1">請填寫商品分類名稱
       </small>
       }
+      @for(c of storeData.menuCategoriesVoList; track c.id){
+      @if (currentCategories.name === c.name) {
+      <small class="text-red-500 text-[10px] ml-1">此分類名稱已存在
+      </small>
+      }
+      }
     </div>
 
     <div class="flex flex-col gap-1 px-4">
@@ -611,8 +617,7 @@
             <label class=" font-bold text-[#662222]/80 mb-1">適用分類</label>
             <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
               @for(cate of storeData.menuCategoriesVoList; track cate.id || $index){
-              <div class="flex items-center p-3 rounded-xl border transition-all cursor-pointer h-full"
-                   [ngClass]="{ 'bg-[#662222]/5 border-[#662222]/30': isCateSelected(cate),
+              <div class="flex items-center p-3 rounded-xl border transition-all h-full" [ngClass]="{ 'bg-[#662222]/5 border-[#662222]/30': isCateSelected(cate),
                               'bg-gray-50 border-gray-100': !isCateSelected(cate) }">
 
                 <div class="flex items-center justify-center flex-shrink-0">
@@ -626,7 +631,7 @@
                 </label>
               </div>
               } @empty {
-                <p class="text-gray-400 italic">尚無可選分類</p>
+              <p class="text-gray-400 italic">尚無可選分類</p>
               }
             </div>
           </div>
@@ -1074,9 +1079,9 @@
   </div>
 </p-dialog>
 
-<!---------------------------- 無法刪除分類 Dialog ---------------------------->
-<p-dialog [(visible)]="displayUnableDeleteSpec" [modal]="true" [draggable]="false" [resizable]="false" [closable]="false"
-  [showHeader]="false" styleClass="rounded-2xl shadow-2xl overflow-hidden"
+<!---------------------------- 無法刪除規格 Dialog ---------------------------->
+<p-dialog [(visible)]="displayUnableDeleteSpec" [modal]="true" [draggable]="false" [resizable]="false"
+  [closable]="false" [showHeader]="false" styleClass="rounded-2xl shadow-2xl overflow-hidden"
   [style]="{ width: '90vw', maxWidth: '28rem', border: 'none' }">
 
   <div class="flex flex-col items-center p-8 bg-white text-center">
@@ -1092,7 +1097,7 @@
       此規格下目前仍有綁定的商品。<br>請先將商品移除或更換至其他規格後，<br>再嘗試刪除此規格。
     </p>
 
-    <button (click)="displayUnableDelete = false" class="w-full py-4 bg-[#662222] text-white rounded-2xl font-bold text-lg mt-5
+    <button (click)="displayUnableDeleteSpec = false" class="w-full py-4 bg-[#662222] text-white rounded-2xl font-bold text-lg mt-5
              hover:brightness-110 active:scale-[0.98] transition-all shadow-lg shadow-[#662222]/20">
       我知道了
     </button>
@@ -1108,7 +1113,8 @@
     <div>
       <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
         <svg class="h-6 w-6 text-[#662222]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9s2.015-9 4.5-9m0 18c5 0 9-4 9-9s-4-9-9-9-9 4-9 9 4 9 9 9Z" />
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9s2.015-9 4.5-9m0 18c5 0 9-4 9-9s-4-9-9-9-9 4-9 9 4 9 9 9Z" />
         </svg>
       </div>
 
@@ -1142,17 +1148,15 @@
 </p-dialog>
 
 <!---------------------------- 儲存失敗Dialog ---------------------------->
-<p-dialog [(visible)]="displaySaveFailedDialog" [modal]="true" [closable]="false" [showHeader]="false" [draggable]="false"
-  [resizable]="false" [closeOnEscape]="false" styleClass="rounded-xl overflow-hidden"
+<p-dialog [(visible)]="displaySaveFailedDialog" [modal]="true" [closable]="false" [showHeader]="false"
+  [draggable]="false" [resizable]="false" [closeOnEscape]="false" styleClass="rounded-xl overflow-hidden"
   [style]="{ width: '90vw', maxWidth: '24rem', border: 'none' }">
 
   <div class="bg-white px-4 pb-4 pt-5 sm:p-6">
     <div>
       <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
-        <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-          stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round"
-            d="M6 18L18 6M6 6l12 12" />
+        <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
         </svg>
       </div>
 

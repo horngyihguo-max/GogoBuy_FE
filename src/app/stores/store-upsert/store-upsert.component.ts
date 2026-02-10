@@ -49,8 +49,9 @@ export class StoreUpsertComponent {
   displayAlertDialog: boolean = false;
   alertMessage!: string;
   selectCategory!: string;
-  phoneRegex = /^(09\d{8}|0\d{1,2}-?\d{6,8})$/;
+  phoneRegex = /^(09\d{8}|0\d{1,2}\d{6,8})$/;
   districtsLoaded = false;
+  openDaily = false;
 
   // 暫存輸入時間
   timeSlots: TimeSlotUI[] = [];
@@ -150,6 +151,27 @@ export class StoreUpsertComponent {
     productOptionGroupsVoList: [] as ProductOptionGroupsVoList[]
   }
 
+  // 菜單掃描 ---------------------------------------------------------
+  onFileChange(event: any) {
+    const element = event.target as HTMLInputElement;
+    if (element.files && element.files.length > 0) {
+      const file = element.files[0];
+      this.menuScan(file);
+    }
+  }
+
+  menuScan(file: File) {
+    const menuImg = new FormData();
+    menuImg.append('file', file);
+    this.http.postApi('http://localhost:8080/gogobuy/store/menuScan', menuImg).subscribe((res: any) => {
+      console.log(res);
+      this.storeData.menuCategoriesVoList = res.menuCategoriesVoList;
+      this.storeData.productOptionGroupsVoList = res.productOptionGroupsVoList;
+      this.storeData.menuVoList = res.menuCategoriesVoList.MenuVo;
+
+    })
+  }
+
   // 店家輸入時顯示搜尋
   searchStore(event: any) {
     const query = event.query.toLowerCase();
@@ -239,7 +261,8 @@ export class StoreUpsertComponent {
 
       this.parseAddressToFields();
       this.convertVoToTimeSlots(source.operatingHoursVoList || []);
-    } else {
+    }
+    else {
       this.addTimeSlot();
     }
 
