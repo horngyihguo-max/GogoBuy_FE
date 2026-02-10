@@ -99,7 +99,6 @@ export class StoreInfoComponent implements OnInit {
   // 是否全部售完
   allSoldOut() {
     const items: any[] = this.store?.menuVoList || [];
-    console.log('菜單: ' + JSON.stringify(items, null, 2));
     if (items.length === 0) {
       this.isAllSoldOut = true;
     } else {
@@ -134,6 +133,7 @@ export class StoreInfoComponent implements OnInit {
         // console.log(res);
         const normalized = this.normalizeStoreResponse(res);
         this.store = normalized;
+        console.log('店家資訊: ' + JSON.stringify(this.store, null, 2));
         // 判斷是否全部售完
         this.allSoldOut();
         // console.log(JSON.stringify(this.store));
