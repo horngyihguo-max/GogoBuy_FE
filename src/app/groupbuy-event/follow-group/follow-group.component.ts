@@ -808,12 +808,12 @@ export class FollowGroupComponent {
     this.http.postApi<any>(url, payload).subscribe({
       next: (res) => {
         // 送出成功
-        console.log("送出訂單: "+JSON.stringify(payload, null, 2));
+        console.log('送出訂單: ' + JSON.stringify(payload, null, 2));
         this.toastSuccess('送出成功', '訂單已送給團長');
         this.router.navigate(['/user/cart']);
       },
       error: (err) => {
-        console.log("送出訂單: "+JSON.stringify(payload, null, 2));
+        console.log('送出訂單: ' + JSON.stringify(payload, null, 2));
         console.error('addOrders error:', err);
         // 送出失敗
         this.toastWarn('送出失敗', '請稍後再試');
@@ -1860,6 +1860,8 @@ export class FollowGroupComponent {
         menuId: it.menuId,
         quantity: it.quantity,
         specName: it.specName ?? null,
+        menuName: it.name,
+        basePrice: it.basePrice,
         selectedOptionList: it.selectedOptionList ?? [],
       })),
       personalMemo: this.personalMemo || '',
