@@ -398,11 +398,54 @@ export class GroupEventComponent {
     }
   }
   onTimeChange(value: Date) {
-    const now = new Date();
-    if (value && value < now) {
-      const nextMinute = new Date();
-      nextMinute.setMinutes(nextMinute.getMinutes() + 1);
-      this.endTime = new Date(nextMinute);
+    // 檢查是否為有效的 Date 物件
+    if (value instanceof Date && !isNaN(value.getTime())) {
+      const now = new Date();
+      // 只有當時間真的「落後現在太多」且不是在打字中的狀態才校正
+      // 或者乾脆只在 DatePicker 選取時才校正，手動輸入則交給後端或最後送出前驗證
+      if (value < now) {
+        console.warn("選擇的時間不能早於現在");
+        // 這裡可以選擇不強制覆寫，而是顯示錯誤訊息
+      }
+    }
+  }
+  // 新增一個 blur 處理，當使用者打完字離開時才校正
+  handleBlur() {
+    if (!this.endTime) return;
+
+    let rawValue = String(this.endTime).trim();
+    let parsedDate: Date;
+
+    // 1. 【格式修復】處理忘記打冒號的情況 (例如: 2026/2/10 1000 -> 2026/2/10 10:00)
+    // 匹配結尾是「空格+4位數字」的情況
+    const timeFixRegex = /(\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2})\s+(\d{2})(\d{2})$/;
+    if (timeFixRegex.test(rawValue)) {
+      rawValue = rawValue.replace(timeFixRegex, '$1 $2:$3');
+    }
+
+    // 2. 嘗試解析
+    parsedDate = new Date(rawValue.replace(/-/g, '/'));
+
+    // 3. 檢查解析結果
+    if (!isNaN(parsedDate.getTime())) {
+      const now = new Date();
+
+      // 如果輸入的時間比現在早，修正為「現在 + 1分鐘」
+      if (parsedDate < now) {
+        const nextMinute = new Date();
+        nextMinute.setMinutes(nextMinute.getMinutes() + 1);
+        nextMinute.setSeconds(0);
+        nextMinute.setMilliseconds(0);
+        this.endTime = nextMinute;
+      } else {
+        // 解析成功，更新回標準 Date 物件，PrimeNG 就會自動整理格式
+        this.endTime = parsedDate;
+      }
+    } else {
+      // 4. 如果還是解析失敗 (例如只打 2026210)
+      console.error("無法解析的時間格式:", rawValue);
+      // 可以選擇恢復成 minDate
+      this.endTime = new Date(this.minDate);
     }
   }
 

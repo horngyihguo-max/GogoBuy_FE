@@ -57,6 +57,7 @@ export class AuthService {
       eventName: e.eventName ?? '',
       announcement: e.announcement ?? '',
       recommendDescription: e.recommendDescription ?? '',
+      nickname: e.nickname ?? e.hostNickname,
       image: e.image || this.eventDemoImages[i % this.eventDemoImages.length],
     }));
   }
@@ -418,7 +419,7 @@ export class AuthService {
   getGroupbuyEventByName(hostNickname: string) {
     const encoded = encodeURIComponent(hostNickname);
     return this.https.getApi(
-      `http://localhost:8080/gogobuy/getGroupbuyEventByNickName?host_nickname=${encoded}`
+      `http://localhost:8080/gogobuy/event/getGroupbuyEventByNickname?host_nickname=${encoded}`
     );
   }
 

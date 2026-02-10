@@ -62,8 +62,12 @@
                   <!-- ================= 桌機下拉 ================= -->
                   <div class="hidden sm:block absolute mt-2 w-full bg-white rounded-md shadow-lg z-50 animate-fade-in"
                     (click)="$event.stopPropagation()">
-                    <div class="px-4 py-2 hover:bg-gray-100 cursor-pointer" (click)="choose('EQUAL')">平分制</div>
-                    <div class="px-4 py-2 hover:bg-gray-100 cursor-pointer" (click)="choose('WEIGHT')">權重制</div>
+                    @if(storeList.category=="fast"){
+                      <div class="px-4 py-2 hover:bg-gray-100 cursor-pointer" (click)="choose('EQUAL')">平分制</div>
+                    }@else {
+                      <div class="px-4 py-2 hover:bg-gray-100 cursor-pointer" (click)="choose('EQUAL')">平分制</div>
+                      <div class="px-4 py-2 hover:bg-gray-100 cursor-pointer" (click)="choose('WEIGHT')">權重制</div>
+                    }
                   </div>
                   <!-- ================= 手機 Bottom Sheet ================= -->
                   <div class="sm:hidden fixed inset-0 z-[1102] bg-black/50 backdrop-blur-sm"></div> <!-- 背景遮罩 -->
@@ -71,14 +75,21 @@
                     <div class="relative w-full max-h-[85vh] bg-white rounded-t-xl px-5 pt-4 pb-6
                               shadow-2xl animate-slide-up" (click)="$event.stopPropagation()"> <!-- 底部選單 -->
                       <h3 class="text-base font-semibold text-gray-900 mb-4">請選擇拆帳模式</h3>
-                      <button class="w-full flex items-center justify-between py-4 px-3 rounded-xl
+                      @if(storeList.category=="fast"){
+                        <button class="w-full flex items-center justify-between py-4 px-3 rounded-xl
                                 transition hover:bg-gray-100 active:bg-gray-200" (click)="choose('EQUAL')">
-                        <span>平分制</span>
-                      </button>
-                      <button class="w-full flex items-center justify-between py-4 px-3 rounded-xl
-                                transition hover:bg-gray-100 active:bg-gray-200" (click)="choose('WEIGHT')">
-                        <span>權重制</span>
-                      </button>
+                          <span>平分制</span>
+                        </button>
+                      }@else {
+                        <button class="w-full flex items-center justify-between py-4 px-3 rounded-xl
+                                  transition hover:bg-gray-100 active:bg-gray-200" (click)="choose('EQUAL')">
+                          <span>平分制</span>
+                        </button>
+                        <button class="w-full flex items-center justify-between py-4 px-3 rounded-xl
+                                  transition hover:bg-gray-100 active:bg-gray-200" (click)="choose('WEIGHT')">
+                          <span>權重制</span>
+                        </button>
+                      }
                       <button class="mt-6 w-full py-3 rounded-xl text-gray-600 bg-gray-100 active:bg-gray-200"
                         (click)="close()">取消</button>
                     </div>
@@ -280,13 +291,14 @@
                           [fluid]="true" styleClass="w-full" [style]="{'width': '100%', 'display': 'flex'}"
                           inputStyleClass="w-full border-none outline-none p-2 pl-3 !rounded-r-md
                           !rounded-l-none bg-white focus:!border-2 focus:!border-[#662222]"
-                          (ngModelChange)="onTimeChange($event)" (onShow)="handleOnShow()">
+                          (ngModelChange)="onTimeChange($event)" (onShow)="handleOnShow()" [readonlyInput]="false"
+                          [keepInvalid]="true" dateFormat="yy/mm/dd" (onBlur)="handleBlur()">
                         </p-datepicker>
                         <label>結束時間</label>
                       </p-floatlabel>
                     </div>
                   </p-inputgroup>
-                  <div class="md:text-center text-[15px] text-gray-400 pr-2 pb-1"></div>
+                  <div class="md:text-center text-[15px] text-gray-400 pr-2 pb-1">結束時間不得早於當下時間</div>
                 </span>
               </div>
               <label class="w-full">

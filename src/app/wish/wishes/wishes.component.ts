@@ -733,6 +733,7 @@ export class WishesComponent implements OnInit {
 
     const wishId = this.selectedWish.id;
     const wishTitle = encodeURIComponent(this.selectedWish.title || '');
+    sessionStorage.removeItem('temp_order_info');
     window.location.href = `/management/store_upsert?wish_id=${wishId}&wish_title=${wishTitle}`;
   }
 

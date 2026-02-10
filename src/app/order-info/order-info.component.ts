@@ -362,28 +362,11 @@ export class OrderInfoComponent implements OnInit {
   }
   private loadOrders() {
     if (!this.eventsId) return;
-
-    const currentUserId =
-      this.mode == 'member'
-        ? this.auth.user?.id
-        : null;
-
-    let memberUserId: string | null = null;
-
-    if (this.mode === 'member') {
-      memberUserId =
-        this.userId ||
-        this.auth.user?.id ||
-        null;
-    }
-
-
-
     const orders$ = this.cart.getOrdersAll(this.eventsId);
 
     orders$.pipe(
       tap((x: any) => console.log('[RAW ordersRes]', x)),
-      switchMap((ordersRes: any) => {
+      map((ordersRes: any) => {
         const raw: any = ordersRes;
 
         const listFromHost = Array.isArray(raw.ordersSearchViewList)
@@ -394,50 +377,19 @@ export class OrderInfoComponent implements OnInit {
           ? this.flattenOrdersDto(raw.ordersDto)
           : [];
 
-        const orders = listFromHost.length > 0 ? listFromHost : listFromMember;
+        let orders = listFromHost.length > 0 ? listFromHost : listFromMember;
 
-        let filteredOrders = orders;
-
-        if (this.mode === 'member') {
-          // 只保留「跟團者自己的訂單」
-          const myUserId =
-            this.userId ||
-            this.auth.user?.id ||
-            orders[0]?.userId;
-
+        if (this.mode == 'member') {
+          const myUserId = this.userId || this.auth.user?.id;
           if (myUserId) {
-            filteredOrders = orders.filter((o: { userId: any; }) => o.userId === myUserId);
+            orders = orders.filter((o: any) => o.userId == myUserId);
           }
         }
 
-        const menuIds: number[] = Array.from(
-          new Set(
-            filteredOrders
-              .map((o: any) => Number(o.menuId))
-              .filter((id: any) => Number.isFinite(id))
-          )
-        );
-
-        if (menuIds.length == 0) {
-          return of({ orders: filteredOrders, menuMap: new Map<number, MenuItemDto>() });
-        }
-
-        return this.cart.getMenuByMenuId(menuIds).pipe(
-          map((menuRes: MenuRes) => {
-            const menuMap = new Map<number, MenuItemDto>();
-            for (const m of menuRes.menuList ?? []) menuMap.set(m.id, m);
-            return { orders: filteredOrders, menuMap };
-          })
-        );
+        return { code: 200, message: 'ok', orders: orders };
       }),
-      map(({ orders, menuMap }) => {
-        const mergedOrders = orders.map((o: any) => ({
-          ...o,
-          menuName: menuMap.get(o.menuId)?.name ?? `menuId:${o.menuId}`,
-        }));
-        return { code: 200, message: 'ok', orders: mergedOrders };
-      }), switchMap((data: any) => {
-        // host 才需要抓全部人的頭像；member 只抓自己也行
+      switchMap((data: any) => {
+        // 3. 抓取頭像與暱稱 (這部分邏輯保留，因為 getOrdersView 通常不包含 Avatar URL)
         const userIds: string[] = Array.from(
           new Set(
             (data.orders ?? [])
@@ -445,19 +397,14 @@ export class OrderInfoComponent implements OnInit {
               .filter((id: any): id is string => typeof id == 'string' && id.trim().length > 0)
           )
         );
-
-
         if (userIds.length == 0) return of(data);
 
-        // 已抓過的就不要重抓
         const needFetch = userIds.filter(id => !this.avatarMap[id]);
         if (needFetch.length == 0) return of(data);
 
         return forkJoin(
           needFetch.map(id =>
-            this.cart.getUserById(id).pipe(
-              catchError(() => of(null))
-            )
+            this.cart.getUserById(id).pipe(catchError(() => of(null)))
           )
         ).pipe(
           map((users: (UserRes | null)[]) => {
@@ -470,7 +417,6 @@ export class OrderInfoComponent implements OnInit {
             return data;
           })
         );
-
       })
     ).subscribe({
       next: (data: any) => {
