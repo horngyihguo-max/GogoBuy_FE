@@ -523,7 +523,7 @@ export class FollowGroupComponent {
       .subscribe((res: any) => {
         const normalized = this.normalizeStoreResponse(res);
         this.store = normalized;
-        console.log('店家資訊: ' + this.store);
+        console.log('店家資訊: ' + JSON.stringify(this.store, null, 2));
         this.afterLoaded();
         this.loadExistingOrder(this.groupId, this.userId);
       });
@@ -808,10 +808,12 @@ export class FollowGroupComponent {
     this.http.postApi<any>(url, payload).subscribe({
       next: (res) => {
         // 送出成功
+        console.log("送出訂單: "+JSON.stringify(payload, null, 2));
         this.toastSuccess('送出成功', '訂單已送給團長');
         this.router.navigate(['/user/cart']);
       },
       error: (err) => {
+        console.log("送出訂單: "+JSON.stringify(payload, null, 2));
         console.error('addOrders error:', err);
         // 送出失敗
         this.toastWarn('送出失敗', '請稍後再試');
