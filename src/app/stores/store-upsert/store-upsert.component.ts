@@ -46,21 +46,26 @@ export class StoreUpsertComponent {
   wishId!: number;
   storeList: any[] = [];
   filteredStores: any[] = [];
-  displayAlertDialog: boolean = false;
-  alertMessage!: string;
   selectCategory!: string;
-  phoneRegex = /^(09\d{8}|0\d{1,2}\d{6,8})$/;
   districtsLoaded = false;
-  openDaily = false;
+
+  phoneRegex = /^(09\d{8}|0\d{1,2}\d{6,8})$/;
+  existingPhones: string[] = [];
+  isPhoneUsed: boolean = false;
 
   // 暫存輸入時間
   timeSlots: TimeSlotUI[] = [];
+  openDaily: boolean = false;
 
   // 行政地區
   cityOptions: any[] = [];
   selectedCity: any = null;
   selectedDistrict: any = null;
   detailAddress: string = '';
+
+  displayPhoneUsedDialog: boolean = false;
+  displayAlertDialog: boolean = false;
+  alertMessage!: string;
 
   // 行政地區 API 排除釣魚台
   loadTaiwanDistricts() {
@@ -76,10 +81,10 @@ export class StoreUpsertComponent {
           }
           return city;
         });
-        this.districtsLoaded = true;
-        if (this.storeData && this.storeData.address) {
-          this.parseAddressToFields();
-        }
+      this.districtsLoaded = true;
+      if (this.storeData && this.storeData.address) {
+        this.parseAddressToFields();
+      }
     });
   }
 
@@ -185,18 +190,38 @@ export class StoreUpsertComponent {
     const selected = event.value;
     this.id = selected.id;
     this.http.getApi(`http://localhost:8080/gogobuy/store/searchId?id=${this.id}`)
-        .subscribe((res: any) => {
-          if (res.storeList && res.storeList.length > 0) {
-            this.storeData = { ...res.storeList[0] };
+      .subscribe((res: any) => {
+        if (res.storeList && res.storeList.length > 0) {
+          this.storeData = { ...res.storeList[0] };
 
-            if (typeof this.storeData.feeDescription === 'string') {
-              this.storeData.feeDescription = JSON.parse(this.storeData.feeDescription);
-            }
-
-            this.convertVoToTimeSlots(res.operatingHoursVoList || []);
-            this.parseAddressToFields();
+          if (typeof this.storeData.feeDescription === 'string') {
+            this.storeData.feeDescription = JSON.parse(this.storeData.feeDescription);
           }
-        });
+
+          this.convertVoToTimeSlots(res.operatingHoursVoList || []);
+          this.parseAddressToFields();
+        }
+      });
+  }
+
+  // 檢查電話是否已使用過
+  checkPhone(phone: string): boolean{
+    if(!phone) {
+      this.isPhoneUsed = false;
+      return false;
+    }
+    const samePhone = this.existingPhones.some(p => p === phone);
+
+    if(samePhone){
+      this.isPhoneUsed = true;
+      return samePhone;
+    }else{
+      return false;
+    }
+  }
+
+  onPhoneInput(event: any) {
+    this.isPhoneUsed = false;
   }
 
   // 將完整地址拆分成 縣市/行政區域/路巷號
@@ -244,6 +269,7 @@ export class StoreUpsertComponent {
     this.http.getApi('http://localhost:8080/gogobuy/store/all').subscribe((res: any) => {
       this.storeList = res.storeList;
       console.log("this.storeList", this.storeList);
+      this.existingPhones = this.storeList.map((s: any) => s.phone);
     });
 
     this.id = Number(this.route.snapshot.paramMap.get('id'));
@@ -314,268 +340,289 @@ export class StoreUpsertComponent {
     }
   }
 
+  onOpenDailyChange() {
+    if (this.openDaily) {
+      this.timeSlots = [{
+        selectedWeeks: [1, 2, 3, 4, 5, 6, 7],
+        openHour: '00',
+        openMinute: '00',
+        closeHour: '23',
+        closeMinute: '59'
+      }];
+    } else {
+      if(this.timeSlots.length > 0){
+        this.timeSlots[0].selectedWeeks = [];
+      }
+    }
+  }
+
   // 時間轉換 從 {weel:1}{week:2} 變成 week:[1,2]
   private convertVoToTimeSlots(voList: any[]) {
-    if (!voList || voList.length === 0) {
-      this.timeSlots = [this.createDefaultSlot()];
-      return;
-    }
-
-    const map = new Map<string, number[]>();
-
-    voList.forEach(vo => {
-      const open = vo.openTime ? vo.openTime.substring(0, 5) : '09:00';
-      const close = vo.closeTime ? vo.closeTime.substring(0, 5) : '18:00';
-      const key = `${open}-${close}`;
-
-      if (!map.has(key)) {
-        map.set(key, []);
-      }
-
-      if (Array.isArray(vo.week)) {
-        const weekNums = vo.week.map((w: any) => parseInt(w, 10));
-        map.get(key)?.push(...weekNums);
-      } else if (vo.week !== undefined && vo.week !== null) {
-        map.get(key)?.push(parseInt(vo.week, 10));
-      }
-    });
-
-    const newSlots: TimeSlotUI[] = [];
-    map.forEach((weeks, timeKey) => {
-      const [openStr, closeStr] = timeKey.split('-');
-      const [openH, openM] = openStr.split(':');
-      const [closeH, closeM] = closeStr.split(':');
-
-      newSlots.push({
-        selectedWeeks: [...new Set(weeks)].sort((a, b) => a - b),
-        openHour: openH.padStart(2, '0'),
-        openMinute: openM.padStart(2, '0'),
-        closeHour: closeH.padStart(2, '0'),
-        closeMinute: closeM.padStart(2, '0')
-      });
-    });
-
-    this.timeSlots = newSlots.length > 0 ? newSlots : [this.createDefaultSlot()];
+  if (!voList || voList.length === 0) {
+    this.timeSlots = [this.createDefaultSlot()];
+    return;
   }
 
-  createDefaultSlot(): TimeSlotUI {
+  const map = new Map<string, number[]>();
+
+  voList.forEach(vo => {
+    const open = vo.openTime ? vo.openTime.substring(0, 5) : '09:00';
+    const close = vo.closeTime ? vo.closeTime.substring(0, 5) : '18:00';
+    const key = `${open}-${close}`;
+
+    if (!map.has(key)) {
+      map.set(key, []);
+    }
+
+    if (Array.isArray(vo.week)) {
+      const weekNums = vo.week.map((w: any) => parseInt(w, 10));
+      map.get(key)?.push(...weekNums);
+    } else if (vo.week !== undefined && vo.week !== null) {
+      map.get(key)?.push(parseInt(vo.week, 10));
+    }
+  });
+
+  const newSlots: TimeSlotUI[] = [];
+  map.forEach((weeks, timeKey) => {
+    const [openStr, closeStr] = timeKey.split('-');
+    const [openH, openM] = openStr.split(':');
+    const [closeH, closeM] = closeStr.split(':');
+
+    newSlots.push({
+      selectedWeeks: [...new Set(weeks)].sort((a, b) => a - b),
+      openHour: openH.padStart(2, '0'),
+      openMinute: openM.padStart(2, '0'),
+      closeHour: closeH.padStart(2, '0'),
+      closeMinute: closeM.padStart(2, '0')
+    });
+  });
+
+  this.timeSlots = newSlots.length > 0 ? newSlots : [this.createDefaultSlot()];
+}
+
+createDefaultSlot(): TimeSlotUI {
+  return {
+    selectedWeeks: [],
+    openHour: '09',
+    openMinute: '00',
+    closeHour: '18',
+    closeMinute: '00'
+  };
+}
+
+// 上傳照片
+onFileSelected(event: any) {
+  const input = event.target as HTMLInputElement;
+  const file = event.target.files[0];
+  if (!file) return;
+
+  if (!file.type.startsWith('image/')) {
+    Swal.fire({
+      toast: true,
+      position: 'top',
+      icon: 'error',
+      title: `只能上傳圖片檔喔!`,
+      showConfirmButton: false,
+      timer: 2000,
+    });
+    input.value = '';
+    return;
+  }
+
+  if (file.size > 2000000) {
+    const sizeMB = (file.size / 1024 / 1024).toFixed(2);
+    Swal.fire({
+      toast: true,
+      position: 'top',
+      icon: 'error',
+      title: `圖片太大了(${sizeMB}MB)，請上傳 2MB 以下的圖片!`,
+      showConfirmButton: false,
+      timer: 2000,
+    });
+    input.value = '';
+    return;
+  }
+  const localPreview = URL.createObjectURL(file);
+  const oldAvatar = this.storeData.image;
+  this.storeData.image = localPreview;
+
+  this.toastWarn('上傳中...', '請稍候');
+
+  this.imageService.upload('stores', file).subscribe({
+    next: (res) => {
+      Swal.close();
+
+      this.storeData.image = res;
+
+      this.toastSuccess('上傳成功', '');
+      input.value = '';
+    },
+    error: (err) => {
+      console.error(err);
+      this.storeData.image = oldAvatar;
+
+      Swal.fire({
+        icon: 'error',
+        title: '上傳失敗',
+        text: err?.error ?? '請稍後再試',
+      });
+      input.value = '';
+    },
+    complete: () => {
+      if (localPreview?.startsWith('blob:')) URL.revokeObjectURL(localPreview);
+    },
+  });
+}
+
+toastWarn(title: string, text: string): void {
+  Swal.fire({
+    icon: 'warning',
+    title,
+    text,
+    // timer: 200,
+    showConfirmButton: false,
+    didOpen: () => {
+      const c = document.querySelector(
+        '.swal2-container',
+      ) as HTMLElement | null;
+      if (c) c.style.zIndex = '20000';
+    },
+  });
+}
+
+toastSuccess(title: string, text: string): void {
+  Swal.fire({
+    icon: 'success',
+    title,
+    text,
+    timer: 1000,
+    showConfirmButton: false,
+    didOpen: () => {
+      const c = document.querySelector(
+        '.swal2-container',
+      ) as HTMLElement | null;
+      if (c) c.style.zIndex = '20000';
+    },
+  });
+}
+
+removeImage(event: Event) {
+  event.preventDefault();
+  event.stopPropagation();
+  this.storeData.image = null;
+}
+
+// 營業時間
+addTimeSlot() {
+  this.timeSlots.push(this.createDefaultSlot());
+}
+
+removeTimeSlot(index: number) {
+  this.timeSlots.splice(index, 1);
+}
+
+formatTime(date: Date | null): string {
+  if (!date) {
+    return '00:00';
+  }
+  const h = date.getHours().toString().padStart(2, '0');
+  const m = date.getMinutes().toString().padStart(2, '0');
+  return `${h}:${m}`;
+}
+
+hours: string[] = [];
+minutes: string[] = [];
+
+initTimeOptions() {
+  this.hours = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0'));
+  this.minutes = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0'));
+}
+
+
+// 運費級距
+addFeeRow() {
+  if (!this.storeData.feeDescription) {
+    this.storeData.feeDescription = [];
+  }
+  this.storeData.feeDescription.push({ km: 0, fee: 0 });
+}
+
+removeFeeRow(index: number) {
+  this.storeData.feeDescription?.splice(index, 1);
+}
+
+// 取消
+cancelStore() {
+  sessionStorage.removeItem('temp_order_info');
+  this.storeData = this.storeService.storeData = {
+    id: 0,
+    name: '',
+    phone: '',
+    address: '',
+    category: '',
+    type: '',
+    memo: '',
+    image: null as Blob | string | null,
+    publish: false,
+    createdBy: '',
+    operatingHoursVoList: [],
+    feeDescription: [] as FeeDescriptionVoList[],
+    menuVoList: [] as MenuVoList[],
+    menuCategoriesVoList: [] as MenuCategoriesVoList[],
+    productOptionGroupsVoList: [] as ProductOptionGroupsVoList[]
+  };
+  this.router.navigate(['../../gogobuy']);
+}
+
+// 下一步
+onSubmit() {
+  const missingFields: string[] = [];
+
+  if (!this.storeData.name) missingFields.push('商店名稱');
+  if (!this.storeData.address) missingFields.push('商店地址');
+  if (!this.storeData.phone) missingFields.push('聯絡電話');
+  if (!this.storeData.category) missingFields.push('經營類別');
+  if (!this.storeData.type) missingFields.push('商店類型');
+
+  const finalVoList = this.timeSlots.map(slot => {
     return {
-      selectedWeeks: [],
-      openHour: '09',
-      openMinute: '00',
-      closeHour: '18',
-      closeMinute: '00'
+      week: slot.selectedWeeks && slot.selectedWeeks.length > 0 ? slot.selectedWeeks : [],
+      openTime: `${slot.openHour || '00'}:${slot.openMinute || '00'}`,
+      closeTime: `${slot.closeHour || '00'}:${slot.closeMinute || '00'}`
     };
+  });
+
+  if (finalVoList.length === 0) {
+    missingFields.push('營業時間');
   }
 
-  // 上傳照片
-  onFileSelected(event: any) {
-    const input = event.target as HTMLInputElement;
-    const file = event.target.files[0];
-    if (!file) return;
-
-    if (!file.type.startsWith('image/')) {
-      Swal.fire({
-        toast: true,
-        position: 'top',
-        icon: 'error',
-        title: `只能上傳圖片檔喔!`,
-        showConfirmButton: false,
-        timer: 2000,
-      });
-      input.value = '';
-      return;
-    }
-
-    if (file.size > 2000000) {
-      const sizeMB = (file.size / 1024 / 1024).toFixed(2);
-      Swal.fire({
-        toast: true,
-        position: 'top',
-        icon: 'error',
-        title: `圖片太大了(${sizeMB}MB)，請上傳 2MB 以下的圖片!`,
-        showConfirmButton: false,
-        timer: 2000,
-      });
-      input.value = '';
-      return;
-    }
-    const localPreview = URL.createObjectURL(file);
-    const oldAvatar = this.storeData.image;
-    this.storeData.image = localPreview;
-
-    this.toastWarn('上傳中...', '請稍候');
-
-    this.imageService.upload('stores', file).subscribe({
-      next: (res) => {
-        Swal.close();
-
-        this.storeData.image = res;
-
-        this.toastSuccess('上傳成功', '');
-        input.value = '';
-      },
-      error: (err) => {
-        console.error(err);
-        this.storeData.image = oldAvatar;
-
-        Swal.fire({
-          icon: 'error',
-          title: '上傳失敗',
-          text: err?.error ?? '請稍後再試',
-        });
-        input.value = '';
-      },
-      complete: () => {
-        if (localPreview?.startsWith('blob:')) URL.revokeObjectURL(localPreview);
-      },
-    });
+  if(this.isPhoneUsed || !this.phoneRegex.test(this.storeData.phone)) {
+    this.displayPhoneUsedDialog = true;
+    return;
   }
 
-  toastWarn(title: string, text: string): void {
-    Swal.fire({
-      icon: 'warning',
-      title,
-      text,
-      // timer: 200,
-      showConfirmButton: false,
-      didOpen: () => {
-        const c = document.querySelector(
-          '.swal2-container',
-        ) as HTMLElement | null;
-        if (c) c.style.zIndex = '20000';
-      },
-    });
+  if (missingFields.length > 0) {
+    this.alertMessage = missingFields.map(field => ` ${field}`).join('\n');
+    this.displayAlertDialog = true;
+    return;
   }
 
-  toastSuccess(title: string, text: string): void {
-    Swal.fire({
-      icon: 'success',
-      title,
-      text,
-      timer: 1000,
-      showConfirmButton: false,
-      didOpen: () => {
-        const c = document.querySelector(
-          '.swal2-container',
-        ) as HTMLElement | null;
-        if (c) c.style.zIndex = '20000';
-      },
-    });
+  this.storeData.operatingHoursVoList = finalVoList;
+  const readyToSave = { ...this.storeData } as any;
+
+  this.storeService.wishId = this.wishId;
+  this.storeService.storeData = readyToSave;
+
+  console.log('同步到 Service 成功：', this.storeService.storeData);
+
+  if (this.id !== 0) {
+    this.router.navigate(['/management/store', this.id]);
+  } else {
+    this.router.navigate(['/management/store']);
   }
 
-  removeImage(event: Event) {
-    event.preventDefault();
-    event.stopPropagation();
-    this.storeData.image = null;
-  }
-
-  // 營業時間
-  addTimeSlot() {
-    this.timeSlots.push(this.createDefaultSlot());
-  }
-
-  removeTimeSlot(index: number) {
-    this.timeSlots.splice(index, 1);
-  }
-
-  formatTime(date: Date | null): string {
-    if (!date) {
-      return '00:00';
-    }
-    const h = date.getHours().toString().padStart(2, '0');
-    const m = date.getMinutes().toString().padStart(2, '0');
-    return `${h}:${m}`;
-  }
-
-  hours: string[] = [];
-  minutes: string[] = [];
-
-  initTimeOptions() {
-    this.hours = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0'));
-    this.minutes = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0'));
-  }
-
-
-  // 運費級距
-  addFeeRow() {
-    if (!this.storeData.feeDescription) {
-      this.storeData.feeDescription = [];
-    }
-    this.storeData.feeDescription.push({ km: 0, fee: 0 });
-  }
-
-  removeFeeRow(index: number) {
-    this.storeData.feeDescription?.splice(index, 1);
-  }
-
-  // 取消
-  cancelStore() {
-    sessionStorage.removeItem('temp_order_info');
-    this.storeData = this.storeService.storeData = {
-      id: 0,
-      name: '',
-      phone: '',
-      address: '',
-      category: '',
-      type: '',
-      memo: '',
-      image: null as Blob | string | null,
-      publish: false,
-      createdBy: '',
-      operatingHoursVoList: [],
-      feeDescription: [] as FeeDescriptionVoList[],
-      menuVoList: [] as MenuVoList[],
-      menuCategoriesVoList: [] as MenuCategoriesVoList[],
-      productOptionGroupsVoList: [] as ProductOptionGroupsVoList[]
-    };
-    this.router.navigate(['../../gogobuy']);
-  }
-
-  // 下一步
-  onSubmit() {
-    const missingFields: string[] = [];
-
-    if (!this.storeData.name) missingFields.push('商店名稱');
-    if (!this.storeData.address) missingFields.push('商店地址');
-    if (!this.storeData.phone) missingFields.push('聯絡電話');
-    if (!this.storeData.category) missingFields.push('經營類別');
-    if (!this.storeData.type) missingFields.push('商店類型');
-
-    const finalVoList = this.timeSlots.map(slot => {
-      return {
-        week: slot.selectedWeeks && slot.selectedWeeks.length > 0 ? slot.selectedWeeks : [],
-        openTime: `${slot.openHour || '00'}:${slot.openMinute || '00'}`,
-        closeTime: `${slot.closeHour || '00'}:${slot.closeMinute || '00'}`
-      };
-    });
-
-    if (finalVoList.length === 0) {
-      missingFields.push('營業時間');
-    }
-
-    if (missingFields.length > 0) {
-      this.alertMessage = missingFields.map(field => ` ${field}`).join('\n');
-      this.displayAlertDialog = true;
-      return;
-    }
-
-    this.storeData.operatingHoursVoList = finalVoList;
-    const readyToSave = { ...this.storeData } as any;
-
-    this.storeService.wishId = this.wishId;
-    this.storeService.storeData = readyToSave;
-
-    console.log('同步到 Service 成功：', this.storeService.storeData);
-
-    if (this.id !== 0) {
-      this.router.navigate(['/management/store', this.id]);
-    } else {
-      this.router.navigate(['/management/store']);
-    }
-
-    sessionStorage.removeItem('temp_order_info');
-  }
+  sessionStorage.removeItem('temp_order_info');
+}
 }
 
 export interface Category {
