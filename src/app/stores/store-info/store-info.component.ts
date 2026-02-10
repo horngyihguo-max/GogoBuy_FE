@@ -45,6 +45,9 @@ export class StoreInfoComponent implements OnInit {
   // force_closed 額外提示
   isForceClosed = false;
 
+  // 是否全部售完
+  isAllSoldOut = false;
+
   // 詳細資訊 drawer
   detailVisible = false;
   detailTab: TabMode = 'info';
@@ -93,6 +96,21 @@ export class StoreInfoComponent implements OnInit {
     this.loadStoreById(this.storeId);
   }
 
+  // 是否全部售完
+  allSoldOut() {
+    const items: any[] = this.store?.menuVoList || [];
+    console.log('菜單: ' + JSON.stringify(items, null, 2));
+    if (items.length === 0) {
+      this.isAllSoldOut = true;
+    } else {
+      const so = items.every((i) => i.available === false);
+      if (so) {
+        console.log('已全數售完或是無商品');
+        this.isAllSoldOut = true;
+      }
+    }
+  }
+
   category: any[] = [
     { name: '團購代購', value: 'slow' },
     { name: '外送', value: 'fast' },
@@ -104,7 +122,7 @@ export class StoreInfoComponent implements OnInit {
   }
 
   // =========================
-  // 讀資料（先假資料，後面換 API）
+  // 讀資料
   // =========================
   loadStoreById(id: number): void {
     this.isLoading = true;
@@ -113,10 +131,12 @@ export class StoreInfoComponent implements OnInit {
     this.http
       .getApi(`http://localhost:8080/gogobuy/store/searchId?id=${id}`)
       .subscribe((res: any) => {
-        console.log(res);
+        // console.log(res);
         const normalized = this.normalizeStoreResponse(res);
         this.store = normalized;
-        console.log(JSON.stringify(this.store));
+        // 判斷是否全部售完
+        this.allSoldOut();
+        // console.log(JSON.stringify(this.store));
         this.afterLoaded();
       });
 

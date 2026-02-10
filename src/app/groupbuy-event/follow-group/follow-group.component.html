@@ -474,14 +474,6 @@
                   "
                   (click)="!isSoldOut(p) && openProductDialog(p)"
                 >
-                  <!-- 已售完標籤 -->
-                  @if (isSoldOut(p)) {
-                    <div
-                      class="absolute top-3 right-3 text-[12px] font-extrabold px-3 py-1 rounded-full bg-gray-800 text-white"
-                    >
-                      已售完
-                    </div>
-                  }
 
                   <div class="flex gap-4">
                     <img
@@ -627,14 +619,6 @@
                   "
                   (click)="!isSoldOut(p) && openProductDialog(p)"
                 >
-                  <!-- 已售完標籤 -->
-                  <!-- @if (isSoldOut(p)) {
-                    <div
-                      class="absolute top-3 right-3 text-[12px] font-extrabold px-3 py-1 rounded-full bg-gray-800 text-white"
-                    >
-                      已售完
-                    </div>
-                  } -->
 
                   <div class="flex gap-4">
                     <!-- 圖片 -->
@@ -1226,13 +1210,13 @@
 
                 <!-- 右側操作 -->
                 <div class="shrink-0 flex flex-col items-end gap-2">
-                  <button
+                  <!-- <button
                     type="button"
                     class="cursor-pointer px-3 py-2 rounded-full bg-gray-100 font-extrabold active:scale-95 transition"
                     (click)="editLine($index)"
                   >
                     修改
-                  </button>
+                  </button> -->
 
                   <button
                     type="button"

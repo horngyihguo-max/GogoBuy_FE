@@ -90,7 +90,7 @@
 
                   <button
                     (click)="goStartGroup()"
-                    [disabled]="!userId || isForceClosed"
+                    [disabled]="!userId || isForceClosed || isAllSoldOut"
                     class="cursor-pointer px-5 py-2 rounded-full text-[17px] font-extrabold transition disabled:opacity-50 disabled:cursor-not-allowed bg-red-900 text-white hover:brightness-110"
                   >
                     <i class="pi pi-bolt"></i>

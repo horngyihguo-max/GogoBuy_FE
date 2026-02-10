@@ -635,26 +635,6 @@ export class FollowGroupComponent {
 
   // TODO 刪除整筆訂單（此團此人）
   deleteOrderApi(): void {
-    // const url = 'http://localhost:8080/gogobuy/event/deleteOrder';
-    // const params = {
-    //   user_id: String(this.userId),
-    //   events_id: String(this.groupId),
-    // };
-
-    // this.http.postApi<any>(url, { params }).subscribe({
-    //   next: () => {
-    //     this.toastSuccess('已移除全部訂單', '此團訂單已清除');
-    //     // 關閉訂單詳情 dialog（停留本頁）
-    //     this.orderDetailDialogVisible = false;
-    //     // 刷新本頁狀態（不跳頁）
-    //     this.resetOrderStateAfterDelete();
-    //   },
-    //   error: (err) => {
-    //     console.error('deleteOrder error:', err);
-    //     this.toastWarn('移除失敗', '請稍後再試');
-    //   },
-    // });
-
     this.cart
       .deleteOrderByUserIdAndEventsId(this.userId, this.groupId)
       .subscribe({
@@ -828,7 +808,7 @@ export class FollowGroupComponent {
     this.http.postApi<any>(url, payload).subscribe({
       next: (res) => {
         // 送出成功
-        this.toastSuccess('送出成功', '訂單已送出');
+        this.toastSuccess('送出成功', '訂單已送給團長');
         this.router.navigate(['/user/cart']);
       },
       error: (err) => {
