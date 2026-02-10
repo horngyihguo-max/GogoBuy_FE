@@ -170,10 +170,10 @@ export class GogoBuyComponent {
 
     }
 
-    this.http.getApi('http://localhost:8080/gogobuy/store/all').subscribe((res:any)=>{
+    this.http.getApi('http://localhost:8080/gogobuy/store/all').subscribe((res: any) => {
       const rawData = res.storeList || [];
       this.storeList = rawData.map((store: any) => {
-        let parsedFees:FeeDescriptionVoList[] = [];
+        let parsedFees: FeeDescriptionVoList[] = [];
         // 檢查是否有值且為字串，才進行解析
         if (store.feeDescription && typeof store.feeDescription === 'string') {
           try {
@@ -392,29 +392,38 @@ export class GogoBuyComponent {
     {
       image: 'fastFood.png',
       title: '速食限時優惠',
-      link:'https://v19.primeng.org/carousel'
+      link: 'https://v19.primeng.org/carousel'
     },
     {
       //位置
       image: 'Bubble.png',
       //圖片無法顯示時文字
       title: '揪團喝珍奶',
-      link:'https://v19.primeng.org/carousel'
+      link: 'https://v19.primeng.org/carousel'
     },
     {
       image: 'JapaneseFood.png',
-      title: '日式料理團購開團中'
+      title: '日式料理團購開團中',
+      link: ''
     },
     {
       image: 'fastFood.png',
-      title: '速食限時優惠'
+      title: '速食限時優惠',
+      link: ''
+    }
+    ,
+    {
+      image: 'COUPON.png',
+      title: '優惠卷',
+      link: ''
     }
     ,
     {
       //位置
       image: 'Bubble.png',
       //圖片無法顯示時文字
-      title: '揪團喝珍奶'
+      title: '揪團喝珍奶',
+      link: ''
     }
   ];
 
