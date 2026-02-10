@@ -21,6 +21,7 @@ import { Subscription } from 'rxjs';
 import { filter, distinctUntilChanged, map } from 'rxjs/operators';
 import { SseService } from './@service/sse.service';
 import { AvatarModule } from 'primeng/avatar';
+import { TooltipModule } from 'primeng/tooltip';
 
 
 // 選擇欄位
@@ -48,7 +49,8 @@ export interface Category {
     SelectModule,
     FormsModule,
     NearbyBarComponent,
-    AvatarModule
+    AvatarModule,
+    TooltipModule
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
