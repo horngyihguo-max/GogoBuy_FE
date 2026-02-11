@@ -4,27 +4,27 @@
   @apply flex justify-center items-center;
 
   .area-block {
-    @apply flex flex-col w-[90vw] rounded-lg h-fit bg-[#F4E7E1]/50 flex-row h-fit mt-[30px];
+    @apply flex flex-col w-[90vw] rounded-lg h-fit bg-[#F4E7E1]/50 md:flex-row md:h-fit md:mt-[30px];
   }
 }
 
 .storeName {
-  @apply text-2xl w-full sm:text-3xl text-4xl;
+  @apply text-2xl w-full sm:text-3xl md:text-4xl;
 }
 
 .info {
-  @apply text-lg pt-[5px] sm:pt-[7.5px] pt-[10px];
+  @apply text-lg pt-[5px] sm:pt-[7.5px] md:pt-[10px];
 }
 
 .store-table {
-  @apply max-w-[295px] mt-[5px] ml-[10px] max-w-none !w-[100%] mt-[10px];
+  @apply max-w-[295px] mt-[5px] ml-[10px] md:max-w-none md: !w-[100%] md:mt-[10px];
 
   tr {
     @apply w-[100vw];
   }
 
   .td-icon {
-    @apply text-lg max-w-[18px];
+    @apply text-lg md:max-w-[18px];
   }
 
   td {
@@ -33,18 +33,18 @@
 }
 
 .event-div {
-  @apply pt-4 sm:pt-6 pt-8;
+  @apply pt-4 sm:pt-6 md:pt-8;
 }
 
 .each-div {
-  @apply w-full px-2 px-4;
+  @apply w-full px-2 md:px-4;
 
   .div-title {
-    @apply text-[#662222] text-lg text-xl;
+    @apply text-[#662222] text-lg md:text-xl;
   }
 
   .div-content {
-    @apply w-full pt-2 px-2 px-8;
+    @apply w-full pt-2 px-2 md:px-8;
   }
 }
 
@@ -59,7 +59,7 @@
 }
 
 .setting-span {
-  @apply w-[25vw] pb-2 w-full w-[25vw];
+  @apply w-[25vw] pb-2 w-full md:w-[25vw];
 }
 
 .Btn {
@@ -235,8 +235,9 @@
 
 /* --- 手機、平板版 RWD (螢幕寬度 < 1024px) --- */
 @media screen and (max-width: 1023px) {
+
   /* 1. 確保排版為垂直：來源在上、目標在下 */
-  :host ::ng-deep .responsive-picklist > .p-picklist {
+  :host ::ng-deep .responsive-picklist>.p-picklist {
     display: flex !important;
     flex-direction: column !important;
   }
@@ -252,32 +253,16 @@
 
   /* 3. 修正 SVG 轉向數值 */
   /* 指向目標 (原向右) -> 旋轉 90 度向下 */
-  :host
-    ::ng-deep
-    .responsive-picklist
-    [data-pc-section='moveToTargetButton']
-    svg,
-  :host
-    ::ng-deep
-    .responsive-picklist
-    [data-pc-section='moveAllToTargetButton']
-    svg {
+  :host ::ng-deep .responsive-picklist [data-pc-section="moveToTargetButton"] svg,
+  :host ::ng-deep .responsive-picklist [data-pc-section="moveAllToTargetButton"] svg {
     transform: rotate(90deg) !important;
     display: block !important;
   }
 
   /* 指向來源 (原向左) -> 旋轉 90 度向上 (因為原圖向左，轉 90 度會變向上) */
   /* 如果轉 90 度不對，請嘗試使用 rotate(-90deg) 或 rotate(270deg) */
-  :host
-    ::ng-deep
-    .responsive-picklist
-    [data-pc-section='moveToSourceButton']
-    svg,
-  :host
-    ::ng-deep
-    .responsive-picklist
-    [data-pc-section='moveAllToSourceButton']
-    svg {
+  :host ::ng-deep .responsive-picklist [data-pc-section="moveToSourceButton"] svg,
+  :host ::ng-deep .responsive-picklist [data-pc-section="moveAllToSourceButton"] svg {
     transform: rotate(90deg) !important;
     display: block !important;
   }
@@ -331,17 +316,12 @@
   --p-floatlabel-focus-color: #662222;
 }
 
-:host ::ng-deep .p-datepicker:not(.p-disabled).p-focus + label {
+:host ::ng-deep .p-datepicker:not(.p-disabled).p-focus+label {
   color: #662222 !important;
 }
 
 /* 針對 PrimeNG 18 選中日期圓圈的終極覆蓋 */
-:host
-  ::ng-deep
-  .my-local-panel
-  .p-datepicker-calendar
-  td
-  .p-datepicker-date.p-highlight {
+:host ::ng-deep .my-local-panel .p-datepicker-calendar td .p-datepicker-date.p-highlight {
   background-color: #662222 !important;
   /* 強制背景深紅 */
   color: #ffffff !important;
@@ -355,24 +335,14 @@
 }
 
 /* 針對滑鼠懸停 (Hover) 時的圓圈顏色，也順便統一 */
-:host
-  ::ng-deep
-  .my-local-panel
-  .p-datepicker-calendar
-  td
-  > span:not(.p-highlight):hover {
+:host ::ng-deep .my-local-panel .p-datepicker-calendar td>span:not(.p-highlight):hover {
   background-color: #fce7e7 !important;
   /* 淡淡的紅 */
   color: #662222 !important;
 }
 
 /* 「今天」的圈圈 (通常是外框線) */
-:host
-  ::ng-deep
-  .my-local-panel
-  .p-datepicker-calendar
-  td.p-datepicker-today
-  > span {
+:host ::ng-deep .my-local-panel .p-datepicker-calendar td.p-datepicker-today>span {
   border: 1px solid #662222 !important;
   /* 把綠框改成紅框 */
   color: #662222 !important;
