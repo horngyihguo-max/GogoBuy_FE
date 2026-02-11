@@ -422,7 +422,7 @@ export class StoreComponent {
     }
 
     const e = this.storeData.menuCategoriesVoList.find(c => c.name === this.currentCategories.name)
-    if (e) {
+    if (e && !this.isEditMode) {
       return;
     }
 
@@ -469,21 +469,18 @@ export class StoreComponent {
     this.isEditMode = true;
     this.editingSpecIndex = index;
     this.currentGroup = JSON.parse(JSON.stringify(spec));
+    console.log('currentGroup', this.currentGroup);
 
-    const categoryIds = this.storeData.menuVoList
-      .filter(menu => menu.unusual && menu.unusual[spec.id])
-      .map(menu => menu.categoryId);
 
-    this.selectedSpecsCategories =
-      this.storeData.menuCategoriesVoList!.filter(cate =>
-        categoryIds.includes(cate.id)
+    if (this.currentGroup.applicableCategoryIds) {
+      this.selectedSpecsCategories = this.storeData.menuCategoriesVoList!.filter(cate =>
+        this.currentGroup.applicableCategoryIds!.includes(cate.id)
       );
+    } else {
+      this.selectedSpecsCategories = [];
+    }
 
-    this.newItemId = Math.max(
-      0,
-      ...this.currentGroup.items.map(i => i.id || 0)
-    ) + 1;
-
+    this.newItemId = Math.max( 0, ...this.currentGroup.items.map(i => i.id || 0)) + 1;
     this.displaySpecsDialog = true;
   }
 
@@ -566,6 +563,7 @@ export class StoreComponent {
         ...this.storeData.productOptionGroupsVoList, newSpec
       ];
     }
+    console.log('OptionGroupsVoList', this.storeData.productOptionGroupsVoList);
 
     this.displaySpecsDialog = false;
     this.currentGroup = this.getNewGroups();
@@ -734,13 +732,10 @@ export class StoreComponent {
   // 新增商品時 選擇category 帶入 optionGroup ---------------------------------
   onCategoryChange() {
     const selectedId = this.currentProduct.categoryId;
-    this.currentProduct.unusual = {};
+    this.filteredSpecsForProduct = [];
 
     if (!selectedId) {
-      this.filteredSpecsForProduct = [];
-      if (!this.isEditMode) {
         this.currentProduct.unusual = {};
-      }
       return;
     }
 
@@ -749,11 +744,10 @@ export class StoreComponent {
     );
 
     if (!this.isEditMode) {
-      const updatedUnusual: { [key: string]: string } = { ...this.currentProduct.unusual };
+      const updatedUnusual: { [key: string]: string } = { };
       this.filteredSpecsForProduct.forEach(spec => {
-        if (!updatedUnusual[spec.id]) {
-          updatedUnusual[spec.id] = 'true';
-        }
+          updatedUnusual[spec.id.toString()] = 'true';
+
       });
       this.currentProduct.unusual = updatedUnusual;
     }
@@ -911,6 +905,7 @@ export class StoreComponent {
     this.currentProduct = { ...product };
 
     this.currentProduct.unusual = this.currentProduct.unusual ? { ...this.currentProduct.unusual } : {};
+    console.log('currentProduct', this.currentProduct);
 
     this.displayProductDialog = true;
   }
@@ -1015,7 +1010,6 @@ export class StoreComponent {
         })),
         productOptionGroupsVoList: this.storeData.productOptionGroupsVoList
       }
-      this.toastWarn('上傳中...', '請稍候');
       console.log("payload(create):", payload);
       this.http.postApi('http://localhost:8080/gogobuy/store/create', payload)
         .subscribe((res: any) => {
@@ -1033,7 +1027,6 @@ export class StoreComponent {
               }
             });
           } else {
-            console.log(res.message);
             this.resMessage = res.message;
             this.displaySaveFailedDialog = true;
           }
@@ -1058,7 +1051,7 @@ export class StoreComponent {
             .map(product => ({
               ...product,
               unusual: (Array.isArray(product.unusual) || !product.unusual || Object.keys(product.unusual).length === 0)
-                        ? null : product.unusual
+                ? null : product.unusual
             }))
         })),
         productOptionGroupsVoList: this.storeData.productOptionGroupsVoList
@@ -1072,7 +1065,8 @@ export class StoreComponent {
             this.id = this.storeData.id;
             this.afterSaveSuccess();
           } else {
-            console.error('更新失敗:', res.message);
+            this.resMessage = res.message;
+            this.displaySaveFailedDialog = true;
           }
         });
     }
@@ -1085,7 +1079,6 @@ export class StoreComponent {
   }
 
   closeSaveDialog() {
-    console.log('closeSaveDialog() this.id', this.id);
     this.displaySaveDialog = false;
     if (!this.wishId) {
       this.router.navigate(['/management/store_info', this.id]);

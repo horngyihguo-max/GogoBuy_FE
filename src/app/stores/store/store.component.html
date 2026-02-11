@@ -497,7 +497,7 @@
       </small>
       }
       @for(c of storeData.menuCategoriesVoList; track c.id){
-      @if (currentCategories.name === c.name) {
+      @if (!isEditMode && currentCategories.name === c.name) {
       <small class="text-red-500 text-[10px] ml-1">此分類名稱已存在
       </small>
       }
@@ -646,14 +646,14 @@
             </div>
 
             <div class="flex flex-col gap-2 max-h-[250px] overflow-y-auto">
-              @for(item of currentGroup.items; track item.id) {
+              @for(item of currentGroup.items; track item.id; let i = $index) {
               <div class="flex gap-2 items-center">
                 <input pInputText [(ngModel)]="item.name" placeholder="項目名稱"
                   class="flex-[2]  border-gray-100 bg-gray-50 rounded-lg px-3 py-2" />
                 <p-inputNumber [(ngModel)]="item.extraPrice" prefix="$"
                   inputStyleClass="w-24  border-gray-100 bg-gray-50 rounded-lg px-2 py-2">
                 </p-inputNumber>
-                <button (click)="removeSpecItem(item.id)" class="text-gray-300 hover:text-red-500">
+                <button (click)="removeSpecItem(i)" class="text-gray-300 hover:text-red-500">
                   <i class="pi pi-times-circle text-lg"></i>
                 </button>
               </div>
@@ -730,7 +730,7 @@
           </div>
         </div>
         }
-        <input type="file" class="absolute inset-0 opacity-0 cursor-pointer" accept="image/*"
+        <input #fileInput type="file" class="absolute inset-0 opacity-0 cursor-pointer" accept="image/*"
           (change)="onFileSelected($event)" />
       </div>
 
@@ -753,7 +753,8 @@
             <label class=" font-bold text-[#662222]/80">所屬分類</label>
           </div>
           <p-select [(ngModel)]="currentProduct.categoryId" [options]="storeData.menuCategoriesVoList"
-            optionLabel="name" optionValue="id" appendTo="body" class="w-full h-12" (onChange)="onCategoryChange()" />
+            optionLabel="name" optionValue="id" appendTo="body" styleClass="w-full h-12 flex items-center"
+            (onChange)="onCategoryChange()" />
           @if (submitted && !currentProduct.categoryId) {
           <small class="text-red-500 text-[10px] ml-1">請選擇分類</small>
           }
