@@ -352,10 +352,8 @@ export class GroupEventComponent {
       // 抓出目前兩個清單中「真正」的產品 (排除墊片)
       const allProductsInSource = this.displaySource.filter(item => !item.isPadding);
       const allProductsInTarget = this.selectedItems.filter(item => !item.isPadding);
-
       // 校正來源區(不能有墊片)
       this.displaySource = [...allProductsInSource];
-
       // 校正目標區：[真正的產品] + [墊片永遠在最後]
       // 使用新物件解構，確保觸發 Angular 的渲染更新
       this.selectedItems = [...allProductsInTarget, { ...this.paddingItem }];

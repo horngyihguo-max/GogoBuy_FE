@@ -1051,7 +1051,7 @@ export class StoreComponent {
             .map(product => ({
               ...product,
               unusual: (Array.isArray(product.unusual) || !product.unusual || Object.keys(product.unusual).length === 0)
-                ? null : product.unusual
+                ? null : [product.unusual]
             }))
         })),
         productOptionGroupsVoList: this.storeData.productOptionGroupsVoList

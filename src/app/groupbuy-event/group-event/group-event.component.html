@@ -134,13 +134,14 @@
                 </div>
                 <div class="flex-1 overflow-y-auto pt-2 pb-4 px-4 bg-white custom-scrollbar rounded-r-xl">
                   @if(activeTab){
-                    <p-pickList [source]="displaySource" [target]="selectedItems" (onMoveToTarget)="onMoveToTarget($event)"
-                      (onMoveToSource)="onMoveToSource($event)" (onMoveAllToTarget)="onMoveAllToTarget($event)"
-                      (onMoveAllToSource)="onMoveAllToSource($event)" (onSourceReorder)="fixPaddingPosition()"
-                      (onTargetReorder)="fixPaddingPosition()" (onSourceSelect)="fixPaddingPosition()"
-                      [showSourceControls]="false" [showTargetControls]="false" sourceHeader="可選品項" targetHeader="已選品項"
-                      [dragdrop]="true" [responsive]="false" dataKey="id" [metaKeySelection]="false"
-                      class="responsive-picklist">
+                    <p-pickList
+                      [source]="displaySource"                        [target]="selectedItems"
+                      (onMoveToSource)="onMoveToSource($event)"       (onMoveToTarget)="onMoveToTarget($event)"
+                      (onMoveAllToSource)="onMoveAllToSource($event)" (onMoveAllToTarget)="onMoveAllToTarget($event)"
+                      (onSourceReorder)="fixPaddingPosition()"        (onTargetReorder)="fixPaddingPosition()"        (onSourceSelect)="fixPaddingPosition()"
+                      [showSourceControls]="false"                    [showTargetControls]="false"
+                      sourceHeader="可選品項"                          targetHeader="已選品項"
+                      [dragdrop]="true" [responsive]="false" dataKey="id" [metaKeySelection]="false" class="responsive-picklist">
                       <ng-template let-product pTemplate="item">
                         @if (product.isPadding) {
                           <div class="dynamic-padding" [class.can-hover]="selectedItems.length === 1">
@@ -226,7 +227,7 @@
             <div class="div-title">填寫開團資料</div>
             <div class="div-content w-full">
               <div class="flex flex-col md:flex-row md:justify-between">
-                <span class="pb-2 md:pr-2">
+                <span class="pb-2 md:pr-2 md:w-[25vw]">
               <!-- <div class="text-[15px] pr-2 pb-1">
                     開團名稱：</div> -->
                   <p-inputgroup>
@@ -246,7 +247,7 @@
                     {{ eventName?.length || 0 }} / 50
                   </div>
                 </span>
-                <span class="pb-2 md:px-2">
+                <span class="pb-2 md:px-2 md:w-[25vw]">
                   <!-- <div class="text-[15px] pr-2 pb-1">
                     成團門檻金額：
                   </div> -->
@@ -267,7 +268,7 @@
                     請輸入阿拉伯數字，最小金額為1元
                   </div>
                 </span>
-                <span class="pb-2 md:pl-2">
+                <span class="pb-2 md:pl-2 md:w-[25vw]">
                   <!-- <div class="text-[15px] pr-2 pb-1">
                     結束時間：
                   </div> -->
