@@ -25,6 +25,8 @@ export class LoginComponent {
   // 密碼顯示用boolean
   showPassword = false;
 
+  errorMessage: string = '';
+
   // 表單資料模型
   user = {
     nickname: '',
@@ -34,10 +36,15 @@ export class LoginComponent {
   };
 
   ngOnInit(): void {
-    //Called after the constructor, initializing input properties, and the first call to ngOnChanges.
-    //Add 'implements OnInit' to the class.
     this.user.email = "test2@gmail.com";
     this.user.password = 'test1234';
+
+    this.route.queryParams.subscribe(params => {
+      if (params['reason'] === 'suspended') {
+        this.errorMessage = '您的帳號已被停權，請聯繫管理員。';
+      }
+    });
+
   }
 
   // 切換模式
@@ -90,11 +97,11 @@ export class LoginComponent {
         if (res.code == 200) {
           localStorage.setItem('user_session', payload.email);
           Swal.fire({
-            title: "創建帳號成功",
-            text: "請返回登入頁面登入",
+            title: "註冊成功",
+            text: "已發送驗證信至您的信箱，請開通後再登入",
             icon: "success",
             showConfirmButton: false,
-            timer: 1000,
+            timer: 3000,
             timerProgressBar: true,
           }).then(() => window.location.reload());
         } else {

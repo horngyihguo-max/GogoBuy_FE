@@ -360,4 +360,43 @@ export class DashboardComponent {
       }
     });
   }
+
+  /**
+   * 停權用戶
+   */
+  onUserBan(user: any) {
+    if (user.role === 'admin') {
+      Swal.fire('無法執行', '不能停權管理員', 'warning');
+      return;
+    }
+
+    Swal.fire({
+      title: '確定要停權此用戶?',
+      text: `用戶: ${user.nickname} (${user.email})\n停權後該用戶將無法登入`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: '確定停權',
+      cancelButtonText: '取消',
+      confirmButtonColor: '#d33'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.authService.banUser(user.id).subscribe({
+          next: () => {
+            Swal.fire('已停權', '該用戶已被停權', 'success');
+            this.loadData();
+          },
+          error: (err) => Swal.fire('操作失敗', err?.message, 'error')
+        });
+      }
+    });
+  }
+
+  /**
+   * 查看活動 (跳轉至跟團頁面)
+   */
+  onEventView(event: any) {
+    // 您可以根據需求決定跳轉到 "group-event/:id" (開團設定) 或 "group-follow/:id" (跟團頁)
+    // 這裡假設管理者想看公開的活動詳情
+    this.router.navigate(['/groupbuy-event/group-follow', event.id]);
+  }
 }

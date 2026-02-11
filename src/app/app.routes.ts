@@ -23,6 +23,7 @@ import { OrderInfoComponent } from './order-info/order-info.component';
 import { GroupEventComponent } from './groupbuy-event/group-event/group-event.component';
 import { FollowGroupComponent } from './groupbuy-event/follow-group/follow-group.component';
 import { MyStoresComponent } from './account/my-stores/my-stores.component';
+import { VerifyEmailComponent } from './verify-email/verify-email.component';
 
 export const routes: Routes = [
   // 1. 公開頁面與首頁
@@ -90,7 +91,7 @@ export const routes: Routes = [
   // 6.GOOGLE登入跳轉頁面
   { path: 'auth-callback', component: AuthCallbackComponent },
 
-  // 6. 管理員頁面
+  // 7. 管理員頁面
   {
     path: 'admin',
     component: DashboardComponent, // 關鍵：這是一個有側邊欄的後台專用版型
@@ -115,6 +116,8 @@ export const routes: Routes = [
     //     }
     //   ]
   },
+
+  { path: 'active-account', component: VerifyEmailComponent },
 
   // 8. 錯誤處理
   { path: '', redirectTo: 'gogobuy', pathMatch: 'full' },

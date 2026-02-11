@@ -71,17 +71,17 @@ export class GroupEventComponent {
   productOptionGroupsVoList: ProductOptionGroupsVoList[] = [];
   feeDescriptionVoList: FeeDescriptionVoList[] = [];
 
-  eventName!:string;
-  endTime:Date | null = null;
-  splitType!:string;
-  announcement!:string;
-  type!:string;
-  tempMenu:number[]=[];  //存品項id
-  recommend:number[]=[];  //存推薦id
-  recommendDescription!:string;
-  limitation!:number;
-  pickTime!:Date;
-  pickLocation!:string;
+  eventName!: string;
+  endTime: Date | null = null;
+  splitType!: string;
+  announcement!: string;
+  type!: string;
+  tempMenu: number[] = [];  //存品項id
+  recommend: number[] = [];  //存推薦id
+  recommendDescription!: string;
+  limitation!: number;
+  pickTime!: Date;
+  pickLocation!: string;
 
   userId!: string;
   storeId!: number;
@@ -652,14 +652,14 @@ export class GroupEventComponent {
       this.loginFirst();
       return;
     }
-    const end=this.formatToFullDateTime(this.endTime);
-    const pick=this.formatToFullDateTime(this.pickTime);
-    const req={
-      id:0,
-      hostId:this.userId,
-      storesId:this.storeId,
-      eventName:this.eventName,
-      endTime:end,
+    const end = this.formatToFullDateTime(this.endTime);
+    const pick = this.formatToFullDateTime(this.pickTime);
+    const req = {
+      id: 0,
+      hostId: this.userId,
+      storesId: this.storeId,
+      eventName: this.eventName,
+      endTime: end,
       status: "OPEN",
       shippingFee: 0,
       splitType: this.splitType,

@@ -3,9 +3,12 @@ import { CanActivateFn, Router } from '@angular/router';
 
 export const authGuard: CanActivateFn = (route, state) => {
   const router = inject(Router);
+  const userStatus = localStorage.getItem('userStatus'); // 登入時狀態
 
   // 從 localStorage 取得我們存入的 session (Base64 過的 email)
   const session = localStorage.getItem('user_id');
+
+
 
   // 判斷是否存在
   if (session) {

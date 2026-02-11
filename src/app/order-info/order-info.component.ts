@@ -196,8 +196,8 @@ export class OrderInfoComponent implements OnInit {
   }
 
   // 返回購物車
-  backtocart() {
-    this.router.navigate(['/user/cart'])
+  backtorder() {
+    this.router.navigate(['/user/orders'])
   }
   // 返回繼續購物
   gotoshop() {
