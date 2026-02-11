@@ -283,7 +283,7 @@ export class GroupEventComponent {
       this.fixPaddingPosition();
     }
   }
- // 給 PickList 顯示用的實體陣列
+  // 給 PickList 顯示用的實體陣列
   paddingItem = { id: 'BOTTOM_PADDING', isPadding: true };
   displaySource: any[] = [this.paddingItem];  // 目標清單
   selectedItems: any[] = [this.paddingItem];  // 目標清單
@@ -608,12 +608,12 @@ export class GroupEventComponent {
       const nowTimestamp = Math.floor(now.getTime() / 60000);
       if (endTimestamp === nowTimestamp) {
         missingFields.push('截止時間不可為當下時間');
-        if(pickTimestamp <= nowTimestamp){
+        if (pickTimestamp <= nowTimestamp) {
           missingFields.push('取貨時間必須晚於結束時間');
         }
       } else if (endTimestamp < nowTimestamp) {
         missingFields.push('截止時間已過請重新輸入');
-        if(pickTimestamp <= nowTimestamp){
+        if (pickTimestamp <= nowTimestamp) {
           missingFields.push('取貨時間必須晚於結束時間');
         }
       } else if (pickTimestamp <= endTimestamp) {

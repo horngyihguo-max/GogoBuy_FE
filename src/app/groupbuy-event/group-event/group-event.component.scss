@@ -11,15 +11,18 @@
 .storeName {
   @apply text-2xl w-full sm:text-3xl md:text-4xl;
 }
+
 .info {
   @apply text-lg pt-[5px] sm:pt-[7.5px] md:pt-[10px];
 }
+
 .store-table {
-  @apply max-w-[295px] mt-[5px] ml-[10px]
-  md:max-w-none md:!w-[100%] md:mt-[10px];
+  @apply max-w-[295px] mt-[5px] ml-[10px] md:max-w-none md: !w-[100%] md:mt-[10px];
+
   tr {
     @apply w-[100vw];
   }
+
   .td-icon {
     @apply text-lg md:max-w-[18px];
   }
@@ -31,11 +34,14 @@
 .event-div {
   @apply pt-4 sm:pt-6 md:pt-8;
 }
+
 .each-div {
   @apply w-full px-2 md:px-4;
+
   .div-title {
     @apply text-[#662222] text-lg md:text-xl;
   }
+
   .div-content {
     @apply w-full pt-2 px-2 md:px-8;
   }
@@ -320,6 +326,7 @@
 :host ::ng-deep .p-datepicker:not(.p-disabled).p-focus + label {
   color: #662222 !important;
 }
+
 /* 針對 PrimeNG 18 選中日期圓圈的終極覆蓋 */
 :host
   ::ng-deep
@@ -327,8 +334,10 @@
   .p-datepicker-calendar
   td
   .p-datepicker-date.p-highlight {
-  background-color: #662222 !important; /* 強制背景深紅 */
-  color: #ffffff !important; /* 強制文字白色 */
+  background-color: #662222 !important;
+  /* 強制背景深紅 */
+  color: #ffffff !important;
+  /* 強制文字白色 */
 }
 /* 如果還是沒變，直接修改它引用的變數 */
 :host ::ng-deep .my-local-panel {
@@ -342,7 +351,8 @@
   .p-datepicker-calendar
   td
   > span:not(.p-highlight):hover {
-  background-color: #fce7e7 !important; /* 淡淡的紅 */
+  background-color: #fce7e7 !important;
+  /* 淡淡的紅 */
   color: #662222 !important;
 }
 /* 「今天」的圈圈 (通常是外框線) */
@@ -352,8 +362,10 @@
   .p-datepicker-calendar
   td.p-datepicker-today
   > span {
-  border: 1px solid #662222 !important; /* 把綠框改成紅框 */
-  color: #662222 !important; /* 文字也改紅 */
+  border: 1px solid #662222 !important;
+  /* 把綠框改成紅框 */
+  color: #662222 !important;
+  /* 文字也改紅 */
   background-color: transparent !important;
 }
 /* 時間選擇器的數字 */

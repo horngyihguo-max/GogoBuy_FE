@@ -6,13 +6,14 @@ import { SelectModule } from 'primeng/select';
 import { InputTextModule } from 'primeng/inputtext';
 import { DialogModule } from 'primeng/dialog';
 import { AuthService } from './@service/auth.service';
+import { TooltipModule } from 'primeng/tooltip';
 
 type Mode = 'idle' | 'auto' | 'manual';
 
 @Component({
   selector: 'app-nearby-bar',
   standalone: true,
-  imports: [CommonModule, FormsModule, ButtonModule, SelectModule, InputTextModule, DialogModule],
+  imports: [CommonModule, FormsModule, ButtonModule, SelectModule, InputTextModule, DialogModule, TooltipModule],
   templateUrl: './nearby-bar.component.html',
 })
 export class NearbyBarComponent implements OnInit, OnDestroy {
@@ -38,7 +39,7 @@ export class NearbyBarComponent implements OnInit, OnDestroy {
   private lastFetchAt = 0;
 
   ngOnInit() {
-      this.startAutoOnce();
+    this.startAutoOnce();
   }
 
   ngOnDestroy() {
@@ -50,31 +51,31 @@ export class NearbyBarComponent implements OnInit, OnDestroy {
   }
 
   startAutoOnce() {
-  if (!navigator.geolocation) {
-    this.mode.set('manual');
-    this.status.set('此裝置不支援定位，請改用地址搜尋');
-    return;
-  }
-
-  this.mode.set('auto');
-  this.status.set('定位中...');
-
-  navigator.geolocation.getCurrentPosition(
-    (pos) => {
-      const lat = pos.coords.latitude;
-      const lng = pos.coords.longitude;
-      this.lastLatLng = { lat, lng };
-      this.fetchByGeo(lat, lng);
-      this.dialogVisible = false;
-      this.status.set('完成');
-    },
-    () => {
+    if (!navigator.geolocation) {
       this.mode.set('manual');
-      this.status.set('定位被拒絕/失敗，請改用地址搜尋');
-    },
-    { enableHighAccuracy: true, maximumAge: 30000, timeout: 10000 }
-  );
-}
+      this.status.set('此裝置不支援定位，請改用地址搜尋');
+      return;
+    }
+
+    this.mode.set('auto');
+    this.status.set('定位中...');
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        this.lastLatLng = { lat, lng };
+        this.fetchByGeo(lat, lng);
+        this.dialogVisible = false;
+        this.status.set('完成');
+      },
+      () => {
+        this.mode.set('manual');
+        this.status.set('定位被拒絕/失敗，請改用地址搜尋');
+      },
+      { enableHighAccuracy: true, maximumAge: 30000, timeout: 10000 }
+    );
+  }
 
 
   stopWatch() {

@@ -1,14 +1,21 @@
 <div class="topbar-wrapper">
   <header class="relative flex items-center px-4">
     <!-- 左：LOGO + nearby（怎麼變寬都不影響置中） -->
+    <!-- pTooltip說明：
+          (1) pTooltip 為氣泡內容
+          (2) tooltipPosition 為氣泡顯示位置可以使用 right 、 left 、 top 、 bottom
+          (3) [positionLeft] 適用於 tooltipPosition 為 right 或 left 的時候
+          (4) [positionTop] 適用於 tooltipPosition 為 top 或 bottom 的時候
+          (5) [showDelay] 用於調整 pTooltip 顯示延遲時間-->
     <div class="flex items-center gap-3 flex-none">
       <img routerLink="gogobuy" src="ggb3.png" class="logo cursor-pointer h-13" pTooltip="點擊返回首頁"
         tooltipPosition="bottom" [showDelay]="50"> @if (showSearch) {
-      <app-nearby-bar class="hidden md:block" pTooltip="搜尋附近商家"></app-nearby-bar>
+      <app-nearby-bar class="hidden md:block" pTooltip="搜尋附近商家" tooltipPosition="bottom"
+        [positionTop]="5"></app-nearby-bar>
       }
     </div>
 
-    <!-- 中：搜尋欄「固定置中」(桌機才顯示，手機用你下面那條 search-mobile) -->
+    <!-- 中：搜尋欄「固定置中」(桌機才顯示，手機用下面那條 search-mobile) -->
     @if (showSearch) {
     <div class="disappear absolute left-1/2 -translate-x-1/2 w-full max-w-[560px] px-4">
       <p-inputgroup class="w-full">
@@ -40,21 +47,25 @@
         <!-- 通知鈴鐺 -->
         @if (isLoggedIn){
         <li>
-          <app-notification-bell class="pi"></app-notification-bell>
+          <app-notification-bell class="pi" pTooltip="點擊查看通知" tooltipPosition="bottom"
+            [positionTop]="5"></app-notification-bell>
         </li>
-        <li><i class="pi pi-cart-plus nav-icon cursor-pointer" style="font-size: 1.5rem" (click)="gocart()"></i></li>
+        <li><i class="pi pi-cart-plus nav-icon cursor-pointer" style="font-size: 1.5rem" (click)="gocart()"
+            pTooltip="點擊查看訂單" tooltipPosition="bottom" [positionTop]="5"></i></li>
         <li>
           @if (userAvatar()) {
           <img [src]="userAvatar()" alt="User Avatar" class="avatar-style"
-            class="w-[24px] h-[25px] rounded-full cursor-pointer" (click)="onUserClick($event, menu)" />
+            class="w-[24px] h-[25px] rounded-full cursor-pointer" (click)="onUserClick($event, menu)" pTooltip="點擊查看菜單"
+            tooltipPosition="bottom" [positionTop]="5" />
           } @else {
           <i class="pi pi-user nav-icon cursor-pointer" style=" color: rgb(255, 255, 255); font-size: 1.5rem"
-            (click)="menu.toggle($event)"></i>
+            (click)="menu.toggle($event)" pTooltip="點擊查看菜單" tooltipPosition="bottom" [positionTop]="5"></i>
           }
         </li>
         } @else {
-        <i class="pi pi-user nav-icon cursor-pointer" style=" color: rgb(255, 255, 255); font-size: 1.5rem"
-          (click)="this.router.navigate(['gogobuy/login'])"></i>
+        <li><i class="pi pi-user nav-icon cursor-pointer" style=" color: rgb(255, 255, 255); font-size: 1.5rem"
+            (click)="this.router.navigate(['gogobuy/login'])" pTooltip="點擊進行登入" tooltipPosition="left"
+            [positionLeft]="-5"></i></li>
         }
       </ul>
     </nav>
