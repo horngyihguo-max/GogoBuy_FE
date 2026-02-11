@@ -40,6 +40,8 @@ interface CartGroup {
   items: CartItem[];
   isHost?: boolean;
   hostLogo: any;
+  pickLocation: any;
+  pickupTime: any;
 }
 
 
@@ -200,6 +202,8 @@ export class OrdersComponent {
             events_id: item.eventsId,
             eventName: item.eventName ?? '',
             storeName: item.storeName ?? '',
+            pickLocation: item.pickLocation ?? '',
+            pickupTime: item.pickupTime ?? '',
             store_id: item.storesId ?? '',
             latestOrderTime: item.latestOrderTime ?? '',
             totalAmount: item.totalAmount ?? '',

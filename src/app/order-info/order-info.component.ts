@@ -82,6 +82,8 @@ export class OrderInfoComponent implements OnInit {
   member: MenuItem[] | undefined;
   eventName = '';
   storeName = '';
+  pickLocation = '';
+  pickupTime = '';
   latestOrderTime = '';
   userId = '';
   totalAmount = '';
@@ -118,6 +120,8 @@ export class OrderInfoComponent implements OnInit {
       this.eventsId = Number(params.get('events_id') || 0);
       this.eventName = params.get('eventName') || '';
       this.storeName = params.get('storeName') || '';
+      this.pickLocation = params.get('pickLocation') || '';
+      this.pickupTime = params.get('pickupTime') || '';
       this.latestOrderTime = params.get('latestOrderTime') || '';
       this.totalAmount = params.get('totalAmount') || '';
       this.storeLogo = params.get('storeLogo') || '';
