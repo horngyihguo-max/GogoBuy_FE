@@ -484,70 +484,107 @@
               <!-- <div class="text-[15px] pr-2 pb-1">
                     開團名稱：
                   </div> -->
-              <p-inputgroup>
-                <p-inputgroup-addon>
-                  <i class="pi pi-home"></i>
-                </p-inputgroup-addon>
-                <div class="flex-1 flex flex-col border border-gray-300 rounded-r-md bg-white">
-                  <p-floatlabel variant="on" autocomplete="off">
-                    <input type="text"
-                      class="border-none outline-none w-full p-2 pl-3 rounded-r-md transition-all bg-white"
-                      [class.p-filled]="!!eventName" [(ngModel)]="eventName" maxlength="50" />
-                    <label>開團名稱</label>
-                  </p-floatlabel>
-                </div>
-              </p-inputgroup>
-              <div class="text-right text-[10px] text-gray-400 pr-2 pb-1">
-                {{ eventName?.length || 0 }} / 50
-              </div>
-            </span>
-            <span class="setting-span md:px-2">
-              <!-- <div class="text-[15px] pr-2 pb-1">
+                  <p-inputgroup>
+                    <p-inputgroup-addon>
+                      <i class="pi pi-home"></i>
+                    </p-inputgroup-addon>
+                    <div class="flex-1 flex flex-col border border-gray-300 rounded-r-md bg-white">
+                      <p-floatlabel variant="on" autocomplete="off">
+                        <input type="text" class="outline-none w-full p-2 pl-3 rounded-r-md transition-all bg-white
+                         focus:!border-1 focus:!border-[#662222]"
+                          [class.p-filled]="!!eventName" [(ngModel)]="eventName" maxlength="50" />
+                        <label>開團名稱</label>
+                        </p-floatlabel>
+                    </div>
+                  </p-inputgroup>
+                  <div class="text-right text-[10px] text-gray-400 pr-2 pb-1">
+                    {{ eventName?.length || 0 }} / 50
+                  </div>
+                </span>
+                <span class="setting-span md:px-2">
+                  <!-- <div class="text-[15px] pr-2 pb-1">
                     成團門檻金額：
                   </div> -->
-              <p-inputgroup>
-                <p-inputgroup-addon>
-                  <i class="pi pi-dollar"></i>
-                </p-inputgroup-addon>
-                <div class="flex-1 flex flex-col border border-gray-300 rounded-r-md bg-white">
-                  <p-floatlabel variant="on" autocomplete="off">
-                    <input type="text" class="border-none outline-none w-full p-2 pl-3 rounded-r-md transition-all bg-white
-                          focus:!border-2 focus:!border-[#662222] focus:!shadow-none" [class.p-filled]="!!limitation"
-                      [(ngModel)]="limitation" />
-                    <label>成團金額門檻</label>
-                  </p-floatlabel>
-                </div>
-              </p-inputgroup>
-              <div class="md:text-center text-[15px] text-gray-400 pr-2 pb-1">
-                請輸入阿拉伯數字，最小金額為1元
-              </div>
-            </span>
-            <span class="setting-span md:pl-2">
-              <!-- <div class="text-[15px] pr-2 pb-1">
+                  <p-inputgroup>
+                    <p-inputgroup-addon>
+                      <i class="pi pi-dollar"></i>
+                    </p-inputgroup-addon>
+                    <div class="flex-1 flex flex-col border border-gray-300 rounded-r-md bg-white">
+                      <p-floatlabel variant="on" autocomplete="off">
+                        <input type="text" class="outline-none w-full p-2 pl-3 rounded-r-md transition-all bg-white
+                          focus:!border-1 focus:!border-[#662222] focus:!shadow-none"
+                          [class.p-filled]="!!limitation" [(ngModel)]="limitation" />
+                        <label>成團金額門檻</label>
+                      </p-floatlabel>
+                    </div>
+                  </p-inputgroup>
+                  <div class="md:text-center text-[15px] text-gray-400 pr-2 pb-1">
+                    請輸入阿拉伯數字，最小金額為1元
+                  </div>
+                </span>
+                <span class="setting-span md:pl-2">
+                  <!-- <div class="text-[15px] pr-2 pb-1">
                     結束時間：
                   </div> -->
-              <p-inputgroup class="w-full">
-                <p-inputgroup-addon>
-                  <i class="pi pi-clock"></i>
-                </p-inputgroup-addon>
-                <div class="flex-1 flex flex-col border border-gray-300 rounded-r-md bg-white">
-                  <p-floatlabel variant="on" style="flex: 1 1 auto; display: block;">
-                    <p-datepicker [(ngModel)]="endTime" [showTime]="true" hourFormat="24" [minDate]="minDate"
-                      [showSeconds]="false" panelStyleClass="my-local-panel" [class.p-filled]="!!endTime" [fluid]="true"
-                      styleClass="w-full" [style]="{'width': '100%', 'display': 'flex'}" inputStyleClass="w-full border-none outline-none p-2 pl-3 !rounded-r-md
-                          !rounded-l-none bg-white focus:!border-2 focus:!border-[#662222]"
-                      (ngModelChange)="onTimeChange($event)" (onShow)="handleOnShow()" [readonlyInput]="false"
-                      [keepInvalid]="true" dateFormat="yy/mm/dd" (onBlur)="handleBlur()">
-                    </p-datepicker>
-                    <label>結束時間</label>
-                  </p-floatlabel>
-                </div>
-              </p-inputgroup>
-              <div class="md:text-center text-[15px] text-gray-400 pr-2 pb-1">結束時間不得早於當下時間</div>
-            </span>
-          </div>
-          <label class="w-full">
-            <!-- <div class="text-[15px] pr-2 pb-1">
+                  <p-inputgroup class="w-full">
+                    <p-inputgroup-addon>
+                      <i class="pi pi-stopwatch"></i>
+                    </p-inputgroup-addon>
+                    <p-floatlabel variant="on" style="flex: 1 1 auto; display: block;">
+                      <p-datepicker [(ngModel)]="endTime" [showTime]="true" hourFormat="24" [minDate]="minDate"
+                        [showSeconds]="false" panelStyleClass="my-local-panel" [class.p-filled]="!!endTime"
+                        [fluid]="true" styleClass="w-full" [style]="{'width': '100%', 'display': 'flex'}"
+                        inputStyleClass="w-full outline-none p-2 pl-3 !rounded-r-md
+                        !rounded-l-none bg-white focus:!border-1 focus:!border-[#662222]"
+                        (onShow)="handleOnShow()" [readonlyInput]="false"
+                        [keepInvalid]="true" dateFormat="yy/mm/dd" (onBlur)="handleBlur()">
+                      </p-datepicker>
+                      <label class="z-1">結束時間</label>
+                    </p-floatlabel>
+                  </p-inputgroup>
+                  <div class="md:text-center text-[15px] text-gray-400 pr-2 pb-1">結束時間不得早於或等於當下時間</div>
+                </span>
+              </div>
+              <div class="flex flex-col md:grid md:grid-cols-2 md:flex-row md:justify-between">
+                <span class="pb-2 md:pr-8">
+                  <p-inputgroup>
+                    <p-inputgroup-addon>
+                      <i class="pi pi-map-marker"></i>
+                    </p-inputgroup-addon>
+                    <div class="flex-1 flex flex-col border border-gray-300 rounded-r-md bg-white">
+                      <p-floatlabel variant="on" autocomplete="off">
+                        <input type="text" class="outline-none w-full p-2 pl-3 rounded-r-md transition-all bg-white
+                         focus:!border-1 focus:!border-[#662222]"
+                          [class.p-filled]="!!pickLocation" [(ngModel)]="pickLocation" maxlength="50" />
+                        <label>取貨地點</label>
+                        </p-floatlabel>
+                    </div>
+                  </p-inputgroup>
+                  <div class="text-right text-[10px] text-gray-400 pr-2 pb-1">
+                    {{ pickLocation?.length || 0 }} / 50
+                  </div>
+                </span>
+                <span class="pb-2 md:pl-8">
+                  <p-inputgroup class="w-full">
+                    <p-inputgroup-addon>
+                      <i class="pi pi-calendar-clock"></i>
+                    </p-inputgroup-addon>
+                    <p-floatlabel variant="on" style="flex: 1 1 auto; display: block;">
+                      <p-datepicker [(ngModel)]="pickTime" [showTime]="true" hourFormat="24" [minDate]="endTime"
+                        [showSeconds]="false" panelStyleClass="my-local-panel" [class.p-filled]="!!pickTime"
+                        [readonlyInput]="false" [keepInvalid]="true" dateFormat="yy/mm/dd"
+                        (onShow)="handlePickupOnShow()" (onBlur)="handlePickupBlur()"
+                        [fluid]="true" [style]="{'width': '100%', 'display': 'flex'}"
+                        inputStyleClass="w-full outline-none p-2 pl-3 !rounded-r-md !rounded-l-none bg-white focus:!border-1 focus:!border-[#662222]">
+                      </p-datepicker>
+                      <label class="z-1">預計取貨時間</label>
+                    </p-floatlabel>
+                  </p-inputgroup>
+                  <div class="md:text-center text-[15px] text-gray-400 pr-2 pb-1">取貨時間不得早於或等於結束時間</div>
+                </span>
+              </div>
+              <label class="w-full">
+                <!-- <div class="text-[15px] pr-2 pb-1">
                   公告事項：
                 </div> -->
             <p-inputgroup class="w-full">
