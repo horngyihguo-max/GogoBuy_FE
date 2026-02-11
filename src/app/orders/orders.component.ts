@@ -150,10 +150,6 @@ export class OrdersComponent {
   );
 
   removeCart(eventsId: number) {
-    const user = JSON.parse(localStorage.getItem('user_info') || '{}');
-    const userId: string = user.id;
-
-    if (!userId) return;
     Swal.fire({
       title: "確定刪除訂單?",
       text: "刪除後無法復原!",
@@ -165,15 +161,15 @@ export class OrdersComponent {
       cancelButtonText: "取消"
     }).then((result) => {
       if (result.isConfirmed) {
-        Swal.fire({
-          title: "刪除!",
-          text: "訂單已刪除完成.",
-          icon: "success"
-        });
         {
-          this.cart.deleteOrderByUserIdAndEventsId(userId, eventsId).subscribe({
+          this.cart.deleteEventPhysically(eventsId).subscribe({
             next: (res: any) => {
               if (res.code == 200) {
+                Swal.fire({
+                  title: "刪除!",
+                  text: "整個活動已刪除完成.",
+                  icon: "success"
+                });
                 this.cartData.update(list => list.filter(item => item.eventsId !== eventsId));
               } else {
                 console.error('delete failed:', res.message);
@@ -184,7 +180,6 @@ export class OrdersComponent {
         }
       }
     });
-
   }
 
   checkout(item: CartGroup) {
