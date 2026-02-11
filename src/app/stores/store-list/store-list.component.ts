@@ -40,7 +40,7 @@ export class StoreListComponent {
   // 如果這個陣列是空的，代表「不限制品牌 = 全部」
   readonly selectedStoreNames = signal<string[]>([]);
 
-  // 選到的餐點總類（type）清單
+  // 選到的餐點種類（type）清單
   readonly selectedFoodTypes = signal<string[]>([]);
 
   // 取店名用的小工具，使用 trim() 消除前後空白
@@ -48,7 +48,7 @@ export class StoreListComponent {
     return String(s?.name ?? '').trim();
   }
 
-  // 取餐點總類用的小工具，同樣做 trim 避免空白問題
+  // 取餐點種類用的小工具，同樣做 trim 避免空白問題
   private getType(s: Store): string {
     return String(s?.type ?? '').trim();
   }
@@ -97,7 +97,7 @@ export class StoreListComponent {
       }));
   });
 
-  // 餐點總類下拉選單的選項（type 分類）
+  // 餐點種類下拉選單的選項（type 分類）
   // 從所有店家資料裡，把 type 抽出來做分類
   readonly foodTypeOptions = computed(() => {
     // count：key=type、value=出現次數
@@ -112,15 +112,15 @@ export class StoreListComponent {
     return Array.from(count.entries())
       .sort(([a], [b]) => a.localeCompare(b, 'zh-Hant'))
       .map(([t, n]) => ({
-        label: n > 1 ? `${t} (${n})` : t,
+        label: n > 1 ? `${t}` : t,
         value: t
       }));
   });
 
   // 拿去卡片的店家清單
-  // 規則：品牌+餐點總類是同時成立（AND）
+  // 規則：品牌+餐點種類是同時成立（AND）
   // - 沒選品牌（selectedStoreNames 是空）→ 不限制品牌
-  // - 沒選餐點總類（selectedFoodTypes 是空）→ 不限制餐點總類
+  // - 沒選餐點種類（selectedFoodTypes 是空）→ 不限制餐點種類
   readonly filteredStores = computed(() => {
     const list = this.stores();
     const selectedNames = this.selectedStoreNames?.() ?? [];
@@ -133,7 +133,7 @@ export class StoreListComponent {
       out = out.filter(s => selectedNames.includes(String(s.name ?? '').trim()));
     }
 
-    // 有選餐點總類才過濾，沒選=全部
+    // 有選餐點種類才過濾，沒選=全部
     if (selectedTypes.length) {
       out = out.filter(s => selectedTypes.includes(this.getType(s)));
     }

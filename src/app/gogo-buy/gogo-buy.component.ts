@@ -121,21 +121,17 @@ export class GogoBuyComponent {
     private storeService: StoreService,
   ) { }
 
-  readonly storeStage = signal<0 | 1>(0);
   readonly storeInitial = 5;   // 初始顯示
-  readonly storeExpanded = 10;  // 第一次查看更多後顯示
+
 
   visibleStores = computed(() => {
-    const limit = this.storeStage() === 0 ? this.storeInitial : this.storeExpanded;
-    return this.auths.store().slice(0, limit);
-
+    return this.auths.store().slice(0, this.storeInitial);
   });
 
-  storeCtaLabel = computed(() => this.storeStage() === 0 ? '查看更多' : '查看全部');
+  storeCtaLabel = computed(() => '查看全部');
 
   onStoreCtaClick() {
-    if (this.storeStage() === 0) this.storeStage.set(1);
-    else this.router.navigate(['/gogobuy/list']); // 店家列表頁
+    this.router.navigate(['/gogobuy/list']);
   }
 
 
@@ -175,7 +171,7 @@ export class GogoBuyComponent {
       this.storeList = rawData.map((store: any) => {
         let parsedFees: FeeDescriptionVoList[] = [];
         // 檢查是否有值且為字串，才進行解析
-        if (store.feeDescription && typeof store.feeDescription === 'string') {
+        if (store.feeDescription && typeof store.feeDescription == 'string') {
           try {
             parsedFees = JSON.parse(store.feeDescription);
           } catch (e) {
@@ -297,32 +293,38 @@ export class GogoBuyComponent {
   //輪播圖片
   banners: Banner[] = [
     {
-      image: 'fastFood.png',
-      title: '速食限時優惠',
-      link: 'https://v19.primeng.org/carousel'
+      image: '許願池2.jpg',
+      title: '許願池',
+      link: 'user/wishes'
     },
     {
       //位置
       image: 'Bubble.png',
       //圖片無法顯示時文字
       title: '揪團喝珍奶',
-      link: 'https://v19.primeng.org/carousel'
+      link: 'management/store_info/6'
     },
     {
       image: 'JapaneseFood.png',
       title: '日式料理團購開團中',
-      link: ''
+      link: 'management/store_info/3'
     },
     {
       image: 'fastFood.png',
       title: '速食限時優惠',
-      link: ''
+      link: 'management/store_info/5'
     }
     ,
     {
       image: 'COUPON.png',
       title: '優惠卷',
       link: ''
+    }
+    ,
+    {
+      image: '許願池2.jpg',
+      title: '許願池',
+      link: 'user/wishes'
     }
     ,
     {
@@ -369,22 +371,22 @@ export class GogoBuyComponent {
 
   get filteredFastStoreList() {
     return this.fastStoreList.filter(store =>
-      this.activeTab === 'allstores' || store.type === this.activeTab
+      this.activeTab == 'allstores' || store.type == this.activeTab
     );
   }
   get filteredSlowStoreList() {
     return this.slowStoreList.filter(store =>
-      this.activeTab === 'allstores' || store.type === this.activeTab
+      this.activeTab == 'allstores' || store.type == this.activeTab
     );
   }
   get filteredOpenStoreList() {
     return this.openStoreList.filter(store =>
-      this.activeTab === 'allstores' || store.type === this.activeTab
+      this.activeTab == 'allstores' || store.type == this.activeTab
     );
   }
   get filteredCloseStoreList() {
     return this.closeStoreList.filter(store =>
-      this.activeTab === 'allstores' || store.type === this.activeTab
+      this.activeTab == 'allstores' || store.type == this.activeTab
     );
   }
 
@@ -429,7 +431,7 @@ export class GogoBuyComponent {
     const searchChars = Array.from(new Set(
       this.storeSearch.toLowerCase().split('').filter(char => char.trim() !== '')
     ));
-    if (searchChars.length === 0) return text;
+    if (searchChars.length == 0) return text;
     // 3. 組成正則表達式，例如 "貨|店"
     const pattern = searchChars
       .map(char => char.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
@@ -574,8 +576,8 @@ export class GogoBuyComponent {
     // 先把 FINISHED / 非 OPEN 的過濾掉
     const activeCards = this.eventCards().filter(c => this.ACTIVE_STATUS.has(this.getEventStatus(c)));
 
-    if (t === 'ALL') return activeCards;
-    return activeCards.filter(c => this.getEventType(c) === t);
+    if (t == 'ALL') return activeCards;
+    return activeCards.filter(c => this.getEventType(c) == t);
   });
 
   /* 轉換ISO8601日期格式 */
@@ -601,7 +603,7 @@ export class GogoBuyComponent {
     if (!img) return `https://picsum.photos/800/600?random=${store?.id ?? Math.random()}`;
 
     // 2) string：可能是 URL / dataURL / base64
-    if (typeof img === 'string') {
+    if (typeof img == 'string') {
       const s = img.trim();
 
       // 已經是可用的 src
@@ -618,7 +620,7 @@ export class GogoBuyComponent {
     }
 
     // 3) number[]：byte array → 轉成 blob: URL
-    if (Array.isArray(img) && img.length > 0 && typeof img[0] === 'number') {
+    if (Array.isArray(img) && img.length > 0 && typeof img[0] == 'number') {
       const blob = new Blob([new Uint8Array(img)], { type: 'image/png' });
       const url = URL.createObjectURL(blob);
       this.objectUrlPool.push(url);
@@ -627,7 +629,7 @@ export class GogoBuyComponent {
 
     // 4) 常見包裝：{ data: number[] } / { bytes: number[] }
     const maybeArr = img?.data ?? img?.bytes;
-    if (Array.isArray(maybeArr) && maybeArr.length > 0 && typeof maybeArr[0] === 'number') {
+    if (Array.isArray(maybeArr) && maybeArr.length > 0 && typeof maybeArr[0] == 'number') {
       const blob = new Blob([new Uint8Array(maybeArr)], { type: 'image/png' });
       const url = URL.createObjectURL(blob);
       this.objectUrlPool.push(url);
