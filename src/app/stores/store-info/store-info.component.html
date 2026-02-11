@@ -78,7 +78,7 @@
 
                   <button
                     (click)="goEdit()"
-                    [disabled]="!userId"
+                    [disabled]="!userId || !user"
                     class="cursor-pointer px-5 py-2 rounded-full text-[17px] font-extrabold border transition disabled:opacity-50 disabled:cursor-not-allowed bg-white text-red-900 border-red-900 hover:bg-red-50"
                   >
                     <i class="pi pi-pencil"></i>
