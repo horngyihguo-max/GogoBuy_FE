@@ -1,3 +1,4 @@
+import { Router } from '@angular/router';
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../@service/auth.service';
@@ -17,6 +18,7 @@ import { TextareaModule } from 'primeng/textarea';
 import { TieredMenu } from 'primeng/tieredmenu';
 import { FormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
+import { StoreService } from '../@service/store.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -73,7 +75,9 @@ export class DashboardComponent {
 
   constructor(
     private authService: AuthService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private router: Router,
+    private storeService: StoreService,
   ) { }
 
   ngOnInit() {
@@ -190,6 +194,11 @@ export class DashboardComponent {
     });
   }
 
+  addStore() {
+    this.storeService.clearCurrentStore();
+    this.router.navigate(['/management/store_upsert']);
+  }
+
   getSeverity(status: string) {
     switch (status) {
       case 'GOOGLE': return 'info';
@@ -238,7 +247,7 @@ export class DashboardComponent {
       timeStr = iso.split('.')[0]; // 拿掉毫秒, 變成 2023-10-27T10:00:00
     }
 
-  // 2. 組合 msg 內容並轉換成JSON格式內容以讓 SSE 收到後能解析成 title/content/link
+    // 2. 組合 msg 內容並轉換成JSON格式內容以讓 SSE 收到後能解析成 title/content/link
     const payloadMsgObj = {
       title: this.announceData.title,
       content: this.announceData.content,
@@ -318,8 +327,8 @@ export class DashboardComponent {
         // 暫時帶入 event.hostId 嘗試
         this.authService.forceCloseEvent(event.id, event.hostId).subscribe({
           next: () => {
-             Swal.fire('結單成功', '該活動已結束', 'success');
-             this.loadData();
+            Swal.fire('結單成功', '該活動已結束', 'success');
+            this.loadData();
           },
           error: (err) => Swal.fire('操作失敗', err?.message, 'error')
         });

@@ -965,7 +965,7 @@
         </div>
 
         <!-- ===================== -->
-        <!-- 規格（單選，必選） -->
+        <!-- 規格 -->
         <!-- ===================== -->
         <div class="mt-4 bg-white/70 border border-zinc-200 rounded-[16px] p-4">
           <div class="flex items-center justify-between">
@@ -1280,17 +1280,13 @@
       <div
         class="mt-4 rounded-2xl bg-white/80 border border-black/5 shadow-sm p-4"
       >
-        <div class="flex items-end justify-between">
-          <div>
-            <div class="text-lg font-semibold text-gray-500">訂單總金額</div>
-            <div class="text-[26px] font-extrabold text-gray-900">
+        <div class="flex items-start justify-between">
+          <div class="text-lg font-semibold text-gray-500">訂單總金額</div>
+          <div class="text-right">
+            <div class="text-[26px] font-extrabold text-gray-900 mr-1">
               ${{ orderSubtotal }}
             </div>
             <div class="text-sm text-gray-500 mt-1">（尚未計入運費）</div>
-          </div>
-
-          <div class="text-lg text-gray-500 font-semibold">
-            運費：{{ group?.shippingFee }} 元
           </div>
         </div>
       </div>

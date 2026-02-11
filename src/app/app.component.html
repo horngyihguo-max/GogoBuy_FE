@@ -38,12 +38,12 @@
         </li>
         }
         <!-- 通知鈴鐺 -->
+        @if (isLoggedIn){
         <li>
           <app-notification-bell class="pi"></app-notification-bell>
         </li>
         <li><i class="pi pi-cart-plus nav-icon cursor-pointer" style="font-size: 1.5rem" (click)="gocart()"></i></li>
         <li>
-          @if (isLoggedIn){
           @if (userAvatar()) {
           <img [src]="userAvatar()" alt="User Avatar" class="avatar-style"
             class="w-[24px] h-[25px] rounded-full cursor-pointer" (click)="onUserClick($event, menu)" />
@@ -51,11 +51,11 @@
           <i class="pi pi-user nav-icon cursor-pointer" style=" color: rgb(255, 255, 255); font-size: 1.5rem"
             (click)="menu.toggle($event)"></i>
           }
-          } @else {
-          <i class="pi pi-user nav-icon cursor-pointer" style=" color: rgb(255, 255, 255); font-size: 1.5rem"
-            (click)="this.router.navigate(['gogobuy/login'])"></i>
-          }
         </li>
+        } @else {
+        <i class="pi pi-user nav-icon cursor-pointer" style=" color: rgb(255, 255, 255); font-size: 1.5rem"
+          (click)="this.router.navigate(['gogobuy/login'])"></i>
+        }
       </ul>
     </nav>
   </header>
@@ -105,7 +105,7 @@
 <!-- footer -->
 <footer>
   <div class="footer-container footer-info">
-    <h4 class="font-bold">聯繫我們</h4>
+    <a class="font-bold cursor-pointer underline decoration-1 hover:text-blue-200" (click)="contactUs()">聯繫我們</a>
     <p class="font-bold">地址：台南市歸仁區歸仁十三路一段6號</p>
     <p class="font-bold">電話：(06) 303 2550</p>
   </div>

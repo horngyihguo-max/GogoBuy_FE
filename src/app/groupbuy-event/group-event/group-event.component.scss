@@ -63,13 +63,15 @@
 
 /* 1. 確保外層包裹容器高度跟隨 */
 :host ::ng-deep .p-picklist-listwrapper {
-  height: 25rem !important; /* 同步改為 25rem */
+  height: 25rem !important;
+  /* 同步改為 25rem */
 }
 /* 2. 讓內部的 ul (清單) 真正撐滿 */
 :host ::ng-deep .p-picklist-list {
-  min-height: 25rem !important;
-  height: 100% !important;
+  min-height: 10rem !important;
+  height: fit-content !important;
 }
+
 /* 3. 調整初始墊片的高度 */
 .dynamic-padding.can-hover {
   /* 當沒東西時，讓墊片幾乎佔滿 25rem */
@@ -86,6 +88,7 @@
   margin: 5px;
   flex-shrink: 0;
 }
+
 .product-item {
   position: relative;
   width: 100%;
@@ -98,11 +101,13 @@
 }
 @media (max-width: 523px) {
   .product-item {
-    flex-direction: column !important; /* 強制轉向 */
+    flex-direction: column !important;
+    /* 強制轉向 */
     align-items: flex-start !important;
     height: auto !important;
     min-height: fit-content;
-    gap: 8px; /* 增加間距觀察是否有變化 */
+    gap: 8px;
+    /* 增加間距觀察是否有變化 */
   }
 }
 @media (min-width: 524px) {
@@ -131,6 +136,7 @@
   z-index: 0;
   box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.2);
 }
+
 /* 移除 PickList 預設選中時的藍框，避免干擾紅按鈕視覺 */
 :host ::ng-deep .p-picklist-item.p-highlight {
   background: #f8f9fa !important;
@@ -146,23 +152,28 @@
 /* --- 手機、平板版 (水平頁籤) --- */
 @media (max-width: 1023px) {
   .active-tab {
-    border-radius: 12px 12px 0 0; /* 圓角在上方 */
+    border-radius: 12px 12px 0 0;
+    /* 圓角在上方 */
   }
+
   .active-tab::before,
   .active-tab::after {
     content: "";
     position: absolute;
-    bottom: 0; /* 貼著按鈕底部 */
+    bottom: 0;
+    /* 貼著按鈕底部 */
     width: 20px;
     height: 20px;
     background-color: transparent;
   }
+
   /* 左下凹角 */
   .active-tab::before {
     left: -20px;
     border-bottom-right-radius: 15px;
     box-shadow: 5px 5px 0 5px white;
   }
+
   /* 右下凹角 */
   .active-tab::after {
     right: -20px;
@@ -173,9 +184,12 @@
 /* --- 桌面版 (垂直頁籤) --- */
 @media (min-width: 1024px) {
   .active-tab {
-    border-radius: 12px 0 0 12px; /* 圓角在左側 */
-    width: calc(100% + 1px); /* 稍微往右突出一點點，覆蓋內容區邊界 */
+    border-radius: 12px 0 0 12px;
+    /* 圓角在左側 */
+    width: calc(100% + 1px);
+    /* 稍微往右突出一點點，覆蓋內容區邊界 */
   }
+
   .active-tab::before,
   .active-tab::after {
     content: "";
@@ -185,12 +199,14 @@
     height: 20px;
     background-color: transparent;
   }
+
   /* 右上凹角 */
   .active-tab::before {
     top: -20px;
     border-bottom-right-radius: 15px;
     box-shadow: 5px 5px 0 5px white;
   }
+
   /* 右下凹角 */
   .active-tab::after {
     bottom: -20px;
@@ -202,8 +218,10 @@
 /* 1. 基本設定：讓 PickList 容器變成 Flex 佈局 */
 :host ::ng-deep .responsive-picklist .p-picklist {
   display: flex;
-  gap: 1rem; /* 左右/上下區域的間距 */
+  gap: 1rem;
+  /* 左右/上下區域的間距 */
 }
+
 /* --- 手機、平板版 RWD (螢幕寬度 < 1024px) --- */
 @media screen and (max-width: 1023px) {
   /* 1. 確保排版為垂直：來源在上、目標在下 */
@@ -211,6 +229,7 @@
     display: flex !important;
     flex-direction: column !important;
   }
+
   /* 2. 按鈕容器橫向排列 */
   :host ::ng-deep .responsive-picklist .p-picklist-controls {
     display: flex !important;
@@ -219,6 +238,7 @@
     gap: 12px;
     padding: 10px 0 !important;
   }
+
   /* 3. 修正 SVG 轉向數值 */
   /* 指向目標 (原向右) -> 旋轉 90 度向下 */
   :host
@@ -234,6 +254,7 @@
     transform: rotate(90deg) !important;
     display: block !important;
   }
+
   /* 指向來源 (原向左) -> 旋轉 90 度向上 (因為原圖向左，轉 90 度會變向上) */
   /* 如果轉 90 度不對，請嘗試使用 rotate(-90deg) 或 rotate(270deg) */
   :host
@@ -249,22 +270,26 @@
     transform: rotate(90deg) !important;
     display: block !important;
   }
+
   /* 4. 寬度修正 */
   :host ::ng-deep .responsive-picklist .p-picklist-list-wrapper {
     width: 100% !important;
   }
 }
+
 /* 3. 桌機版樣式 (lg 以上) */
 @media (min-width: 1024px) {
   :host ::ng-deep .responsive-picklist .p-picklist {
     flex-direction: row; /* 水平排列：來源在左，目標在右 */
     align-items: flex-start;
   }
+
   /* 確保兩個清單寬度平分或自適應 */
   :host ::ng-deep .responsive-picklist .p-picklist-list-wrapper {
     flex: 1 1 50%;
   }
 }
+
 /* 修正中間控制按鈕垂直置中 */
 :host ::ng-deep .responsive-picklist .p-picklist-buttons {
   display: flex;
@@ -291,10 +316,10 @@
 :host ::ng-deep .p-floatlabel {
   --p-floatlabel-focus-color: #662222;
 }
+
 :host ::ng-deep .p-datepicker:not(.p-disabled).p-focus + label {
   color: #662222 !important;
 }
-
 /* 針對 PrimeNG 18 選中日期圓圈的終極覆蓋 */
 :host
   ::ng-deep

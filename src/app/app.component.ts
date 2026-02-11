@@ -376,6 +376,12 @@ export class AppComponent {
     this.lastLatLng = null; // 避免半徑變更又用舊座標重查
   }
 
+  contactUs() {
+    this.router.navigate(['/support/faq'],
+      { state: { scrollToBottom: true } }
+    )
+  }
+
 
   stopNearbyWatch() {
     if (this.watchId != null) {

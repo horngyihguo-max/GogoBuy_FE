@@ -441,19 +441,6 @@ export class GogoBuyComponent {
     return this.sanitizer.bypassSecurityTrustHtml(result);
   }
 
-  addStore() {
-    // 跳轉前手動銷毀 Tooltip，防止文字殘留
-    if (this.tooltip) {
-      this.tooltip.deactivate();
-      this.tooltip.hide();
-    }
-    clearTimeout(this.idleTimer);
-    this.visible = false;
-    this.enableScroll();
-    this.storeService.clearCurrentStore();
-    sessionStorage.removeItem('temp_order_info');
-    this.router.navigate(['/management/store_upsert']);
-  }
   goStoreInfo(storeId: number) {
     // 跳轉前手動銷毀 Tooltip，防止文字殘留
     if (this.tooltip) {
