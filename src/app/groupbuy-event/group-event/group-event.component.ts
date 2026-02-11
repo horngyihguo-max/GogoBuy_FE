@@ -74,6 +74,8 @@ export class GroupEventComponent {
   recommend:number[]=[];  //存推薦id
   recommendDescription!:string;
   limitation!:number;
+  pickTime!:Date;
+  pickLocation!:string;
 
   userId!:string;
   storeId!:number;
@@ -397,55 +399,109 @@ export class GroupEventComponent {
       this.minDate = new Date(nextMinute);
     }
   }
-  onTimeChange(value: Date) {
-    // 檢查是否為有效的 Date 物件
-    if (value instanceof Date && !isNaN(value.getTime())) {
-      const now = new Date();
-      // 只有當時間真的「落後現在太多」且不是在打字中的狀態才校正
-      // 或者乾脆只在 DatePicker 選取時才校正，手動輸入則交給後端或最後送出前驗證
-      if (value < now) {
-        console.warn("選擇的時間不能早於現在");
-        // 這裡可以選擇不強制覆寫，而是顯示錯誤訊息
-      }
-    }
-  }
-  // 新增一個 blur 處理，當使用者打完字離開時才校正
-  handleBlur() {
+  // onTimeChange(value: Date) {
+  //   // 檢查是否為有效的 Date 物件
+  //   if (value instanceof Date && !isNaN(value.getTime())) {
+  //     const now = new Date();
+  //     // 只有當時間真的「落後現在太多」且不是在打字中的狀態才校正
+  //     // 或者乾脆只在 DatePicker 選取時才校正，手動輸入則交給後端或最後送出前驗證
+  //     if (value < now) {
+  //       console.warn("選擇的時間不能早於現在");
+  //       // 這裡可以選擇不強制覆寫，而是顯示錯誤訊息
+  //     }
+  //   }
+  // }
+  handleBlur() {  // 新增一個 blur 處理，當使用者打完字離開時才校正
     if (!this.endTime) return;
-
     let rawValue = String(this.endTime).trim();
     let parsedDate: Date;
-
     // 1. 【格式修復】處理忘記打冒號的情況 (例如: 2026/2/10 1000 -> 2026/2/10 10:00)
     // 匹配結尾是「空格+4位數字」的情況
     const timeFixRegex = /(\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2})\s+(\d{2})(\d{2})$/;
     if (timeFixRegex.test(rawValue)) {
       rawValue = rawValue.replace(timeFixRegex, '$1 $2:$3');
     }
-
-    // 2. 嘗試解析
-    parsedDate = new Date(rawValue.replace(/-/g, '/'));
-
-    // 3. 檢查解析結果
-    if (!isNaN(parsedDate.getTime())) {
+    parsedDate = new Date(rawValue.replace(/-/g, '/'));    // 2. 嘗試解析
+    if (!isNaN(parsedDate.getTime())) {    // 3. 檢查解析結果
       const now = new Date();
-
-      // 如果輸入的時間比現在早，修正為「現在 + 1分鐘」
-      if (parsedDate < now) {
+      if (parsedDate < now) {      // 如果輸入的時間比現在早，修正為「現在 + 1分鐘」
         const nextMinute = new Date();
         nextMinute.setMinutes(nextMinute.getMinutes() + 1);
         nextMinute.setSeconds(0);
         nextMinute.setMilliseconds(0);
         this.endTime = nextMinute;
+        Swal.fire({
+          title: "結束時間不得早於或等於當下時間",
+          text: "已將結束時間設定為當下時間後1分鐘",
+          icon: "warning",
+          showConfirmButton: false,
+          timer: 2000,
+          timerProgressBar: true,
+        });
       } else {
-        // 解析成功，更新回標準 Date 物件，PrimeNG 就會自動整理格式
-        this.endTime = parsedDate;
+        this.endTime = parsedDate;        // 解析成功，更新回標準 Date 物件，PrimeNG 就會自動整理格式
       }
     } else {
       // 4. 如果還是解析失敗 (例如只打 2026210)
       console.error("無法解析的時間格式:", rawValue);
       // 可以選擇恢復成 minDate
       this.endTime = new Date(this.minDate);
+    }
+  }
+  // --- 取貨時間相關邏輯 ---
+  handlePickupOnShow() {
+    if (!this.pickTime) {  // 預設取貨時間為結單時間 + 30 分鐘，給店家準備
+      const defaultDate = this.endTime ? new Date(this.endTime) : new Date();
+      defaultDate.setMinutes(defaultDate.getMinutes() + 30);
+      defaultDate.setSeconds(0);
+      defaultDate.setMilliseconds(0);
+      this.pickTime = defaultDate;
+    }
+  }
+  // onPickupTimeChange(value: Date) {
+  //   if (value instanceof Date && !isNaN(value.getTime())) {
+  //     // 如果取貨時間早於結單時間，可以在此 console 提示，或等 Blur 再修正
+  //     if (this.endTime && value < this.endTime) {
+  //       console.warn("取貨時間不應早於結單時間");
+  //     }
+  //   }
+  // }
+  handlePickupBlur() {
+    if (!this.pickTime) return;
+    let rawValue = String(this.pickTime).trim();
+    let parsedDate: Date;
+    // 1. 格式修復 (補冒號)
+    const timeFixRegex = /(\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2})\s+(\d{2})(\d{2})$/;
+    if (timeFixRegex.test(rawValue)) {
+      rawValue = rawValue.replace(timeFixRegex, '$1 $2:$3');
+    }
+    // 2. 嘗試解析
+    parsedDate = new Date(rawValue.replace(/-/g, '/'));
+    // 3. 檢查解析結果
+    if (!isNaN(parsedDate.getTime())) {
+      // 取貨時間的檢查基準是 endTime
+      const baseTime = this.endTime ? new Date(this.endTime) : new Date();
+      if (parsedDate <= baseTime) {
+        // 如果取貨早於結單，自動修正為結單時間 + 10 分鐘
+        const autoCorrect = new Date(baseTime);
+        autoCorrect.setMinutes(autoCorrect.getMinutes() + 10);
+        this.pickTime = autoCorrect;
+        Swal.fire({
+          title: "取貨時間不得早於或等於結束時間",
+          text: "已將取貨時間設定為結束時間後10分鐘",
+          icon: "warning",
+          showConfirmButton: false,
+          timer: 2000,
+          timerProgressBar: true,
+        });
+      } else {
+        this.pickTime = parsedDate;
+      }
+    } else {
+      // 解析失敗，重設為結單時間 + 30 分鐘
+      const fallback = this.endTime ? new Date(this.endTime) : new Date();
+      fallback.setMinutes(fallback.getMinutes() + 30);
+      this.pickTime = fallback;
     }
   }
 
@@ -538,19 +594,29 @@ export class GroupEventComponent {
       // 如果要排除「當下」，通常是因為 endTime 只選擇到分鐘
       // 將比對精準度設在「分鐘」
       const endTimestamp = Math.floor(this.endTime.getTime() / 60000); // 取得分鐘數
+      const pickTimestamp = Math.floor(this.pickTime.getTime() / 60000);
       const nowTimestamp = Math.floor(now.getTime() / 60000);
       if (endTimestamp === nowTimestamp) {
         missingFields.push('截止時間不可為當下時間');
+        if(pickTimestamp <= nowTimestamp){
+          missingFields.push('取貨時間必須晚於結束時間');
+        }
       } else if (endTimestamp < nowTimestamp) {
         missingFields.push('截止時間已過請重新輸入');
+        if(pickTimestamp <= nowTimestamp){
+          missingFields.push('取貨時間必須晚於結束時間');
+        }
+      } else if (pickTimestamp <= endTimestamp) {
+        missingFields.push('取貨時間必須晚於結束時間');
       }
     }
     if (missingFields.length > 0) {    // Swal 警告
       const fieldList = missingFields.join('、'); // 將陣列轉為 "欄位A、欄位B"
-      this.showAlert('資料未填寫完整', `請輸入以下欄位：${fieldList}`);
+      this.showAlert('資料未填寫完整', `請檢查以下欄位：${fieldList}`);
       return; // 攔截，不執行後續邏輯
     }
     const end=this.formatToFullDateTime(this.endTime);
+    const pick=this.formatToFullDateTime(this.pickTime);
     const req={
       id:0,
       hostId:this.userId,
@@ -567,7 +633,9 @@ export class GroupEventComponent {
       recommendDescription: this.recommendDescription,
       totalOrderAmount: 0,
       limitation: this.limitation,
-      deleted: false
+      deleted: false,
+      pickTime: pick,
+      pickLocation: this.pickLocation
     }
     this.http.postApi('http://localhost:8080/gogobuy/event/addEvent', req).subscribe({
       next: (res: any) => {
