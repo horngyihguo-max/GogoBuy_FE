@@ -32,6 +32,7 @@ export class StoreInfoComponent implements OnInit {
   isLoading = true;
 
   userId = ''; // 沒登入就 ""
+  user: any | null = null; // 存用戶資料
   storeId = 0;
 
   // 店家資料（從 API 或假資料來）
@@ -78,6 +79,8 @@ export class StoreInfoComponent implements OnInit {
     // userId（測試塞假id）
     // this.userId = this.auth.user?.id || '12b7bf42-57af-4e3f-acfc-b9a2ba3342aa';
     this.userId = String(localStorage.getItem('user_id'));
+    this.user = localStorage.getItem('user_info');
+
     console.log(this.userId);
     // 刷新用戶資料
     this.auth.refreshUser();
@@ -344,7 +347,14 @@ export class StoreInfoComponent implements OnInit {
   // 按鈕：編輯 / 開團
   // =========================
   goEdit(): void {
+    const userDate = JSON.parse(this.user);
+    const role = userDate.role;
+    console.log('當前的角色是: ' + role);
     if (!this.userId) return;
+    if (!this.user || role === 'user') {
+      this.toastWarn('無法修改', '只有管理員可以修改店家資訊');
+      return;
+    }
     this.router.navigate(['/management/store_upsert', this.storeId]);
   }
 

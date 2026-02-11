@@ -2,6 +2,7 @@
 
 .area {
   @apply flex justify-center items-center;
+
   .area-block {
     @apply flex flex-col w-[90vw] rounded-lg h-fit bg-[#F4E7E1]/50 md:flex-row md:h-fit md:mt-[30px];
     /* @media (min-width: 768px) {
@@ -26,18 +27,21 @@
 
 .store-table {
   @apply max-w-[295px] mt-[5px] ml-[10px] md:max-w-none md:w-[100%] md:mt-[10px];
+
   /* @media (min-width: 768px) {
     @apply max-w-none !w-[100%] mt-[10px];
   } */
   tr {
     @apply w-[100vw];
   }
+
   .td-icon {
     @apply text-lg md:max-w-[18px];
     /* @media (min-width: 768px) {
       @apply max-w-[18px];
     } */
   }
+
   td {
     @apply text-lg;
   }
@@ -52,6 +56,7 @@
 
 .each-div {
   @apply w-full px-2 md:px-4;
+
   /* @media (min-width: 768px) {
     @apply px-4;
   } */
@@ -85,9 +90,7 @@
 }
 
 .Btn {
-  @apply w-[13vw] bg-[#F4E7E1] text-[#662222] border-1 border-[#662222] rounded-3xl h-[7vh] min-w-[100px] font-bold transition-all
-    hover:bg-[#662222]/20 hover:text-[#662222] hover:border-[#662222] hover:scale-[1.05]
-    active:bg-white active:text-[#662222] active:scale-[0.85];
+  @apply w-[13vw] bg-[#F4E7E1] text-[#662222] border-1 border-[#662222] rounded-3xl h-[7vh] min-w-[100px] font-bold transition-all hover:bg-[#662222]/20 hover:text-[#662222] hover:border-[#662222] hover:scale-[1.05] active:bg-white active:text-[#662222] active:scale-[0.85];
 }
 
 /* 1. 確保外層包裹容器高度跟隨 */
@@ -95,6 +98,7 @@
   height: 25rem !important;
   /* 同步改為 25rem */
 }
+
 /* 2. 讓內部的 ul (清單) 真正撐滿 */
 :host ::ng-deep .p-picklist-list {
   min-height: 10rem !important;
@@ -109,6 +113,7 @@
   border-color: #3b82f6;
   color: #3b82f6;
 }
+
 /* 4. 墊片基礎縮放動畫 */
 .dynamic-padding {
   transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -128,6 +133,7 @@
   background: white;
   flex-shrink: 0;
 }
+
 @media (max-width: 523px) {
   .product-item {
     flex-direction: column !important;
@@ -139,6 +145,7 @@
     /* 增加間距觀察是否有變化 */
   }
 }
+
 @media (min-width: 524px) {
   .product-item {
     flex-direction: row !important;
@@ -178,6 +185,7 @@
   color: #7c2d12;
   font-weight: bold;
 }
+
 /* --- 手機、平板版 (水平頁籤) --- */
 @media (max-width: 1023px) {
   .active-tab {
@@ -210,6 +218,7 @@
     box-shadow: -5px 5px 0 5px white;
   }
 }
+
 /* --- 桌面版 (垂直頁籤) --- */
 @media (min-width: 1024px) {
   .active-tab {
@@ -309,7 +318,8 @@
 /* 3. 桌機版樣式 (lg 以上) */
 @media (min-width: 1024px) {
   :host ::ng-deep .responsive-picklist .p-picklist {
-    flex-direction: row; /* 水平排列：來源在左，目標在右 */
+    flex-direction: row;
+    /* 水平排列：來源在左，目標在右 */
     align-items: flex-start;
   }
 
@@ -332,6 +342,7 @@
   font-weight: bold;
   border: 1px solid #662222 !important;
 }
+
 .transition-colors {
   transition: all 0.2s ease-in-out;
 }
@@ -342,6 +353,7 @@
   color: #662222 !important;
   font-weight: 600;
 }
+
 :host ::ng-deep .p-floatlabel {
   --p-floatlabel-focus-color: #662222;
 }
@@ -362,11 +374,13 @@
   color: #ffffff !important;
   /* 強制文字白色 */
 }
+
 /* 如果還是沒變，直接修改它引用的變數 */
 :host ::ng-deep .my-local-panel {
   --p-datepicker-date-selected-background: #662222 !important;
   --p-datepicker-date-selected-color: #ffffff !important;
 }
+
 /* 針對滑鼠懸停 (Hover) 時的圓圈顏色，也順便統一 */
 :host
   ::ng-deep
@@ -378,6 +392,7 @@
   /* 淡淡的紅 */
   color: #662222 !important;
 }
+
 /* 「今天」的圈圈 (通常是外框線) */
 :host
   ::ng-deep
@@ -391,13 +406,16 @@
   /* 文字也改紅 */
   background-color: transparent !important;
 }
+
 /* 時間選擇器的數字 */
 :host ::ng-deep .my-local-panel .p-datepicker-timepicker span {
   color: #662222 !important;
 }
+
 /* 針對所有綠色箭頭 (SVG) */
 :host ::ng-deep .my-local-panel svg {
-  color: #662222 !important; /* 強制把所有圖標改紅 */
+  color: #662222 !important;
+  /* 強制把所有圖標改紅 */
   fill: #662222 !important;
 }
 
