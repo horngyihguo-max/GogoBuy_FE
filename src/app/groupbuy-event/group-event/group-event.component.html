@@ -96,12 +96,264 @@
             </div>
             }
           </div>
-          <div class="flex items-center gap-3 cursor-pointer group w-64 lg:w-auto">
-            <input type="checkbox" [checked]="isConfirmed" (change)="onCheckChange($event)"
-              class="w-4 h-4 rounded border-gray-300 text-[#662222] focus:ring-[#662222]">
-            <span class="text-base font-bold group-hover:text-[#662222] transition-colors" (click)="dialog()">
-              我已詳閱並同意「隨機餘數分配」等拆帳規則
-            </span>
+          <div class="event-div each-div">
+            <div class="div-title">編輯開團菜單</div>
+            <div class="div-content">
+              <div class="w-full ml-8 my-4">
+                <label>
+                  <input type="checkbox" class="w-4 h-4 rounded border-gray-300 mr-4"  [checked]="useAll" (change)="useAllChange($event)">
+                  <span class="text-lg">套用所有品項</span>
+                </label>
+              </div>
+              <div class="flex flex-col lg:flex-row h-full bg-gray-100 rounded-lg">
+                <div class="flex w-full flex-shrink-0 bg-gray-100 overflow-x-auto
+                            lg:flex-col lg:w-30 lg:overflow-x-hidden lg:overflow-y-auto">
+                  @for(cate of menuCategoriesVoList; track $index){
+                    <button class="relative py-4 px-6 transition-all duration-200
+                                  rounded-t-xl
+                                  lg:rounded-tr-none lg:rounded-l-xl"
+                      (click)="activeTab = cate.id"                    [class.active-tab]="activeTab === cate.id"
+                      [class.text-[#662222]]="activeTab === cate.id"   [class.font-bold]="activeTab === cate.id"
+                      [class.bg-white]="activeTab === cate.id" [class.border-transparent]="activeTab !== cate.id">
+                      {{cate.name}}
+                      @if(activeTab == cate.id) {
+                        <div class="hidden lg:block absolute -right-[2px] top-0 h-full w-[2px] bg-white z-20"></div>
+                      }
+                    </button>
+                  }
+                </div>
+                <div class="flex-1 overflow-y-auto pt-2 pb-4 px-4 bg-white custom-scrollbar rounded-r-xl">
+                  @if(activeTab){
+                    <p-pickList
+                      [source]="displaySource"                        [target]="selectedItems"
+                      (onMoveToTarget)="onMoveToTarget($event)"       (onMoveToSource)="onMoveToSource($event)"
+                      (onMoveAllToTarget)="onMoveAllToTarget($event)" (onMoveAllToSource)="onMoveAllToSource($event)"
+                      (onSourceReorder)="fixPaddingPosition()"        (onTargetReorder)="fixPaddingPosition()" (onSourceSelect)="fixPaddingPosition()"
+                      [showSourceControls]="false"                    [showTargetControls]="false"
+                      sourceHeader="可選品項"                          targetHeader="已選品項"
+                      [dragdrop]="true"                               [responsive]="false"
+                      [sourceStyle]="{ height: '18rem' }"             [targetStyle]="{ height: '18rem' }"
+                      dataKey="id" [metaKeySelection]="false" class="responsive-picklist">
+                        <ng-template let-product pTemplate="item">
+                          @if (product.isPadding) {
+                            <div class="dynamic-padding"
+                                [class.can-hover]="selectedItems.length === 1"
+                                [style.height]="getPaddingHeight()">
+
+                              @if (selectedItems.length === 1) {
+                                <span>請拖曳項目至此</span>
+                              } @else {
+                                <div class="plus-icon">
+                                  <i class="pi pi-plus"></i>
+                                </div>
+                              }
+                            </div>
+                          } @else {
+                            <div class="product-item md:min-w-[270px]">
+                              @if (isItemInTarget(product)) {
+                                <div class="remove-badge" (click)="removeItem(product, $event)">
+                                  <i class="pi pi-minus"></i>
+                                </div>
+                              }
+                              <img [src]="product.image ? product.image : 'no-product-image.jpg'"
+                                  (error)="$any($event.target).src = 'no-product-image.jpg'"
+                                    class="w-[100px] md:w-[60px] aspect-square object-cover rounded-sm mr-2">
+                              <div class=" flex flex-col w-full lg:flex-1">
+                                <div class="flex justify-between">
+                                  <div class="font-bold">{{ product.name }}<i class="pi pi-tag text-sm"></i></div>
+                                  @if (isItemInTarget(product)) {
+                                    <div>
+                                      <button type="button" (click)="toggleRecommend(product, $event)"
+                                        [class.recommended-active]="product.isRecommended"
+                                        class="bg-[#662222]/20 w-[105px] rounded-2xl border-[1px]
+                                              border-[#662222]/20 px-2 py-1 transition-colors
+                                              hover:bg-[#662222]/50 hover:text-white hover:border-[#662222]/50">
+                                        @if(product.isRecommended){
+                                          <i class="pi pi-times"></i>
+                                        }@else{
+                                          <i class="pi pi-plus"></i>
+                                        }
+                                        <span class="ml-[5px]">{{ product.isRecommended ? '取消推薦' : '推薦' }}</span>
+                                      </button>
+                                    </div>
+                                  }
+                                </div>
+                                <div class="flex flex-col sm:flex-row sm:align-items-center sm:gap-3">
+                                  @for(each of product.basePrice;track $index){
+                                    <span class="sm:border-r sm:pr-1 sm:border-gray-300">{{each.name}} ${{ each.price }}</span>
+                                  }
+                                </div>
+                              </div>
+                            </div>
+                          }
+                        </ng-template>
+                    </p-pickList>
+                  }
+                </div>
+              </div>
+              <div class="w-full bg-white h-auto flex flex-col mt-4 rounded-lg pt-4 px-4">
+                <div class="flex flex-col md:flex-row md:items-start mb-3">
+                  <div class="font-bold text-gray-700 md:w-24 shrink-0">推薦品項：</div>
+                  <div class="text-gray-600 flex-1 mt-1 md:mt-0">
+                    @for(item of menuVoList; track $index) {
+                      @for(id of recommend; track $index) {
+                        @if(item.id == id) {
+                          <span class="inline-block bg-white px-2 py-1 rounded border border-gray-200 text-xs mr-2 mb-2">{{item.name}}</span>
+                        }
+                      }
+                    }
+                  </div>
+                </div>
+                <div class="flex flex-col md:flex-row md:items-start">
+                  <div class="font-bold text-gray-700 md:w-24 shrink-0">推薦說明：</div>
+                  <div class="flex flex-col flex-1">
+                    <textarea
+                      class="border-1 border-gray-400/70 rounded-md resize-none p-1
+                      overflow-y-auto placeholder:text-gray-500"
+                      [(ngModel)]="recommendDescription" maxlength="200"
+                      placeholder="請輸入說明 (限 200 字)" rows="3"
+                      style="min-height: 90px;">
+                    </textarea>
+                    <div class="text-right text-xs text-gray-400 mt-2 mr-3 mb-1">
+                      {{ recommendDescription?.length || 0 }} / 200
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="event-div each-div pb-4 sm:pb-6 md:pb-8">
+            <div class="div-title">填寫開團資料</div>
+            <div class="div-content w-full">
+              <div class="flex flex-col md:flex-row md:justify-between">
+                <span class="setting-span md:pr-2">
+                  <!-- <div class="text-[15px] pr-2 pb-1">
+                    開團名稱：
+                  </div> -->
+                  <p-inputgroup>
+                    <p-inputgroup-addon>
+                      <i class="pi pi-home"></i>
+                    </p-inputgroup-addon>
+                    <div class="flex-1 flex flex-col border border-gray-300 rounded-r-md bg-white">
+                      <p-floatlabel variant="on" autocomplete="off">
+                        <input type="text" class="outline-none w-full p-2 pl-3 rounded-r-md transition-all bg-white
+                         focus:!border-1 focus:!border-[#662222]"
+                          [class.p-filled]="!!eventName" [(ngModel)]="eventName" maxlength="50" />
+                        <label>開團名稱</label>
+                        </p-floatlabel>
+                    </div>
+                  </p-inputgroup>
+                  <div class="text-right text-[10px] text-gray-400 pr-2 pb-1">
+                    {{ eventName?.length || 0 }} / 50
+                  </div>
+                </span>
+                <span class="setting-span md:px-2">
+                  <!-- <div class="text-[15px] pr-2 pb-1">
+                    成團門檻金額：
+                  </div> -->
+                  <p-inputgroup>
+                    <p-inputgroup-addon>
+                      <i class="pi pi-dollar"></i>
+                    </p-inputgroup-addon>
+                    <div class="flex-1 flex flex-col border border-gray-300 rounded-r-md bg-white">
+                      <p-floatlabel variant="on" autocomplete="off">
+                        <input type="text" class="outline-none w-full p-2 pl-3 rounded-r-md transition-all bg-white
+                          focus:!border-1 focus:!border-[#662222] focus:!shadow-none"
+                          [class.p-filled]="!!limitation" [(ngModel)]="limitation" />
+                        <label>成團金額門檻</label>
+                      </p-floatlabel>
+                    </div>
+                  </p-inputgroup>
+                  <div class="md:text-center text-[15px] text-gray-400 pr-2 pb-1">
+                    請輸入阿拉伯數字，最小金額為1元
+                  </div>
+                </span>
+                <span class="setting-span md:pl-2">
+                  <!-- <div class="text-[15px] pr-2 pb-1">
+                    結束時間：
+                  </div> -->
+                  <p-inputgroup class="w-full">
+                    <p-inputgroup-addon>
+                      <i class="pi pi-stopwatch"></i>
+                    </p-inputgroup-addon>
+                    <p-floatlabel variant="on" style="flex: 1 1 auto; display: block;">
+                      <p-datepicker [(ngModel)]="endTime" [showTime]="true" hourFormat="24" [minDate]="minDate"
+                        [showSeconds]="false" panelStyleClass="my-local-panel" [class.p-filled]="!!endTime"
+                        [fluid]="true" styleClass="w-full" [style]="{'width': '100%', 'display': 'flex'}"
+                        inputStyleClass="w-full outline-none p-2 pl-3 !rounded-r-md
+                        !rounded-l-none bg-white focus:!border-1 focus:!border-[#662222]"
+                        (onShow)="handleOnShow()" [readonlyInput]="false"
+                        [keepInvalid]="true" dateFormat="yy/mm/dd" (onBlur)="handleBlur()">
+                      </p-datepicker>
+                      <label class="z-1">結束時間</label>
+                    </p-floatlabel>
+                  </p-inputgroup>
+                  <div class="md:text-center text-[15px] text-gray-400 pr-2 pb-1">結束時間不得早於或等於當下時間</div>
+                </span>
+              </div>
+              <div class="flex flex-col md:grid md:grid-cols-2 md:flex-row md:justify-between">
+                <span class="pb-2 md:pr-8">
+                  <p-inputgroup>
+                    <p-inputgroup-addon>
+                      <i class="pi pi-map-marker"></i>
+                    </p-inputgroup-addon>
+                    <div class="flex-1 flex flex-col border border-gray-300 rounded-r-md bg-white">
+                      <p-floatlabel variant="on" autocomplete="off">
+                        <input type="text" class="outline-none w-full p-2 pl-3 rounded-r-md transition-all bg-white
+                         focus:!border-1 focus:!border-[#662222]"
+                          [class.p-filled]="!!pickLocation" [(ngModel)]="pickLocation" maxlength="50" />
+                        <label>取貨地點</label>
+                        </p-floatlabel>
+                    </div>
+                  </p-inputgroup>
+                  <div class="text-right text-[10px] text-gray-400 pr-2 pb-1">
+                    {{ pickLocation?.length || 0 }} / 50
+                  </div>
+                </span>
+                <span class="pb-2 md:pl-8">
+                  <p-inputgroup class="w-full">
+                    <p-inputgroup-addon>
+                      <i class="pi pi-calendar-clock"></i>
+                    </p-inputgroup-addon>
+                    <p-floatlabel variant="on" style="flex: 1 1 auto; display: block;">
+                      <p-datepicker [(ngModel)]="pickTime" [showTime]="true" hourFormat="24" [minDate]="endTime"
+                        [showSeconds]="false" panelStyleClass="my-local-panel" [class.p-filled]="!!pickTime"
+                        [readonlyInput]="false" [keepInvalid]="true" dateFormat="yy/mm/dd"
+                        (onShow)="handlePickupOnShow()" (onBlur)="handlePickupBlur()"
+                        [fluid]="true" [style]="{'width': '100%', 'display': 'flex'}"
+                        inputStyleClass="w-full outline-none p-2 pl-3 !rounded-r-md !rounded-l-none bg-white focus:!border-1 focus:!border-[#662222]">
+                      </p-datepicker>
+                      <label class="z-1">預計取貨時間</label>
+                    </p-floatlabel>
+                  </p-inputgroup>
+                  <div class="md:text-center text-[15px] text-gray-400 pr-2 pb-1">取貨時間不得早於或等於結束時間</div>
+                </span>
+              </div>
+              <label class="w-full">
+                <!-- <div class="text-[15px] pr-2 pb-1">
+                  公告事項：
+                </div> -->
+                <p-inputgroup class="w-full">
+                  <p-inputgroup-addon>
+                    <i class="pi pi-megaphone"></i>
+                  </p-inputgroup-addon>
+                  <div class="flex-1 flex flex-col border border-gray-300 rounded-r-md bg-white">
+                    <p-floatlabel variant="on" class="w-full">
+                      <textarea id="announcement"
+                        class="w-full p-2 border-none outline-none resize-none overflow-y-auto"
+                        [(ngModel)]="announcement" [class.p-filled]="!!announcement"
+                        maxlength="500" rows="2"
+                        style="min-height: 80px;">
+                      </textarea>
+                      <label for="announcement">團長公告</label>
+                    </p-floatlabel>
+                  </div>
+                </p-inputgroup>
+                <div class="text-right text-[10px] text-gray-400 pr-2 pb-1">
+                  {{ announcement?.length || 0 }} / 500
+                </div>
+              </label>
+            </div>
           </div>
         </div>
       </div>
