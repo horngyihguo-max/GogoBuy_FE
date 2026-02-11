@@ -3,28 +3,40 @@
 .area {
   @apply flex justify-center items-center;
   .area-block {
-    @apply flex flex-col w-[90vw] rounded-lg h-fit bg-[#F4E7E1]/50
-            md:flex-row md:h-fit md:mt-[30px];
+    @apply flex flex-col w-[90vw] rounded-lg h-fit bg-[#F4E7E1]/50 md:flex-row md:h-fit md:mt-[30px];
+    /* @media (min-width: 768px) {
+      @apply flex-row h-fit mt-[30px];
+    } */
   }
 }
 
 .storeName {
   @apply text-2xl w-full sm:text-3xl md:text-4xl;
+  /* @media (min-width: 768px) {
+    @apply text-4xl;
+  } */
 }
 
 .info {
   @apply text-lg pt-[5px] sm:pt-[7.5px] md:pt-[10px];
+  /* @media (min-width: 768px) {
+    @apply pt-[10px];
+  } */
 }
 
 .store-table {
-  @apply max-w-[295px] mt-[5px] ml-[10px] md:max-w-none md: !w-[100%] md:mt-[10px];
-
+  @apply max-w-[295px] mt-[5px] ml-[10px] md:max-w-none md:w-[100%] md:mt-[10px];
+  /* @media (min-width: 768px) {
+    @apply max-w-none !w-[100%] mt-[10px];
+  } */
   tr {
     @apply w-[100vw];
   }
-
   .td-icon {
     @apply text-lg md:max-w-[18px];
+    /* @media (min-width: 768px) {
+      @apply max-w-[18px];
+    } */
   }
   td {
     @apply text-lg;
@@ -33,17 +45,28 @@
 
 .event-div {
   @apply pt-4 sm:pt-6 md:pt-8;
+  /* @media (min-width: 768px) {
+    @apply pt-8;
+  } */
 }
 
 .each-div {
   @apply w-full px-2 md:px-4;
-
+  /* @media (min-width: 768px) {
+    @apply px-4;
+  } */
   .div-title {
     @apply text-[#662222] text-lg md:text-xl;
+    /* @media (min-width: 768px) {
+      @apply text-xl;
+    } */
   }
 
   .div-content {
     @apply w-full pt-2 px-2 md:px-8;
+    /* @media (min-width: 768px) {
+      @apply px-8;
+    } */
   }
 }
 
@@ -58,7 +81,7 @@
 }
 
 .setting-span {
-  @apply w-[25vw] pb-2 w-full md:w-[25vw];
+  @apply pt-4 px-4 w-full;
 }
 
 .Btn {

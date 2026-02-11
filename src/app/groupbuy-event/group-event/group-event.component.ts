@@ -644,11 +644,12 @@ export class GroupEventComponent {
       totalOrderAmount: 0,
       limitation: this.limitation,
       deleted: false,
-      pickTime: pick,
+      pickupTime: pick,
       pickLocation: this.pickLocation
     }
     this.http.postApi('http://localhost:8080/gogobuy/event/addEvent', req).subscribe({
       next: (res: any) => {
+        console.log(req);
         console.log(res);
         if (res && res.id) {
           if (this.wishId) {  // 有許願，先結案再跳轉
