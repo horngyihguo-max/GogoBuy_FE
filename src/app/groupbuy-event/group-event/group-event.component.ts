@@ -1,7 +1,5 @@
-import { filter } from 'rxjs/operators';
 import { FeeDescriptionVoList, MenuCategoriesVoList, MenuVoList, OperatingHoursVoList, PriceLevel, ProductOptionGroupsVoList, Stores } from './../../@service/store.service';
 import { Component } from '@angular/core';
-import { AuthService } from '../../@service/auth.service';
 import { HttpService } from '../../@service/http.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -96,6 +94,10 @@ export class GroupEventComponent {
   minDate: Date = new Date();
   previewTab!: number;
   ngOnInit(): void {
+    this.userId = String(localStorage.getItem('user_id'));
+    if(!this.userId || this.userId === 'null'){
+      this.loginFirst();
+    }
     this.isPreview = false;
     this.useAll = false;
     // 設定中文語系
@@ -126,7 +128,6 @@ export class GroupEventComponent {
     const today = weekMap[weekday];
     const time = now.getHours() * 100 + now.getMinutes();
 
-    this.userId = String(localStorage.getItem('user_id'));
     this.storeId = Number(this.route.snapshot.paramMap.get('id'));
     this.http.getApi('http://localhost:8080/gogobuy/store/searchId?id=' + this.storeId).subscribe((res: any) => {
       // 1. 先判斷 res 是否存在且 storeList 有資料
@@ -210,7 +211,27 @@ export class GroupEventComponent {
       }
 
     });
+  }
 
+  loginFirst(){
+    Swal.fire({
+      title: "請先登入",
+      width: 400,
+      padding: "3em",
+      customClass: {
+        container: 'my-glass-backdrop' // 自定義遮罩類別
+      },
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      allowEnterKey: true,
+      showConfirmButton: true,
+      confirmButtonText: "確定",
+      confirmButtonColor: "#662222"
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.router.navigate(['/gogobuy/login']);
+      }
+    });
   }
 
   getFutureOpenTime(currentDay: number): string {
@@ -566,6 +587,10 @@ export class GroupEventComponent {
       this.showAlert('資料未填寫完整', `請輸入以下欄位：${fieldList}`);
       return; // 攔截，不執行後續邏輯
     }
+    if(!this.userId || this.userId === 'null'){
+      this.loginFirst();
+      return;
+    }
     // 通過檢查
     this.isPreview = true;
     const tabs = this.uniqueTabs;
@@ -623,7 +648,11 @@ export class GroupEventComponent {
     if (missingFields.length > 0) {    // Swal 警告
       const fieldList = missingFields.join('、'); // 將陣列轉為 "欄位A、欄位B"
       this.showAlert('資料未填寫完整', `請檢查以下欄位：${fieldList}`);
-      return; // 攔截，不執行後續邏輯
+      return;
+    }
+    if(!this.userId || this.userId === 'null'){
+      this.loginFirst();
+      return;
     }
     const end = this.formatToFullDateTime(this.endTime);
     const pick = this.formatToFullDateTime(this.pickTime);

@@ -388,3 +388,20 @@
   /* 強制把所有圖標改紅 */
   fill: #662222 !important;
 }
+
+/* 必須使用 ::ng-deep 或寫在全域 styles.scss */
+::ng-deep .my-glass-backdrop {
+  /* 核心：讓後方背景模糊 */
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  /* 相容 Safari */
+  /* 選擇性：增加一點深色疊加感 */
+  background-color: rgba(0, 0, 0, 0.2) !important;
+}
+
+/* 讓彈窗本體也有一點毛玻璃感 (選用) */
+::ng-deep .swal2-popup {
+  box-shadow: 0 8px 32px 0 rgba(95, 96, 103, 0.37) !important;
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
