@@ -331,7 +331,8 @@ export class GogoBuyComponent {
       //位置
       image: 'Bubble.png',
       //圖片無法顯示時文字
-      title: '揪團喝珍奶'
+      title: '揪團喝珍奶',
+      link: 'management/store_info/6'
     }
   ];
 
