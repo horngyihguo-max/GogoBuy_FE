@@ -100,11 +100,17 @@
   height: 450px !important; /* 固定整個元件的高度 */
 }
 
+<<<<<<< HEAD
 /* 2. 針對左右兩個區域的包裹層 */
 :host ::ng-deep .responsive-picklist .p-picklist-list-wrapper {
   display: flex !important;
   flex-direction: column !important;
   flex: 1 1 50% !important; /* 確保左右各佔一半 */
+=======
+/* 2. 讓內部的 ul (清單) 真正撐滿 */
+:host ::ng-deep .p-picklist-list {
+  min-height: 25rem !important;
+>>>>>>> origin/Mickey
   height: 100% !important;
 }
 
@@ -283,8 +289,9 @@
 }
 /* --- 手機、平板版 RWD (螢幕寬度 < 1024px) --- */
 @media screen and (max-width: 1023px) {
+
   /* 1. 確保排版為垂直：來源在上、目標在下 */
-  :host ::ng-deep .responsive-picklist > .p-picklist {
+  :host ::ng-deep .responsive-picklist>.p-picklist {
     display: flex !important;
     flex-direction: column !important;
   }
@@ -299,19 +306,29 @@
 
   /* 3. 修正 SVG 轉向數值 */
   /* 指向目標 (原向右) -> 旋轉 90 度向下 */
+<<<<<<< HEAD
   :host::ng-deep.responsive-picklist [data-pc-section="moveToTargetButton"] svg,
   :host::ng-deep.responsive-picklist
     [data-pc-section="moveAllToTargetButton"]
     svg {
+=======
+  :host ::ng-deep .responsive-picklist [data-pc-section="moveToTargetButton"] svg,
+  :host ::ng-deep .responsive-picklist [data-pc-section="moveAllToTargetButton"] svg {
+>>>>>>> origin/Mickey
     transform: rotate(90deg) !important;
     display: block !important;
   }
   /* 指向來源 (原向左) -> 旋轉 90 度向上 (因為原圖向左，轉 90 度會變向上) */
   /* 如果轉 90 度不對，請嘗試使用 rotate(-90deg) 或 rotate(270deg) */
+<<<<<<< HEAD
   :host::ng-deep.responsive-picklist [data-pc-section="moveToSourceButton"] svg,
   :host::ng-deep.responsive-picklist
     [data-pc-section="moveAllToSourceButton"]
     svg {
+=======
+  :host ::ng-deep .responsive-picklist [data-pc-section="moveToSourceButton"] svg,
+  :host ::ng-deep .responsive-picklist [data-pc-section="moveAllToSourceButton"] svg {
+>>>>>>> origin/Mickey
     transform: rotate(90deg) !important;
     display: block !important;
   }
@@ -362,17 +379,12 @@
   --p-floatlabel-focus-color: #662222;
 }
 
-:host ::ng-deep .p-datepicker:not(.p-disabled).p-focus + label {
+:host ::ng-deep .p-datepicker:not(.p-disabled).p-focus+label {
   color: #662222 !important;
 }
 
 /* 針對 PrimeNG 18 選中日期圓圈的終極覆蓋 */
-:host
-  ::ng-deep
-  .my-local-panel
-  .p-datepicker-calendar
-  td
-  .p-datepicker-date.p-highlight {
+:host ::ng-deep .my-local-panel .p-datepicker-calendar td .p-datepicker-date.p-highlight {
   background-color: #662222 !important;
   /* 強制背景深紅 */
   color: #ffffff !important;
@@ -386,24 +398,14 @@
 }
 
 /* 針對滑鼠懸停 (Hover) 時的圓圈顏色，也順便統一 */
-:host
-  ::ng-deep
-  .my-local-panel
-  .p-datepicker-calendar
-  td
-  > span:not(.p-highlight):hover {
+:host ::ng-deep .my-local-panel .p-datepicker-calendar td>span:not(.p-highlight):hover {
   background-color: #fce7e7 !important;
   /* 淡淡的紅 */
   color: #662222 !important;
 }
 
 /* 「今天」的圈圈 (通常是外框線) */
-:host
-  ::ng-deep
-  .my-local-panel
-  .p-datepicker-calendar
-  td.p-datepicker-today
-  > span {
+:host ::ng-deep .my-local-panel .p-datepicker-calendar td.p-datepicker-today>span {
   border: 1px solid #662222 !important;
   /* 把綠框改成紅框 */
   color: #662222 !important;
@@ -427,10 +429,12 @@
 ::ng-deep .my-glass-backdrop {
   /* 核心：讓後方背景模糊 */
   backdrop-filter: blur(8px) !important;
-  -webkit-backdrop-filter: blur(8px) !important; /* 相容 Safari */
+  -webkit-backdrop-filter: blur(8px) !important;
+  /* 相容 Safari */
   /* 選擇性：增加一點深色疊加感 */
   background-color: rgba(0, 0, 0, 0.2) !important;
 }
+
 /* 讓彈窗本體也有一點毛玻璃感 (選用) */
 ::ng-deep .swal2-popup {
   box-shadow: 0 8px 32px 0 rgba(95, 96, 103, 0.37) !important;
