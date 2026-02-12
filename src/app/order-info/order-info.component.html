@@ -33,7 +33,7 @@
 
       @if (groupedOrders.length) {
       @for (g of groupedOrders; track g.key) {
-      <div class="mt-4 border-t border-slate-100 pt-4">
+      <div class="mt-6 bg-white rounded-xl shadow-sm p-4">
         <button type="button" class="w-full flex items-center gap-3" (click)="toggleGroup(g.key)">
           <div class="w-10 h-10 rounded-full bg-sky-500 text-white flex items-center justify-center font-bold">
             @if (avatarMap[g.key]) {
@@ -43,9 +43,9 @@
             {{ g.nickname?.[0] }}
             }
           </div>
-          <div class="font-bold text-[18px] text-slate-900">{{ g.nickname }}</div>
+          <div class="font-bold text-[18px] text-slate-900 text-xl">{{ g.nickname }}</div>
           <div class="ml-auto flex items-center gap-3 text-slate-700">
-            <div class="font-semibold">${{ g.totalAmount }} / {{ g.totalQty }} 份</div>
+            <div class="font-semibold text-xl">${{ g.totalAmount }} / {{ g.totalQty }} 份</div>
             <i class="pi" [ngClass]="isGroupOpen(g.key) ? 'pi-angle-up' : 'pi-angle-down'"></i>
           </div>
         </button>
@@ -53,24 +53,24 @@
         @if (isGroupOpen(g.key)) {
         <div class="mt-3 space-y-3">
           @for (order of g.orders; track order.id) {
-          <div class="bg-slate-50 rounded-xl px-5 py-4 flex items-start gap-4">
+          <div class="flex items-start gap-4 py-4 border-b border-slate-100">
             <div class="flex-1">
-              <div class="font-bold text-slate-900">{{ order.menuName }}</div>
+              <div class="font-bold text-slate-900 text-xl">{{ order.menuName }}</div>
 
-              <div class="mt-2 text-[14px] text-slate-500">
+              <div class="mt-2 text-[14px] text-slate-500 text-xl">
                 {{ formatSelectedOptionList(order.parsedOptions) }}
               </div>
 
               <div class="mt-2 text-[14px] text-slate-700">
-                共{{ order.quantity }}份/小計：<span class="font-semibold">${{ order.subtotal }}</span>
+                <span class="font-semibold text-xl">${{ order.subtotal/order.quantity }}</span>
+                <span class="text-slate-900 font-semibold text-right text-xl">
+                  x {{ order.quantity }} 份
+                </span>
+                <p class="font-semibold text-xl">小計${{ order.subtotal }}</p>
               </div>
             </div>
 
             <div class="flex flex-col items-end gap-3">
-              <div class="text-slate-900 font-extrabold text-[16px]">
-                ${{ order.subtotal / order.quantity }}/1份
-              </div>
-
               <button type="button"
                 class="w-9 h-9 rounded-full bg-slate-300 text-white flex items-center justify-center hover:bg-slate-400"
                 (click)="removeorder(order.id)">
