@@ -129,12 +129,13 @@
 
 
 <!-- 常見問題+氣泡 -->
+@if(!showProblem){
 <button class="question" type="button" balloon-data="有甚麼疑問嗎?點擊這裡" aria-label="常見問題"
   (click)="problemMenu.toggle($event)">
   ?
 </button>
 <p-menu #problemMenu [popup]="true" [model]="problems"></p-menu>
-
+}
 <!-- 手機 footer 依 router.url 判斷目前頁籤並高亮 -->
 <div class="footer-mobile">
   <!-- 首頁 -->
