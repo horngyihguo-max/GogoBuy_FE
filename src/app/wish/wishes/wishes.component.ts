@@ -104,6 +104,7 @@ export class WishesComponent implements OnInit {
         console.log('接收到用戶資料:', user);
         this.userId = user.id;
         this.timesRemaining = user.timesRemaining;
+        this.role = user.role;
       }
     });
     // 刷新資料
@@ -111,6 +112,7 @@ export class WishesComponent implements OnInit {
 
     console.log('用戶id : ' + this.userId);
     console.log('許願次數 : ' + this.timesRemaining);
+    console.log('用戶身分 : ' + this.role);
 
     this.loadWishes();
   }
@@ -723,9 +725,9 @@ export class WishesComponent implements OnInit {
     this.selectedWish = null;
   }
 
+  role = 'user';
   startGroupFromWish(): void {
     if (!this.selectedWish) return;
-
     if (!this.userId) {
       this.toastWarn('請先登入', '登入後才可以開團');
       return;
@@ -734,7 +736,7 @@ export class WishesComponent implements OnInit {
     const wishId = this.selectedWish.id;
     const wishTitle = encodeURIComponent(this.selectedWish.title || '');
     sessionStorage.removeItem('temp_order_info');
-    window.location.href = `/gogobuy/list?wish_id=${wishId}&wish_title=${wishTitle}`;
+    window.location.href = `/management/store_upsert?wish_id=${wishId}&wish_title=${wishTitle}`;
   }
 
   // =========================
