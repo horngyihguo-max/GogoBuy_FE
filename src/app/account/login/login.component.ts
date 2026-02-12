@@ -1,5 +1,5 @@
 import { AuthService } from './../../@service/auth.service';
-import { Component } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpService } from '../../@service/http.service';
@@ -47,10 +47,21 @@ export class LoginComponent {
 
   }
 
+  // 取得右側容器的引用
+  @ViewChild('rightPanel') rightPanel!: ElementRef;
   // 切換模式
   toggleMode() {
     this.pageMode = this.pageMode == 'login' ? 'register' : 'login';
     this.resetForm();
+    // 當切換回登入時，強制將右側容器捲動回最上方
+    if (this.pageMode === 'login') {
+      // 延遲一小段時間確保 DOM 已更新 class (如 overflow-hidden)
+      setTimeout(() => {
+        if (this.rightPanel) {
+          this.rightPanel.nativeElement.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      }, 0);
+    }
   }
 
   // 清空所有欄位
