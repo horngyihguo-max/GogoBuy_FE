@@ -73,6 +73,7 @@
   <p-menu #menu [popup]="true" [model]="filteredItems" appendTo="body"></p-menu>
 
   <!-- 跑馬燈 -->
+  @if(showMarquee){
   <div class="marquee">
     <div class="marquee__track">
       <div class="marquee__group">
@@ -83,6 +84,7 @@
       </div>
     </div>
   </div>
+  }
 </div>
 
 <!-- 手機板搜尋欄，class="search-mobile"讓搜尋欄只在手機板出現 -->

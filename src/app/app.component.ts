@@ -224,6 +224,10 @@ export class AppComponent {
     return this.router.url.startsWith('/gogobuy/home');
   }
 
+  get showMarquee(): boolean {
+    return this.router.url.startsWith('/gogobuy/home');
+  }
+
   // 滾動時收起 PrimeNG Menu，避免遮擋內容與定位錯亂
   @HostListener('window:scroll', [])
   onWindowScroll() {
