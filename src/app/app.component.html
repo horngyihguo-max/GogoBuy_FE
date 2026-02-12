@@ -41,7 +41,8 @@
         <!-- 管理者介面 -->
         @if(isAdmin()){
         <li>
-          <i class="pi pi-wrench nav-icon cursor-pointer" style="font-size: 1.5rem" (click)="toDashboard()"></i>
+          <i class="pi pi-wrench nav-icon cursor-pointer" style="font-size: 1.5rem" (click)="toDashboard()"
+            pTooltip="點擊進入管理" tooltipPosition="bottom" [positionTop]="5"></i>
         </li>
         }
         <!-- 通知鈴鐺 -->
