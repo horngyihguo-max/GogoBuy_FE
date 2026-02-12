@@ -711,15 +711,15 @@
             刪除願望
           </button>
         }
-        <!-- @if (showStartGroupBtn) {
+        @if (showStartGroupBtn && this.role === 'admin') {
           <button
             (click)="startGroupFromWish()"
             [disabled]="disableStartGroupBtn"
             class="ml-auto cursor-pointer px-4 py-3 rounded-xl font-extrabold text-[15px] md:text-[18px] shadow enabled:bg-red-900 enabled:text-white enabled:hover:bg-red-950 enabled:active:scale-95 disabled:bg-gray-300 disabled:text-gray-600 disabled:cursor-not-allowed"
           >
-            以此願望開團
+            以此願望開店
           </button>
-        } -->
+        }
         @if (showReWishBtn) {
           <button
             (click)="onReWish(selectedWish)"
