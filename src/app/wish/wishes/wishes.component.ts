@@ -40,8 +40,8 @@ export class WishesComponent implements OnInit {
     public auth: AuthService,
     private messageService: MessageService,
     private route: ActivatedRoute,
-    private router: Router
-  ) { }
+    private router: Router,
+  ) {}
 
   // =========================
   // 用戶資料(ngOnInt注入)
@@ -132,9 +132,9 @@ export class WishesComponent implements OnInit {
 
       this.pendingFilter =
         filter === 'all' ||
-          filter === 'active' ||
-          filter === 'finished' ||
-          filter === 'expired'
+        filter === 'active' ||
+        filter === 'finished' ||
+        filter === 'expired'
           ? filter
           : null;
 
@@ -734,7 +734,7 @@ export class WishesComponent implements OnInit {
     const wishId = this.selectedWish.id;
     const wishTitle = encodeURIComponent(this.selectedWish.title || '');
     sessionStorage.removeItem('temp_order_info');
-    window.location.href = `/management/store_upsert?wish_id=${wishId}&wish_title=${wishTitle}`;
+    window.location.href = `/gogobuy/list?wish_id=${wishId}&wish_title=${wishTitle}`;
   }
 
   // =========================
