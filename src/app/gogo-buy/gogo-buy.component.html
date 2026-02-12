@@ -129,6 +129,10 @@
         <span class="text-base font-semibold text-slate-700 bg-slate-200/50 px-3 py-1 rounded-full ml-2">
           {{ auths.store().length }} 間店
         </span>
+        <button class="text-base w-[110px] h-[45px] px-5 py-2 rounded-xl bg-[#E07A3F] text-white font-bold hover:bg-[#c86d39]"
+          (click)="onStoreCtaClick()">
+          {{ storeCtaLabel() }}
+        </button>
       </h2>
     </div>
   </section>
@@ -164,15 +168,6 @@
     } @else {
     <div class="p-6 text-center font-bold text-slate-500 text-2xl">
       查無附近店家
-    </div>
-    }
-    <!-- 展開/到全部商家頁面 -->
-    @if (auths.store().length > storeInitial) {
-    <div class="mt-6 flex justify-center">
-      <button class="px-5 py-2 rounded-xl bg-[#E07A3F] text-white font-bold hover:bg-[#c86d39]"
-        (click)="onStoreCtaClick()">
-        {{ storeCtaLabel() }}
-      </button>
     </div>
     }
   </section>
