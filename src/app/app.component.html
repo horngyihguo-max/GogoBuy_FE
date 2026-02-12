@@ -56,11 +56,11 @@
         <li>
           @if (userAvatar()) {
           <img [src]="userAvatar()" alt="User Avatar" class="avatar-style"
-            class="w-[24px] h-[25px] rounded-full cursor-pointer" (click)="onUserClick($event, menu)" pTooltip="點擊查看菜單"
+            class="w-[24px] h-[25px] rounded-full cursor-pointer" (click)="onUserClick($event, menu)" pTooltip="點擊查看功能選單"
             tooltipPosition="bottom" [positionTop]="5" />
           } @else {
           <i class="pi pi-user nav-icon cursor-pointer" style=" color: rgb(255, 255, 255); font-size: 1.5rem"
-            (click)="menu.toggle($event)" pTooltip="點擊查看菜單" tooltipPosition="bottom" [positionTop]="5"></i>
+            (click)="menu.toggle($event)" pTooltip="點擊查看功能選單" tooltipPosition="bottom" [positionTop]="5"></i>
           }
         </li>
         } @else {
