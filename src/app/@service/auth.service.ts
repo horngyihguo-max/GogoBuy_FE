@@ -115,6 +115,7 @@ export class AuthService {
       next: (res: any) => {
         const userData = res;
         localStorage.setItem('user_avatar_url', res.avatarUrl);
+        localStorage.setItem('user_role', res.role);
         if (userData && (userData.id || userData.userId)) {
           this.setUser(userData);
         }

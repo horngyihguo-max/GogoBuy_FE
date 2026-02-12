@@ -59,10 +59,10 @@ export const routes: Routes = [
     path: 'management',
     data: { breadcrumb: '後台管理' },
     children: [
-      { path: 'store', component: StoreComponent, title: '店家管理', data: { breadcrumb: '我的店家' } },
-      { path: 'store/:id', component: StoreComponent, title: '店家管理', data: { breadcrumb: '我的店家' } },
-      { path: 'store_upsert', component: StoreUpsertComponent, title: '創建店家', data: { breadcrumb: '創建店家' } },
-      { path: 'store_upsert/:id', component: StoreUpsertComponent, title: '創建店家', data: { breadcrumb: '創建店家' } },
+      { path: 'store', component: StoreComponent, title: '店家管理', data: { breadcrumb: '我的店家', expectedRole: 'admin' }, canActivate: [authGuard] },
+      { path: 'store/:id', component: StoreComponent, title: '店家管理', data: { breadcrumb: '我的店家', expectedRole: 'admin' }, canActivate: [authGuard] },
+      { path: 'store_upsert', component: StoreUpsertComponent, title: '創建店家', data: { breadcrumb: '創建店家', expectedRole: 'admin' }, canActivate: [authGuard] },
+      { path: 'store_upsert/:id', component: StoreUpsertComponent, title: '創建店家', data: { breadcrumb: '創建店家', expectedRole: 'admin' }, canActivate: [authGuard] },
       { path: 'store_info/:id', component: StoreInfoComponent, title: '店家資訊', data: { breadcrumb: '店家資訊' } },
     ]
   },
