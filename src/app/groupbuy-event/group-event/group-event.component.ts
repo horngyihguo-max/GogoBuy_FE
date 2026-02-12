@@ -72,7 +72,7 @@ export class GroupEventComponent {
   feeDescriptionVoList: FeeDescriptionVoList[] = [];
 
   eventName!: string;
-  endTime: Date | null = null;
+  endTime!: Date;
   splitType!: string;
   announcement!: string;
   type!: string;
@@ -93,6 +93,92 @@ export class GroupEventComponent {
   useAll!: boolean;
   minDate: Date = new Date();
   previewTab!: number;
+
+
+  dateFormat(date:Date){  //後端回傳營業間轉換
+    const dateString = date.toString();
+    const weekday = dateString.split(' ')[0];
+    const weekMap: any = {
+      'Sun': '7',
+      'Mon': '1',
+      'Tue': '2',
+      'Wed': '3',
+      'Thu': '4',
+      'Fri': '5',
+      'Sat': '6'
+    };
+    return weekMap[weekday];
+  }
+  formatToFullDateTime(date: Date | null): string {  //資料存進後端前轉換
+    if (!date) return '';
+    const d = new Date(date);
+    const YYYY = d.getFullYear();
+    const MM = String(d.getMonth() + 1).padStart(2, '0');
+    const DD = String(d.getDate()).padStart(2, '0');
+    const hh = String(d.getHours()).padStart(2, '0');
+    const mm = String(d.getMinutes()).padStart(2, '0');
+    return `${YYYY}-${MM}-${DD}T${hh}:${mm}:00`;
+  }
+
+  loginFirst(){  //登入警告
+    Swal.fire({
+      title: "請先登入",
+      width: 400,
+      padding: "3em",
+      customClass: {
+        container: 'my-glass-backdrop' // 自定義遮罩類別
+      },
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      allowEnterKey: true,
+      showConfirmButton: true,
+      confirmButtonText: "確定",
+      confirmButtonColor: "#662222"
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.router.navigate(['/gogobuy/login']);
+      }
+    });
+  }
+  showAlert(title: string, text: string) {  //必填警告、營業時間警告
+    Swal.fire({
+      icon: 'warning',
+      title: title,
+      text: text,
+      width: 600,
+      confirmButtonColor: '#7F1D1D',
+      confirmButtonText: '我知道了',
+      didOpen: () => {
+        const c = document.querySelector('.swal2-container') as HTMLElement | null;
+        if (c) c.style.zIndex = '20000';
+      },
+    });
+  }
+  // operatingAlert() {  //營業時間警告
+  //   Swal.fire({
+  //     title: "截止時間不在店家營業時間內",
+  //     text: "確定要繼續嗎?",
+  //     icon: "warning",
+  //     showConfirmButton: true,
+  //     confirmButtonText: "繼續",
+  //     showCancelButton: true,
+  //     cancelButtonText: "取消",
+  //     reverseButtons: true,  //左右交換位置
+  //     customClass: {
+  //       confirmButton: 'px-8 py-3 bg-[#7F1D1D] text-white rounded-xl mx-3 hover:bg-[#F4E7E1] hover:text-black active:scale-85 transition duration-150',
+  //       cancelButton: 'px-8 py-3 bg-slate-400 text-white rounded-xl mx-3 hover:bg-slate-400/50 hover:text-black active:scale-85 transition duration-150'
+  //     },
+  //     buttonsStyling: false
+  //   }).then((result) => {
+  //     if (result.isConfirmed) {
+  //       this.isPreview = true;
+  //     } else {
+  //       this.isPreview = false;
+  //     }
+  //   });
+  // }
+
+
   ngOnInit(): void {
     this.userId = String(localStorage.getItem('user_id'));
     if(!this.userId || this.userId === 'null'){
@@ -114,18 +200,7 @@ export class GroupEventComponent {
     });
 
     const now = new Date();
-    const dateString = now.toString();
-    const weekday = dateString.split(' ')[0];
-    const weekMap: any = {
-      'Sun': '7',
-      'Mon': '1',
-      'Tue': '2',
-      'Wed': '3',
-      'Thu': '4',
-      'Fri': '5',
-      'Sat': '6'
-    };
-    const today = weekMap[weekday];
+    const today = this.dateFormat(now);
     const time = now.getHours() * 100 + now.getMinutes();
 
     this.storeId = Number(this.route.snapshot.paramMap.get('id'));
@@ -213,26 +288,6 @@ export class GroupEventComponent {
     });
   }
 
-  loginFirst(){
-    Swal.fire({
-      title: "請先登入",
-      width: 400,
-      padding: "3em",
-      customClass: {
-        container: 'my-glass-backdrop' // 自定義遮罩類別
-      },
-      allowOutsideClick: false,
-      allowEscapeKey: false,
-      allowEnterKey: true,
-      showConfirmButton: true,
-      confirmButtonText: "確定",
-      confirmButtonColor: "#662222"
-    }).then((result) => {
-      if (result.isConfirmed) {
-        this.router.navigate(['/gogobuy/login']);
-      }
-    });
-  }
 
   getFutureOpenTime(currentDay: number): string {
     const weekNames = ["", "週一", "週二", "週三", "週四", "週五", "週六", "週日"];
@@ -546,6 +601,57 @@ export class GroupEventComponent {
   }
 
 
+  checkPickupTime() {
+    const finishDate=this.dateFormat(this.pickTime);
+    const operatingTime:{ open: string; close: string; }[]=[];
+    for(let each of this.operatingHoursVoList){
+      if(each.week==finishDate){
+        operatingTime.push({
+          open: each.openTime,
+          close: each.closeTime
+        });
+      }
+    }
+    if (operatingTime.length === 0) {
+      const timeInfo = '該店當日不營業，請選擇其他日期。';
+      this.showAlert('您選擇的取貨時間不在店家營業時間內', timeInfo);
+    }
+    let openCount = 0;
+    // 取得 pickTime 的年月日，作為基準日期物件
+    const year = this.pickTime.getFullYear();
+    const month = this.pickTime.getMonth();
+    const date = this.pickTime.getDate();
+    // 目標時間的總分鐘數 (基準：1970/01/01 以來)
+    const pickTimestamp = Math.floor(this.pickTime.getTime() / 60000);
+    operatingTime.forEach(each => {
+      // 1. 解析營業時間字串 "08:00:00" -> [8, 0, 0]
+      const [openH, openM, openS] = each.open.split(':').map(Number);
+      const [closeH, closeM, closeS] = each.close.split(':').map(Number);
+      // 2. 將基準日期配上營業時間，建立「同一天」的 Date 物件
+      const openDate = new Date(year, month, date, openH, openM, openS || 0);
+      const closeDate = new Date(year, month, date, closeH, closeM, closeS || 0);
+      // 3. 轉成分鐘 Timestamp
+      const openTimestamp = Math.floor(openDate.getTime() / 60000);
+      const closeTimestamp = Math.floor(closeDate.getTime() / 60000);
+      if (openTimestamp <= closeTimestamp) {
+        // 一般時段
+        if (pickTimestamp >= openTimestamp && pickTimestamp <= closeTimestamp) {
+          openCount++;
+        }
+      } else {
+        // 跨夜時段
+        if (pickTimestamp >= openTimestamp || pickTimestamp <= closeTimestamp) {
+          openCount++;
+        }
+      }
+    });
+    if (openCount == 0) {
+      // 這裡同樣可以組合營業時間顯示
+      const timeInfo = operatingTime.map(t => `${t.open.substring(0, 5)} ~ ${t.close.substring(0, 5)}`).join('、');
+      this.showAlert('您選擇的取貨時間不在店家營業時間內', `該店當日營業時段為：${timeInfo}`);
+    }
+  }
+
   goHome() {
     this.router.navigate(['/gogobuy/home']);
   }
@@ -566,6 +672,7 @@ export class GroupEventComponent {
     } else if (this.limitation % 1 != 0) {
       missingFields.push('請輸入新台幣整數金額(須為阿拉伯數字)');
     }
+    if (!this.pickLocation) missingFields.push('取貨地點');
     if (!this.endTime) {
       missingFields.push('截止日期與時間');
     } else {
@@ -579,6 +686,11 @@ export class GroupEventComponent {
       } else if (endTimestamp < nowTimestamp) {
         missingFields.push('截止時間已過請重新輸入');
       }
+    }
+    if (!this.pickTime) {
+      missingFields.push('取貨時間');
+    } else {
+      this.checkPickupTime();
     }
     if (missingFields.length > 0) {    // 如果有漏填，觸發 Swal 警告
       const fieldList = missingFields.join('、'); // 將陣列轉為 "欄位A、欄位B"
@@ -596,19 +708,7 @@ export class GroupEventComponent {
       this.previewTab = tabs[0].id;
     }
   }
-  showAlert(title: string, text: string) {
-    Swal.fire({
-      icon: 'warning',
-      title: title,
-      text: text,
-      confirmButtonColor: '#7F1D1D',
-      confirmButtonText: '我知道了',
-      didOpen: () => {
-        const c = document.querySelector('.swal2-container') as HTMLElement | null;
-        if (c) c.style.zIndex = '20000';
-      },
-    });
-  }
+
 
   revise() {
     this.isPreview = false;
@@ -652,6 +752,7 @@ export class GroupEventComponent {
       this.loginFirst();
       return;
     }
+
     const end = this.formatToFullDateTime(this.endTime);
     const pick = this.formatToFullDateTime(this.pickTime);
     const req = {
@@ -701,14 +802,5 @@ export class GroupEventComponent {
       }
     });
   }
-  formatToFullDateTime(date: Date | null): string {
-    if (!date) return '';
-    const d = new Date(date);
-    const YYYY = d.getFullYear();
-    const MM = String(d.getMonth() + 1).padStart(2, '0');
-    const DD = String(d.getDate()).padStart(2, '0');
-    const hh = String(d.getHours()).padStart(2, '0');
-    const mm = String(d.getMinutes()).padStart(2, '0');
-    return `${YYYY}-${MM}-${DD}T${hh}:${mm}:00`;
-  }
+
 }

@@ -270,7 +270,7 @@
                 </span>
                 <span class="pb-2 md:pl-2 md:w-[25vw]">
                   <!-- <div class="text-[15px] pr-2 pb-1">
-                    結束時間：
+                    截止時間：
                   </div> -->
                   <p-inputgroup class="w-full">
                     <p-inputgroup-addon>
@@ -285,10 +285,10 @@
                         (onShow)="handleOnShow()" [readonlyInput]="false"
                         [keepInvalid]="true" dateFormat="yy/mm/dd" (onBlur)="handleBlur()">
                       </p-datepicker>
-                      <label class="z-1">結束時間</label>
+                      <label class="z-1">截止時間</label>
                     </p-floatlabel>
                   </p-inputgroup>
-                  <div class="md:text-center text-[15px] text-gray-400 pr-2 pb-1">結束時間不得早於或等於當下時間</div>
+                  <div class="md:text-center text-[15px] text-gray-400 pr-2 pb-1">截止時間不得早於或等於當下時間</div>
                 </span>
               </div>
               <div class="flex flex-col md:grid md:grid-cols-2 md:flex-row md:justify-between">
@@ -327,7 +327,7 @@
                       <label class="z-1">預計取貨時間</label>
                     </p-floatlabel>
                   </p-inputgroup>
-                  <div class="md:text-center text-[15px] text-gray-400 pr-2 pb-1">取貨時間不得早於或等於結束時間</div>
+                  <div class="md:text-center text-[15px] text-gray-400 pr-2 pb-1">取貨時間不得早於或等於截止時間</div>
                 </span>
               </div>
               <label class="w-full">
@@ -456,7 +456,7 @@
               </div>
               <div class="setting-span">
                 <div class="pr-2 pb-1">
-                  <span class="text-[#662222]">結束時間：</span>
+                  <span class="text-[#662222]">截止時間：</span>
                   <span class="font-bold">{{endTime | date: 'yyyy/MM/dd　HH:mm' }}</span>
                 </div>
               </div>
