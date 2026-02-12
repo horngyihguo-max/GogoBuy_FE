@@ -40,8 +40,43 @@ export class LoginComponent {
     this.user.password = 'test1234';
 
     this.route.queryParams.subscribe(params => {
+      // 1. 處理停權 (舊有邏輯，來自攔截器)
       if (params['reason'] === 'suspended') {
         this.errorMessage = '您的帳號已被停權，請聯繫管理員。';
+      }
+
+      // 2. 處理 OAuth 登入錯誤 (來自 SecurityConfig 的 failureHandler)
+      if (params['errorMsg']) {
+        const errorMsg = params['errorMsg'];
+        // 為了避免 refresh 一直看到錯誤，可以考慮清除為空，但這裡先顯示
+        Swal.fire({
+          icon: 'error',
+          title: '登入失敗',
+          text: errorMsg,
+          confirmButtonText: '確定'
+        });
+
+        // 替換 URL，移除參數避免重整後還在 (Optional)
+        this.router.navigate([], {
+          queryParams: { errorMsg: null },
+          queryParamsHandling: 'merge'
+        });
+      }
+
+      // 3. 處理 OAuth 註冊成功 (需驗證信箱)
+      if (params['verificationSent']) {
+        const msg = params['message'] || '請前往信箱收取驗證信';
+        Swal.fire({
+          icon: 'success',
+          title: '註冊成功',
+          text: msg,
+          confirmButtonText: '好的'
+        });
+
+        this.router.navigate([], {
+          queryParams: { verificationSent: null, message: null },
+          queryParamsHandling: 'merge'
+        });
       }
     });
 

@@ -51,6 +51,8 @@ export class DashboardComponent {
   users: any[] = [];
   loading = false;
   items: any[] | undefined;
+  minDate: Date = new Date();
+
 
   currentView: 'announce' | 'stores' | 'events' | 'users' = 'announce';
 
