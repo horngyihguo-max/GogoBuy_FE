@@ -41,7 +41,8 @@
         <!-- 管理者介面 -->
         @if(isAdmin()){
         <li>
-          <i class="pi pi-wrench nav-icon cursor-pointer" style="font-size: 1.5rem" (click)="toDashboard()"></i>
+          <i class="pi pi-wrench nav-icon cursor-pointer" style="font-size: 1.5rem" (click)="toDashboard()"
+            pTooltip="點擊進入管理" tooltipPosition="bottom" [positionTop]="5"></i>
         </li>
         }
         <!-- 通知鈴鐺 -->
@@ -55,11 +56,11 @@
         <li>
           @if (userAvatar()) {
           <img [src]="userAvatar()" alt="User Avatar" class="avatar-style"
-            class="w-[24px] h-[25px] rounded-full cursor-pointer" (click)="onUserClick($event, menu)" pTooltip="點擊查看菜單"
+            class="w-[24px] h-[25px] rounded-full cursor-pointer" (click)="onUserClick($event, menu)" pTooltip="點擊查看功能選單"
             tooltipPosition="bottom" [positionTop]="5" />
           } @else {
           <i class="pi pi-user nav-icon cursor-pointer" style=" color: rgb(255, 255, 255); font-size: 1.5rem"
-            (click)="menu.toggle($event)" pTooltip="點擊查看菜單" tooltipPosition="bottom" [positionTop]="5"></i>
+            (click)="menu.toggle($event)" pTooltip="點擊查看功能選單" tooltipPosition="bottom" [positionTop]="5"></i>
           }
         </li>
         } @else {
@@ -73,6 +74,7 @@
   <p-menu #menu [popup]="true" [model]="filteredItems" appendTo="body"></p-menu>
 
   <!-- 跑馬燈 -->
+  @if(showMarquee){
   <div class="marquee">
     <div class="marquee__track">
       <div class="marquee__group">
@@ -83,6 +85,7 @@
       </div>
     </div>
   </div>
+  }
 </div>
 
 <!-- 手機板搜尋欄，class="search-mobile"讓搜尋欄只在手機板出現 -->
@@ -109,7 +112,7 @@
 
 
 <!-- main(顯示頁面，其他網頁主要修改) -->
-<main class="bg-[#F8FAFC] flex-1">
+<main class="bg-[#F8FAFC] flex-1" [class.has-marquee]="showMarquee">
   <router-outlet></router-outlet>
 </main>
 
@@ -127,12 +130,13 @@
 
 
 <!-- 常見問題+氣泡 -->
+@if(!showProblem){
 <button class="question" type="button" balloon-data="有甚麼疑問嗎?點擊這裡" aria-label="常見問題"
   (click)="problemMenu.toggle($event)">
   ?
 </button>
 <p-menu #problemMenu [popup]="true" [model]="problems"></p-menu>
-
+}
 <!-- 手機 footer 依 router.url 判斷目前頁籤並高亮 -->
 <div class="footer-mobile">
   <!-- 首頁 -->

@@ -68,8 +68,13 @@ nav i.nav-icon:hover {
 /* --- MAIN --- */
 main {
   flex: 1;
+  padding-top: 64px;
+}
+
+main.has-marquee {
   padding-top: 112px;
 }
+
 
 .marquee {
   top: 64px;

@@ -50,9 +50,16 @@ export class LoginComponent {
   // 取得右側容器的引用
   @ViewChild('rightPanel') rightPanel!: ElementRef;
   // 切換模式
+  setPageMode(mode: 'login' | 'register') {
+    if (this.pageMode !== mode) {
+      this.pageMode = mode;
+      this.resetForm();
+    }
+  }
+
+  // 切換模式
   toggleMode() {
-    this.pageMode = this.pageMode == 'login' ? 'register' : 'login';
-    this.resetForm();
+    this.setPageMode(this.pageMode == 'login' ? 'register' : 'login');
     // 當切換回登入時，強制將右側容器捲動回最上方
     if (this.pageMode === 'login') {
       // 延遲一小段時間確保 DOM 已更新 class (如 overflow-hidden)

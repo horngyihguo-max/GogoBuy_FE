@@ -32,41 +32,44 @@
     </div>
 
     <!-- 右側表單卡：可捲動 -->
-    <div class="w-full md:w-7/12 bg-orange-400 relative overflow-y-auto" #rightPanel
-      [class.overflow-y-auto]="pageMode === 'register'"
-      [class.overflow-hidden]="pageMode === 'login'">
-      <!-- 右上切換 -->
-      <div
-        class="sticky top-0 z-20 flex justify-end p-4 md:p-4 bg-gradient-to-b from-orange-400 to-orange-400/40 backdrop-blur">
-        <button type="button" (click)="toggleMode()"
-          class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 hover:bg-white text-red-950 font-extrabold text-sm shadow-sm border border-white/60 transition active:scale-[0.98]">
-          <i class="pi pi-refresh text-xs"></i>
-          <span>{{ pageMode == "login" ? "註冊帳號" : "返回登入" }}</span>
-        </button>
-      </div>
+    <div class="w-full md:w-7/12 bg-orange-400 relative " #rightPanel>
 
       <!-- 內容容器：置中、容許高度變動 -->
-      <div class="min-h-full flex items-center justify-center px-6 pb-10 md:px-10">
+      <div class="min-h-full flex items-center justify-center px-6 py-10 md:px-10">
         <div class="w-full max-w-sm">
           <!-- 白色卡片本體 -->
           <div class="bg-white rounded-3xl p-8 md:p-9 shadow-[0_20px_50px_rgba(0,0,0,0.15)]">
-            <div class="flex items-start justify-between">
+
+            <!-- Tabs Navigation -->
+            <div class="relative flex p-1 bg-slate-100 rounded-2xl mb-8">
+              <!-- Sliding Indicator -->
+              <div
+                class="absolute left-1 top-1 bottom-1 w-[calc(50%-4px)] bg-white rounded-xl shadow-sm transition-all duration-300 ease-out z-0"
+                [style.transform]="pageMode === 'login' ? 'translateX(0)' : 'translateX(100%)'">
+              </div>
+
+              <button type="button" (click)="setPageMode('login')"
+                class="relative z-10 flex-1 py-3 text-sm font-black uppercase tracking-widest transition-colors duration-300 cursor-pointer"
+                [class.text-red-900]="pageMode === 'login'" [class.text-slate-500]="pageMode !== 'login'">
+                登入 / Login
+              </button>
+              <button type="button" (click)="setPageMode('register')"
+                class="relative z-10 flex-1 py-3 text-sm font-black uppercase tracking-widest transition-colors duration-300 cursor-pointer"
+                [class.text-red-900]="pageMode === 'register'" [class.text-slate-500]="pageMode !== 'register'">
+                註冊 / Register
+              </button>
+            </div>
+
+            <!-- <div class="flex items-start justify-between">
               <div>
-                <p class="text-[20px] font-black text-orange-500 uppercase tracking-[0.22em]">
-                  {{ pageMode == "login" ? "Welcome Back" : "Join Us Today" }}
-                </p>
-                <h3 class="mt-2 text-[25px] font-black tracking-tight text-slate-900">
-                  {{ pageMode == "login" ? "登入您的帳號" : "建立新帳號" }}
+                <h3 class="text-[25px] font-black tracking-tight text-slate-900">
+                  {{ pageMode == "login" ? "歡迎回來" : "建立帳號" }}
                 </h3>
-                <p class="mt-2 text-base font-bold text-slate-500">
-                  {{
-                  pageMode == "login"
-                  ? "歡迎回來，請輸入帳號資訊。"
-                  : "只要幾步就能開始團購。"
-                  }}
+                <p class="mt-1 text-sm font-bold text-slate-500">
+                  {{ pageMode == "login" ? "請輸入您的帳號密碼進行登入。" : "加入 GogoBuy 享受團購樂趣。" }}
                 </p>
               </div>
-            </div>
+            </div> -->
 
             <form (ngSubmit)="onSubmit()" #authForm="ngForm" class="mt-8 space-y-4">
               <!-- 名稱 -->
@@ -77,7 +80,7 @@
                     名字 / Name
                   </label>
                   <input type="text" name="nickname" [(ngModel)]="user.nickname" #nickname="ngModel" required
-                    class="w-full py-2 bg-transparent border-none outline-none text-slate-800 font-semibold placeholder:text-slate-300"
+                    class="w-full py-1 bg-transparent border-none outline-none text-slate-800 font-semibold placeholder:text-slate-300"
                     placeholder="怎麼稱呼您？" />
                 </div>
 
@@ -97,8 +100,8 @@
                   </label>
                   <input type="email" name="email" [(ngModel)]="user.email" #email="ngModel" required
                     pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
-                    class="w-full py-2 bg-transparent border-none outline-none text-slate-800 font-semibold placeholder:text-slate-300"
-                    placeholder="mazo@gmail.com" value="test2@gmail.com" />
+                    class="w-full py-1 bg-transparent border-none outline-none text-slate-800 font-semibold placeholder:text-slate-300"
+                    placeholder="example@gmail.com" value="test2@gmail.com" />
                 </div>
 
                 <p class="min-h-[7px] mt-[5px] text-[13px] font-bold text-red-700"
@@ -116,7 +119,7 @@
                   </label>
                   <input type="text" name="phone" [(ngModel)]="user.phone" #phone="ngModel" required
                     pattern="^09\d{2}[\s\-]?\d{3}[\s\-]?\d{3}$"
-                    class="w-full py-2 bg-transparent border-none outline-none text-slate-800 font-semibold placeholder:text-slate-300"
+                    class="w-full py-1 bg-transparent border-none outline-none text-slate-800 font-semibold placeholder:text-slate-300"
                     placeholder="0912345678" />
                 </div>
 
@@ -136,7 +139,7 @@
                   <div class="relative">
                     <input [type]="showPassword ? 'text' : 'password'" name="password" [(ngModel)]="user.password"
                       #password="ngModel" required
-                      class="w-full py-2 pr-10 bg-transparent border-none outline-none text-slate-800 font-semibold placeholder:text-slate-300"
+                      class="w-full py-1 pr-10 bg-transparent border-none outline-none text-slate-800 font-semibold placeholder:text-slate-300"
                       pattern="^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z\d]{8,16}$" placeholder="••••••••" value="" />
 
                     <button type="button" (click)="showPassword = !showPassword"
@@ -154,7 +157,7 @@
 
               <!-- 送出 -->
               <button type="submit" [disabled]="!authForm.valid"
-                class="w-full mt-2 bg-red-900 text-white font-black py-4 rounded-2xl hover:bg-red-950 transition active:scale-[0.99] shadow-[0_12px_24px_rgba(127,29,29,0.28)] disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-widest text-[20px]">
+                class="w-full mt-1 bg-red-900 text-white font-black py-2 rounded-2xl hover:bg-red-950 transition active:scale-[0.99] shadow-[0_12px_24px_rgba(127,29,29,0.28)] disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-widest text-[20px]">
                 {{ pageMode == "login" ? "登入" : "註冊" }}
               </button>
               @if (pageMode == 'login') {
@@ -164,7 +167,7 @@
               }
 
               <!-- 分隔線 -->
-              <div class="flex items-center gap-3 pt-4">
+              <div class="flex items-center gap-3 pt-2">
                 <div class="h-px bg-slate-200 flex-1"></div>
                 <span class="text-[10px] font-bold text-slate-700">OR</span>
                 <div class="h-px bg-slate-200 flex-1"></div>
@@ -172,7 +175,7 @@
 
               <!-- Google -->
               <button type="button" (click)="loginWithGoogle()"
-                class="w-full flex items-center justify-center gap-3 bg-slate-50 hover:bg-slate-100 text-slate-900 font-extrabold px-6 py-3 rounded-2xl transition border border-slate-200">
+                class="w-full flex items-center justify-center gap-3 bg-slate-50 hover:bg-slate-100 text-slate-900 font-extrabold px-6 py-2 rounded-2xl transition border border-slate-200">
                 <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" class="w-8 h-8"
                   alt="Google" />
                 <span class="text-sm">Continue with Google</span>

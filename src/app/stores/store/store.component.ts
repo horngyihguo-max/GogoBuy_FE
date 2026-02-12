@@ -132,6 +132,9 @@ export class StoreComponent {
   // res.message
   resMessage!: string;
 
+  // loading
+  loading: boolean = false;
+
   // 清空欄位
   getNewProduct(): MenuVoList {
     return {
@@ -577,29 +580,29 @@ export class StoreComponent {
   }
 
   rebuildApplicableCategoryIds() {
-  const groups = this.storeData.productOptionGroupsVoList;
-  const menus = this.storeData.menuVoList;
+    const groups = this.storeData.productOptionGroupsVoList;
+    const menus = this.storeData.menuVoList;
 
-  if (!groups || !menus) return;
+    if (!groups || !menus) return;
 
-  groups.forEach(g => g.applicableCategoryIds = []);
+    groups.forEach(g => g.applicableCategoryIds = []);
 
-  menus.forEach(menu => {
-    if (!menu.unusual) return;
+    menus.forEach(menu => {
+      if (!menu.unusual) return;
 
-    Object.keys(menu.unusual).forEach(specIdStr => {
-      const specId = Number(specIdStr);
-      const specGroup = groups.find(g => g.id === specId);
+      Object.keys(menu.unusual).forEach(specIdStr => {
+        const specId = Number(specIdStr);
+        const specGroup = groups.find(g => g.id === specId);
 
-      if (specGroup) {
-        if (!specGroup.applicableCategoryIds) specGroup.applicableCategoryIds = [];
-        if (!specGroup.applicableCategoryIds.includes(menu.categoryId)) {
-          specGroup.applicableCategoryIds.push(menu.categoryId);
+        if (specGroup) {
+          if (!specGroup.applicableCategoryIds) specGroup.applicableCategoryIds = [];
+          if (!specGroup.applicableCategoryIds.includes(menu.categoryId)) {
+            specGroup.applicableCategoryIds.push(menu.categoryId);
+          }
         }
-      }
+      });
     });
-  });
-}
+  }
 
   getApplicableSpecsForCategory(categoryId: number): ProductOptionGroupsVoList[] {
     return this.storeData.productOptionGroupsVoList.filter(group =>
@@ -998,6 +1001,7 @@ export class StoreComponent {
   // 存資料庫 ---------------------------------------------------------
   async onSaveAll() {
     this.displayPublishConfirm = false;
+    this.loading = true;
     const transformUnusual = (unusual: any) => {
       if (!unusual || Object.keys(unusual).length === 0) {
         return [];
@@ -1037,23 +1041,32 @@ export class StoreComponent {
       }
       console.log("payload(create):", payload);
       this.http.postApi('http://localhost:8080/gogobuy/store/create', payload)
-        .subscribe((res: any) => {
-          console.log("create store:", res);
-          if (res.code === 200) {
+        .subscribe({
+          next: (res: any) => {
+            console.log("create store:", res);
+            if (res.code === 200) {
 
-            this.http.getApi('http://localhost:8080/gogobuy/store/all').subscribe((all: any) => {
-              const myStores = all.storeList.filter((s: any) => s.createdBy === this.userId);
-              if (myStores && myStores.length > 0) {
-                const latestStore = myStores.reduce((prev: any, current: any) => (prev.id > current.id) ? prev : current);
-                this.id = latestStore.id;
-                this.afterSaveSuccess();
-              } else {
-                this.router.navigate(['gogobuy/home']);
-              }
-            });
-          } else {
-            this.resMessage = res.message;
-            this.displaySaveFailedDialog = true;
+              this.http.getApi('http://localhost:8080/gogobuy/store/all').subscribe((all: any) => {
+                const myStores = all.storeList.filter((s: any) => s.createdBy === this.userId);
+                if (myStores && myStores.length > 0) {
+                  const latestStore = myStores.reduce((prev: any, current: any) => (prev.id > current.id) ? prev : current);
+                  this.id = latestStore.id;
+                  this.afterSaveSuccess();
+                } else {
+                  this.router.navigate(['gogobuy/home']);
+                }
+              });
+            } else {
+              this.loading = false;
+              this.resMessage = res.message;
+              this.displaySaveFailedDialog = true;
+            }
+          },
+          error: () => {
+            this.loading = false;
+          },
+          complete: () => {
+            this.loading = false;
           }
         });
     } else {
@@ -1084,17 +1097,21 @@ export class StoreComponent {
       console.log("payload(update):", payload);
 
       this.http.postApi(`http://localhost:8080/gogobuy/store/update?id=${this.storeData.id}`, payload)
-        .subscribe((res: any) => {
-          if (res.code === 200) {
-            console.log("update store:", res);
-            this.id = this.storeData.id;
-            this.afterSaveSuccess();
-          } else {
-            this.resMessage = res.message;
-            this.displaySaveFailedDialog = true;
-          }
+        .subscribe({
+          next: (res: any) => {
+            if (res.code === 200) {
+              console.log("update store:", res);
+              this.id = this.storeData.id;
+              this.loading = false;
+              this.afterSaveSuccess();
+            } else {
+              this.resMessage = res.message;
+              this.displaySaveFailedDialog = true;
+            }
+          },
         });
     }
+
   }
 
   private afterSaveSuccess() {
