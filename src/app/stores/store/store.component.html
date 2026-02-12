@@ -1105,7 +1105,7 @@
   </div>
 </p-dialog>
 
-<!---------------------------- 公開嗎店家 Dialog ---------------------------->
+<!---------------------------- 公開嗎店家 Dialog ------------------------------>
 <p-dialog [(visible)]="displayPublishConfirm" [modal]="true" [closable]="false" [showHeader]="false" [draggable]="false"
   [resizable]="false" [closeOnEscape]="false" styleClass="rounded-xl overflow-hidden"
   [style]="{ width: '90vw', maxWidth: '28rem', border: 'none' }">
@@ -1148,7 +1148,7 @@
   </div>
 </p-dialog>
 
-<!---------------------------- 儲存失敗Dialog ---------------------------->
+<!---------------------------- 儲存失敗Dialog ---------------------------------->
 <p-dialog [(visible)]="displaySaveFailedDialog" [modal]="true" [closable]="false" [showHeader]="false"
   [draggable]="false" [resizable]="false" [closeOnEscape]="false" styleClass="rounded-xl overflow-hidden"
   [style]="{ width: '90vw', maxWidth: '24rem', border: 'none' }">
@@ -1175,4 +1175,13 @@
       </button>
     </div>
   </div>
+</p-dialog>
+
+<!------------------------------ 儲存 loading ------------------------------>
+<p-dialog [(visible)]="loading" [modal]="true" [closable]="false" [showHeader]="false"
+    [style]="{ 'background': 'transparent', 'border': 'none', 'box-shadow': 'none' }">
+    <div class="flex flex-column align-items-center">
+        <i class="pi pi-spin pi-spinner" style="font-size: 3rem; color: white;"></i>
+        <span class="mt-2 text-white">正在儲存店家資訊，請稍候...</span>
+    </div>
 </p-dialog>

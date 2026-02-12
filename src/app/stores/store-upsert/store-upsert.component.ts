@@ -95,6 +95,11 @@ export class StoreUpsertComponent {
     });
   }
 
+  private zhHant(text: string): string {
+    if (!text) return '';
+    return text.replace(/台/g, '臺');
+  }
+
   updateFullAddress() {
     const city = this.selectedCity?.CityName || '';
     const district = this.selectedDistrict?.AreaName || '';
@@ -218,21 +223,22 @@ export class StoreUpsertComponent {
           name: res.storesname,
           publish: true,
           feeDescription: res.fee_description,
+          operatingHoursVoList: this.convertVoToTimeSlots(res.operatingHoursVoList || []),
           menuCategoriesVoList: categories,
           menuVoList: categories.flatMap((cate: any) => cate.menuVo),
           productOptionGroupsVoList: optionGroup,
         };
-
+        this.parseAddressToFields()
         this.scanning = false;
         console.log('掃描後的 storeData:', this.storeData);
       },
       error: (err) => {
-        if(err.status === 503){
+        if (err.status === 503) {
           this.scanErrorMessage = "伺服器目前過於繁忙，請稍候幾秒再試一次。";
-        }else if(err.status === 429){
+        } else if (err.status === 429) {
           this.scanErrorMessage = "今日辨識次數已達上限，或請求過於頻繁。\n請稍候約一分鐘再試，或明天再使用。";
         }
-        else{
+        else {
           this.scanErrorMessage = "AI辨識失敗或正在忙碌中，請確保圖片清晰並稍候再試。";
         }
         this.displayScanFailedDialog = true;
@@ -297,14 +303,13 @@ export class StoreUpsertComponent {
 
   // 將完整地址拆分成 縣市/行政區域/路巷號
   parseAddressToFields() {
-    if (!this.storeData.address) return;
     if (!this.storeData.address || typeof this.storeData.address !== 'string') return;
 
     const regex = /^(\D+?[縣市])(\D+?[區鄉鎮市])(.*)$/;
     const match = this.storeData.address.match(regex);
 
     if (match) {
-      const cityName = match[1];
+      const cityName = this.zhHant(match[1]);
       const districtName = match[2];
       const restAddress = match[3].trim();
 
