@@ -34,8 +34,8 @@
     overflow: visible !important;
   }
 
-  /* sticky 的切換按鈕區：手機可以改成一般區塊，避免佔視窗高度 */
-  .login-page .sticky {
-    position: static !important;
+  /* 右側原本 overflow-y-auto，手機通常會變成雙重滾動，體驗很差 */
+  .login-page .overflow-y-auto {
+    overflow: visible !important;
   }
 }
