@@ -1125,6 +1125,11 @@ export class FollowGroupComponent {
 
   // 卡片上的「+」：能快加就快加；要選就開 dialog
   onPlusClick(product: any): void {
+    if (!this.userId) {
+      this.toastWarn('請先登入', '');
+      this.router.navigate(['/gogobuy/login']);
+      return;
+    }
     if (!this.productNeedsDialog(product)) {
       this.quickAdd(product);
       return;
@@ -1134,6 +1139,11 @@ export class FollowGroupComponent {
 
   // 卡片上的「-」：只針對「快加商品」直減（有規格/選項的先不做卡片直減，避免規格混在一起）
   onMinusClick(product: any): void {
+    if (!this.userId) {
+      this.toastWarn('請先登入', '');
+      this.router.navigate(['/gogobuy/login']);
+      return;
+    }
     if (!product) return;
 
     if (this.productNeedsDialog(product)) {
@@ -1191,6 +1201,11 @@ export class FollowGroupComponent {
 
   // 在菜單卡片上點擊商品時呼叫它
   openProductDialog(product: any): void {
+    if (!this.userId) {
+      this.toastWarn('請先登入', '');
+      this.router.navigate(['/gogobuy/login']);
+      return;
+    }
     if (!product) return;
 
     this.selectedProduct = product;
