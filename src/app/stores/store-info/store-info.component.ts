@@ -30,10 +30,12 @@ export class StoreInfoComponent implements OnInit {
   // 狀態
   // =========================
   isLoading = true;
+  isGroupOpening = false;
 
   userId = ''; // 沒登入就 ""
   user: any | null = null; // 存用戶資料
   storeId = 0;
+  event: any | null = null; // 存團資料
 
   // 店家資料（從 API 或假資料來）
   store: any = null;
@@ -56,6 +58,10 @@ export class StoreInfoComponent implements OnInit {
   // 商品詳情 dialog
   productVisible = false;
   selectedProduct: any = null;
+
+  // 正在開團 dialog
+  eventListVisible = false;
+  eventTab: any = 'event';
 
   // 菜單分組結果
   menuGroups: Array<{
@@ -97,6 +103,54 @@ export class StoreInfoComponent implements OnInit {
 
     // 載入資料
     this.loadStoreById(this.storeId);
+    this.isEventOpen(this.storeId);
+  }
+
+  // 判斷是否有團正在開
+  isEventOpen(storeId: number) {
+    this.http
+      .getApi(
+        `http://localhost:8080/gogobuy/event/getGroupbuyEventByStoresId?stores_id=${storeId}`,
+      )
+      .subscribe((res: any) => {
+        this.event = res.groupbuyEvents.filter((o: any) => o.status === 'OPEN');
+        console.log('團: ' + JSON.stringify(this.event, null, 2));
+        if (this.event.length > 0) {
+          this.isGroupOpening = true;
+        } else {
+          this.isGroupOpening = false;
+        }
+      });
+  }
+  // 打開現在開團 dialog
+  openEventList(): void {
+    this.eventListVisible = true;
+  }
+
+  // 團截止時間計算機
+  formatDateTime(dateString: string): string {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    // 取得月、日
+    const month = date.getMonth() + 1; // 0-11，所以要 +1
+    const day = date.getDate();
+    // 取得時、分
+    let hours = date.getHours();
+    const minutes = date.getMinutes();
+    // 判斷上午/下午
+    const period = hours >= 12 ? '下午' : '上午';
+    // 轉換成 12 小時制
+    if (hours > 12) {
+      hours = hours - 12;
+    } else if (hours === 0) {
+      hours = 12;
+    }
+    return `${month}月${day}日${period} ${hours}點${minutes.toString().padStart(2, '0')}分`;
+  }
+
+  goToFollow(evendId: number) {
+    this.router.navigate(['groupbuy-event/group-follow', evendId]);
+    this.enableScroll();
   }
 
   // 是否全部售完
@@ -136,7 +190,7 @@ export class StoreInfoComponent implements OnInit {
         // console.log(res);
         const normalized = this.normalizeStoreResponse(res);
         this.store = normalized;
-        console.log('店家資訊: ' + JSON.stringify(this.store, null, 2));
+        // console.log('店家資訊: ' + JSON.stringify(this.store, null, 2));
         // 判斷是否全部售完
         this.allSoldOut();
         // console.log(JSON.stringify(this.store));

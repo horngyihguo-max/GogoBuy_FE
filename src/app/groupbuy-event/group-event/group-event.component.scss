@@ -96,21 +96,18 @@
 /* 1. 確保最外層容器不會因為內部拖曳而改變高度 */
 :host ::ng-deep .responsive-picklist .p-picklist {
   display: flex !important;
-  align-items: stretch !important; /* 核心：強制左右兩箱高度永遠齊平 */
-  height: 450px !important; /* 固定整個元件的高度 */
+  align-items: stretch !important;
+  /* 核心：強制左右兩箱高度永遠齊平 */
+  height: 450px !important;
+  /* 固定整個元件的高度 */
 }
 
-<<<<<<< HEAD
 /* 2. 針對左右兩個區域的包裹層 */
 :host ::ng-deep .responsive-picklist .p-picklist-list-wrapper {
   display: flex !important;
   flex-direction: column !important;
-  flex: 1 1 50% !important; /* 確保左右各佔一半 */
-=======
-/* 2. 讓內部的 ul (清單) 真正撐滿 */
-:host ::ng-deep .p-picklist-list {
-  min-height: 25rem !important;
->>>>>>> origin/Mickey
+  flex: 1 1 50% !important;
+  /* 確保左右各佔一半 */
   height: 100% !important;
 }
 
@@ -134,6 +131,7 @@
 :host ::ng-deep .p-picklist-item {
   box-sizing: border-box !important;
 }
+
 /* 3. 調整初始墊片的高度 */
 .dynamic-padding.can-hover {
   /* 當沒東西時，讓墊片幾乎佔滿 25rem */
@@ -201,6 +199,7 @@
   z-index: 0;
   box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.2);
 }
+
 /* 移除 PickList 預設選中時的藍框，避免干擾紅按鈕視覺 */
 :host ::ng-deep .p-picklist-item.p-highlight {
   background: #f8f9fa !important;
@@ -287,6 +286,7 @@
   gap: 1rem;
   /* 左右/上下區域的間距 */
 }
+
 /* --- 手機、平板版 RWD (螢幕寬度 < 1024px) --- */
 @media screen and (max-width: 1023px) {
 
@@ -295,6 +295,7 @@
     display: flex !important;
     flex-direction: column !important;
   }
+
   /* 2. 按鈕容器橫向排列 */
   :host ::ng-deep .responsive-picklist .p-picklist-controls {
     display: flex !important;
@@ -306,32 +307,20 @@
 
   /* 3. 修正 SVG 轉向數值 */
   /* 指向目標 (原向右) -> 旋轉 90 度向下 */
-<<<<<<< HEAD
   :host::ng-deep.responsive-picklist [data-pc-section="moveToTargetButton"] svg,
-  :host::ng-deep.responsive-picklist
-    [data-pc-section="moveAllToTargetButton"]
-    svg {
-=======
-  :host ::ng-deep .responsive-picklist [data-pc-section="moveToTargetButton"] svg,
-  :host ::ng-deep .responsive-picklist [data-pc-section="moveAllToTargetButton"] svg {
->>>>>>> origin/Mickey
+  :host::ng-deep.responsive-picklist [data-pc-section="moveAllToTargetButton"] svg {
     transform: rotate(90deg) !important;
     display: block !important;
   }
+
   /* 指向來源 (原向左) -> 旋轉 90 度向上 (因為原圖向左，轉 90 度會變向上) */
   /* 如果轉 90 度不對，請嘗試使用 rotate(-90deg) 或 rotate(270deg) */
-<<<<<<< HEAD
   :host::ng-deep.responsive-picklist [data-pc-section="moveToSourceButton"] svg,
-  :host::ng-deep.responsive-picklist
-    [data-pc-section="moveAllToSourceButton"]
-    svg {
-=======
-  :host ::ng-deep .responsive-picklist [data-pc-section="moveToSourceButton"] svg,
-  :host ::ng-deep .responsive-picklist [data-pc-section="moveAllToSourceButton"] svg {
->>>>>>> origin/Mickey
+  :host::ng-deep.responsive-picklist [data-pc-section="moveAllToSourceButton"] svg {
     transform: rotate(90deg) !important;
     display: block !important;
   }
+
   /* 4. 寬度修正 */
   :host ::ng-deep .responsive-picklist .p-picklist-list-wrapper {
     width: 100% !important;
@@ -345,11 +334,13 @@
     /* 水平排列：來源在左，目標在右 */
     align-items: flex-start;
   }
+
   /* 確保兩個清單寬度平分或自適應 */
   :host ::ng-deep .responsive-picklist .p-picklist-list-wrapper {
     flex: 1 1 50%;
   }
 }
+
 /* 修正中間控制按鈕垂直置中 */
 :host ::ng-deep .responsive-picklist .p-picklist-buttons {
   display: flex;

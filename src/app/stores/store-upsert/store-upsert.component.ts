@@ -395,8 +395,6 @@ export class StoreUpsertComponent {
         this.parseAddressToFields();
       }
     }
-    console.log('storeData ngOnInt', this.storeData);
-
   }
 
   // 從 service 拿到的資料 ( 新增店家又回來修改店家資訊 )
@@ -655,9 +653,6 @@ export class StoreUpsertComponent {
     if (!this.storeData.category) missingFields.push('經營類別');
     if (!this.storeData.type) missingFields.push('商店類型');
 
-    console.log('timeSlots', this.timeSlots);
-
-
     const finalVoList = this.timeSlots.map(slot => {
       return {
         week: (slot.selectedWeeks || []).filter(w => !Number.isNaN(w)),
@@ -665,9 +660,6 @@ export class StoreUpsertComponent {
         closeTime: `${slot.closeHour || '00'}:${slot.closeMinute || '00'}`
       };
     });
-
-    console.log('finalVoList', finalVoList);
-
 
     if (finalVoList.length === 0) {
       missingFields.push('營業時間');

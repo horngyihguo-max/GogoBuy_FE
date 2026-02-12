@@ -223,13 +223,17 @@ export class StoreComponent {
     if (this.id !== 0) {
       this.http.getApi(`http://localhost:8080/gogobuy/store/searchId?id=${this.id}`)
         .subscribe((res: any) => {
+          console.log('res', res);
 
           if (res.storeList && res.storeList.length > 0) {
             this.storeData.menuCategoriesVoList = res.menuCategoriesVoList;
             this.storeData.productOptionGroupsVoList = res.productOptionGroupsVoList;
             this.storeData.menuVoList = res.menuVoList.map((product: any) => {
               if (Array.isArray(product.unusual) && product.unusual.length > 0) {
-                product.unusual = product.unusual[0];
+                // 將 [{124: '湯頭'}, {125: '麵條'}] 合併成 {124: '湯頭', 125: '麵條'}
+                product.unusual = product.unusual.reduce((acc: any, curr: any) => {
+                  return { ...acc, ...curr };
+                }, {});
               } else if (!product.unusual) {
                 product.unusual = {};
               }
@@ -237,13 +241,13 @@ export class StoreComponent {
             });
             this.rebuildApplicableCategoryIds();
             this.filteredProducts = [...this.storeData.menuVoList];
+            console.log('filteredProducts(res)', this.filteredProducts);
             this.newPId = this.storeData.menuVoList.length + 1;
             this.newSpecId = this.storeData.productOptionGroupsVoList.length + 1;
             this.newCateId = this.storeData.menuCategoriesVoList.length + 1;
           }
         });
     }
-    this.filteredProducts = [...this.storeData.menuVoList];
 
     if (this.storeService.storeData && this.storeService.storeData.name !== '') {
       const source = this.storeService.storeData;
@@ -480,7 +484,7 @@ export class StoreComponent {
       this.selectedSpecsCategories = [];
     }
 
-    this.newItemId = Math.max( 0, ...this.currentGroup.items.map(i => i.id || 0)) + 1;
+    this.newItemId = Math.max(0, ...this.currentGroup.items.map(i => i.id || 0)) + 1;
     this.displaySpecsDialog = true;
   }
 
@@ -573,26 +577,29 @@ export class StoreComponent {
   }
 
   rebuildApplicableCategoryIds() {
-    const groups = this.storeData.productOptionGroupsVoList;
-    const menus = this.storeData.menuVoList;
+  const groups = this.storeData.productOptionGroupsVoList;
+  const menus = this.storeData.menuVoList;
 
-    if (!groups || !menus) return;
+  if (!groups || !menus) return;
 
-    groups.forEach(g => g.applicableCategoryIds = []);
+  groups.forEach(g => g.applicableCategoryIds = []);
 
-    menus.forEach(menu => {
-      if (!menu.unusual) return;
-      Object.keys(menu.unusual).forEach(specIdStr => {
-        const specId = Number(specIdStr);
-        const specGroup = groups.find(g => g.id === specId);
-        if (!specGroup) return;
+  menus.forEach(menu => {
+    if (!menu.unusual) return;
 
-        if (!specGroup.applicableCategoryIds!.includes(menu.categoryId)) {
-          specGroup.applicableCategoryIds!.push(menu.categoryId);
+    Object.keys(menu.unusual).forEach(specIdStr => {
+      const specId = Number(specIdStr);
+      const specGroup = groups.find(g => g.id === specId);
+
+      if (specGroup) {
+        if (!specGroup.applicableCategoryIds) specGroup.applicableCategoryIds = [];
+        if (!specGroup.applicableCategoryIds.includes(menu.categoryId)) {
+          specGroup.applicableCategoryIds.push(menu.categoryId);
         }
-      });
+      }
     });
-  }
+  });
+}
 
   getApplicableSpecsForCategory(categoryId: number): ProductOptionGroupsVoList[] {
     return this.storeData.productOptionGroupsVoList.filter(group =>
@@ -617,6 +624,8 @@ export class StoreComponent {
     }
 
     this.filteredProducts = results;
+    console.log('filteredProducts', this.filteredProducts);
+
   }
 
   // 新增商品 ---------------------------------------------------------
@@ -735,7 +744,7 @@ export class StoreComponent {
     this.filteredSpecsForProduct = [];
 
     if (!selectedId) {
-        this.currentProduct.unusual = {};
+      this.currentProduct.unusual = {};
       return;
     }
 
@@ -744,12 +753,15 @@ export class StoreComponent {
     );
 
     if (!this.isEditMode) {
-      const updatedUnusual: { [key: string]: string } = { };
-      this.filteredSpecsForProduct.forEach(spec => {
-          updatedUnusual[spec.id.toString()] = 'true';
+      if (!this.isEditMode) {
+        // 將所有符合的 spec 組合進同一個物件中，而不是變成陣列
+        const updatedUnusual: { [key: string]: string } = {};
+        this.filteredSpecsForProduct.forEach(spec => {
+          updatedUnusual[spec.id.toString()] = spec.name;
+        });
 
-      });
-      this.currentProduct.unusual = updatedUnusual;
+        this.currentProduct.unusual = updatedUnusual;
+      }
     }
   }
 
@@ -904,8 +916,8 @@ export class StoreComponent {
     this.isEditMode = true;
     this.currentProduct = { ...product };
 
+    console.log('currentProduct(上)', this.currentProduct);
     this.currentProduct.unusual = this.currentProduct.unusual ? { ...this.currentProduct.unusual } : {};
-    console.log('currentProduct', this.currentProduct);
 
     this.displayProductDialog = true;
   }
@@ -986,6 +998,19 @@ export class StoreComponent {
   // 存資料庫 ---------------------------------------------------------
   async onSaveAll() {
     this.displayPublishConfirm = false;
+    const transformUnusual = (unusual: any) => {
+      if (!unusual || Object.keys(unusual).length === 0) {
+        return [];
+      }
+      if (Array.isArray(unusual) && unusual.length > 1) {
+        return unusual;
+      }
+      const targetObj = Array.isArray(unusual) ? unusual[0] : unusual;
+
+      return Object.entries(targetObj).map(([key, value]) => ({
+        [key]: value
+      }));
+    }
     if (this.storeData.id == 0) {
       const payload = {
         storesname: this.storeData.name,
@@ -1005,7 +1030,7 @@ export class StoreComponent {
           menuVo: this.storeData.menuVoList.filter(item => item.categoryId === category.id)
             .map(product => ({
               ...product,
-              unusual: product.unusual ? [product.unusual] : null
+              unusual: transformUnusual(product.unusual)
             }))
         })),
         productOptionGroupsVoList: this.storeData.productOptionGroupsVoList
