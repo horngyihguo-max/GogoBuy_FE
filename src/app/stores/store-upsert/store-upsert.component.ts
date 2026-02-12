@@ -76,8 +76,8 @@ export class StoreUpsertComponent {
 
   // 行政地區 API 排除釣魚台
   loadTaiwanDistricts() {
-    const url = 'https://raw.githubusercontent.com/donma/TaiwanAddressCityAreaRoadChineseEnglishJSON/master/AllData.json';
-    this.http.getDApi(url, false).subscribe((data: any) => {
+    const url = 'taiwan-districts.json';
+    this.http.getApi(url).subscribe((data: any) => {
       this.cityOptions = data.filter((city: any) => city.CityName !== '釣魚臺' && city.CityName !== '南海島')
         .map((city: any) => {
           if (city.CityName == '宜蘭縣') {

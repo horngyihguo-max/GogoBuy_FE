@@ -301,7 +301,7 @@
     </div>
     <div class="flex flex-col gap-2">
       <label for="expiredAt" class="font-bold">過期時間</label>
-      <p-datepicker inputId="calendar-12h" [(ngModel)]="announceDate" hourFormat="12" [showTime]="true"
+      <p-datepicker inputId="calendar-12h" [(ngModel)]="announceDate" hourFormat="24" [minDate]="minDate" [showTime]="true"
         [showIcon]="true" placeholder="選擇日期" appendTo="body"></p-datepicker>
     </div>
   </div>

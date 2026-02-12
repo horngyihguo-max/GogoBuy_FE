@@ -276,4 +276,13 @@ export class OrdersComponent {
     return statusMap[status] || 'warn';
   }
 
+  get memberCarts() {
+    return (this.cartData() ?? []).filter(x => !x.isHost);
+  }
+
+  get hostCarts() {
+    return (this.cartData() ?? []).filter(x => x.isHost);
+  }
+
+
 }
