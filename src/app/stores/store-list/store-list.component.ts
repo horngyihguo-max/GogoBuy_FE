@@ -271,32 +271,45 @@ export class StoreListComponent {
   // - 沒選店家（selectedStoreNames 是空）→ 不限制店家
   // - 沒選餐點種類（selectedFoodTypes 是空）→ 不限制餐點種類
   readonly filteredStores = computed(() => {
-    let out = this.stores(); // 這裡已經是 API 篩選過（全部 or 附近）的結果
+    let out = this.stores();
     const selectedNames = this.selectedStoreNames();
     const selectedTypes = this.selectedFoodTypes();
     const category = this.selectedCategory();
     const status = this.selectedStatus();
     const operatingIds = new Set(this.operatingStores().map(s => s.id));
 
-    // 店家篩選
+    // 基礎篩選 (店家名稱/餐點種類)
     if (selectedNames.length) {
       out = out.filter(s => selectedNames.includes(this.getStoreName(s)));
     }
-
-    // 餐點種類篩選
     if (selectedTypes.length) {
       out = out.filter(s => selectedTypes.includes(this.getType(s)));
     }
 
-    // 營業狀態處理
-    return out.map(s => ({
-      ...s,
-      isClosed: !operatingIds.has(s.id)
-    })).filter(s => {
-      if (status == 'open') return !s.isClosed;
-      if (status == 'closed') return s.isClosed;
-      return true;
-    });
+    // 類型篩選 (外送/團購) - 如果你的 logic 有用到這部分
+    if (category !== 'all') {
+      out = out.filter(s => s.category === category);
+    }
+
+    // 處理營業狀態並進行排序
+    return out
+      .map(s => ({
+        ...s,
+        isClosed: !operatingIds.has(s.id)
+      }))
+      .filter(s => {
+        if (status === 'open') return !s.isClosed;
+        if (status === 'closed') return s.isClosed;
+        return true;
+      })
+      .sort((a, b) => {
+        // 先比營業狀態 (營業中的放前面)
+        if (a.isClosed !== b.isClosed) {
+          return Number(a.isClosed) - Number(b.isClosed);
+        }
+        // 如果營業狀態一樣，再比距離 (由近到遠)
+        return (a.distance ?? 0) - (b.distance ?? 0);
+      });
   });
 
   // 前往商店頁面
