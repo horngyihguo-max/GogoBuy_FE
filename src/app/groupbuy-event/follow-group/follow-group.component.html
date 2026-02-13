@@ -28,14 +28,20 @@
                     <div
                       class="flex md:flex-col items-center justify-center gap-2 flex-shrink-0 md:w-[90px] border-r border-gray-100 md:pr-4 md:mt-5"
                     >
-                      <div
-                        class="w-12 h-12 rounded-full bg-red-900 flex items-center justify-center text-white shadow-inner"
-                      >
-                        <span class="text-lg font-bold">{{
-                          (group.nickname || "G")[0]
-                        }}</span>
-                      </div>
-
+                      @if (group.hostAvatar) {
+                        <img
+                          [src]="group.hostAvatar"
+                          class="w-16 h-16 rounded-full flex items-center justify-center shadow-sm"
+                        />
+                      } @else {
+                        <div
+                          class="w-12 h-12 rounded-full bg-red-900 flex items-center justify-center text-white shadow-inner"
+                        >
+                          <span class="text-lg font-bold">{{
+                            (group.hostNickname || "G")[0]
+                          }}</span>
+                        </div>
+                      }
                       <div class="flex flex-col items-center">
                         <span
                           class="text-[10px] font-bold text-red-900/60 uppercase tracking-widest"
@@ -43,8 +49,10 @@
                         >
                         <div
                           class="font-extrabold text-gray-900 text-lg truncate max-w-[80px]"
+                          pTooltip="{{ group.hostNickname }}"
+                          tooltipPosition="bottom"
                         >
-                          {{ group.nickname || "匿名" }}
+                          {{ group.hostNickname || "匿名" }}
                         </div>
                       </div>
                     </div>
@@ -57,16 +65,17 @@
                           class="inline-flex items-center px-2.5 py-1 rounded-full text-sm font-bold bg-gray-100 text-gray-700"
                           [ngClass]="{
                             'bg-green-100 text-green-700':
-                              group.status === 'OPEN',
-                            'bg-red-900 text-white': group.status === 'LOCKED',
+                              group.eventStatus === 'OPEN',
+                            'bg-red-900 text-white':
+                              group.eventStatus === 'LOCKED',
                             'bg-gray-200 text-gray-500':
-                              group.status === 'FINISHED',
+                              group.eventStatus === 'FINISHED',
                           }"
                         >
                           {{
-                            group.status === "OPEN"
+                            group.eventStatus === "OPEN"
                               ? "進行中"
-                              : group.status === "LOCKED"
+                              : group.eventStatus === "LOCKED"
                                 ? "鎖定"
                                 : "已結束"
                           }}
@@ -76,7 +85,7 @@
                         <span
                           class="inline-flex items-center px-2.5 py-1 rounded-full text-sm font-bold bg-orange-50 text-orange-700"
                         >
-                          {{ group.type }}
+                          {{ group.eventType }}
                         </span>
 
                         <!-- splitType badge -->
@@ -208,32 +217,32 @@
 
                   <!-- 詳細資訊卡片：RWD 1/2/3 欄 -->
                   <div
-                    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4"
+                    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 md:gap-4"
                   >
                     <!-- type -->
                     <div
-                      class="rounded-2xl bg-gray-50 p-4 border border-black/5"
+                      class="rounded-2xl bg-gray-50 p-4 border border-black/5 lg:col-span-2"
                     >
                       <div class="text-sm text-gray-500 font-semibold">
                         類型
                       </div>
                       <div class="mt-1 text-lg font-bold text-gray-900">
-                        {{ group.type }}
+                        {{ group.eventType }}
                       </div>
                     </div>
 
                     <!-- status -->
                     <div
-                      class="rounded-2xl bg-gray-50 p-4 border border-black/5"
+                      class="rounded-2xl bg-gray-50 p-4 border border-black/5 lg:col-span-2"
                     >
                       <div class="text-sm text-gray-500 font-semibold">
                         狀態
                       </div>
                       <div class="mt-1 text-lg font-bold text-gray-900">
                         {{
-                          group.status === "OPEN"
+                          group.eventStatus === "OPEN"
                             ? "進行中"
-                            : group.status === "LOCKED"
+                            : group.eventStatus === "LOCKED"
                               ? "鎖定"
                               : "已結束"
                         }}
@@ -242,7 +251,7 @@
 
                     <!-- nickname -->
                     <div
-                      class="rounded-2xl bg-gray-50 p-4 border border-black/5"
+                      class="rounded-2xl bg-gray-50 p-4 border border-black/5 lg:col-span-2"
                     >
                       <div class="text-sm text-gray-500 font-semibold">
                         團主暱稱
@@ -250,13 +259,13 @@
                       <div
                         class="mt-1 text-lg font-bold text-gray-900 truncate"
                       >
-                        {{ group.nickname || "未命名" }}
+                        {{ group.hostNickname || "未命名" }}
                       </div>
                     </div>
 
                     <!-- shippingFee -->
                     <div
-                      class="rounded-2xl bg-gray-50 p-4 border border-black/5"
+                      class="rounded-2xl bg-gray-50 p-4 border border-black/5 lg:col-span-2"
                     >
                       <div class="text-sm text-gray-500 font-semibold">
                         運費
@@ -268,7 +277,7 @@
 
                     <!-- limitation -->
                     <div
-                      class="rounded-2xl bg-gray-50 p-4 border border-black/5"
+                      class="rounded-2xl bg-gray-50 p-4 border border-black/5 lg:col-span-2"
                     >
                       <div class="text-sm text-gray-500 font-semibold">
                         成團門檻
@@ -280,7 +289,7 @@
 
                     <!-- splitType -->
                     <div
-                      class="rounded-2xl bg-gray-50 p-4 border border-black/5"
+                      class="rounded-2xl bg-gray-50 p-4 border border-black/5 lg:col-span-2"
                     >
                       <div class="text-sm text-gray-500 font-semibold">
                         運費分攤
@@ -290,9 +299,33 @@
                       </div>
                     </div>
 
+                    <!-- pickupTime -->
+                    <div
+                      class="rounded-2xl bg-gray-50 p-4 sm:col-span-2 lg:col-span-3 border border-black/5"
+                    >
+                      <div class="text-sm text-gray-500 font-semibold">
+                        預計取餐時間
+                      </div>
+                      <div class="mt-1 text-lg font-bold text-gray-900">
+                        {{ formatDateTime(group.pickupTime) }}
+                      </div>
+                    </div>
+
+                    <!-- pickLocation -->
+                    <div
+                      class="rounded-2xl bg-gray-50 p-4 border border-black/5 lg:col-span-3"
+                    >
+                      <div class="text-sm text-gray-500 font-semibold">
+                        取餐地點
+                      </div>
+                      <div class="mt-1 text-lg font-bold text-gray-900">
+                        {{ group.pickLocation }}
+                      </div>
+                    </div>
+
                     <!-- endTime -->
                     <div
-                      class="rounded-2xl bg-gray-50 p-4 sm:col-span-2 lg:col-span-2 border border-black/5"
+                      class="rounded-2xl bg-gray-50 p-4 sm:col-span-2 lg:col-span-3 border border-black/5"
                     >
                       <div class="text-sm text-gray-500 font-semibold">
                         截止時間
@@ -304,7 +337,7 @@
 
                     <!-- totalOrderAmount -->
                     <div
-                      class="rounded-2xl bg-gray-50 p-4 border border-black/5"
+                      class="rounded-2xl bg-gray-50 p-4 border border-black/5 lg:col-span-3"
                     >
                       <div class="text-sm text-gray-500 font-semibold">
                         目前累積金額
@@ -474,7 +507,6 @@
                   "
                   (click)="!isSoldOut(p) && openProductDialog(p)"
                 >
-
                   <div class="flex gap-4">
                     <img
                       [src]="getProductImage(p)"
@@ -619,7 +651,6 @@
                   "
                   (click)="!isSoldOut(p) && openProductDialog(p)"
                 >
-
                   <div class="flex gap-4">
                     <!-- 圖片 -->
                     <img

@@ -1,4 +1,4 @@
-import { Component, HostListener, ViewChild, computed, signal } from '@angular/core';
+import { Component, HostListener, ViewChild, computed, signal, OnInit, effect, } from '@angular/core';
 import { CarouselModule } from 'primeng/carousel';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
@@ -19,7 +19,6 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { AuthService } from '../@service/auth.service';
 import { SelectModule } from 'primeng/select';
 import { FeeDescriptionVoList, StoreService } from '../@service/store.service';
-
 
 export type Stores = {
   id: number;
@@ -55,7 +54,6 @@ export interface Banner {
   link?: string;
 }
 
-
 export interface Store {
   "id": number,
   "name": string,
@@ -72,6 +70,19 @@ export interface Store {
   "created_by": string
 }
 
+export interface StoreOperating {
+  id: number;
+  name: string;
+  image: string;
+  open_time: string;
+  close_time: string;
+  category: string;
+}
+
+interface StatusOption {
+  label: string;
+  value: string;
+}
 @Component({
   template: `
     <div class="card">
@@ -112,21 +123,64 @@ export interface Store {
   templateUrl: './gogo-buy.component.html',
   styleUrl: './gogo-buy.component.scss'
 })
-export class GogoBuyComponent {
+export class GogoBuyComponent implements OnInit {
   constructor(
     public router: Router,
     private http: HttpService,
     private sanitizer: DomSanitizer,
     public auths: AuthService,
     private storeService: StoreService,
-  ) { }
+  ) {
+    effect(() => {
+      const stores = this.auths.store();
+      if (stores && stores.length > 0) {
+        this.fetchOperatingStores(stores);
+      }
+    });
+  }
+
+  operatingStores = signal<StoreOperating[]>([]);
+  statusFilter = signal<'ALL' | 'OPEN' | 'CLOSED'>('ALL');
+  statusOptions: StatusOption[] = [
+    { label: '顯示全部', value: 'ALL' },
+    { label: '營業中', value: 'OPEN' },
+    { label: '休息中', value: 'CLOSED' }
+  ];
+  visibleStores = computed(() => {
+    const allStores = this.auths.store();
+    const operating = this.operatingStores();
+    const status = this.statusFilter();
+
+    // 建立一個包含所有營業中 ID 的 Set
+    const operatingIds = new Set(operating.map(s => s.id));
+
+    // 1. 先處理全部店家，並標註狀態
+    const processedStores = allStores.map(store => ({
+      ...store,
+      isClosed: !operatingIds.has(store.id)
+    }));
+
+    // 2. 根據選單狀態進行過濾
+    let filtered = processedStores;
+    if (status === 'OPEN') {
+      filtered = processedStores.filter(s => !s.isClosed);
+    } else if (status === 'CLOSED') {
+      filtered = processedStores.filter(s => s.isClosed);
+    }
+
+    // 3. 回傳前 5 筆
+    return filtered.slice(0, this.storeInitial);
+  });
+  storeCountLabel = computed(() => {
+    const status = this.statusFilter();
+    if (status === 'OPEN') return `${this.operatingStores().length} 間營業中`;
+    if (status === 'CLOSED') return `${this.auths.store().length - this.operatingStores().length} 間休息中`;
+    return `${this.auths.store().length} 間店`;
+  });
+
 
   readonly storeInitial = 5;   // 初始顯示
 
-
-  visibleStores = computed(() => {
-    return this.auths.store().slice(0, this.storeInitial);
-  });
 
   storeCtaLabel = computed(() => '查看全部');
 
@@ -163,7 +217,6 @@ export class GogoBuyComponent {
     // 店家
     if (this.auths.store().length == 0) {
       this.auths.performSearch('');
-
     }
 
     this.http.getApi('http://localhost:8080/gogobuy/store/all').subscribe((res: any) => {
@@ -195,6 +248,26 @@ export class GogoBuyComponent {
       this.openStoreList = this.slowStoreList.filter(store => !store.force_closed);
       this.closeStoreList = this.slowStoreList.filter(store => store.force_closed);
     });
+  }
+
+  fetchOperatingStores(currentStores: any[]) {
+    const allStoreIds = currentStores.map(s => s.id);
+    const payload = { filteredStoreIds: allStoreIds };
+
+    this.http.postApi('http://localhost:8080/gogobuy/store/getOperatingStores', payload)
+      .subscribe({
+        next: (res: any) => {
+          if (res.code === 200 && res.storeOperatingList) {
+            // 補上 type 欄位（因為營業中 API 回傳的是 category，如果你原本 UI 需要 item.type）
+            const processed = res.storeOperatingList.map((s: any) => ({
+              ...s,
+              type: s.category === 'fast' ? '快速' : '團購'
+            }));
+            this.operatingStores.set(processed);
+          }
+        },
+        error: (err) => console.error('抓取營業中店家失敗:', err)
+      });
   }
 
   // 監聽全域滑鼠移動

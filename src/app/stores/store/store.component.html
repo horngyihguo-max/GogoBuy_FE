@@ -1180,9 +1180,9 @@
 <!------------------------------ 儲存 loading ------------------------------>
 <p-dialog [(visible)]="loading" [modal]="true" [closable]="false" [showHeader]="false"
     [style]="{ 'background': 'transparent', 'border': 'none', 'box-shadow': 'none' }">
-    <div class="flex flex-column align-items-center">
-        <i class="pi pi-spin pi-spinner" style="font-size: 3rem; color: white;"></i>
-        <span class="mt-2 text-white">正在儲存店家資訊，請稍候...</span>
+    <div class="flex flex-col items-center w-full">
+        <i class="pi pi-spin pi-spinner-dotted" style="font-size: 3rem; color: white;"></i>
+        <span class="mt-2 text-white tracking-widest animate-pul">正在儲存店家資訊，請稍候...</span>
     </div>
 </p-dialog>
 
@@ -1204,7 +1204,7 @@
     </p>
 
     <div class="mt-8 flex gap-3">
-      <button type="button" routerLink="/admin"
+      <button type="button" (click)="displaySureUpdateDialog= false"
         class="w-full cursor-pointer bg-gray-200 hover:bg-gray-300 text-white font-bold py-3 px-6 rounded-2xl shadow-lg transition
         duration-300 ease-in-out transform active:scale-95 border-0 focus:outline-none">
         暫不更新

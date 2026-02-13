@@ -19,7 +19,7 @@ import { BehaviorSubject } from 'rxjs';
 export class AuthService {
   // 這邊專門放用戶資料相關API和變數
   constructor(
-    private https: HttpService,
+    public https: HttpService,
     private router: Router,
     private route: ActivatedRoute,) { }
   user: any = null;
@@ -546,9 +546,17 @@ export class AuthService {
 
   /**
    * 停權用戶 (後台用)
-   * POST gogobuy/ban-user/{id}?id={userId}
+   * POST gogobuy/ban-user?id={userId}
    */
   banUser(userId: string) {
-    return this.https.postApi(`http://localhost:8080/gogobuy/ban-user/${userId}?id=${userId}`, {});
+    return this.https.postApi(`http://localhost:8080/gogobuy/ban-user?id=${userId}`, {});
+  }
+
+  /**
+   * 恢復用戶 (後台用)
+   * POST gogobuy/active-user?id={userId}
+   */
+  activeUser(userId: string) {
+    return this.https.postApi(`http://localhost:8080/gogobuy/active-user?id=${userId}`, {});
   }
 }

@@ -224,6 +224,12 @@ export class AppComponent {
     return this.router.url.startsWith('/gogobuy/home');
   }
 
+  get nearby(): boolean {
+    const url = this.router.url;
+    return url.startsWith('/gogobuy/home');
+  }
+
+
   get showMarquee(): boolean {
     return this.router.url.startsWith('/gogobuy/home');
   }
