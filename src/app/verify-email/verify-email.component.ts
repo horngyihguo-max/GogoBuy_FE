@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { ActivatedRoute, Route, Router } from '@angular/router';
+import Swal from 'sweetalert2';
 
 
 @Component({
@@ -50,8 +51,56 @@ export class VerifyEmailComponent {
     this.router.navigate(['/gogobuy/login']);
   }
 
-  resendEmail() {
-    // 實作重新發送的邏輯...
-    alert('已嘗試重新發送，請檢查您的信箱。');
+  async resendEmail() {
+    const { value: email } = await Swal.fire({
+      title: '重新發送驗證信',
+      input: 'email',
+      inputLabel: '請輸入您的註冊信箱',
+      inputPlaceholder: 'example@mail.com',
+      showCancelButton: true,
+      confirmButtonText: '發送',
+      cancelButtonText: '取消',
+      preConfirm: (value) => {
+        if (!value) return Swal.showValidationMessage('請輸入有效的 Email');
+        return value;
+      }
+    });
+
+    if (email) {
+      Swal.fire({
+        title: '發送中...',
+        didOpen: () => Swal.showLoading(),
+        allowOutsideClick: false
+      });
+
+      this.http.get(`http://localhost:8080/gogobuy/user/resend-active-account?email=${email}`)
+        .subscribe({
+          next: (res: any) => {
+            if (res.code === 200) {
+              Swal.fire({
+                icon: 'success',
+                title: '發送成功',
+                text: '驗證信已重新發送，請檢查您的信箱。',
+                confirmButtonText: '確定'
+              });
+            } else {
+              Swal.fire({
+                icon: 'error',
+                title: '發送失敗',
+                text: res.message || '請稍後再試。',
+                confirmButtonText: '確定'
+              });
+            }
+          },
+          error: (err) => {
+            Swal.fire({
+              icon: 'error',
+              title: '發生錯誤',
+              text: err.error?.message || '連線伺服器失敗，請稍後再試。',
+              confirmButtonText: '確定'
+            });
+          }
+        });
+    }
   }
 }

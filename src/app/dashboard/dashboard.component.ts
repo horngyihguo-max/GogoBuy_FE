@@ -208,6 +208,16 @@ export class DashboardComponent {
     }
   }
 
+  getUserStatusSeverity(status: string) {
+    switch (status) {
+      case 'banned': return 'danger';
+      case 'pending_active': return 'info';
+      case 'self_suspended': return 'warn';
+
+      default: return 'success';
+    }
+  }
+
   getEventSeverity(status: string) {
     switch (status) {
       case 'FINISHED': return 'info';
@@ -385,6 +395,31 @@ export class DashboardComponent {
         this.authService.banUser(user.id).subscribe({
           next: () => {
             Swal.fire('已停權', '該用戶已被停權', 'success');
+            this.loadData();
+          },
+          error: (err) => Swal.fire('操作失敗', err?.message, 'error')
+        });
+      }
+    });
+  }
+
+  /**
+   * 恢復用戶帳號
+   */
+  onUserActive(user: any) {
+    Swal.fire({
+      title: '確定要恢復此用戶帳號?',
+      text: `用戶: ${user.nickname} (${user.email})\n恢復後該用戶將可以正常登入`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: '確定恢復',
+      cancelButtonText: '取消',
+      confirmButtonColor: '#3085d6'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.authService.activeUser(user.id).subscribe({
+          next: () => {
+            Swal.fire('已恢復', '該用戶帳號已恢復為活躍狀態', 'success');
             this.loadData();
           },
           error: (err) => Swal.fire('操作失敗', err?.message, 'error')

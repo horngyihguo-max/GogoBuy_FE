@@ -66,4 +66,60 @@ export class PersonInfoComponent {
     return window.innerWidth <= 768;
   }
 
+  // 停用帳戶
+  async suspendAccount() {
+    const result = await Swal.fire({
+      title: '您確定要停用帳戶嗎？',
+      text: '停用後您將立即被登出，且無法再次登入此帳號。',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#7f1d1d', // red-900
+      cancelButtonColor: '#94a3b8', // slate-400
+      confirmButtonText: '確定停用',
+      cancelButtonText: '取消',
+      reverseButtons: true
+    });
+
+    if (result.isConfirmed) {
+      Swal.fire({
+        title: '正在處理中...',
+        didOpen: () => Swal.showLoading(),
+        allowOutsideClick: false
+      });
+
+      this.http.postApi(`http://localhost:8080/gogobuy/user/suspend?id=${this.auth.user.id}`, {})
+        .subscribe({
+          next: (res: any) => {
+            if (res.code === 200) {
+              Swal.fire({
+                icon: 'success',
+                title: '帳戶已停用',
+                text: '您的帳戶已成功停用。正在將您登出...',
+                showConfirmButton: false,
+                timer: 2000
+              });
+
+              // 登出並清除資料
+              setTimeout(() => {
+                this.auth.logout();
+                this.router.navigate(['/']);
+              }, 2000);
+            } else {
+              Swal.fire({
+                icon: 'error',
+                title: '停用失敗',
+                text: res.message || '請稍後再試。'
+              });
+            }
+          },
+          error: (err: any) => {
+            Swal.fire({
+              icon: 'error',
+              title: '發生錯誤',
+              text: err.error?.message || '伺服器發生錯誤，請稍後再試。'
+            });
+          }
+        });
+    }
+  }
 }
