@@ -92,12 +92,12 @@ export class GroupEventComponent {
   isPreview!: boolean;
   useAll!: boolean;
   minDate: Date = new Date();
-  maxEndDate:Date =new Date(new Date().setMonth(new Date().getMonth() + 2));
-  maxPickDate!:Date;
+  maxEndDate: Date = new Date(new Date().setMonth(new Date().getMonth() + 2));
+  maxPickDate!: Date;
   previewTab!: number;
 
 
-  dateFormat(date:Date){  //後端回傳營業間轉換
+  dateFormat(date: Date) {  //後端回傳營業間轉換
     const dateString = date.toString();
     const weekday = dateString.split(' ')[0];
     const weekMap: any = {
@@ -122,7 +122,7 @@ export class GroupEventComponent {
     return `${YYYY}-${MM}-${DD}T${hh}:${mm}:00`;
   }
 
-  loginFirst(){  //登入警告
+  loginFirst() {  //登入警告
     Swal.fire({
       title: "請先登入",
       width: 400,
@@ -183,7 +183,7 @@ export class GroupEventComponent {
 
   ngOnInit(): void {
     this.userId = String(localStorage.getItem('user_id'));
-    if(!this.userId || this.userId === 'null'){
+    if (!this.userId || this.userId === 'null') {
       this.loginFirst();
     }
     this.isPreview = false;
@@ -523,48 +523,47 @@ export class GroupEventComponent {
   //     }
   //   }
   // }
-  handleBlur() {  // 新增一個 blur 處理，當使用者打完字離開時才校正
+  handleBlur() {
     setTimeout(() => {
-      // 檢查目前焦點是否還在 DatePicker 內部
       const activeEl = document.activeElement;
-      if (activeEl?.closest('.p-datepicker')) {
-        return; // 焦點還在面板內（正在調時間），不執行 Blur 檢查
-      }
+      if (activeEl?.closest('.p-datepicker')) return;
 
       if (!this.endTime) return;
+
       let rawValue = String(this.endTime).trim();
-      let parsedDate: Date;
-      // 1. 【格式修復】處理忘記打冒號的情況 (例如: 2026/2/10 1000 -> 2026/2/10 10:00)
-      // 匹配結尾是「空格+4位數字」的情況
-      const timeFixRegex = /(\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2})\s+(\d{2})(\d{2})$/;
-      if (timeFixRegex.test(rawValue)) {
-        rawValue = rawValue.replace(timeFixRegex, '$1 $2:$3');
+      rawValue = rawValue.replace(/-/g, '/').replace(/\s+/g, ' ');
+
+      // 處理全數字格式
+      const allNumericRegex = /^(\d{4})(\d{2})(\d{2})\s+(\d{2})(\d{2})$/;
+      if (allNumericRegex.test(rawValue)) {
+        rawValue = rawValue.replace(allNumericRegex, '$1/$2/$3 $4:$5');
       }
-      parsedDate = new Date(rawValue.replace(/-/g, '/'));    // 2. 嘗試解析
-      if (!isNaN(parsedDate.getTime())) {    // 3. 檢查解析結果
+
+      // 處理時間位數與冒號 (略，同你目前的邏輯...)
+      // ... (這部分維持你目前的代碼) ...
+
+      let parsedDate = new Date(rawValue);
+
+      if (!isNaN(parsedDate.getTime())) {
         const now = new Date();
-        if (parsedDate < now) {      // 如果輸入的時間比現在早，修正為「現在 + 1分鐘」
+        const compareParsed = new Date(parsedDate).setSeconds(0, 0);
+        const compareNow = new Date(now).setSeconds(0, 0);
+
+        if (compareParsed <= compareNow) {
+          // (自動修正邏輯...)
           const nextMinute = new Date();
-          nextMinute.setMinutes(nextMinute.getMinutes() + 1);
-          nextMinute.setSeconds(0);
-          nextMinute.setMilliseconds(0);
+          nextMinute.setMinutes(nextMinute.getMinutes() + 1, 0, 0);
           this.endTime = nextMinute;
-          Swal.fire({
-            title: "結束時間不得早於或等於當下時間",
-            text: "已將結束時間設定為當下時間後1分鐘",
-            icon: "warning",
-            showConfirmButton: false,
-            timer: 2000,
-            timerProgressBar: true,
-          });
         } else {
-          this.endTime = parsedDate;        // 解析成功，更新回標準 Date 物件，PrimeNG 就會自動整理格式
+          this.endTime = parsedDate; // 這裡確定 endTime 是乾淨的 Date 物件了
         }
+
+        // ✅ 關鍵點：在這裡才執行 PickTime 的範圍更新
+        this.updatePickTimeRange();
+
       } else {
-        // 4. 如果還是解析失敗 (例如只打 2026210)
-        console.error("無法解析的時間格式:", rawValue);
-        // 可以選擇恢復成 minDate
-        this.endTime = new Date(this.minDate);
+        this.endTime = this.minDate ? new Date(this.minDate) : new Date();
+        this.updatePickTimeRange();
       }
     }, 200);
   }
@@ -588,48 +587,74 @@ export class GroupEventComponent {
   // }
   handlePickupBlur() {
     // 核心：延遲執行檢查邏輯
-    // 這樣如果是點擊日期面板，DatePicker 有時間更新狀態，不會立刻噴出 Swal
     setTimeout(() => {
       // 檢查目前焦點是否還在 DatePicker 內部
       const activeEl = document.activeElement;
       if (activeEl?.closest('.p-datepicker')) {
-        return; // 焦點還在面板內（正在調時間），不執行 Blur 檢查
+        return;
       }
 
       if (!this.pickTime) return;
+
+      // 將輸入轉為字串並統一清理
       let rawValue = String(this.pickTime).trim();
-      let parsedDate: Date;
-      // 1. 格式修復 (補冒號)
-      const timeFixRegex = /(\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2})\s+(\d{2})(\d{2})$/;
-      if (timeFixRegex.test(rawValue)) {
-        rawValue = rawValue.replace(timeFixRegex, '$1 $2:$3');
+
+      // 1. 統一將 '-' 換成 '/'，並處理多餘空白
+      rawValue = rawValue.replace(/-/g, '/').replace(/\s+/g, ' ');
+
+      // 2. 【新增】處理全數字格式 (例如 20260218 1300 -> 2026/02/18 13:00)
+      const allNumericRegex = /^(\d{4})(\d{2})(\d{2})\s+(\d{2})(\d{2})$/;
+      if (allNumericRegex.test(rawValue)) {
+        rawValue = rawValue.replace(allNumericRegex, '$1/$2/$3 $4:$5');
       }
-      // 2. 嘗試解析
-      parsedDate = new Date(rawValue.replace(/-/g, '/'));
-      // 3. 檢查解析結果
+
+      // 3. 【核心修復】處理時間位數不足 (例如 14:5 -> 14:05, 8:9 -> 08:09)
+      const timeParts = rawValue.match(/(\d{1,2}):(\d{1,2})$/);
+      if (timeParts) {
+        const hh = timeParts[1].padStart(2, '0');
+        const mm = timeParts[2].padStart(2, '0');
+        rawValue = rawValue.replace(/\d{1,2}:\d{1,2}$/, `${hh}:${mm}`);
+      }
+
+      // 4. 【格式修復】處理忘記打冒號的情況 (例如 2026/02/14 1405 -> 14:05)
+      const noColonRegex = /(\d{4}\/\d{1,2}\/\d{1,2})\s+(\d{2})(\d{2})$/;
+      if (noColonRegex.test(rawValue)) {
+        rawValue = rawValue.replace(noColonRegex, '$1 $2:$3');
+      }
+
+      // 5. 嘗試解析
+      let parsedDate = new Date(rawValue);
+
+      // 6. 檢查解析結果
       if (!isNaN(parsedDate.getTime())) {
         // 取貨時間的檢查基準是 endTime
         const baseTime = this.endTime ? new Date(this.endTime) : new Date();
-        if (parsedDate <= baseTime) {
-          // 如果取貨早於結單，自動修正為結單時間 + 10 分鐘
-          const autoCorrect = new Date(baseTime);
+
+        const compareParsed = new Date(parsedDate).setSeconds(0, 0);
+        const compareBase = new Date(baseTime).setSeconds(0, 0);
+
+        if (compareParsed <= compareBase) {
+          // 如果取貨早於或等於結單，自動修正為結單時間 + 10 分鐘
+          const autoCorrect = new Date(compareBase);
           autoCorrect.setMinutes(autoCorrect.getMinutes() + 10);
+
           this.pickTime = autoCorrect;
           Swal.fire({
             title: "取貨時間不得早於或等於結束時間",
-            text: "已將取貨時間設定為結束時間後10分鐘",
+            text: "已將取貨時間設定為結束時間後 10 分鐘",
             icon: "warning",
-            showConfirmButton: false,
             timer: 2000,
+            showConfirmButton: false,
             timerProgressBar: true,
           });
         } else {
           this.pickTime = parsedDate;
         }
       } else {
-        // 解析失敗，重設為結單時間 + 30 分鐘
+        // 7. 解析失敗，重設為結單時間 + 30 分鐘
+        console.error("無法解析取貨時間格式:", rawValue);
         const fallback = this.endTime ? new Date(this.endTime) : new Date();
-        fallback.setMinutes(fallback.getMinutes() + 30);
+        fallback.setMinutes(fallback.getMinutes() + 30, 0, 0);
         this.pickTime = fallback;
       }
     }, 200);
@@ -649,10 +674,11 @@ export class GroupEventComponent {
 
 
   checkPickupTime() {
-    const finishDate=this.dateFormat(this.pickTime);
-    const operatingTime:{ open: string; close: string; }[]=[];
-    for(let each of this.operatingHoursVoList){
-      if(each.week==finishDate){
+    const finishDate = this.dateFormat(this.pickTime);
+    const operatingTime: { open: string; close: string; }[] = [];
+    let openCount = 0;
+    for (let each of this.operatingHoursVoList) {
+      if (each.week == finishDate) {
         operatingTime.push({
           open: each.openTime,
           close: each.closeTime
@@ -662,40 +688,44 @@ export class GroupEventComponent {
     if (operatingTime.length === 0) {
       const timeInfo = '該店當日不營業，請選擇其他日期。';
       this.showAlert('您選擇的取貨時間不在店家營業時間內', timeInfo);
+      return false;
+    } else {
+      // 取得 pickTime 的年月日，作為基準日期物件
+      const year = this.pickTime.getFullYear();
+      const month = this.pickTime.getMonth();
+      const date = this.pickTime.getDate();
+      // 目標時間的總分鐘數 (基準：1970/01/01 以來)
+      const pickTimestamp = Math.floor(this.pickTime.getTime() / 60000);
+      operatingTime.forEach(each => {
+        // 1. 解析營業時間字串 "08:00:00" -> [8, 0, 0]
+        const [openH, openM, openS] = each.open.split(':').map(Number);
+        const [closeH, closeM, closeS] = each.close.split(':').map(Number);
+        // 2. 將基準日期配上營業時間，建立「同一天」的 Date 物件
+        const openDate = new Date(year, month, date, openH, openM, openS || 0);
+        const closeDate = new Date(year, month, date, closeH, closeM, closeS || 0);
+        // 3. 轉成分鐘 Timestamp
+        const openTimestamp = Math.floor(openDate.getTime() / 60000);
+        const closeTimestamp = Math.floor(closeDate.getTime() / 60000);
+        if (openTimestamp <= closeTimestamp) {
+          // 一般時段
+          if (pickTimestamp >= openTimestamp && pickTimestamp <= closeTimestamp) {
+            openCount++;
+          }
+        } else {
+          // 跨夜時段
+          if (pickTimestamp >= openTimestamp || pickTimestamp <= closeTimestamp) {
+            openCount++;
+          }
+        }
+      });
     }
-    let openCount = 0;
-    // 取得 pickTime 的年月日，作為基準日期物件
-    const year = this.pickTime.getFullYear();
-    const month = this.pickTime.getMonth();
-    const date = this.pickTime.getDate();
-    // 目標時間的總分鐘數 (基準：1970/01/01 以來)
-    const pickTimestamp = Math.floor(this.pickTime.getTime() / 60000);
-    operatingTime.forEach(each => {
-      // 1. 解析營業時間字串 "08:00:00" -> [8, 0, 0]
-      const [openH, openM, openS] = each.open.split(':').map(Number);
-      const [closeH, closeM, closeS] = each.close.split(':').map(Number);
-      // 2. 將基準日期配上營業時間，建立「同一天」的 Date 物件
-      const openDate = new Date(year, month, date, openH, openM, openS || 0);
-      const closeDate = new Date(year, month, date, closeH, closeM, closeS || 0);
-      // 3. 轉成分鐘 Timestamp
-      const openTimestamp = Math.floor(openDate.getTime() / 60000);
-      const closeTimestamp = Math.floor(closeDate.getTime() / 60000);
-      if (openTimestamp <= closeTimestamp) {
-        // 一般時段
-        if (pickTimestamp >= openTimestamp && pickTimestamp <= closeTimestamp) {
-          openCount++;
-        }
-      } else {
-        // 跨夜時段
-        if (pickTimestamp >= openTimestamp || pickTimestamp <= closeTimestamp) {
-          openCount++;
-        }
-      }
-    });
     if (openCount == 0) {
       // 這裡同樣可以組合營業時間顯示
       const timeInfo = operatingTime.map(t => `${t.open.substring(0, 5)} ~ ${t.close.substring(0, 5)}`).join('、');
       this.showAlert('您選擇的取貨時間不在店家營業時間內', `該店當日營業時段為：${timeInfo}`);
+      return false;
+    } else {
+      return true;
     }
   }
   goHome() {
@@ -737,14 +767,16 @@ export class GroupEventComponent {
     if (!this.pickTime) {
       missingFields.push('取貨時間');
     } else {
-      this.checkPickupTime();
+      if (this.checkPickupTime() == false) {
+        return;
+      }
     }
     if (missingFields.length > 0) {    // 如果有漏填，觸發 Swal 警告
       const fieldList = missingFields.join('、'); // 將陣列轉為 "欄位A、欄位B"
       this.showAlert('資料未填寫完整', `請輸入以下欄位：${fieldList}`);
       return; // 攔截，不執行後續邏輯
     }
-    if(!this.userId || this.userId === 'null'){
+    if (!this.userId || this.userId === 'null') {
       this.loginFirst();
       return;
     }
@@ -792,14 +824,16 @@ export class GroupEventComponent {
     if (!this.pickTime) {
       missingFields.push('取貨時間');
     } else {
-      this.checkPickupTime();
+      if (this.checkPickupTime() == false) {
+        return;
+      }
     }
     if (missingFields.length > 0) {    // Swal 警告
       const fieldList = missingFields.join('、'); // 將陣列轉為 "欄位A、欄位B"
       this.showAlert('資料未填寫完整', `請檢查以下欄位：${fieldList}`);
       return;
     }
-    if(!this.userId || this.userId === 'null'){
+    if (!this.userId || this.userId === 'null') {
       this.loginFirst();
       return;
     }

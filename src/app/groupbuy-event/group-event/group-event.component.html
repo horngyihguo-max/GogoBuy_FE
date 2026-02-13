@@ -37,7 +37,9 @@
             [ngClass]="isOpen ? 'bg-emerald-400/20 text-green-800' : 'bg-red-100 text-red-800'">
             {{ isOpen ? '● 營業中' : '○ 休息中' }}
           </span>
-          <span class="ml-[20px]">{{operateString}}</span>
+          @if(operateString!="休息中"){
+            <span class="ml-[20px]">{{operateString}}</span>
+          }
         </label>
         <div class="ml-[10px] mt-[5px] text-small text-gray-500">{{nextOperating}}</div>
       </div>
@@ -132,7 +134,7 @@
                     </button>
                   }
                 </div>
-                <div class="flex-1 overflow-y-auto pt-2 pb-4 px-4 bg-white custom-scrollbar rounded-r-xl">
+                <div class="flex-1 overflow-hidden pt-2 pb-4 px-4 bg-white custom-scrollbar rounded-r-xl">
                   @if(activeTab){
                     <p-pickList
                       [source]="displaySource"                        [target]="selectedItems"
@@ -284,7 +286,7 @@
                         inputStyleClass="w-full outline-none p-2 pl-3 !rounded-r-md
                         !rounded-l-none bg-white focus:!border-1 focus:!border-[#662222]"
                         (onShow)="handleOnShow()" [readonlyInput]="false" [hideOnDateTimeSelect]="false"
-                        [showButtonBar]="true" [keepInvalid]="true" dateFormat="yy/mm/dd" (onBlur)="handleBlur(); updatePickTimeRange()"
+                        [showButtonBar]="true" [keepInvalid]="true" dateFormat="yy/mm/dd" (onBlur)="handleBlur();"
                         (onSelect)="updatePickTimeRange()">
                       </p-datepicker>
                       <label class="z-1">截止時間</label>

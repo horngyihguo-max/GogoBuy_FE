@@ -90,48 +90,49 @@
 }
 
 .Btn {
-  @apply w-[13vw] bg-[#F4E7E1] text-[#662222] border-1 border-[#662222] rounded-3xl h-[7vh] min-w-[100px] font-bold transition-all hover:bg-[#662222]/20 hover:text-[#662222] hover:border-[#662222] hover:scale-[1.05] active:bg-white active:text-[#662222] active:scale-[0.85];
+  @apply w-[13vw] bg-[#F4E7E1] text-[#662222] border-1 border-[#662222] rounded-3xl h-[7vh] min-w-[100px] font-bold transition-all
+         hover:bg-[#662222]/20 hover:text-[#662222] hover:border-[#662222] hover:scale-[1.05]
+         active:bg-white active:text-[#662222] active:scale-[0.85];
 }
+
 
 /* 1. 確保最外層容器不會因為內部拖曳而改變高度 */
 :host ::ng-deep .responsive-picklist .p-picklist {
   display: flex !important;
   align-items: stretch !important;
-  /* 核心：強制左右兩箱高度永遠齊平 */
-  height: 450px !important;
+  /* 強制左右兩箱高度永遠齊平 */
+  height: 550px !important;
   /* 固定整個元件的高度 */
 }
-
 /* 2. 針對左右兩個區域的包裹層 */
 :host ::ng-deep .responsive-picklist .p-picklist-list-wrapper {
   display: flex !important;
   flex-direction: column !important;
   flex: 1 1 50% !important;
   /* 確保左右各佔一半 */
-  height: 100% !important;
 }
-
 /* 3. 針對灰色線框 (ul) 所在的容器：這是最容易縮放的地方 */
 :host ::ng-deep .responsive-picklist .p-picklist-list {
   /* 捨棄 height: 100%，改用 flex-grow 強制填滿 wrapper 的剩餘空間 */
   flex-grow: 1 !important;
   flex-shrink: 0 !important;
-
   /* 這裡設定一個具體的高度數值 */
   height: 350px !important;
   min-height: 350px !important;
   max-height: 350px !important;
-
   overflow-y: auto !important;
   box-sizing: border-box !important;
 }
-
+:host ::ng-deep .p-listbox-list-container {
+  height: 100% !important;
+  /* 確保內部列表也填滿父容器 */
+  box-sizing: border-box !important;
+}
 /* 4. 關鍵：防止 PrimeNG 的內建樣式在拖曳時干擾佈局 */
 :host ::ng-deep .p-dataview-content,
 :host ::ng-deep .p-picklist-item {
   box-sizing: border-box !important;
 }
-
 /* 3. 調整初始墊片的高度 */
 .dynamic-padding.can-hover {
   /* 當沒東西時，讓墊片幾乎佔滿 25rem */
@@ -140,7 +141,6 @@
   border-color: #3b82f6;
   color: #3b82f6;
 }
-
 /* 4. 墊片基礎縮放動畫 */
 .dynamic-padding {
   transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -149,7 +149,6 @@
   margin: 5px;
   flex-shrink: 0;
 }
-
 .product-item {
   position: relative;
   width: 100%;
@@ -160,7 +159,6 @@
   background: white;
   flex-shrink: 0;
 }
-
 @media (max-width: 523px) {
   .product-item {
     flex-direction: column !important;
@@ -172,7 +170,6 @@
     /* 增加間距觀察是否有變化 */
   }
 }
-
 @media (min-width: 524px) {
   .product-item {
     flex-direction: row !important;
@@ -180,7 +177,6 @@
     height: fit-content !important;
   }
 }
-
 .remove-badge {
   position: absolute;
   /* 往外推 */
@@ -199,20 +195,90 @@
   z-index: 0;
   box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.2);
 }
-
 /* 移除 PickList 預設選中時的藍框，避免干擾紅按鈕視覺 */
 :host ::ng-deep .p-picklist-item.p-highlight {
   background: #f8f9fa !important;
   color: #495057 !important;
 }
+/* 讓 PickList 容器變成 Flex 佈局 */
+:host ::ng-deep .responsive-picklist .p-picklist {
+  display: flex;
+  gap: 1rem;
+  /* 左右/上下區域的間距 */
+}
+/* --- 手機、平板版 RWD (螢幕寬度 < 1024px) --- */
+@media screen and (max-width: 1023px) {
+  /* 1. 確保排版為垂直：來源在上、目標在下 */
+  :host ::ng-deep .responsive-picklist > .p-picklist {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  /* 2. 按鈕容器橫向排列 */
+  :host ::ng-deep .responsive-picklist .p-picklist-controls {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: center !important;
+    gap: 12px;
+    padding: 10px 0 !important;
+  }
+  /* 3. 修正 SVG 轉向數值 */
+  /* 指向目標 (原向右) -> 旋轉 90 度向下 */
+  :host::ng-deep.responsive-picklist [data-pc-section="moveToTargetButton"] svg,
+  :host::ng-deep.responsive-picklist
+    [data-pc-section="moveAllToTargetButton"]
+    svg {
+    transform: rotate(90deg) !important;
+    display: block !important;
+  }
+  /* 指向來源 (原向左) -> 旋轉 90 度向上 (因為原圖向左，轉 90 度會變向上) */
+  /* 如果轉 90 度不對，請嘗試使用 rotate(-90deg) 或 rotate(270deg) */
+  :host::ng-deep.responsive-picklist [data-pc-section="moveToSourceButton"] svg,
+  :host::ng-deep.responsive-picklist
+    [data-pc-section="moveAllToSourceButton"]
+    svg {
+    transform: rotate(90deg) !important;
+    display: block !important;
+  }
+  /* 4. 寬度修正 */
+  :host ::ng-deep .responsive-picklist .p-picklist-list-wrapper {
+    width: 100% !important;
+  }
+}
+/* 3. 桌機版樣式 (lg 以上) */
+@media (min-width: 1024px) {
+  :host ::ng-deep .responsive-picklist .p-picklist {
+    flex-direction: row;
+    /* 水平排列：來源在左，目標在右 */
+    align-items: flex-start;
+  }
+  /* 確保兩個清單寬度平分或自適應 */
+  :host ::ng-deep .responsive-picklist .p-picklist-list-wrapper {
+    flex: 1 1 50%;
+  }
+}
+/* 修正中間控制按鈕垂直置中 */
+:host ::ng-deep .responsive-picklist .p-picklist-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.recommended-active {
+  background-color: white !important;
+  color: #662222 !important;
+  font-weight: bold;
+  border: 1px solid #662222 !important;
+}
+.transition-colors {
+  transition: all 0.2s ease-in-out;
+}
 
-/* 基礎樣式：選中的頁籤 */
+
+/* 選中的頁籤 */
 .active-tab {
   background-color: white;
   color: #7c2d12;
   font-weight: bold;
 }
-
 /* --- 手機、平板版 (水平頁籤) --- */
 @media (max-width: 1023px) {
   .active-tab {
@@ -242,7 +308,6 @@
     box-shadow: -5px 5px 0 5px white;
   }
 }
-
 /* --- 桌面版 (垂直頁籤) --- */
 @media (min-width: 1024px) {
   .active-tab {
@@ -274,87 +339,6 @@
   }
 }
 
-/* 1. 基本設定：讓 PickList 容器變成 Flex 佈局 */
-:host ::ng-deep .responsive-picklist .p-picklist {
-  display: flex;
-  gap: 1rem;
-  /* 左右/上下區域的間距 */
-}
-
-/* --- 手機、平板版 RWD (螢幕寬度 < 1024px) --- */
-@media screen and (max-width: 1023px) {
-  /* 1. 確保排版為垂直：來源在上、目標在下 */
-  :host ::ng-deep .responsive-picklist > .p-picklist {
-    display: flex !important;
-    flex-direction: column !important;
-  }
-
-  /* 2. 按鈕容器橫向排列 */
-  :host ::ng-deep .responsive-picklist .p-picklist-controls {
-    display: flex !important;
-    flex-direction: row !important;
-    justify-content: center !important;
-    gap: 12px;
-    padding: 10px 0 !important;
-  }
-
-  /* 3. 修正 SVG 轉向數值 */
-  /* 指向目標 (原向右) -> 旋轉 90 度向下 */
-  :host::ng-deep.responsive-picklist [data-pc-section="moveToTargetButton"] svg,
-  :host::ng-deep.responsive-picklist
-    [data-pc-section="moveAllToTargetButton"]
-    svg {
-    transform: rotate(90deg) !important;
-    display: block !important;
-  }
-
-  /* 指向來源 (原向左) -> 旋轉 90 度向上 (因為原圖向左，轉 90 度會變向上) */
-  /* 如果轉 90 度不對，請嘗試使用 rotate(-90deg) 或 rotate(270deg) */
-  :host::ng-deep.responsive-picklist [data-pc-section="moveToSourceButton"] svg,
-  :host::ng-deep.responsive-picklist
-    [data-pc-section="moveAllToSourceButton"]
-    svg {
-    transform: rotate(90deg) !important;
-    display: block !important;
-  }
-
-  /* 4. 寬度修正 */
-  :host ::ng-deep .responsive-picklist .p-picklist-list-wrapper {
-    width: 100% !important;
-  }
-}
-
-/* 3. 桌機版樣式 (lg 以上) */
-@media (min-width: 1024px) {
-  :host ::ng-deep .responsive-picklist .p-picklist {
-    flex-direction: row;
-    /* 水平排列：來源在左，目標在右 */
-    align-items: flex-start;
-  }
-
-  /* 確保兩個清單寬度平分或自適應 */
-  :host ::ng-deep .responsive-picklist .p-picklist-list-wrapper {
-    flex: 1 1 50%;
-  }
-}
-
-/* 修正中間控制按鈕垂直置中 */
-:host ::ng-deep .responsive-picklist .p-picklist-buttons {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.recommended-active {
-  background-color: white !important;
-  color: #662222 !important;
-  font-weight: bold;
-  border: 1px solid #662222 !important;
-}
-
-.transition-colors {
-  transition: all 0.2s ease-in-out;
-}
 
 :host ::ng-deep .p-floatlabel:has(.p-focus) label,
 :host ::ng-deep .p-floatlabel:has(textarea:focus) label,
@@ -402,13 +386,13 @@
 }
 /* 當滑鼠懸停在按鈕上時，改變 SVG 顏色 */
 ::ng-deep .my-local-panel button:hover svg {
-    color: #4a1818 !important; /* 懸停時變更深色 */
+    color: #4a1818 !important;
     fill: #4a1818 !important;
-    transform: scale(1.1);      /* 稍微放大 */
+    transform: scale(1.1);
 }
 /* 修改按鈕本身的背景 Hover */
 ::ng-deep .my-local-panel button:hover {
-    background: rgba(102, 34, 34, 0.1) !important; /* 淡淡的紅背景 */
+    background: rgba(102, 34, 34, 0.1) !important;
     border-color: transparent !important;
 }
 
@@ -418,11 +402,8 @@
   backdrop-filter: blur(8px) !important;
   -webkit-backdrop-filter: blur(8px) !important;
   /* 相容 Safari */
-  /* 選擇性：增加一點深色疊加感 */
   background-color: rgba(0, 0, 0, 0.2) !important;
 }
-
-/* 讓彈窗本體也有一點毛玻璃感 (選用) */
 ::ng-deep .swal2-popup {
   box-shadow: 0 8px 32px 0 rgba(95, 96, 103, 0.37) !important;
   backdrop-filter: blur(4px);
