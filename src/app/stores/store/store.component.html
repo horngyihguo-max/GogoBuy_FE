@@ -1185,3 +1185,34 @@
         <span class="mt-2 text-white">正在儲存店家資訊，請稍候...</span>
     </div>
 </p-dialog>
+
+<!---------------------------- 正在開團 確定要更新然後刪除正在開團中的資訊嗎 Dialog ------------------------------>
+<p-dialog [(visible)]="displaySureUpdateDialog" [modal]="true" [draggable]="false" [resizable]="false"
+  [style]="{ width: '400px', 'border-radius': '1.5rem' }" [showHeader]="false">
+
+  <div class="p-8 text-center">
+    <div class="flex justify-center mb-6">
+      <div class="bg-red-50 rounded-full p-4">
+        <i class="pi pi-exclamation-triangle text-[#662222]" style="font-size: 3rem"></i>
+      </div>
+    </div>
+
+    <h2 class="text-2xl font-bold text-gray-800 mb-3">目前店家正在開團中</h2>
+
+    <p class="text-gray-600 leading-relaxed text-center inline-block w-full px-4" style="white-space: pre-line;">
+      更新商店資訊將會導致現有開團資訊被刪除且無法恢復，確定要繼續執行更新嗎？
+    </p>
+
+    <div class="mt-8 flex gap-3">
+      <button type="button" routerLink="/admin"
+        class="w-full cursor-pointer bg-gray-200 hover:bg-gray-300 text-white font-bold py-3 px-6 rounded-2xl shadow-lg transition
+        duration-300 ease-in-out transform active:scale-95 border-0 focus:outline-none">
+        暫不更新
+      </button>
+      <button type="button" (click)="deleteEvent()"
+        class="w-full cursor-pointer bg-[#662222] hover:bg-[#4d1a1a] text-white font-bold py-3 px-6 rounded-2xl shadow-lg transition duration-300 ease-in-out transform active:scale-95">
+        確定更新並刪除團購
+      </button>
+    </div>
+  </div>
+</p-dialog>

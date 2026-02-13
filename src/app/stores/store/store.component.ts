@@ -59,6 +59,7 @@ export class StoreComponent {
   id!: number;
   userId = '';
   wishId!: number;
+  activeEventsByStoreId!: any[];
 
   // 開啟dialog
   displayStoreInfoDialog = false;
@@ -76,6 +77,7 @@ export class StoreComponent {
   displayUnableDeleteSpec = false;
   displayPublishConfirm = false
   displaySaveFailedDialog = false;
+  displaySureUpdateDialog = false;
 
   selectedProduct!: MenuVoList;
   selectedCategoryId: number | null = null;
@@ -222,6 +224,7 @@ export class StoreComponent {
     this.userId = String(localStorage.getItem('user_id') || '');
     this.id = Number(this.route.snapshot.paramMap.get('id'));
     this.wishId = this.storeService.wishId;
+    this.activeEventsByStoreId = this.storeService.activeEventsByStoreId;
 
     if (this.id !== 0) {
       this.http.getApi(`http://localhost:8080/gogobuy/store/searchId?id=${this.id}`)
@@ -1070,6 +1073,9 @@ export class StoreComponent {
           }
         });
     } else {
+      if (this.activeEventsByStoreId.length > 0) {
+        // 再給他一個dialog
+      }
       const payload = {
         ...this.storeData, storesname: this.storeData.name,
         phone: this.storeData.phone,
@@ -1128,6 +1134,12 @@ export class StoreComponent {
       this.router.navigate(['/groupbuy-event/group-event', this.id], {
         queryParams: { wish_id: this.wishId }
       });
+    }
+  }
+
+  deleteEvent() {
+    for (let id of this.activeEventsByStoreId) {
+      this.storeService.getEventsByEventsId(id)
     }
   }
 
