@@ -1,15 +1,20 @@
 import { Injectable } from '@angular/core';
 import { HttpService } from './http.service';
+import { map } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
 })
 export class StoreService {
 
-  constructor(private https: HttpService) { }
+  constructor(private http: HttpService) { }
 
-  getEventsByEventsId(id: number) {
-    return this.https.getApi(`http://localhost:8080/gogobuy/event/getEventsByEventsId?id=${id}`);
+  deleteEventPhysically(id: number, group: any){
+    return this.http.postApi(`http://localhost:8080/gogobuy/event/deleteEventPhysically?id=${id}`, group)
+      .subscribe((res: any) => {
+        console.log("res", res);
+      })
+
   }
 
   wishId!: number;

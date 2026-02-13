@@ -285,6 +285,7 @@ export class StoreUpsertComponent {
           this.parseAddressToFields();
         }
       });
+    
   }
 
   // 檢查電話是否已使用過
@@ -356,7 +357,8 @@ export class StoreUpsertComponent {
             this.activeEventsByStoreId = res.groupbuyEvents.filter((g: any) =>
               g.status !== "FINISHED"
             );
-            if (this.activeEventsByStoreId) {
+
+            if (this.activeEventsByStoreId && this.activeEventsByStoreId.length > 0) {
               this.isHaveEvent = true;
               this.displayHaveEventDialog = true;
             }
@@ -670,6 +672,8 @@ export class StoreUpsertComponent {
 
   // 下一步
   onSubmit() {
+    console.log('active', this.activeEventsByStoreId);
+
     const missingFields: string[] = [];
 
     if (!this.storeData.name) missingFields.push('商店名稱');
@@ -711,9 +715,13 @@ export class StoreUpsertComponent {
     console.log('同步到 Service 成功：', this.storeService.storeData);
 
     if (this.id !== 0) {
-      this.router.navigate(['/management/store', this.id]);
+      this.router.navigate(['/management/store', this.id]).then(() => {
+        window.scrollTo(0, 0);
+      });
     } else {
-      this.router.navigate(['/management/store']);
+      this.router.navigate(['/management/store']).then(() => {
+        window.scrollTo(0, 0);
+      });;
     }
 
     sessionStorage.removeItem('temp_order_info');

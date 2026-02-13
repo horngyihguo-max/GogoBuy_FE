@@ -67,7 +67,7 @@ export class FollowGroupComponent {
     private router: Router,
     private route: ActivatedRoute,
     private cart: CartService,
-  ) {}
+  ) { }
 
   // =========================
   // 基本狀態
@@ -491,8 +491,9 @@ export class FollowGroupComponent {
             return;
           }
         }
+        console.log(JSON.stringify(g, null, 2));
         this.applyGroup(g);
-        this.loadStoreById(g.storesId);
+        this.loadStoreById(g.storeId);
       });
 
     // 假資料
@@ -531,7 +532,7 @@ export class FollowGroupComponent {
       .subscribe((res: any) => {
         const normalized = this.normalizeStoreResponse(res);
         this.store = normalized;
-        console.log('店家資訊: ' + JSON.stringify(this.store, null, 2));
+        // console.log('店家資訊: ' + JSON.stringify(this.store, null, 2));
         this.afterLoaded();
         this.loadExistingOrder(this.groupId, this.userId);
       });
@@ -546,7 +547,7 @@ export class FollowGroupComponent {
   // 套用團資料：解析 tempMenuList / recommendList + 基本防呆
   applyGroup(g: GroupbuyEvents): void {
     this.group = g;
-    this.storeId = Number(g.storesId);
+    this.storeId = Number(g.storeId);
     console.log('店家的ID是: ' + this.storeId);
 
     if (g.deleted === true) {
@@ -690,7 +691,7 @@ export class FollowGroupComponent {
           this.group.limitation = g.limitation;
           this.group.shippingFee = g.shippingFee;
           this.group.splitType = g.splitType;
-          this.group.status = g.status;
+          this.group.eventStatus = g.eventStatus;
         } else {
           // 保險：如果 group 還沒初始化（通常不會），就整包套用
           this.applyGroup(g);
@@ -1046,7 +1047,7 @@ export class FollowGroupComponent {
       const decoded = atob(String(img));
       if (decoded.startsWith('http://') || decoded.startsWith('https://'))
         return decoded;
-    } catch {}
+    } catch { }
 
     return this.defaultProductCover;
   }
@@ -1592,10 +1593,10 @@ export class FollowGroupComponent {
       maxSelection: Number(g?.maxSelection ?? 1),
       items: Array.isArray(g?.items)
         ? g.items.map((it: any) => ({
-            id: Number(it?.id),
-            name: String(it?.name ?? ''),
-            extraPrice: Number(it?.extraPrice ?? 0),
-          }))
+          id: Number(it?.id),
+          name: String(it?.name ?? ''),
+          extraPrice: Number(it?.extraPrice ?? 0),
+        }))
         : [],
     }));
   }
@@ -2265,23 +2266,25 @@ export class FollowGroupComponent {
 
 // 團的資料的interface
 export interface GroupbuyEvents {
-  id: number;
-  hostId: string;
-  storesId: number;
-  eventName: string;
-  status: 'OPEN' | 'LOCKED' | 'FINISHED';
-  endTime: string;
-  totalOrderAmount: number;
-  shippingFee: number;
-  splitType: 'EQUAL' | 'WEIGHT';
-  announcement: string;
-  type: string;
-  tempMenuList: string;
-  recommendList: string;
-  recommendDescription: string;
-  limitation: number;
-  deleted: boolean;
-  nickname?: string;
-  hostAvatar?: string;
-  store_category?: 'fast' | 'slow';
+  eventId: number; // ○
+  hostId: string; // ○
+  storeId: number; // ○
+  eventName: string; // ○
+  eventStatus: 'OPEN' | 'LOCKED' | 'FINISHED'; // ○
+  endTime: string; // ○
+  pickupTime: string; // ○
+  pickLocation: string; // ○
+  totalOrderAmount: number; // ○
+  shippingFee: number; // ○
+  splitType: 'EQUAL' | 'WEIGHT'; // ○
+  announcement: string; // ○
+  eventType: string; // ○
+  tempMenuList: string; // ○
+  recommendList: string; // ○
+  recommendDescription: string; // ○
+  limitation: number; // ○
+  deleted: boolean; // ○
+  hostNickname?: string; // ○
+  hostAvatar?: string; // ○
+  storeCategory?: 'fast' | 'slow'; // ○
 }

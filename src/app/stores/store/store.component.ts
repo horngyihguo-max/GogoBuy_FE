@@ -1,3 +1,4 @@
+import { forkJoin } from 'rxjs';
 import { FeeDescriptionVoList, StoreService } from './../../@service/store.service';
 import { Component, ElementRef, HostListener, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { StepperModule } from 'primeng/stepper';
@@ -247,7 +248,6 @@ export class StoreComponent {
             });
             this.rebuildApplicableCategoryIds();
             this.filteredProducts = [...this.storeData.menuVoList];
-            console.log('filteredProducts(res)', this.filteredProducts);
             this.newPId = this.storeData.menuVoList.length + 1;
             this.newSpecId = this.storeData.productOptionGroupsVoList.length + 1;
             this.newCateId = this.storeData.menuCategoriesVoList.length + 1;
@@ -1004,7 +1004,6 @@ export class StoreComponent {
   // 存資料庫 ---------------------------------------------------------
   async onSaveAll() {
     this.displayPublishConfirm = false;
-    this.loading = true;
     const transformUnusual = (unusual: any) => {
       if (!unusual || Object.keys(unusual).length === 0) {
         return [];
@@ -1019,6 +1018,7 @@ export class StoreComponent {
       }));
     }
     if (this.storeData.id == 0) {
+      this.loading = true;
       const payload = {
         storesname: this.storeData.name,
         phone: this.storeData.phone,
@@ -1073,51 +1073,16 @@ export class StoreComponent {
           }
         });
     } else {
-      if (this.activeEventsByStoreId.length > 0) {
-        // 再給他一個dialog
-      }
-      const payload = {
-        ...this.storeData, storesname: this.storeData.name,
-        phone: this.storeData.phone,
-        address: this.storeData.address,
-        category: this.storeData.category,
-        type: this.storeData.type,
-        memo: this.storeData.memo,
-        image: this.storeData.image,
-        publish: this.storeData.publish,
-        createdBy: this.userId,
-        operatingHoursVoList: this.normalizeOperatingHours(),
-        fee_description: this.storeData.feeDescription,
-        menuCategoriesVoList: this.storeData.menuCategoriesVoList.map(category => ({
-          name: category.name,
-          priceLevel: category.priceLevel,
-          menuVo: this.storeData.menuVoList.filter(item => item.categoryId === category.id)
-            .map(product => ({
-              ...product,
-              unusual: (Array.isArray(product.unusual) || !product.unusual || Object.keys(product.unusual).length === 0)
-                ? null : [product.unusual]
-            }))
-        })),
-        productOptionGroupsVoList: this.storeData.productOptionGroupsVoList
-      }
-      console.log("payload(update):", payload);
+      if (this.activeEventsByStoreId && this.activeEventsByStoreId.length > 0) {
+        this.displaySureUpdateDialog = true;
+        console.log('有activeEventsByStoreId');
 
-      this.http.postApi(`http://localhost:8080/gogobuy/store/update?id=${this.storeData.id}`, payload)
-        .subscribe({
-          next: (res: any) => {
-            if (res.code === 200) {
-              console.log("update store:", res);
-              this.id = this.storeData.id;
-              this.loading = false;
-              this.afterSaveSuccess();
-            } else {
-              this.resMessage = res.message;
-              this.displaySaveFailedDialog = true;
-            }
-          },
-        });
+      } else {
+        this.updateStore();
+        console.log("一般更新");
+
+      }
     }
-
   }
 
   private afterSaveSuccess() {
@@ -1128,19 +1093,78 @@ export class StoreComponent {
 
   closeSaveDialog() {
     this.displaySaveDialog = false;
-    if (!this.wishId) {
-      this.router.navigate(['/management/store_info', this.id]);
-    } else {
-      this.router.navigate(['/groupbuy-event/group-event', this.id], {
-        queryParams: { wish_id: this.wishId }
-      });
-    }
+    // if (!this.wishId) {
+    this.router.navigate(['/management/store_info', this.id]);
+    // } else {
+    //   this.router.navigate(['/groupbuy-event/group-event', this.id], {
+    //     queryParams: { wish_id: this.wishId }
+    //   });
+    // }
   }
 
+  // 更新店家資訊並刪正在開的團
   deleteEvent() {
-    for (let id of this.activeEventsByStoreId) {
-      this.storeService.getEventsByEventsId(id)
+    this.displaySureUpdateDialog = false;
+    let deleteEventIdList: any[] = [];
+    deleteEventIdList = this.activeEventsByStoreId.map((event: any) => event.id)
+
+    this.loading = true;
+    for (let id of deleteEventIdList) {
+      this.storeService.deleteEventPhysically(id, this.activeEventsByStoreId)
     }
+
+    this.updateStore();
+  }
+
+  updateStore(){
+    this.loading = true;
+    const payload = {
+      ...this.storeData, storesname: this.storeData.name,
+      phone: this.storeData.phone,
+      address: this.storeData.address,
+      category: this.storeData.category,
+      type: this.storeData.type,
+      memo: this.storeData.memo,
+      image: this.storeData.image,
+      publish: this.storeData.publish,
+      createdBy: this.userId,
+      operatingHoursVoList: this.normalizeOperatingHours(),
+      fee_description: this.storeData.feeDescription,
+      menuCategoriesVoList: this.storeData.menuCategoriesVoList.map(category => ({
+        name: category.name,
+        priceLevel: category.priceLevel,
+        menuVo: this.storeData.menuVoList.filter(item => item.categoryId === category.id)
+          .map(product => ({
+            ...product,
+            unusual: (Array.isArray(product.unusual) || !product.unusual || Object.keys(product.unusual).length === 0)
+              ? null : [product.unusual]
+          }))
+      })),
+      productOptionGroupsVoList: this.storeData.productOptionGroupsVoList
+    }
+    console.log("payload(update):", payload);
+
+    this.http.postApi(`http://localhost:8080/gogobuy/store/update?id=${this.storeData.id}`, payload)
+      .subscribe({
+        next: (res: any) => {
+          if (res.code === 200) {
+            console.log("update store:", res);
+            this.id = this.storeData.id;
+            this.afterSaveSuccess();
+          } else {
+            this.resMessage = res.message;
+            this.displaySaveFailedDialog = true;
+          }
+          this.loading = false;
+        },
+        error: (err) => {
+          this.loading = false;
+        },
+        complete: () => {
+          this.loading = false;
+        }
+      });
+    this.loading = false;
   }
 
   // 假資料 ---------------------------------------------------------
