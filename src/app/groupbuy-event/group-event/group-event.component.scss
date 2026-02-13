@@ -289,9 +289,8 @@
 
 /* --- 手機、平板版 RWD (螢幕寬度 < 1024px) --- */
 @media screen and (max-width: 1023px) {
-
   /* 1. 確保排版為垂直：來源在上、目標在下 */
-  :host ::ng-deep .responsive-picklist>.p-picklist {
+  :host ::ng-deep .responsive-picklist > .p-picklist {
     display: flex !important;
     flex-direction: column !important;
   }
@@ -308,7 +307,9 @@
   /* 3. 修正 SVG 轉向數值 */
   /* 指向目標 (原向右) -> 旋轉 90 度向下 */
   :host::ng-deep.responsive-picklist [data-pc-section="moveToTargetButton"] svg,
-  :host::ng-deep.responsive-picklist [data-pc-section="moveAllToTargetButton"] svg {
+  :host::ng-deep.responsive-picklist
+    [data-pc-section="moveAllToTargetButton"]
+    svg {
     transform: rotate(90deg) !important;
     display: block !important;
   }
@@ -316,7 +317,9 @@
   /* 指向來源 (原向左) -> 旋轉 90 度向上 (因為原圖向左，轉 90 度會變向上) */
   /* 如果轉 90 度不對，請嘗試使用 rotate(-90deg) 或 rotate(270deg) */
   :host::ng-deep.responsive-picklist [data-pc-section="moveToSourceButton"] svg,
-  :host::ng-deep.responsive-picklist [data-pc-section="moveAllToSourceButton"] svg {
+  :host::ng-deep.responsive-picklist
+    [data-pc-section="moveAllToSourceButton"]
+    svg {
     transform: rotate(90deg) !important;
     display: block !important;
   }
@@ -370,43 +373,61 @@
   --p-floatlabel-focus-color: #662222;
 }
 
-:host ::ng-deep .p-datepicker:not(.p-disabled).p-focus+label {
+:host ::ng-deep .p-datepicker:not(.p-disabled).p-focus + label {
   color: #662222 !important;
 }
-
 /* 針對 PrimeNG 18 選中日期圓圈的終極覆蓋 */
-:host ::ng-deep .my-local-panel .p-datepicker-calendar td .p-datepicker-date.p-highlight {
+:host
+  ::ng-deep
+  .my-local-panel
+  .p-datepicker-calendar
+  td
+  .p-datepicker-date.p-highlight {
   background-color: #662222 !important;
   /* 強制背景深紅 */
   color: #ffffff !important;
   /* 強制文字白色 */
 }
-
 /* 如果還是沒變，直接修改它引用的變數 */
 :host ::ng-deep .my-local-panel {
   --p-datepicker-date-selected-background: #662222 !important;
   --p-datepicker-date-selected-color: #ffffff !important;
 }
-
 /* 針對滑鼠懸停 (Hover) 時的圓圈顏色，也順便統一 */
-:host ::ng-deep .my-local-panel .p-datepicker-calendar td>span:not(.p-highlight):hover {
+:host
+  ::ng-deep
+  .my-local-panel
+  .p-datepicker-calendar
+  td
+  > span:not(.p-highlight):hover {
   background-color: #fce7e7 !important;
   /* 淡淡的紅 */
   color: #662222 !important;
 }
-
 /* 「今天」的圈圈 (通常是外框線) */
-:host ::ng-deep .my-local-panel .p-datepicker-calendar td.p-datepicker-today>span {
+:host
+  ::ng-deep
+  .my-local-panel
+  .p-datepicker-calendar
+  td.p-datepicker-today
+  > span {
   border: 1px solid #662222 !important;
   /* 把綠框改成紅框 */
   color: #662222 !important;
   /* 文字也改紅 */
   background-color: transparent !important;
 }
-
 /* 時間選擇器的數字 */
 :host ::ng-deep .my-local-panel .p-datepicker-timepicker span {
   color: #662222 !important;
+}
+:host ::ng-deep .my-local-panel .p-datepicker-buttonbar button {
+  background: #662222 !important;
+  border: none;
+  &:hover {
+    background: rgba(102, 34, 34, 0.04) !important;
+    color: #4a1818 !important;
+  }
 }
 
 /* 針對所有綠色箭頭 (SVG) */
