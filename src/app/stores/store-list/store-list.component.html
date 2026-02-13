@@ -5,11 +5,11 @@
     選完後會改變 signal（selectedStoreNames、selectedFoodTypes）
     卡片區用 filteredStores() 讀取結果，所以會即時更新
   -->
-  <div class="bg-gray-200 min-h-[89px] flex flex-wrap items-center gap-4 p-4">
+  <div class="bg-gray-200 min-h-[89px] flex flex-wrap items-center gap-4 p-4 justify-between">
 
-    <!-- ========= 品牌（店名）篩選 ========= -->
+    <!-- ========= 店家 篩選 ========= -->
     <div class="flex items-center gap-2 shrink-0">
-      <span class="font-bold whitespace-nowrap">品牌</span>
+      <span class="font-bold whitespace-nowrap">店家</span>
       <!--
           p-multiselect是多選下拉選單(PRIMENG套件)
           options 來源：storeOptions()（由所有 stores() 產生）
@@ -32,11 +32,14 @@
       </p-multiselect>
     </div>
 
-    <!-- ========= 評價(佔位格) ========= -->
     <div class="flex items-center gap-2 shrink-0">
-      <span class="font-bold whitespace-nowrap">評價</span>
-      <input pInputText #searchInput type="text" class="bg-white border rounded px-2 h-10 w-64" />
+      <span class="font-bold whitespace-nowrap">類型</span>
+      <p-dropdown [options]="categoryOptions" optionLabel="label" optionValue="value" [ngModel]="selectedCategory()"
+        (ngModelChange)="selectedCategory.set($event)" class="w-64">
+      </p-dropdown>
+
     </div>
+
 
   </div>
 </section>

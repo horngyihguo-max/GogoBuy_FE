@@ -4,6 +4,8 @@ import { MultiSelectModule } from 'primeng/multiselect';
 import { AuthService } from '../../@service/auth.service';
 import { InputTextModule } from 'primeng/inputtext';
 import { Router } from '@angular/router';
+import { DropdownModule } from 'primeng/dropdown';
+
 
 
 type Store = {
@@ -11,7 +13,9 @@ type Store = {
   name: string;
   image: string;
   type: string;
+  category: 'fast' | 'slow';
 };
+
 
 @Component({
   selector: 'app-store-list',
@@ -19,6 +23,7 @@ type Store = {
     MultiSelectModule,
     FormsModule,
     InputTextModule,
+    DropdownModule
   ],
   templateUrl: './store-list.component.html',
   styleUrl: './store-list.component.scss'
@@ -29,6 +34,14 @@ export class StoreListComponent {
     public auths: AuthService,
   ) { }
   storeSearch!: string;
+  // 選到的類型（外送 / 團購 / 不限）
+  readonly selectedCategory = signal<'all' | 'fast' | 'slow'>('all');
+  readonly categoryOptions = [
+    { label: '外送', value: 'fast' },
+    { label: '團購', value: 'slow' },
+    { label: '不限類型 (外送 + 團購)', value: 'all' }
+  ];
+
 
   // stores：存「所有店家資料」
   readonly stores = signal<Store[]>([]);
@@ -57,6 +70,11 @@ export class StoreListComponent {
   ngOnInit() {
     this.loadStores();
   }
+
+  choose(category: 'all' | 'fast' | 'slow') {
+    this.selectedCategory.set(category);
+  }
+
 
   // 呼叫後端 API，拿到 storeList 後存進 stores()
   // next：成功回來
@@ -122,24 +140,34 @@ export class StoreListComponent {
   // - 沒選品牌（selectedStoreNames 是空）→ 不限制品牌
   // - 沒選餐點種類（selectedFoodTypes 是空）→ 不限制餐點種類
   readonly filteredStores = computed(() => {
-    const list = this.stores();
-    const selectedNames = this.selectedStoreNames?.() ?? [];
+    let out = this.stores();
+
+    const selectedNames = this.selectedStoreNames();
     const selectedTypes = this.selectedFoodTypes();
+    const category = this.selectedCategory();
 
-    let out = list;
-
-    // 有選品牌才過濾，沒選=全部
-    if (selectedNames.length) {
-      out = out.filter(s => selectedNames.includes(String(s.name ?? '').trim()));
+    // 先過濾 外送/團購
+    if (category !== 'all') {
+      out = out.filter(s => s.category == category);
     }
 
-    // 有選餐點種類才過濾，沒選=全部
+    // 品牌
+    if (selectedNames.length) {
+      out = out.filter(s =>
+        selectedNames.includes(this.getStoreName(s))
+      );
+    }
+
+    // 餐點種類
     if (selectedTypes.length) {
-      out = out.filter(s => selectedTypes.includes(this.getType(s)));
+      out = out.filter(s =>
+        selectedTypes.includes(this.getType(s))
+      );
     }
 
     return out;
   });
+
 
   // 前往商店頁面
   goStoreInfo(storeId: number) {
