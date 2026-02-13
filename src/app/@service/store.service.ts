@@ -1,13 +1,19 @@
 import { Injectable } from '@angular/core';
+import { HttpService } from './http.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class StoreService {
 
-  constructor() { }
+  constructor(private https: HttpService) { }
+
+  getEventsByEventsId(id: number) {
+    return this.https.getApi(`http://localhost:8080/gogobuy/event/getEventsByEventsId?id=${id}`);
+  }
 
   wishId!: number;
+  activeEventsByStoreId: any[] = [];
 
   storeData: Stores = {
     id: 0,

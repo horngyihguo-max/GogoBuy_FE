@@ -19,7 +19,7 @@ import { BehaviorSubject } from 'rxjs';
 export class AuthService {
   // 這邊專門放用戶資料相關API和變數
   constructor(
-    private https: HttpService,
+    public https: HttpService,
     private router: Router,
     private route: ActivatedRoute,) { }
   user: any = null;

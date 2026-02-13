@@ -419,6 +419,39 @@
   </div>
 </p-dialog>
 
+<!-------------- 此店家有正在開團 Dialog -------------->
+<p-dialog [(visible)]="displayHaveEventDialog" [modal]="true" [draggable]="false" [resizable]="false"
+  [style]="{ width: '400px', 'border-radius': '1.5rem' }" [showHeader]="false">
+
+  <div class="p-8 text-center">
+    <div class="flex justify-center mb-6">
+      <div class="bg-red-50 rounded-full p-4">
+        <i class="pi pi-exclamation-circle text-[#662222]" style="font-size: 3rem"></i>
+      </div>
+    </div>
+
+    <h2 class="text-2xl font-bold text-gray-800 mb-3">目前店家正在開團中</h2>
+
+    <p class="text-gray-600 leading-relaxed text-center inline-block w-full px-4" style="white-space: pre-line;">
+      此店家目前有 {{ activeEventsByStoreId.length }} 個進行中的團購活動。若現在修改店家資訊，會導致現有開團資訊被刪除且無法恢復，影響已參與成員的訂單內容，請確認是否繼續。
+    </p>
+
+    <div class="mt-8 flex gap-3">
+      <button type="button" routerLink="/admin"
+        class="w-full cursor-pointer bg-gray-200 hover:bg-gray-300 text-white font-bold py-3 px-6 rounded-2xl shadow-lg transition
+        duration-300 ease-in-out transform active:scale-95 border-0 focus:outline-none">
+        返回
+      </button>
+      <button type="button" (click)="displayHaveEventDialog = false"
+        class="w-full cursor-pointer bg-[#662222] hover:bg-[#4d1a1a] text-white font-bold py-3 px-6 rounded-2xl shadow-lg transition duration-300 ease-in-out transform active:scale-95">
+        確認並繼續
+      </button>
+    </div>
+  </div>
+</p-dialog>
+
+
+
 <!---------------------- blockUI ---------------------->
 <p-blockUI [blocked]="scanning">
   <div class="flex flex-col items-center justify-center w-full">

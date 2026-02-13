@@ -27,7 +27,8 @@ import { BlockUIModule } from 'primeng/blockui';
     SelectModule, FloatLabelModule,
     DatePickerModule, FormsModule, FluidModule,
     FormsModule, CheckboxModule, InputNumber,
-    DialogModule, AutoCompleteModule, BlockUIModule
+    DialogModule, AutoCompleteModule, BlockUIModule,
+    RouterLink
   ],
   templateUrl: './store-upsert.component.html',
   styleUrl: './store-upsert.component.scss'
@@ -50,6 +51,10 @@ export class StoreUpsertComponent {
   selectCategory!: string;
   districtsLoaded = false;
 
+  // 團團團
+  isHaveEvent: boolean = false;
+  activeEventsByStoreId: any[] = [];
+
   // 載入掃描時間
   scanning: boolean = false;
   scanErrorMessage: string = '';
@@ -69,6 +74,7 @@ export class StoreUpsertComponent {
   selectedDistrict: any = null;
   detailAddress: string = '';
 
+  displayHaveEventDialog: boolean = false;
   displayPhoneUsedDialog: boolean = false;
   displayScanFailedDialog: boolean = false;
   displayAlertDialog: boolean = false;
@@ -339,16 +345,30 @@ export class StoreUpsertComponent {
 
   ngOnInit(): void {
     this.userId = String(localStorage.getItem('user_id') || '');
+    this.id = Number(this.route.snapshot.paramMap.get('id'));
     this.loadTaiwanDistricts();
     this.initTimeOptions();
+
+    this.http.getApi(`http://localhost:8080/gogobuy/event/getGroupbuyEventByStoresId?stores_id=${this.id}`)
+      .subscribe({
+        next: (res: any) => {
+          if (res.code === 200) {
+            this.activeEventsByStoreId = res.groupbuyEvents.filter((g: any) =>
+              g.status !== "FINISHED"
+            );
+            if (this.activeEventsByStoreId) {
+              this.isHaveEvent = true;
+              this.displayHaveEventDialog = true;
+            }
+          }
+        }
+      });
 
     this.http.getApi('http://localhost:8080/gogobuy/store/all').subscribe((res: any) => {
       this.storeList = res.storeList;
       console.log("this.storeList", this.storeList);
       this.existingPhones = this.storeList.map((s: any) => s.phone);
     });
-
-    this.id = Number(this.route.snapshot.paramMap.get('id'));
 
     // service 讀取資料
     if (!this.wishId && this.storeService.storeData && this.storeService.storeData.name !== '') {
@@ -685,6 +705,7 @@ export class StoreUpsertComponent {
     const readyToSave = { ...this.storeData } as any;
 
     this.storeService.wishId = this.wishId;
+    this.storeService.activeEventsByStoreId = this.activeEventsByStoreId;
     this.storeService.storeData = readyToSave;
 
     console.log('同步到 Service 成功：', this.storeService.storeData);
