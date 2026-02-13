@@ -411,8 +411,8 @@ export class StoreInfoComponent implements OnInit {
     }
     if (this.isGroupOpening) {
       this.toastWarn(
-        '重要警示!',
-        '目前此店家正在開團，若進行修改，將強制終止所有正在進行的團',
+        '重要警示',
+        '目前此店家正在開團，若進行修改，將強制終止所有正在進行的團購',
       );
     }
     this.router.navigate(['/management/store_upsert', this.storeId]);
