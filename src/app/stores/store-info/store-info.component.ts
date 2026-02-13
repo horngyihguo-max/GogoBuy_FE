@@ -409,6 +409,12 @@ export class StoreInfoComponent implements OnInit {
       this.toastWarn('無法修改', '只有管理員可以修改店家資訊');
       return;
     }
+    if (this.isGroupOpening) {
+      this.toastWarn(
+        '重要警示!',
+        '目前此店家正在開團，若進行修改，將強制終止所有正在進行的團',
+      );
+    }
     this.router.navigate(['/management/store_upsert', this.storeId]);
   }
 
