@@ -117,10 +117,29 @@ export class OrderInfoComponent implements OnInit {
       this.mode = (params.get('mode') == 'host') ? 'host' : 'member';
       this.eventsId = Number(params.get('events_id') || 0);
       this.loadOrders();
+      if (this.eventsId) {
+        this.loadEventInfo();
+      }
     });
   }
 
+  private loadEventInfo() {
+    this.cart.getEventsByEventsId(this.eventsId).subscribe({
+      next: (res: any) => {
+        const event = res.groupbuyEvents?.[0];
+        if (!event) return;
 
+        // 取得欄位
+        this.eventName = event.eventName ?? '';
+        this.storeName = event.storeName ?? '';
+        this.pickupTime = event.pickupTime ?? '';
+        this.pickLocation = event.pickLocation ?? '';
+      },
+      error: (err: any) => {
+        console.error('getEventsByEventsId 失敗', err);
+      }
+    });
+  }
   private flattenOrdersDto(dto: any): any[] {
     const base = {
       id: dto.id ?? dto.orderId,

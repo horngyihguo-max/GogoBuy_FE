@@ -24,8 +24,8 @@
     <div class="bg-white py-[32px] px-[16px] mt-[16px] font-bold text-2xl rounded-lg shadow-sm">
       團購名稱：<p class="font-normal text-lg">{{ eventName }}</p><br>
       商店名稱：<p class="font-normal text-lg">{{ storeName }}</p><br>
-      取貨時間：<p class="font-normal text-lg">{{ pickLocation }}</p><br>
-      取貨地點：<p class="font-normal text-lg">{{ formatDateTime(pickupTime) }}</p><br>
+      取貨時間：<p class="font-normal text-lg">{{ formatDateTime(pickupTime) }}</p><br>
+      取貨地點：<p class="font-normal text-lg">{{ pickLocation }}</p><br>
     </div>
 
     <div class="bg-white py-[24px] px-[16px] mt-[16px] rounded-2xl shadow-sm">
@@ -40,7 +40,7 @@
             <img [src]="avatarMap[g.key]"
               class="w-10 h-10 rounded-full bg-sky-500 text-white flex items-center justify-center font-bold" />
             } @else {
-            {{ g.nickname?.[0] }}
+            {{ g.nickname[0] || '' }}
             }
           </div>
           <div class="font-bold text-[18px] text-slate-900 text-xl">{{ g.nickname }}</div>
