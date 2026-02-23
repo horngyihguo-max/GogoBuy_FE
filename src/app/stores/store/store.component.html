@@ -752,12 +752,14 @@
           <div class="flex items-center justify-between">
             <label class=" font-bold text-[#662222]/80">所屬分類</label>
           </div>
+          @if(displayProductDialog){
           <p-select [(ngModel)]="currentProduct.categoryId" [options]="storeData.menuCategoriesVoList"
             optionLabel="name" optionValue="id" appendTo="body" styleClass="w-full h-12 flex items-center"
-            (onChange)="onCategoryChange()" />
+            (onChange)="onCategoryChange()" placeholder="請選擇分類"/>
           @if (submitted && !currentProduct.categoryId) {
           <small class="text-red-500 text-[10px] ml-1">請選擇分類</small>
           }
+        }
         </div>
 
         <div class="space-y-1.5">
@@ -1178,11 +1180,11 @@
 </p-dialog>
 
 <!------------------------------ 儲存 loading ------------------------------>
-<p-dialog [(visible)]="loading" [modal]="true" [closable]="false" [showHeader]="false"
+<p-dialog [(visible)]="loading" [modal]="true" [closable]="false" [showHeader]="false" appendTo="body"
     [style]="{ 'background': 'transparent', 'border': 'none', 'box-shadow': 'none' }">
     <div class="flex flex-col items-center w-full">
         <i class="pi pi-spin pi-spinner-dotted" style="font-size: 3rem; color: white;"></i>
-        <span class="mt-2 text-white tracking-widest animate-pul">正在儲存店家資訊，請稍候...</span>
+        <span class="mt-2 text-white tracking-widest animate-pulse">正在儲存店家資訊，請稍候...</span>
     </div>
 </p-dialog>
 
