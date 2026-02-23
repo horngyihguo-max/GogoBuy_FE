@@ -9,6 +9,7 @@ import { Router } from '@angular/router';
 import { CartService } from '../@service/cart.service';
 import { catchError, finalize, forkJoin, map, of } from 'rxjs';
 import Swal from 'sweetalert2';
+import { OrderTransferService } from '../@service/orderTransfer.service';
 
 interface CartItem {
   id: number;
@@ -133,7 +134,7 @@ type Order = {
   styleUrl: './orders.component.scss'
 })
 
-/* 假資料 */
+
 export class OrdersComponent {
   isLoading = true
   res?: CartRes;
@@ -141,6 +142,7 @@ export class OrdersComponent {
   constructor(
     public router: Router,
     private cart: CartService,
+    private transfer: OrderTransferService,
   ) {
   }
 
@@ -189,7 +191,7 @@ export class OrdersComponent {
               code: item.orderCode,
               storeName: item.storeName || '未知店家',
               createdAt: new Date(item.createdAt),
-              statusLabel: item.pickupStatus === 'PICKED_UP' ? '已完成' : (item.eventStatus === 'COMPLETED' ? '待取餐' : '進行中'),
+              statusLabel: item.pickupStatus == 'PICKED_UP' ? '已完成' : (item.eventStatus === 'COMPLETED' ? '待取餐' : '進行中'),
               total: item.totalAmount,
               receiverName: item.receiverName,
               phone: item.phone,
@@ -260,7 +262,7 @@ export class OrdersComponent {
         if (!event) return;
 
         const mode = (event.hostId == userId) ? 'host' : 'member';
-
+        this.transfer.latestOrderTime.set(item.latestOrderTime ?? '');
         this.router.navigate(['/user/orders/info'], {
           queryParams: {
             events_id: item.eventsId,
