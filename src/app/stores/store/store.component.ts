@@ -358,6 +358,7 @@ export class StoreComponent {
   // 商品分類 ---------------------------------------------------------
   addCategories() {
     this.isEditMode = false;
+    this.submitted = false;
     this.currentCategories = this.getNewCategories();
     this.displayCategoriesDialog = true;
   }
@@ -472,6 +473,7 @@ export class StoreComponent {
   // 規格 ---------------------------------------------------------
   addSpecs() {
     this.isEditMode = false;
+    this.submitted = false;
     this.editingSpecIndex = -1;
     this.currentGroup = this.getNewGroups();
     this.selectedSpecsCategories = [];
@@ -562,6 +564,12 @@ export class StoreComponent {
       return;
     }
 
+    if (this.currentGroup.maxSelection) {
+      if (this.currentGroup.maxSelection > this.currentGroup.items.length) {
+        return;
+      }
+    }
+
     this.currentGroup.applicableCategoryIds = this.selectedSpecsCategories.map(cate => cate.id);
 
     if (this.isEditMode && this.editingSpecIndex > -1) {
@@ -640,7 +648,7 @@ export class StoreComponent {
   // 新增商品 ---------------------------------------------------------
   openNewProduct() {
     this.isEditMode = false;
-
+    this.submitted = false;
     this.currentProduct = this.getNewProduct();
     this.displayProductDialog = true;
     setTimeout(() => {
@@ -1099,7 +1107,7 @@ export class StoreComponent {
 
         }
       }
-    }, 100);
+    });
   }
 
   private afterSaveSuccess() {
@@ -1181,7 +1189,6 @@ export class StoreComponent {
           this.loading = false;
         }
       });
-    this.loading = false;
   }
 
   // 假資料 ---------------------------------------------------------

@@ -43,7 +43,8 @@ export class MyStoresComponent {
 
   ngOnInit(): void {
     this.userId = String(localStorage.getItem('user_id') || '');
-    console.log("userId", this.userId);
+
+    // this.http.getApi
 
     this.http.getApi('http://localhost:8080/gogobuy/store/all').subscribe((res: any) => {
       if (res && res.storeList) {
@@ -58,11 +59,6 @@ export class MyStoresComponent {
         this.privateStores = myAllStores.filter((s: any) => s.publish === false);
       }
     });
-  }
-
-  addStore(){
-    this.storeService.clearCurrentStore();
-    this.router.navigate(['/management/store_upsert']);
   }
 
   isStoreOpen(store: any) {
@@ -85,6 +81,10 @@ export class MyStoresComponent {
 
       return currentTime >= start && currentTime <= end;
     })
+  }
+
+  isFavorite() {
+    return true;
   }
 
 }
