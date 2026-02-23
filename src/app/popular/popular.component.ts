@@ -6,7 +6,7 @@ import { PopularService } from '../@service/popular.service';
 
 interface StatusOption {
   label: string;
-  value: string;
+  value: 'ALL' | 'YEAR' | 'MONTHLY' | 'WEEKLY' | 'DAILY';
 }
 
 interface SalesLeaderboardProjection {
@@ -50,15 +50,15 @@ export class PopularComponent {
     this.loadTop10();
   }
 
-  onStatusChange(value: any) {
+  onStatusChange(value: 'ALL' | 'YEAR' | 'MONTHLY' | 'WEEKLY' | 'DAILY') {
     this.statusFilter.set(value);
     this.loadTop10();
   }
 
   loadTop10() {
-    this.popularService.getTop10().subscribe({
+    const type = this.statusFilter() == 'ALL' ? undefined : this.statusFilter();
+    this.popularService.getTop10(type).subscribe({
       next: (res: any) => {
-        // 從 API 回傳把 salesDetailList 更新到 signal
         this.salesDetailList.set(res.salesDetailList ?? []);
       },
       error: (err: any) => console.error(err),

@@ -263,17 +263,7 @@ export class OrdersComponent {
 
         this.router.navigate(['/user/orders/info'], {
           queryParams: {
-            user_id: userId,
             events_id: item.eventsId,
-            eventName: item.eventName ?? '',
-            storeName: item.storeName ?? '',
-            pickLocation: item.pickLocation ?? '',
-            pickupTime: item.pickupTime ?? '',
-            store_id: item.storesId ?? '',
-            latestOrderTime: item.latestOrderTime ?? '',
-            totalAmount: item.totalAmount ?? '',
-            storeLogo: item.storeLogo ?? '',
-            hostLogo: item.hostLogo ?? '',
             // 身分判斷結果
             mode, // 'host' | 'member'
           }

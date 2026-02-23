@@ -66,7 +66,6 @@ type OrderGroupVM = {
     StepsModule,
     ToastModule,
     FormsModule,
-    JsonPipe,
     CommonModule
   ],
   providers: [MessageService],
@@ -116,16 +115,7 @@ export class OrderInfoComponent implements OnInit {
     // 載入cart傳入開團訂單詳情
     this.route.queryParamMap.subscribe(params => {
       this.mode = (params.get('mode') == 'host') ? 'host' : 'member';
-      this.userId = params.get('user_id') || '';
       this.eventsId = Number(params.get('events_id') || 0);
-      this.eventName = params.get('eventName') || '';
-      this.storeName = params.get('storeName') || '';
-      this.pickLocation = params.get('pickLocation') || '';
-      this.pickupTime = params.get('pickupTime') || '';
-      this.latestOrderTime = params.get('latestOrderTime') || '';
-      this.totalAmount = params.get('totalAmount') || '';
-      this.storeLogo = params.get('storeLogo') || '';
-      this.hostLogo = params.get('hostLogo') || '';
       this.loadOrders();
     });
   }
