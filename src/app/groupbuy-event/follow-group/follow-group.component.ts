@@ -830,7 +830,7 @@ export class FollowGroupComponent {
         // 送出成功
         console.log('送出訂單: ' + JSON.stringify(payload, null, 2));
         this.toastSuccess('送出成功', '訂單已送給團長');
-        this.router.navigate(['/user/cart']);
+        this.router.navigate(['/user/orders']);
       },
       error: (err) => {
         console.log('送出訂單: ' + JSON.stringify(payload, null, 2));
