@@ -149,75 +149,10 @@ export class WishesComponent implements OnInit {
       .getApi('http://localhost:8080/gogobuy/wish/all_wishes')
       .subscribe((res: any) => {
         this.wishes = res.allWish || [];
+        console.log(JSON.stringify(this.wishes, null, 2));
         this.afterLoad();
         this.applyScrollAndHighlight();
       });
-
-    // 假資料
-    // this.wishes = [
-    //   {
-    //     id: 1,
-    //     user_id: '5274e1a0-40cd-4e2b-9528-a3779e2f84a6',
-    //     nickname: '小林',
-    //     title: '喝不喝五十嵐（這邊故意做很長很長用來測試省略）',
-    //     followers: [
-    //       '74db5f21-f331-4824-853b-0be13d633c80',
-    //       '12b7bf42-57af-4e3f-acfc-b9a2ba3342aa',
-    //     ],
-    //     finished: false,
-    //     type: '手搖店',
-    //     buildDate: '2026-01-09',
-    //     location: '資安大樓（這邊也做很長測測測測測測測測測試）',
-    //   },
-    //   {
-    //     id: 2,
-    //     user_id: '12b7bf42-57af-4e3f-acfc-b9a2ba3342aa',
-    //     nickname: null,
-    //     title: '全聯火鍋吃起來',
-    //     followers: [],
-    //     finished: false,
-    //     type: '生鮮雜貨',
-    //     buildDate: '2026-01-06',
-    //     location: '台南市歸仁區',
-    //   },
-    //   {
-    //     id: 3,
-    //     user_id: '74db5f21-f331-4824-853b-0be13d633c80',
-    //     nickname: null,
-    //     title: '大祥燒臘',
-    //     followers: ['12b7bf42-57af-4e3f-acfc-b9a2ba3342aa'],
-    //     finished: false,
-    //     type: '餐廳',
-    //     buildDate: '2026-01-01',
-    //     location: '資安大樓',
-    //   },
-    //   {
-    //     id: 4,
-    //     user_id: '12b7bf42-57af-4e3f-acfc-b9a2ba3342aa',
-    //     nickname: null,
-    //     title: '我好想喝迷克夏',
-    //     followers: ['74db5f21-f331-4824-853b-0be13d633c80'],
-    //     finished: true,
-    //     type: '手搖店',
-    //     buildDate: '2026-01-05',
-    //     location: '高雄小港',
-    //   },
-    //   {
-    //     id: 5,
-    //     user_id: '12b7bf42-57af-4e3f-acfc-b9a2ba3342aa',
-    //     nickname: null,
-    //     title: '可不可要不要',
-    //     followers: ['74db5f21-f331-4824-853b-0be13d633c80'],
-    //     finished: false,
-    //     type: '餐廳',
-    //     buildDate: '2025-10-01',
-    //     location: '資安大樓',
-    //   },
-    // ];
-
-    // this.afterLoad();
-    // this.applyScrollAndHighlight();
-    // 這邊實際上線時記得要刪掉
   }
 
   // 讀取完資料後的整理小工具
