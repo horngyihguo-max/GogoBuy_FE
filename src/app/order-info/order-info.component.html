@@ -4,7 +4,7 @@
       購物車({{ mode == 'host' ? '開團者版本' : '跟團者版本' }})
     </a>
     <p class="ml-auto font-normal text-lg">
-      更新時間：{{ formatDateTime(latestOrderTime) }}
+      更新時間：{{ formatDateTime(transfer.latestOrderTime()) }}
     </p>
   </div>
 </section>
