@@ -9,6 +9,7 @@ import { Router } from '@angular/router';
 import { CartService } from '../@service/cart.service';
 import { catchError, finalize, forkJoin, map, of } from 'rxjs';
 import Swal from 'sweetalert2';
+import { OrderTransferService } from '../@service/orderTransfer.service';
 
 interface CartItem {
   id: number;
@@ -62,6 +63,40 @@ type CartSummary = {
 };
 
 
+export interface OrderHistoryDTO {
+  orderCode: string;
+  eventsId: number;
+  eventName: string;
+  storeName: string;
+  hostName: string;
+  createdAt: string;
+  eventStatus: string;
+  statusLabel: string;
+  totalAmount: number;
+  receiverName: string;
+  phone: string;
+  items: OrderMenuVo[];
+  paymentStatus: string;
+  pickupStatus: string;
+  pickupTime: string | null;
+  pickLocation: string | null;
+}
+
+export interface OrderHistoryRes {
+  code: number;
+  message: string;
+  orderHistoryList: OrderHistoryDTO[];
+}
+
+export interface OrderMenuVo {
+  menuId: number;
+  quantity: number;
+  specName: string;
+  menuName: string;
+  personalMemo: string;
+  selectedOptionList: any[];
+}
+
 /* PrimeNG <p-tag> 支援的 severity 類型 */
 type TagSeverity = 'info' | 'success' | 'warn' | 'danger' | 'primary' | 'contrast';
 
@@ -99,7 +134,7 @@ type Order = {
   styleUrl: './orders.component.scss'
 })
 
-/* 假資料 */
+
 export class OrdersComponent {
   isLoading = true
   res?: CartRes;
@@ -107,6 +142,7 @@ export class OrdersComponent {
   constructor(
     public router: Router,
     private cart: CartService,
+    private transfer: OrderTransferService,
   ) {
   }
 
@@ -141,7 +177,38 @@ export class OrdersComponent {
         },
         error: (err: any) => console.error('getCart failed:', err)
       });
+
+    this.fetchHistoryOrders(userId);
   }
+
+  fetchHistoryOrders(userId: string) {
+    this.cart.getHistoryOrders(userId).subscribe({
+      next: (res: any) => {
+        if (res.code === 200 && res.orderHistoryList) {
+          const historyList: OrderHistoryDTO[] = res.orderHistoryList;
+          this.historyOrders = historyList.map(item => {
+            return {
+              code: item.orderCode,
+              storeName: item.storeName || '未知店家',
+              createdAt: new Date(item.createdAt),
+              statusLabel: item.pickupStatus == 'PICKED_UP' ? '已完成' : (item.eventStatus === 'COMPLETED' ? '待取餐' : '進行中'),
+              total: item.totalAmount,
+              receiverName: item.receiverName,
+              phone: item.phone,
+              items: item.items.map(i => ({
+                name: i.menuName,
+                qty: i.quantity,
+                price: i.quantity, // Price calculation can be refined if needed
+                note: i.personalMemo
+              }))
+            };
+          });
+        }
+      },
+      error: (err: any) => console.error('fetchHistory failed:', err)
+    });
+  }
+
 
   carts = signal<CartSummary[]>([]);
 
@@ -195,20 +262,10 @@ export class OrdersComponent {
         if (!event) return;
 
         const mode = (event.hostId == userId) ? 'host' : 'member';
-
+        this.transfer.latestOrderTime.set(item.latestOrderTime ?? '');
         this.router.navigate(['/user/orders/info'], {
           queryParams: {
-            user_id: userId,
             events_id: item.eventsId,
-            eventName: item.eventName ?? '',
-            storeName: item.storeName ?? '',
-            pickLocation: item.pickLocation ?? '',
-            pickupTime: item.pickupTime ?? '',
-            store_id: item.storesId ?? '',
-            latestOrderTime: item.latestOrderTime ?? '',
-            totalAmount: item.totalAmount ?? '',
-            storeLogo: item.storeLogo ?? '',
-            hostLogo: item.hostLogo ?? '',
             // 身分判斷結果
             mode, // 'host' | 'member'
           }
@@ -233,34 +290,9 @@ export class OrdersComponent {
     return `${d.getFullYear()}/${pad(d.getMonth() + 1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
   }
 
-  activeOrders: Order[] = [
-    {
-      code: 'A001',
-      storeName: '50嵐',
-      createdAt: new Date(),
-      statusLabel: '進行中',
-      total: 120,
-      receiverName: '王小明',
-      phone: '0912-345-678',
-      items: [
-        { name: '珍珠奶茶', qty: 1, price: 60, note: "去冰" },
-        { name: '烏龍奶茶', qty: 1, price: 60, note: "" }
-      ]
-    }
-  ];
+  activeOrders: Order[] = [];
 
-  historyOrders: Order[] = [
-    {
-      code: 'H001',
-      storeName: '可不可',
-      createdAt: new Date(),
-      statusLabel: '已完成',
-      total: 75,
-      receiverName: '王小明',
-      phone: '0912-345-678',
-      items: [{ name: '熟成紅茶', qty: 1, price: 75 }]
-    }
-  ];
+  historyOrders: Order[] = [];
 
   // 展開狀態（用 code 當 key）
   activeOpenValues: string[] = [];

@@ -1,4 +1,4 @@
-import { timer } from 'rxjs';
+import { AutoCompleteModule } from 'primeng/autocomplete';
 import { Component, computed, signal, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MultiSelectModule } from 'primeng/multiselect';
@@ -9,7 +9,7 @@ import { DropdownModule } from 'primeng/dropdown';
 import { HttpService } from '../../@service/http.service';
 import { MessageService } from 'primeng/api';
 import { TooltipModule } from 'primeng/tooltip';
-import { ToastModule } from 'primeng/toast'; // 如果要顯示提示框
+import { ToastModule } from 'primeng/toast';
 
 type Store = {
   id: number;
@@ -37,6 +37,7 @@ interface StoreOperating {
     DropdownModule,
     TooltipModule,
     ToastModule,
+    AutoCompleteModule,
   ],
   providers: [MessageService],
   templateUrl: './store-list.component.html',
@@ -49,7 +50,7 @@ export class StoreListComponent {
     private https: HttpService,
     private messageService: MessageService,
   ) { }
-  storeSearch!: string;
+  readonly storeSearch = signal<string>('');
   // 選到的類型（外送 / 團購 / 不限）
   readonly selectedCategory = signal<'all' | 'fast' | 'slow'>('all');
   readonly categoryOptions = [
@@ -92,6 +93,7 @@ export class StoreListComponent {
   // 選到的品牌（店名）清單
   // 如果這個陣列是空的，代表「不限制品牌 = 全部」
   readonly selectedStoreNames = signal<string[]>([]);
+  filteredStoreSuggestions: { label: string; value: string }[] = [];
 
   // 選到的餐點種類（type）清單
   readonly selectedFoodTypes = signal<string[]>([]);
@@ -114,6 +116,22 @@ export class StoreListComponent {
 
   choose(category: 'all' | 'fast' | 'slow') {
     this.selectedCategory.set(category);
+  }
+
+  // 搜尋店名
+  searchStore(event: any) {
+    const query = event.query?.toLowerCase() ?? '';
+
+    const uniqueNames = Array.from(
+      new Set(this.stores().map(s => this.getStoreName(s)))
+    );
+
+    this.filteredStoreSuggestions = uniqueNames
+      .filter(name => name.toLowerCase().includes(query))
+      .map(name => ({
+        label: name,
+        value: name
+      }));
   }
 
   // 取得位置
@@ -271,6 +289,7 @@ export class StoreListComponent {
   // - 沒選店家（selectedStoreNames 是空）→ 不限制店家
   // - 沒選餐點種類（selectedFoodTypes 是空）→ 不限制餐點種類
   readonly filteredStores = computed(() => {
+    const keyword = this.storeSearch().trim().toLowerCase();
     let out = this.stores();
     const selectedNames = this.selectedStoreNames();
     const selectedTypes = this.selectedFoodTypes();
@@ -278,6 +297,11 @@ export class StoreListComponent {
     const status = this.selectedStatus();
     const operatingIds = new Set(this.operatingStores().map(s => s.id));
 
+    if (keyword) {
+      out = out.filter(s =>
+        this.getStoreName(s).toLowerCase().includes(keyword)
+      );
+    }
     // 基礎篩選 (店家名稱/餐點種類)
     if (selectedNames.length) {
       out = out.filter(s => selectedNames.includes(this.getStoreName(s)));

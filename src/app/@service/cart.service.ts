@@ -62,6 +62,12 @@ export class CartService {
     return this.https.getApi(url);
   }
 
+  // 取得用戶歷史訂單
+  getHistoryOrders(userId: string) {
+    return this.https.getApi(`http://localhost:8080/gogobuy/orders/history?user_id=${encodeURIComponent(userId)}`);
+  }
+
+
 
   // 刪除訂單（後端用 POST 做刪除，不是 RESTful 的 DELETE）
   // body 不需要資料，所以傳 null

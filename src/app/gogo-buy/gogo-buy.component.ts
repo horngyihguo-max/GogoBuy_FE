@@ -368,9 +368,9 @@ export class GogoBuyComponent implements OnInit {
   //輪播圖片
   banners: Banner[] = [
     {
-      image: '許願池2.jpg',
-      title: '許願池',
-      link: 'user/wishes'
+      image: 'popular2x.png',
+      title: '熱門團購',
+      link: 'gogobuy/popular'
     },
     {
       //位置
@@ -400,6 +400,12 @@ export class GogoBuyComponent implements OnInit {
       image: '許願池2.jpg',
       title: '許願池',
       link: 'user/wishes'
+    }
+    ,
+    {
+      image: 'popular2x.png',
+      title: '熱門團購',
+      link: 'gogobuy/popular'
     }
     ,
     {
