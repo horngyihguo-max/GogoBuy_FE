@@ -183,7 +183,6 @@
   </p-tabs>
 </div>
 
-<!--  -->
 <ng-template #orderList let-orders let-openValues="openValues">
   <p-accordion [value]="openValues" [multiple]="true">
     @for (o of orders; track o.code) {
@@ -193,10 +192,10 @@
           <div class="flex flex-row gap-6 items-center">
 
             <!-- 訂單編號 + 店家名稱 -->
-            <div class="title font-bold">#{{ o.code }}｜{{ o.storeName }}</div>
+            <div class="title font-bold">{{ o.code }}｜{{ o.storeName }}</div>
 
             <!-- 建立時間 -->
-            <div class="sub text-base text-slate-700">{{ o.createdAt | date:'yyyy/MM/dd HH:mm' }}</div>
+            <!-- <div class="sub text-base text-slate-700">訂單成團時間： {{ o.createdAt | date:'yyyy/MM/dd HH:mm' }}</div> -->
 
             <!-- 狀態標籤：顏色由 getStatusSeverity() 控制 -->
             <p-tag class="break-keep! mr-2" [value]="o.statusLabel" [severity]="getStatusSeverity(o.statusLabel)" />
@@ -209,9 +208,9 @@
         <div class="order-body space-y-4">
 
           <!-- 訂單狀態細節 (付款/取餐) -->
-          <div class="flex flex-col gap-2 border-b pb-2 text-sm text-slate-700">
+          <div class="flex flex-col gap-2 border-b pb-2 text-base text-slate-700">
             <div class="flex flex-row place-content-between">
-              <div>付款狀態：<span
+              <div>付款狀態：<span class="font-bold"
                   [ngClass]="o.statusLabel === '已完成' || o.statusLabel === '待取餐' ? 'text-green-600' : 'text-orange-500'">{{
                   (o.statusLabel === '已完成' || o.statusLabel === '待取餐') ? '已付款' : '尚未付款' }}</span></div>
               <div>取餐時間：{{ o.pickupTime ? (o.pickupTime | date:'yyyy/MM/dd HH:mm') : '尚未確認' }}</div>
@@ -245,10 +244,10 @@
           </div>
 
           <!-- 重購按鈕 (選配) -->
-          <div class="flex justify-end mt-2">
-            <button pButton type="button" label="再買一次" icon="pi pi-refresh"
-              class="p-button-outlined p-button-sm p-button-secondary"></button>
-          </div>
+          <!-- <div class="flex justify-end mt-2">
+            <button pButton type="button" severity="success" label="再買一次" icon="pi pi-refresh"
+              class="text-slate-700 font-medium"></button>
+          </div> -->
         </div>
       </p-accordion-content>
     </p-accordion-panel>
