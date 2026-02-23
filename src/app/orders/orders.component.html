@@ -208,6 +208,16 @@
       <p-accordion-content>
         <div class="order-body space-y-4">
 
+          <!-- 訂單狀態細節 (付款/取餐) -->
+          <div class="flex flex-col gap-2 border-b pb-2 text-sm text-slate-700">
+            <div class="flex flex-row place-content-between">
+              <div>付款狀態：<span
+                  [ngClass]="o.statusLabel === '已完成' || o.statusLabel === '待取餐' ? 'text-green-600' : 'text-orange-500'">{{
+                  (o.statusLabel === '已完成' || o.statusLabel === '待取餐') ? '已付款' : '尚未付款' }}</span></div>
+              <div>取餐時間：{{ o.pickupTime ? (o.pickupTime | date:'yyyy/MM/dd HH:mm') : '尚未確認' }}</div>
+            </div>
+          </div>
+
           <!-- 收件資訊 -->
           <div class="flex flex-row gap-2 place-content-between border-b pb-2 text-nowrap">
             <div class="font-bold text-base">收件人：{{ o.receiverName }}</div>
@@ -232,6 +242,12 @@
           <!-- 金額總計 -->
           <div class="total text-right font-bold text-lg border-t pt-2">
             總計：{{ o.total }} 元
+          </div>
+
+          <!-- 重購按鈕 (選配) -->
+          <div class="flex justify-end mt-2">
+            <button pButton type="button" label="再買一次" icon="pi pi-refresh"
+              class="p-button-outlined p-button-sm p-button-secondary"></button>
           </div>
         </div>
       </p-accordion-content>

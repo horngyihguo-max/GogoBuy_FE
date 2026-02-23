@@ -34,7 +34,7 @@
       @if (groupedOrders.length) {
       @for (g of groupedOrders; track g.key) {
       <div class="mt-6 bg-white rounded-xl shadow-sm p-4">
-        <button type="button" class="w-full flex items-center gap-3" (click)="toggleGroup(g.key)">
+        <button type="button" class="w-full flex items-center gap-3 cursor-pointer" (click)="toggleGroup(g.key)">
           <div class="w-10 h-10 rounded-full bg-sky-500 text-white flex items-center justify-center font-bold">
             @if (avatarMap[g.key]) {
             <img [src]="avatarMap[g.key]"
@@ -72,7 +72,7 @@
 
             <div class="flex flex-col items-end gap-3">
               <button type="button"
-                class="w-9 h-9 rounded-full bg-slate-300 text-white flex items-center justify-center hover:bg-slate-400"
+                class="w-9 h-9 rounded-full bg-slate-300 text-white cursor-pointer flex items-center justify-center hover:bg-slate-400"
                 (click)="removeorder(order.id)">
                 <i class="pi pi-trash"></i>
               </button>
@@ -85,14 +85,14 @@
       }
 
       <div class="mt-6 text-center">
-        <button type="button" class="px-6 py-3 rounded-lg bg-[#769902] text-white font-bold hover:bg-[#5f7a02]"
+        <button type="button" class="px-6 py-3 rounded-lg bg-[#769902] cursor-pointer text-white font-bold hover:bg-[#5f7a02]"
           (click)="router.navigate(['groupbuy-event/group-follow', eventsId])">
           加購更多商品
         </button>
       </div>
       @if (mode == 'host') {
       <div class="mt-6 flex flex-col items-center gap-3 text-slate-600">
-        <button type="button" class="flex items-center gap-2 hover:underline" (click)="reloadOrders()">
+        <button type="button" class="flex cursor-pointer items-center gap-2 hover:underline" (click)="reloadOrders()">
           <i class="pi pi-refresh"></i> 重新取得團員訂單
         </button>
       </div>
