@@ -10,6 +10,7 @@ import { ConfirmPopupModule } from 'primeng/confirmpopup';
 import { ToastModule } from 'primeng/toast';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { DialogModule } from 'primeng/dialog';
+import { AuthService } from '../../@service/auth.service';
 
 @Component({
   selector: 'app-my-stores',
@@ -27,6 +28,7 @@ import { DialogModule } from 'primeng/dialog';
 })
 export class MyStoresComponent {
 
+  user: any | null = null;
   userId = '';
   privateStores: any[] = [];
   favoriteStoreIds: number[] = [];
@@ -49,35 +51,42 @@ export class MyStoresComponent {
     private http: HttpService,
     private confirmationService: ConfirmationService,
     private messageService: MessageService,
+    private auth: AuthService,
   ) { }
 
   ngOnInit(): void {
     this.userId = String(localStorage.getItem('user_id') || '');
 
-    this.http.getApi(`http://localhost:8080/gogobuy/getFavoriteStore?id=${this.userId}`).subscribe((res: any) => {
-      this.favoriteStoreIds = res.favoriteStores;
-      this.favoriteStores = [];
+    this.user = localStorage.getItem('user_info');
+    // 刷新用戶資料
+    this.auth.refreshUser();
+    this.auth.user$.subscribe((user) => {
+      if (user) {
+        this.favoriteStoreIds = user.favoriteStore || [];
+      }
+    });
 
-      this.favoriteStoreIds.forEach((id: number) => {
-        this.http.getApi(`http://localhost:8080/gogobuy/store/searchId?id=${id}`).subscribe((store: any) => {
-          if (store.storeList && store.storeList.length > 0) {
-            const storeInfo = store.storeList[0];
+    this.favoriteStores = [];
 
-            const fullStoreData = {
-              ...storeInfo,
-              operatingHoursVoList: store.operatingHoursVoList,
-              menuCategoriesVoList: store.menuCategoriesVoList,
-              productOptionGroupsVoList: store.productOptionGroupsVoList
-            };
+    this.favoriteStoreIds.forEach((id: number) => {
+      this.http.getApi(`http://localhost:8080/gogobuy/store/searchId?id=${id}`).subscribe((store: any) => {
+        if (store.storeList && store.storeList.length > 0) {
+          const storeInfo = store.storeList[0];
 
-            this.favoriteStores.push(fullStoreData);
-            this.favoriteFastStores = this.favoriteStores.filter(s => s.category === 'fast');
-            this.favoriteSlowStores = this.favoriteStores.filter(s => s.category === 'slow');
-          }
+          const fullStoreData = {
+            ...storeInfo,
+            operatingHoursVoList: store.operatingHoursVoList,
+            menuCategoriesVoList: store.menuCategoriesVoList,
+            productOptionGroupsVoList: store.productOptionGroupsVoList
+          };
 
-        });
+          this.favoriteStores.push(fullStoreData);
+          this.favoriteFastStores = this.favoriteStores.filter(s => s.category === 'fast');
+          this.favoriteSlowStores = this.favoriteStores.filter(s => s.category === 'slow');
+        }
+
       });
-    })
+    });
 
   }
 
