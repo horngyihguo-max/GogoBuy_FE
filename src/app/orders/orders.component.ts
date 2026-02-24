@@ -329,5 +329,94 @@ export class OrdersComponent {
     return (this.cartData() ?? []).filter(x => x.isHost);
   }
 
+  // ==================== 管理中心邏輯 ====================
+  manageMembersMap = signal<Record<number, any[]>>({});
 
+  loadManageData(eventsId: number) {
+    this.cart.getPersonalOrdersByEventId(eventsId).subscribe({
+      next: (res: any) => {
+        if (res.code === 200) {
+          const list = res.personalOrder || [];
+          this.manageMembersMap.update(map => ({
+            ...map,
+            [eventsId]: list
+          }));
+        }
+      },
+      error: (err: any) => console.error(err)
+    });
+  }
+
+  togglePaymentStatus(member: any, eventsId: number) {
+    const isPaid = member.paymentStatus === 'CONFIRMED' || member.paymentStatus === 'PAID';
+    const nextStatus = isPaid ? 'UNPAID' : 'CONFIRMED';
+
+    const payload = {
+      eventsId: eventsId,
+      userId: member.userId,
+      paymentStatus: nextStatus,
+      totalSum: member.totalSum,
+      totalWeight: member.totalWeight,
+      personFee: member.personFee
+    };
+
+    this.cart.updatePersonalOrder(payload).subscribe({
+      next: (res: any) => {
+        if (res.code === 200) {
+          member.paymentStatus = nextStatus;
+          Swal.fire({
+            toast: true,
+            position: 'top',
+            icon: 'success',
+            title: '付款狀態已更新',
+            showConfirmButton: false,
+            timer: 1500
+          });
+          // 同步更新歷史訂單 (如果有的話)
+          this.fetchHistoryOrders(member.userId);
+        }
+      },
+      error: (err: any) => {
+        console.error(err);
+        Swal.fire('更新失敗', '', 'error');
+      }
+    });
+  }
+
+  togglePickupStatus(member: any, eventsId: number) {
+    const isPickedUp = member.pickupStatus === 'PICKED_UP';
+    const nextStatus = isPickedUp ? 'NOT_PICKED_UP' : 'PICKED_UP';
+
+    const payload = {
+      eventsId: eventsId,
+      userId: member.userId,
+      pickupStatus: nextStatus, // 會同步更新到 orders 表
+      paymentStatus: member.paymentStatus,
+      totalSum: member.totalSum,
+      totalWeight: member.totalWeight,
+      personFee: member.personFee
+    };
+
+    this.cart.updatePersonalOrder(payload).subscribe({
+      next: (res: any) => {
+        if (res.code === 200) {
+          member.pickupStatus = nextStatus;
+          Swal.fire({
+            toast: true,
+            position: 'top',
+            icon: 'success',
+            title: '取餐狀態已更新',
+            showConfirmButton: false,
+            timer: 1500
+          });
+          // 同步更新資訊
+          this.fetchHistoryOrders(member.userId);
+        }
+      },
+      error: (err: any) => {
+        console.error(err);
+        Swal.fire('更新失敗', '', 'error');
+      }
+    });
+  }
 }
