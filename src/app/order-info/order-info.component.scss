@@ -64,3 +64,13 @@
   :host ::ng-deep .ggb-progress:not(.is-host) .p-steps-item:before {
     display: none !important;
   }
+
+  /* 手機版 RWD 優化：隱藏文字標籤避免碰撞 */
+  @media (max-width: 640px) {
+    :host ::ng-deep .ggb-progress .p-steps-item-label {
+      display: none !important;
+    }
+    :host ::ng-deep .ggb-progress {
+      --dot: 28px;
+    }
+  }

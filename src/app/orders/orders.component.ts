@@ -73,12 +73,14 @@ export interface OrderHistoryDTO {
   eventStatus: string;
   statusLabel: string;
   totalAmount: number;
+  personFee: number;
   receiverName: string;
   phone: string;
   items: OrderMenuVo[];
   paymentStatus: string;
   pickupStatus: string;
   pickupTime: string | null;
+  eventPickupTime: string | null;
   pickLocation: string | null;
 }
 
@@ -94,6 +96,7 @@ export interface OrderMenuVo {
   specName: string;
   menuName: string;
   personalMemo: string;
+  subtotal: number;
   selectedOptionList: any[];
 }
 
@@ -114,9 +117,14 @@ type Order = {
   storeName: string;
   createdAt: Date;
   statusLabel: string;
+  personFee: number;
   total: number;
   receiverName: string;
   phone: string;
+  paymentStatus: string;
+  pickupStatus: string;
+  pickupTime: Date | null;
+  eventPickupTime: Date | null;
   items: OrderItem[];
 };
 
@@ -191,14 +199,19 @@ export class OrdersComponent {
               code: item.orderCode,
               storeName: item.storeName || '未知店家',
               createdAt: new Date(item.createdAt),
-              statusLabel: item.pickupStatus == 'PICKED_UP' ? '已完成' : (item.eventStatus === 'COMPLETED' ? '待取餐' : '進行中'),
-              total: item.totalAmount,
+              statusLabel: item.statusLabel,
+              personFee: item.personFee,
+              total: item.totalAmount + item.personFee,
               receiverName: item.receiverName,
               phone: item.phone,
+              paymentStatus: item.paymentStatus,
+              pickupStatus: item.pickupStatus,
+              pickupTime: item.pickupTime ? new Date(item.pickupTime) : null,
+              eventPickupTime: item.eventPickupTime ? new Date(item.eventPickupTime) : null,
               items: item.items.map(i => ({
                 name: i.menuName,
                 qty: i.quantity,
-                price: i.quantity, // Price calculation can be refined if needed
+                price: i.quantity > 0 ? (i.subtotal / i.quantity) : 0,
                 note: i.personalMemo
               }))
             };

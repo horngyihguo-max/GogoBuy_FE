@@ -50,6 +50,7 @@ type OrderVM = {
   parsedOptions?: any;
   userId?: string;
   eventId: number;
+  personalMemo?: string;
 };
 
 type OrderGroupVM = {
@@ -108,7 +109,6 @@ export class OrderInfoComponent implements OnInit {
   ngOnInit() {
     this.host = [
       { label: 'Personal' },
-      { label: 'Payment' },
       { label: 'Confirmation' }
     ];
     this.member = [
@@ -229,13 +229,76 @@ export class OrderInfoComponent implements OnInit {
 
   // 前往下一個Step
   nextStep() {
-    const max = (this.host?.length ?? 1) - 1;
-    this.activeIndex = Math.min(this.activeIndex + 1, max);
+    const max = (this.mode == 'host' ? this.host?.length : this.member?.length) ?? 1;
+    this.activeIndex = Math.min(this.activeIndex + 1, max - 1);
   }
 
   // 返回前一個Step
   prevStep() {
     this.activeIndex = Math.max(this.activeIndex - 1, 0);
+  }
+
+  // 統一處理主按鈕點擊
+  onPrimaryAction() {
+    if (this.activeIndex === 0 && this.mode === 'host') {
+      this.nextStep();
+    } else {
+      this.submitOrder();
+    }
+  }
+
+  // 統一處理返回/次要按鈕點擊
+  onSecondaryAction() {
+    if (this.activeIndex === 0) {
+      this.backtorder();
+    } else {
+      this.prevStep();
+    }
+  }
+
+  exportToCSV() {
+    // 準備 CSV 的表頭
+    const headers = ['群組/訂購人', '商品名稱', '選項/備註', '單價', '數量', '小計'];
+    const rows = [];
+
+    // 放入表頭
+    rows.push(headers.join(','));
+
+    // 扁平化資料並放入 rows
+    const grouped = this.groupedOrders;
+    for (const group of grouped) {
+      for (const order of group.orders) {
+        // 避免 CSV 欄位中含有逗號造成錯位，內容值用雙引號包起來
+        const person = `"${group.nickname}"`;
+        const item = `"${order.menuName}"`;
+        const optionsAndMemo = `"${this.formatSelectedOptionList(order.parsedOptions)} ${order.personalMemo || ''}"`.trim();
+        const price = order.quantity ? order.subtotal / order.quantity : 0;
+        const qty = order.quantity;
+        const sub = order.subtotal;
+
+        rows.push([person, item, optionsAndMemo, price, qty, sub].join(','));
+      }
+      // 加入這個人的總計行
+      rows.push([`"${group.nickname} 總計"`, '', '', '', `"${group.totalQty}"`, `"${group.totalAmount}"`].join(','));
+    }
+    rows.push(['', '', '', '', '', '']);
+    rows.push([`"整筆總計"`, '', '', '', '', `"${this.totalAmount}"`].join(','));
+
+    // 組合 CSV 字串
+    const csvContent = rows.join('\n');
+
+    // 加上 BOM (避免中文亂碼)
+    const BOM = '\uFEFF';
+    const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+
+    // 建立 <a> 元素下載檔案
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `${this.eventName || '訂單'}_明細.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   }
 
 
@@ -460,32 +523,46 @@ export class OrderInfoComponent implements OnInit {
 
   submitOrder() {
     Swal.fire({
-      title: "確定送出訂單?",
-      text: "送出訂單後無法取消!",
+      title: "確定確認訂單?",
+      text: "確認後狀態將轉為已確認!",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#3085d6",
       cancelButtonColor: "#d33",
-      confirmButtonText: "是的，送出!",
+      confirmButtonText: "是的，確認!",
       cancelButtonText: "取消"
     }).then((result) => {
       if (result.isConfirmed) {
-        Swal.fire({
-          title: "送出!",
-          text: "訂單已送出",
-          icon: "success",
-          showCancelButton: true,
-          confirmButtonColor: "#3085d6",
-          cancelButtonColor: "rgb(24, 173, 54)",
-          confirmButtonText: "返回首頁",
-          cancelButtonText: "返回訂單"
-        }).then((result) => {
-          if (result.isConfirmed) {
-            this.router.navigate(['/gogobuy/home'])
-          } else if (result.dismiss == Swal.DismissReason.cancel) {
-            this.router.navigate(['/user/orders'])
+
+        // 呼叫 API 確定訂單
+        const submitUserId = this.userId || this.auth.user?.id || '';
+        this.cart.confirmPersonalOrder(submitUserId, this.eventsId).subscribe({
+          next: (res: any) => {
+            if (res.code == 200) {
+              Swal.fire({
+                title: "送出!",
+                text: "訂單已確認",
+                icon: "success",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "rgb(24, 173, 54)",
+                confirmButtonText: "返回首頁",
+                cancelButtonText: "返回歷史訂單"
+              }).then((result) => {
+                if (result.isConfirmed) {
+                  this.router.navigate(['/gogobuy/home'])
+                } else {
+                  this.router.navigate(['/user/orders'], { queryParams: { tab: 'history' } })
+                }
+              });
+            } else {
+              Swal.fire("錯誤", res.message || "確認失敗", "error");
+            }
+          },
+          error: (err: any) => {
+            Swal.fire("系統異常", "無法送出確認請求", "error");
           }
-        })
+        });
 
       }
     });
