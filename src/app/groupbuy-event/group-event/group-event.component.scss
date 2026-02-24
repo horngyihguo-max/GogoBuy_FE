@@ -101,8 +101,6 @@
   display: flex !important;
   align-items: stretch !important;
   /* 強制左右兩箱高度永遠齊平 */
-  height: 550px !important;
-  /* 固定整個元件的高度 */
 }
 /* 2. 針對左右兩個區域的包裹層 */
 :host ::ng-deep .responsive-picklist .p-picklist-list-wrapper {
@@ -116,15 +114,14 @@
   /* 捨棄 height: 100%，改用 flex-grow 強制填滿 wrapper 的剩餘空間 */
   flex-grow: 1 !important;
   flex-shrink: 0 !important;
-  /* 這裡設定一個具體的高度數值 */
-  height: 350px !important;
-  min-height: 350px !important;
-  max-height: 350px !important;
-  overflow-y: auto !important;
+  /* 必須設為 100% 才能讓內部的 li:last-child 偵測到「剩餘空間」 */
+  height: 100% !important;
+  overflow-y: hidden !important; /* 既然要自動填滿，通常不需要滾動軸 */
   box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
 }
 :host ::ng-deep .p-listbox-list-container {
-  height: 100% !important;
   /* 確保內部列表也填滿父容器 */
   box-sizing: border-box !important;
 }
@@ -133,21 +130,35 @@
 :host ::ng-deep .p-picklist-item {
   box-sizing: border-box !important;
 }
-/* 3. 調整初始墊片的高度 */
-.dynamic-padding.can-hover {
-  /* 當沒東西時，讓墊片幾乎佔滿 25rem */
-  /* 扣除一些 header 的高度，設為 23.5-24rem 左右 */
-  height: 24rem !important;
-  border-color: #3b82f6;
+:host ::ng-deep .responsive-picklist .p-picklist-list li:has(.dynamic-padding) {
+  flex-grow: 1 !important;
+  display: flex !important;
+  align-items: stretch !important;
+}
+:host ::ng-deep .responsive-picklist .p-picklist-list li:last-child {
+  /* 移除原本可能限制高度的屬性 */
+  flex: 1 1 auto !important;
+  display: flex !important;
+  min-height: 0 !important; /* 重要：防止內容溢出觸發滾動軸 */
+}
+/* 目標區初始墊片 */
+.dynamic-targetPadding.can-hover{
   color: #3b82f6;
 }
-/* 4. 墊片基礎縮放動畫 */
-.dynamic-padding {
-  transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  /* 確保寬度不會因為 padding 跑掉 */
-  width: calc(100% - 10px);
-  margin: 5px;
-  flex-shrink: 0;
+/* 墊片縮放 */
+.dynamic-targetPadding {
+  width: 100%;
+  transition: height 0.3s ease; /* 增加縮放平滑感 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* 來源墊片專屬：自動填滿並置中 */
+.dynamic-sourcePadding {
+  width: 100%;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 .product-item {
   position: relative;
@@ -160,6 +171,14 @@
   flex-shrink: 0;
 }
 @media (max-width: 523px) {
+  :host ::ng-deep .p-listbox-list-container {
+    height: 310px !important; /* 改用 height 固定整體，而非 max-height */
+  }
+  /* 只有在目標區「只有一個墊片」時才給高度，否則讓 flex-grow 處理 */
+  .dynamic-targetPadding.can-hover {
+    height: 100% !important;
+    min-height: 280px;
+  }
   .product-item {
     flex-direction: column !important;
     /* 強制轉向 */
@@ -170,11 +189,27 @@
     /* 增加間距觀察是否有變化 */
   }
 }
-@media (min-width: 524px) {
+@media (min-width: 524px) and (max-width: 1023px) {
+  :host ::ng-deep .p-listbox-list-container {
+    height: 410px !important;
+  }
+  .dynamic-targetPadding.can-hover {
+    height: 100% !important;
+    min-height: 380px;
+  }
   .product-item {
     flex-direction: row !important;
     align-items: center !important;
     height: fit-content !important;
+  }
+}
+@media (min-width:1024px){
+  :host ::ng-deep .p-listbox-list-container {
+    height: 510px !important;
+  }
+  .dynamic-targetPadding.can-hover {
+    height: 100% !important;
+    min-height: 480px;
   }
 }
 .remove-badge {
