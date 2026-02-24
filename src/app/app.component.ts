@@ -206,7 +206,7 @@ export class AppComponent {
   // 用戶頭向下拉選單
   items: MenuItem[] = [
     { label: '用戶首頁', icon: 'pi pi-user', routerLink: '/user/profile' },
-    { label: '我的店家', icon: 'pi pi-shop', routerLink: '/user/my_store' },
+    { label: '最愛店家', icon: 'pi pi-heart', routerLink: '/user/my_store' },
     { label: '許願池', icon: 'pi pi-sparkles', routerLink: '/user/wishes' },
     { label: '登入', icon: 'pi pi-sign-in', routerLink: '/gogobuy/login' },
     { label: '登出', icon: 'pi pi-sign-out', command: () => { this.logout(); } }
