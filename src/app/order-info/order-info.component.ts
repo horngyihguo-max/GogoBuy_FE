@@ -128,6 +128,8 @@ export class OrderInfoComponent implements OnInit {
   private loadEventInfo() {
     this.cart.getEventsByEventsId(this.eventsId).subscribe({
       next: (res: any) => {
+        console.log('event res =', res);
+
         const event = res.groupbuyEvents?.[0];
         if (!event) return;
 
@@ -211,9 +213,14 @@ export class OrderInfoComponent implements OnInit {
     return this.activeIndex / (n - 1); // 0~1
   }
 
+  clear() {
+    localStorage.removeItem('latestOrderTime');
+  }
+
   // 返回購物車
   backtorder() {
-    this.router.navigate(['/user/orders'])
+    this.router.navigate(['/user/orders']);
+    this.clear();
   }
   // 返回繼續購物
   gotoshop() {
