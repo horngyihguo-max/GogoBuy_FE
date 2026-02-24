@@ -3,8 +3,8 @@
     <a class="absolute left-1/2 -translate-x-1/2 text-3xl font-bold">
       購物車({{ mode == 'host' ? '開團者版本' : '跟團者版本' }})
     </a>
-    <p class="ml-auto font-normal text-lg">
-      更新時間：{{ formatDateTime(transfer.latestOrderTime()) }}
+    <p class="ml-auto font-normal text-lg bg-slate-100 text-slate-600 px-2 py-1 whitespace-nowrap rounded-lg">
+      Last Updated: {{ formatDateTime(transfer.latestOrderTime()) }}
     </p>
   </div>
 </section>
@@ -85,7 +85,8 @@
       }
 
       <div class="mt-6 text-center">
-        <button type="button" class="px-6 py-3 rounded-lg bg-[#769902] cursor-pointer text-white font-bold hover:bg-[#5f7a02]"
+        <button type="button"
+          class="px-6 py-3 rounded-lg bg-[#769902] cursor-pointer text-white font-bold hover:bg-[#5f7a02]"
           (click)="router.navigate(['groupbuy-event/group-follow', eventsId])">
           加購更多商品
         </button>
