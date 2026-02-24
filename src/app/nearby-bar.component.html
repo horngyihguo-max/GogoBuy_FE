@@ -1,9 +1,11 @@
+<p-toast></p-toast>
 <div class="flex items-center gap-2">
   <button pButton type="button" icon="pi pi-map-marker" class="p-button-text" (click)="openDialog()">
     附近
   </button>
 </div>
 
+<!-- 使用目前GPS位置進行附近搜尋 -->
 <p-dialog header="設定附近店家" [(visible)]="dialogVisible" [modal]="true" [draggable]="false" [resizable]="false"
   styleClass="w-[380px] h-[450px]">
   <div class="space-y-3">
@@ -15,12 +17,13 @@
       </button>
     </div>
 
-    <!-- 半徑 5~20 -->
+    <!-- 附近搜尋半徑限制為 5km ~ 20km -->
     <p class="font-size-500 font-bold">選擇範圍</p>
     <div class="flex items-center gap-2">
       <p-select [options]="radiusOptions" optionLabel="label" optionValue="value" [ngModel]="radius()"
         (ngModelChange)="onRadiusChange($event)" styleClass="!w-full">
       </p-select>
+      <!-- 清除附近篩選（會回到全區搜尋） -->
       <button pButton type="button" icon="pi pi-times" class="p-button-text p-button-sm" (click)="clearNearby()"
         pTooltip="清除附近篩選">
       </button>
