@@ -91,10 +91,14 @@ export class StoreInfoComponent implements OnInit {
     // this.userId = this.auth.user?.id || '12b7bf42-57af-4e3f-acfc-b9a2ba3342aa';
     this.userId = String(localStorage.getItem('user_id'));
     this.user = localStorage.getItem('user_info');
-
-    console.log(this.userId);
     // 刷新用戶資料
     this.auth.refreshUser();
+    this.updateLocalFavoriteList();
+    this.auth.user$.subscribe((user) => {
+      if (user) {
+        this.favoriteIds = user.favoriteStore || [];
+      }
+    });
 
     // 取路由 id
     const idStr = this.route.snapshot.paramMap.get('id');
@@ -111,34 +115,56 @@ export class StoreInfoComponent implements OnInit {
     this.isEventOpen(this.storeId);
   }
 
-  // 收藏的店家
-  isFavorite(storeId: number) {
-    const userDate = JSON.parse(this.user);
-    // console.log(userDate);
-    const favorite = userDate.favorite; // 這邊要確認
-    // console.log('喜愛的店家: ' + favorite);
-    if (!favorite || favorite === null || favorite === undefined) return false;
+  // 放收藏店家陣列
+  favoriteIds: number[] = [];
 
-    // 如果是陣列
-    if (Array.isArray(favorite)) {
-      return favorite.includes(storeId);
-    } else {
-      console.log('收藏店家的格式不是陣列');
-      return false;
-    }
+  // 更新同步收藏店家陣列
+  private updateLocalFavoriteList() {
+    const user = JSON.parse(this.user || '{}');
+    this.favoriteIds = user.favoriteStore || [];
   }
 
-  // TODO 收藏店家
+  // 收藏的店家
+  isFavorite(storeId: number) {
+    return this.favoriteIds.includes(storeId);
+  }
+
+  // 收藏店家
   toggleFavorite(storeId: number) {
-    // this.http
-    //   .postApi(`http://localhost:8080/gogobuy/updateFavoriteStore`, storeId)
-    //   .subscribe((res: any) => {
-    //     if (res?.code === 200) {
-    //       this.toastSuccess('成功', '收藏店家成功');
-    //     } else {
-    //       this.toastWarn('失敗', res?.message || '收藏店家失敗');
-    //     }
-    //   });
+    // --- 樂觀更新 (Optimistic UI) ---
+    // 不等 API 回傳，先直接在畫面上改掉顏色
+    if (this.isFavorite(storeId)) {
+      this.favoriteIds = this.favoriteIds.filter((id) => id !== storeId);
+    } else {
+      this.favoriteIds = [...this.favoriteIds, storeId];
+    }
+    const urlWithParams = `http://localhost:8080/gogobuy/updateFavoriteStore?id=${this.userId}&storesList=${storeId}`;
+    this.http.postApi(urlWithParams, {}).subscribe({
+      next: (res: any) => {
+        if (res?.code === 200) {
+          this.toastSuccess('成功', '收藏狀態已更新');
+          this.auth.refreshUser(); // 後端同步
+        } else {
+          // 如果後端失敗，再把畫面改回來（回滾）
+          this.updateLocalFavoriteList();
+          this.toastWarn('失敗', '同步失敗');
+        }
+      },
+      error: () => {
+        this.updateLocalFavoriteList(); // 網路失敗也回滾
+      },
+    });
+  }
+
+  // 點擊收藏店家
+  handleFavoriteClick(id: number) {
+    console.log('用戶ID: ' + this.userId);
+    if (!this.userId || this.userId === 'null') {
+      this.toastWarn('提醒', '請先登入才能收藏店家');
+      return;
+    } else {
+      this.toggleFavorite(id);
+    }
   }
 
   // =========================

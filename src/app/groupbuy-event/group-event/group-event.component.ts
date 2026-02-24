@@ -20,28 +20,20 @@ import { TabsModule } from 'primeng/tabs';
 
 @Component({
   template: `
-    <div
-      class="
-        card
-      "
-    >
+    <div class="card">
       <p-tabs value="0" scrollable>
         <p-tablist>
           @for (tab of scrollableTabs; track tab.value) {
-              <p-tab [value]="tab.value">
-                  {{ tab.title }}
-              </p-tab>
+            <p-tab [value]="tab.value">
+                {{ tab.title }}
+            </p-tab>
           }
         </p-tablist>
         <p-tabpanels>
           @for (tab of scrollableTabs; track tab.value) {
-              <p-tabpanel [value]="tab.value">
-                  <p
-                    class="
-                      m-0
-                    "
-                  >{{ tab.content }}</p>
-              </p-tabpanel>
+            <p-tabpanel [value]="tab.value">
+                <p class="m-0">{{ tab.content }}</p>
+            </p-tabpanel>
           }
         </p-tabpanels>
       </p-tabs>
@@ -83,6 +75,8 @@ export class GroupEventComponent {
   pickTime!: Date;
   pickLocation!: string;
 
+  scrolllabelTabs: any = [];
+  isExist: boolean = true;
   userId!: string;
   storeId!: number;
   wishId?: number;
@@ -207,86 +201,85 @@ export class GroupEventComponent {
 
     this.storeId = Number(this.route.snapshot.paramMap.get('id'));
     this.http.getApi('http://localhost:8080/gogobuy/store/searchId?id=' + this.storeId).subscribe((res: any) => {
-      // 1. 先判斷 res 是否存在且 storeList 有資料
-      if (!res || !res.storeList || res.storeList.length === 0) {
-        console.error('找不到店家資料或 API 異常');
-        return;
-      }
-      this.storeList = res.storeList[0];
-      if (this.storeList) {
-        this.type = this.storeList.type;
-      }
-      this.menuVoList = res.menuVoList.filter((item: any) => item.available) || [];
-      this.menuCategoriesVoList = res.menuCategoriesVoList || [];
-      if (this.menuCategoriesVoList?.length > 0) {
-        const categoryMap = new Map(
-          this.menuCategoriesVoList.map(cat => [cat.id, cat])
-        );
-        for (const cate of this.menuVoList) {
-          const matchedCategory = categoryMap.get(cate.categoryId);
-          const perPrice: PriceLevel[] = [];
-          const base = Number(cate.basePrice) || 0;
-          if (matchedCategory?.priceLevel && matchedCategory.priceLevel.length > 0) {
-            matchedCategory.priceLevel.forEach(level => {
-              perPrice.push({
-                name: level.name,
-                price: (level.price || 0) + base
+      if (res.code == 200) {
+        this.isExist = true;
+        this.storeList = res.storeList[0];
+        if (this.storeList) {
+          this.type = this.storeList.type;
+        }
+        this.menuVoList = res.menuVoList.filter((item: any) => item.available) || [];
+        this.menuCategoriesVoList = res.menuCategoriesVoList || [];
+        if (this.menuCategoriesVoList?.length > 0) {
+          const categoryMap = new Map(
+            this.menuCategoriesVoList.map(cat => [cat.id, cat])
+          );
+          for (const cate of this.menuVoList) {
+            const matchedCategory = categoryMap.get(cate.categoryId);
+            const perPrice: PriceLevel[] = [];
+            const base = Number(cate.basePrice) || 0;
+            if (matchedCategory?.priceLevel && matchedCategory.priceLevel.length > 0) {
+              matchedCategory.priceLevel.forEach(level => {
+                perPrice.push({
+                  name: level.name,
+                  price: (level.price || 0) + base
+                });
               });
-            });
-          } else {
-            perPrice.push({
-              name: '單價',
-              price: base
-            });
-          }
-          cate.basePrice = perPrice;
-        }
-        this.activeTab = this.menuCategoriesVoList[0]?.id;
-      }
-      this.productOptionGroupsVoList = res.productOptionGroupsVoList;
-      this.feeDescriptionVoList = res.FeeDescription;
-
-      this.operatingHoursVoList = res.operatingHoursVoList.sort((a: any, b: any) => a.openTime.localeCompare(b.openTime));  // 排序 (字串比較)
-      const todayList = this.operatingHoursVoList
-        .filter(each => each.week == today)
-        .sort((a, b) => a.openTime.localeCompare(b.openTime));  // 排序 (字串比較)
-      // --------有return放最後面--------
-      if (todayList.length > 0) {
-        for (let i = 0; i < todayList.length; i++) {
-          const open = (+todayList[i].openTime.split(":")[0]) * 100 + (+todayList[i].openTime.split(":")[1]);
-          const close = (+todayList[i].closeTime.split(":")[0]) * 100 + (+todayList[i].closeTime.split(":")[1]);
-          // --- 營業中 ---
-          if (time >= open && time <= close) {
-            this.isOpen = true;
-            this.operateString = "營業至 " + todayList[i].closeTime.slice(0, 5);
-
-            if ((i + 1) < todayList.length) {
-              this.nextOperating = "下次開始營業時間為 " + todayList[i + 1].openTime.slice(0, 5);
             } else {
-              this.nextOperating = this.getFutureOpenTime(today); // 抓明天的 function
+              perPrice.push({
+                name: '單價',
+                price: base
+              });
             }
-            return; // 找到狀態，跳出
+            cate.basePrice = perPrice;
           }
-          // --- 休息中：但今天稍後還有開門 ---
-          // 因為 todayList 排過序，第一個滿足 time < open 的就是最近的開門時間。
-          if (time < open) {
-            this.isOpen = false;
-            this.operateString = "休息中";
-            this.nextOperating = "下次開始營業時間為 " + todayList[i].openTime.slice(0, 5);
-            return; // 找到最近的開門時間，跳出
-          }
+          this.activeTab = this.menuCategoriesVoList[0]?.id;
         }
-        // --- 休息中：今天所有的時段都已經結束了 ---
-        this.isOpen = false;
-        this.operateString = "休息中";
-        this.nextOperating = this.getFutureOpenTime(today);
-      } else {
-        // 今日整天公休
-        this.isOpen = false;
-        this.operateString = "休息中";
-        this.nextOperating = this.getFutureOpenTime(today);
-      }
+        this.productOptionGroupsVoList = res.productOptionGroupsVoList;
+        this.feeDescriptionVoList = res.FeeDescription;
 
+        this.operatingHoursVoList = res.operatingHoursVoList.sort((a: any, b: any) => a.openTime.localeCompare(b.openTime));  // 排序 (字串比較)
+        const todayList = this.operatingHoursVoList
+          .filter(each => each.week == today)
+          .sort((a, b) => a.openTime.localeCompare(b.openTime));  // 排序 (字串比較)
+        // --------有return放最後面--------
+        if (todayList.length > 0) {
+          for (let i = 0; i < todayList.length; i++) {
+            const open = (+todayList[i].openTime.split(":")[0]) * 100 + (+todayList[i].openTime.split(":")[1]);
+            const close = (+todayList[i].closeTime.split(":")[0]) * 100 + (+todayList[i].closeTime.split(":")[1]);
+            // --- 營業中 ---
+            if (time >= open && time <= close) {
+              this.isOpen = true;
+              this.operateString = "營業至 " + todayList[i].closeTime.slice(0, 5);
+
+              if ((i + 1) < todayList.length) {
+                this.nextOperating = "下次開始營業時間為 " + todayList[i + 1].openTime.slice(0, 5);
+              } else {
+                this.nextOperating = this.getFutureOpenTime(today); // 抓明天的 function
+              }
+              return; // 找到狀態，跳出
+            }
+            // --- 休息中：但今天稍後還有開門 ---
+            // 因為 todayList 排過序，第一個滿足 time < open 的就是最近的開門時間。
+            if (time < open) {
+              this.isOpen = false;
+              this.operateString = "休息中";
+              this.nextOperating = "下次開始營業時間為 " + todayList[i].openTime.slice(0, 5);
+              return; // 找到最近的開門時間，跳出
+            }
+          }
+          // --- 休息中：今天所有的時段都已經結束了 ---
+          this.isOpen = false;
+          this.operateString = "休息中";
+          this.nextOperating = this.getFutureOpenTime(today);
+        } else {
+          // 今日整天公休
+          this.isOpen = false;
+          this.operateString = "休息中";
+          this.nextOperating = this.getFutureOpenTime(today);
+        }
+      } else {
+        this.isExist = false;
+      }
     });
   }
 
@@ -361,9 +354,30 @@ export class GroupEventComponent {
       this.fixPaddingPosition();
     }
   }
+  calculatePaddingHeight(): string {
+    // 減掉 1 是因為 selectedItems 裡面包含墊片
+    const itemCount = this.selectedItems.length - 1;
+    const totalHeight = 480; // 內部容器高度
+    const itemHeight = 95;  // product-item 估計高度
+    const remainingHeight = totalHeight - (itemCount * itemHeight);
+    // 確保墊片最少有 50px，最高不超過 480px
+    const finalHeight = Math.max(remainingHeight, 50);
+    return `${finalHeight}px`;
+  }
+  calculateSourcePaddingHeight(): string {
+    // 減掉 1 是因為 selectedItems 裡面包含墊片
+    const itemCount = this.displaySource.length - 1;
+    const totalHeight = 480; // 內部容器高度
+    const itemHeight = 95;  // product-item 估計高度
+    const remainingHeight = totalHeight - (itemCount * itemHeight);
+    // 確保墊片最少有 50px，最高不超過 480px
+    const finalHeight = Math.max(remainingHeight, 50);
+    return `${finalHeight}px`;
+  }
   // 給 PickList 顯示用的實體陣列
+  sourcePaddingItem = { id: 'SOURCE_PADDING', isPadding: true };
   paddingItem = { id: 'BOTTOM_PADDING', isPadding: true };
-  displaySource: any[] = [this.paddingItem];  // 目標清單
+  displaySource: any[] = [];  // 來源清單
   selectedItems: any[] = [this.paddingItem];  // 目標清單
   // 監控 Tab 切換 (在 p-tabs 綁定了 (valueChange) 或透過 activeTab 的 setter)
   private _activeTab: any;
@@ -377,12 +391,16 @@ export class GroupEventComponent {
       item.categoryId == this._activeTab &&
       !this.selectedItems.some(s => s.id === item.id)
     );
+    if (this.displaySource.length === 0) {
+      this.displaySource = [this.sourcePaddingItem];
+    } else {
+      this.displaySource.push(this.sourcePaddingItem);
+    }
   }
   onMoveToTarget(event: any) {  // 選中
     this.fixPaddingPosition();
   }
   onMoveToSource(event: any) {  // 取消選中 (從 Target 搬回 Source)
-    console.log(event.items);
     const movedItems = event.items;
     movedItems.forEach((item: any) => {
       this.recommend = this.recommend.filter(id => id !== item.id);
@@ -406,14 +424,16 @@ export class GroupEventComponent {
   fixPaddingPosition() {
     // 給 PrimeNG 內建邏輯 50ms 的緩衝，確保它跑完
     setTimeout(() => {
-      // 抓出目前兩個清單中「真正」的產品 (排除墊片)
-      const allProductsInSource = this.displaySource.filter(item => !item.isPadding);
-      const allProductsInTarget = this.selectedItems.filter(item => !item.isPadding);
-      // 校正來源區(不能有墊片)
-      this.displaySource = [...allProductsInSource];
-      // 校正目標區：[真正的產品] + [墊片永遠在最後]
-      // 使用新物件解構，確保觸發 Angular 的渲染更新
-      this.selectedItems = [...allProductsInTarget, { ...this.paddingItem }];
+      // 處理 Target
+      this.selectedItems = [
+        ...this.selectedItems.filter(i => i.id !== 'BOTTOM_PADDING' && i.id !== 'SOURCE_PADDING'),
+        this.paddingItem
+      ];
+      // 處理 Source
+      this.displaySource = [
+        ...this.displaySource.filter(i => i.id !== 'SOURCE_PADDING' && i.id !== 'BOTTOM_PADDING'),
+        this.sourcePaddingItem
+      ];
       this.updateDisplaySource();
     }, 10);
   }
