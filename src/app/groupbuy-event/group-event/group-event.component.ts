@@ -2,7 +2,7 @@ import { FeeDescriptionVoList, MenuCategoriesVoList, MenuVoList, OperatingHoursV
 import { Component } from '@angular/core';
 import { HttpService } from '../../@service/http.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { Dialog } from "primeng/dialog";
 import { PickListModule } from 'primeng/picklist';
 import { DragDropModule } from '@angular/cdk/drag-drop';
@@ -53,7 +53,8 @@ export class GroupEventComponent {
     private http: HttpService,
     private router: Router,
     private route: ActivatedRoute,
-    private primeng: PrimeNG
+    private primeng: PrimeNG,
+    private location: Location
   ) { };
 
   storeList: Stores | null = null;
@@ -174,6 +175,23 @@ export class GroupEventComponent {
   //     }
   //   });
   // }
+  usualAlert(title: string) {  //一般警告
+    Swal.fire({
+      icon: 'warning',
+      title: title,
+      text: '即將返回上一頁',
+      width: 600,
+      showConfirmButton: false,
+      timer: 2000,
+      timerProgressBar: true,
+    }).then((result) => {
+      if (window.history.length > 1) {
+        this.location.back();
+      } else {
+        this.router.navigate(['/gogobuy/home']);
+      }
+    });
+  }
 
 
   ngOnInit(): void {
@@ -184,6 +202,11 @@ export class GroupEventComponent {
     this.route.queryParams.subscribe(params => {
       if (params['event_id']) {
         this.eventId = Number(params['event_id']);
+      }
+    });
+    this.route.queryParams.subscribe(params => {
+      if (params['store_id']) {
+        this.storeId = Number(params['store_id']);
       }
     });
     this.isPreview = false;
@@ -205,92 +228,147 @@ export class GroupEventComponent {
     const today = this.dateFormat(now);
     const time = now.getHours() * 100 + now.getMinutes();
 
-    this.route.queryParams.subscribe(params => {
-      if (params['store_id']) {
-        this.storeId = Number(params['store_id']);
-      }
-    });
-    this.http.getApi('http://localhost:8080/gogobuy/store/searchId?id=' + this.storeId).subscribe((res: any) => {
-      if (res.code == 200) {
-        this.isExist = true;
-        this.storeList = res.storeList[0];
-        if (this.storeList) {
-          this.type = this.storeList.type;
-        }
-        this.menuVoList = res.menuVoList.filter((item: any) => item.available) || [];
-        this.menuCategoriesVoList = res.menuCategoriesVoList || [];
-        if (this.menuCategoriesVoList?.length > 0) {
-          const categoryMap = new Map(
-            this.menuCategoriesVoList.map(cat => [cat.id, cat])
-          );
-          for (const cate of this.menuVoList) {
-            const matchedCategory = categoryMap.get(cate.categoryId);
-            const perPrice: PriceLevel[] = [];
-            const base = Number(cate.basePrice) || 0;
-            if (matchedCategory?.priceLevel && matchedCategory.priceLevel.length > 0) {
-              matchedCategory.priceLevel.forEach(level => {
-                perPrice.push({
-                  name: level.name,
-                  price: (level.price || 0) + base
+    //行為判斷：有 storeId 沒 eventId 是開團頁面；有 eventId 沒 storeId 是跟團頁面
+    if (this.storeId && !this.eventId) {
+      this.http.getApi('http://localhost:8080/gogobuy/store/searchId?id=' + this.storeId).subscribe((res: any) => {
+        if (res.code == 200) {
+          this.isExist = true;
+          this.storeList = res.storeList[0];
+          if (this.storeList) {
+            this.type = this.storeList.type;
+          }
+          this.menuVoList = res.menuVoList.filter((item: any) => item.available) || [];
+          this.menuCategoriesVoList = res.menuCategoriesVoList || [];
+          if (this.menuCategoriesVoList?.length > 0) {
+            const categoryMap = new Map(
+              this.menuCategoriesVoList.map(cat => [cat.id, cat])
+            );
+            for (const cate of this.menuVoList) {
+              const matchedCategory = categoryMap.get(cate.categoryId);
+              const perPrice: PriceLevel[] = [];
+              const base = Number(cate.basePrice) || 0;
+              if (matchedCategory?.priceLevel && matchedCategory.priceLevel.length > 0) {
+                matchedCategory.priceLevel.forEach(level => {
+                  perPrice.push({
+                    name: level.name,
+                    price: (level.price || 0) + base
+                  });
                 });
-              });
-            } else {
-              perPrice.push({
-                name: '單價',
-                price: base
-              });
-            }
-            cate.basePrice = perPrice;
-          }
-          this.activeTab = this.menuCategoriesVoList[0]?.id;
-        }
-        this.productOptionGroupsVoList = res.productOptionGroupsVoList;
-        this.feeDescriptionVoList = res.FeeDescription;
-
-        this.operatingHoursVoList = res.operatingHoursVoList.sort((a: any, b: any) => a.openTime.localeCompare(b.openTime));  // 排序 (字串比較)
-        const todayList = this.operatingHoursVoList
-          .filter(each => each.week == today)
-          .sort((a, b) => a.openTime.localeCompare(b.openTime));  // 排序 (字串比較)
-        // --------有return放最後面--------
-        if (todayList.length > 0) {
-          for (let i = 0; i < todayList.length; i++) {
-            const open = (+todayList[i].openTime.split(":")[0]) * 100 + (+todayList[i].openTime.split(":")[1]);
-            const close = (+todayList[i].closeTime.split(":")[0]) * 100 + (+todayList[i].closeTime.split(":")[1]);
-            // --- 營業中 ---
-            if (time >= open && time <= close) {
-              this.isOpen = true;
-              this.operateString = "營業至 " + todayList[i].closeTime.slice(0, 5);
-
-              if ((i + 1) < todayList.length) {
-                this.nextOperating = "下次開始營業時間為 " + todayList[i + 1].openTime.slice(0, 5);
               } else {
-                this.nextOperating = this.getFutureOpenTime(today); // 抓明天的 function
+                perPrice.push({
+                  name: '單價',
+                  price: base
+                });
               }
-              return; // 找到狀態，跳出
+              cate.basePrice = perPrice;
             }
-            // --- 休息中：但今天稍後還有開門 ---
-            // 因為 todayList 排過序，第一個滿足 time < open 的就是最近的開門時間。
-            if (time < open) {
-              this.isOpen = false;
-              this.operateString = "休息中";
-              this.nextOperating = "下次開始營業時間為 " + todayList[i].openTime.slice(0, 5);
-              return; // 找到最近的開門時間，跳出
-            }
+            this.activeTab = this.menuCategoriesVoList[0]?.id;
           }
-          // --- 休息中：今天所有的時段都已經結束了 ---
-          this.isOpen = false;
-          this.operateString = "休息中";
-          this.nextOperating = this.getFutureOpenTime(today);
+          this.productOptionGroupsVoList = res.productOptionGroupsVoList;
+          this.feeDescriptionVoList = res.FeeDescription;
+
+          this.operatingHoursVoList = res.operatingHoursVoList.sort((a: any, b: any) => a.openTime.localeCompare(b.openTime));  // 排序 (字串比較)
+          const todayList = this.operatingHoursVoList
+            .filter(each => each.week == today)
+            .sort((a, b) => a.openTime.localeCompare(b.openTime));  // 排序 (字串比較)
+          // --------有return放最後面--------
+          if (todayList.length > 0) {
+            for (let i = 0; i < todayList.length; i++) {
+              const open = (+todayList[i].openTime.split(":")[0]) * 100 + (+todayList[i].openTime.split(":")[1]);
+              const close = (+todayList[i].closeTime.split(":")[0]) * 100 + (+todayList[i].closeTime.split(":")[1]);
+              // --- 營業中 ---
+              if (time >= open && time <= close) {
+                this.isOpen = true;
+                this.operateString = "營業至 " + todayList[i].closeTime.slice(0, 5);
+
+                if ((i + 1) < todayList.length) {
+                  this.nextOperating = "下次開始營業時間為 " + todayList[i + 1].openTime.slice(0, 5);
+                } else {
+                  this.nextOperating = this.getFutureOpenTime(today); // 抓明天的 function
+                }
+                return; // 找到狀態，跳出
+              }
+              // --- 休息中：但今天稍後還有開門 ---
+              // 因為 todayList 排過序，第一個滿足 time < open 的就是最近的開門時間。
+              if (time < open) {
+                this.isOpen = false;
+                this.operateString = "休息中";
+                this.nextOperating = "下次開始營業時間為 " + todayList[i].openTime.slice(0, 5);
+                return; // 找到最近的開門時間，跳出
+              }
+            }
+            // --- 休息中：今天所有的時段都已經結束了 ---
+            this.isOpen = false;
+            this.operateString = "休息中";
+            this.nextOperating = this.getFutureOpenTime(today);
+          } else {
+            // 今日整天公休
+            this.isOpen = false;
+            this.operateString = "休息中";
+            this.nextOperating = this.getFutureOpenTime(today);
+          }
         } else {
-          // 今日整天公休
-          this.isOpen = false;
-          this.operateString = "休息中";
-          this.nextOperating = this.getFutureOpenTime(today);
+          this.isExist = false;
         }
-      } else {
-        this.isExist = false;
-      }
-    });
+      });
+    } else if (this.eventId && !this.storeId) {
+      this.http.getApi('http://localhost:8080/gogobuy/event/getEventsByEventsId?id=' + this.eventId).subscribe((res: any) => {
+        if (res.code = 200) {
+          if (this.userId == res.groupbuyEvents[0].hostId) {
+            this.eventName = res.groupbuyEvents[0].eventName;
+            this.endTime = res.groupbuyEvents[0].endTime;
+            this.splitType = res.groupbuyEvents[0].splitType;
+            this.announcement = res.groupbuyEvents[0].announcement;
+            this.type = res.groupbuyEvents[0].eventType;
+            this.tempMenu = res.groupbuyEvents[0].tempMenuList;
+            this.recommend = res.groupbuyEvents[0].recommendList;
+            this.recommendDescription = res.groupbuyEvents[0].recommendDescription;
+            this.limitation = res.groupbuyEvents[0].limitation;
+            this.pickTime = res.groupbuyEvents[0].pickupTime;
+            this.pickLocation = res.groupbuyEvents[0].pickLocation;
+          } else {
+            Swal.fire({
+              icon: 'warning',
+              title: '您沒有權限修改此活動資訊',
+              text: '即將返回上一頁',
+              width: 600,
+              timer: 2000,
+              showConfirmButton: false,
+              timerProgressBar: true,
+              didOpen: () => {
+                const c = document.querySelector('.swal2-container') as HTMLElement | null;
+                if (c) c.style.zIndex = '20000';
+              }
+            }).then((result) => {
+              if (window.history.length > 1) {
+                this.location.back();
+              } else {
+                this.router.navigate(['/gogobuy/home']);
+              }
+            });
+          }
+        } else {
+          this.usualAlert(res.message);
+        }
+      });
+    } else {
+      Swal.fire({
+        icon: 'warning',
+        title: '無效網址',
+        text: '即將跳轉至首頁',
+        width: 600,
+        timer: 2000,
+        showConfirmButton: false,
+        timerProgressBar: true,
+        didOpen: () => {
+          const c = document.querySelector('.swal2-container') as HTMLElement | null;
+          if (c) c.style.zIndex = '20000';
+        }
+      }).then((result) => {
+        this.router.navigate(['/gogobuy/home']);
+      });
+    }
+
   }
 
 
