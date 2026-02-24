@@ -498,7 +498,11 @@ export class StoreInfoComponent implements OnInit {
         return;
       }
     }
-    this.router.navigate(['/groupbuy-event/group-event', this.storeId]);
+    this.router.navigate(['/groupbuy-event/group-event'], {
+      queryParams: {
+        storeId: this.storeId,
+      },
+    });
   }
 
   // =========================
