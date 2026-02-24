@@ -195,7 +195,7 @@
             <div class="title font-bold">{{ o.code }}｜{{ o.storeName }}</div>
 
             <!-- 建立時間 -->
-            <!-- <div class="sub text-base text-slate-700">訂單成團時間： {{ o.createdAt | date:'yyyy/MM/dd HH:mm' }}</div> -->
+            <div class="sub text-base text-slate-700">建立時間： {{ o.createdAt | date:'yyyy/MM/dd HH:mm' }}</div>
 
             <!-- 狀態標籤：顏色由 getStatusSeverity() 控制 -->
             <p-tag class="break-keep! mr-2" [value]="o.statusLabel" [severity]="getStatusSeverity(o.statusLabel)" />
@@ -211,10 +211,13 @@
           <div class="flex flex-col gap-2 border-b pb-2 text-base text-slate-700">
             <div class="flex flex-row place-content-between">
               <div>付款狀態：<span class="font-bold"
-                  [ngClass]="o.statusLabel === '已完成' || o.statusLabel === '待取餐' ? 'text-green-600' : 'text-orange-500'">{{
-                  (o.statusLabel === '已完成' || o.statusLabel === '待取餐') ? '已付款' : '尚未付款' }}</span></div>
-              <div>取餐時間：{{ o.pickupTime ? (o.pickupTime | date:'yyyy/MM/dd HH:mm') : '尚未確認' }}</div>
+                  [ngClass]="o.paymentStatus === 'CONFIRMED' || o.paymentStatus === 'PAID' ? 'text-green-600' : 'text-orange-500'">{{
+                  o.paymentStatus === 'CONFIRMED' || o.paymentStatus === 'PAID' ? '已付款' : '尚未付款' }}</span></div>
+              <div>預計取餐：{{ o.eventPickupTime ? (o.eventPickupTime | date:'yyyy/MM/dd HH:mm') : '尚未確認' }}</div>
             </div>
+            @if (o.pickupTime) {
+            <div class="text-xs text-slate-500">實際取餐時間：{{ o.pickupTime | date:'yyyy/MM/dd HH:mm' }}</div>
+            }
           </div>
 
           <!-- 收件資訊 -->
@@ -239,8 +242,11 @@
           </div>
 
           <!-- 金額總計 -->
-          <div class="total text-right font-bold text-lg border-t pt-2">
-            總計：{{ o.total }} 元
+          <div class="total text-right font-bold border-t pt-2 space-y-1">
+            @if (o.personFee > 0) {
+            <div class="text-sm text-slate-500">運費分攤：{{ o.personFee }} 元</div>
+            }
+            <div class="text-lg text-emerald-600">總計：{{ o.total }} 元</div>
           </div>
 
           <!-- 重購按鈕 (選配) -->

@@ -42,7 +42,7 @@
       <div
         class="font-bold w-[150px] h-[50px] text-[16px] ml-[5px] md:w-[170px] md:h-[45px] md:ml-[1vw] md:text-[15px]">
         <p-floatlabel variant="on">
-          <p-select inputId="event_type" [options]="eventTypeOptions()" optionLabel="label" optionValue="value"
+          <p-select class="font-bold!" inputId="event_type" [options]="eventTypeOptions()" optionLabel="label" optionValue="value"
             [ngModel]="selectedType()" (ngModelChange)="selectedType.set($event ?? 'ALL')" [filter]="true"
             [showClear]="false" placeholder="全部" styleClass="w-full"></p-select>
         </p-floatlabel>
@@ -135,7 +135,7 @@
         </h2>
 
         <div class="w-[150px]">
-          <p-select [options]="statusOptions" [(ngModel)]="statusFilter" optionLabel="label" optionValue="value"
+          <p-select class="font-bold!" [options]="statusOptions" [(ngModel)]="statusFilter" optionLabel="label" optionValue="value"
             styleClass="w-full h-[40px] rounded-xl text-sm" (ngModelChange)="statusFilter.set($event)">
           </p-select>
         </div>

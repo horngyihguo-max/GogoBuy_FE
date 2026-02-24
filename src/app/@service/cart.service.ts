@@ -67,9 +67,11 @@ export class CartService {
     return this.https.getApi(`http://localhost:8080/gogobuy/orders/history?user_id=${encodeURIComponent(userId)}`);
   }
 
-
-
-  // 刪除訂單（後端用 POST 做刪除，不是 RESTful 的 DELETE）
+  // 確認訂單 (將狀態轉為 CONFIRMED)
+  confirmPersonalOrder(userId: string, eventsId: number) {
+    const url = `http://localhost:8080/gogobuy/event/confirmPersonalOrder?user_id=${encodeURIComponent(userId)}&events_id=${eventsId}`;
+    return this.https.postApi<BasicRes>(url, null);
+  }  // 刪除訂單（後端用 POST 做刪除，不是 RESTful 的 DELETE）
   // body 不需要資料，所以傳 null
   deleteOrderByUserIdAndEventsId(userId: string, eventsId: number) {
     const url =
