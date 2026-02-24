@@ -11,17 +11,9 @@
     <!-- ========= 店家 篩選 ========= -->
     <div class="flex items-center gap-2 shrink-0">
       <span class="font-bold whitespace-nowrap">店家</span>
-      <!--
-          p-multiselect是多選下拉選單(PRIMENG套件)
-          options 來源：storeOptions()（由所有 stores() 產生）
-          使用者勾選後，會把「選到的品牌名稱陣列」放進 selectedStoreNames
-          filter=true：下拉面板裡會有搜尋框（可搜尋選項）
-          display="chip"：選到的項目會顯示成標籤
-      -->
-      <p-multiselect class="w-48" [options]="storeOptions()" optionLabel="label" optionValue="value"
-        [ngModel]="selectedStoreNames()" (ngModelChange)="selectedStoreNames.set($event ?? [])" [filter]="true"
-        display="chip">
-      </p-multiselect>
+      <p-autoComplete [ngModel]="storeSearch()" (ngModelChange)="storeSearch.set($event)"
+        [suggestions]="filteredStoreSuggestions" (completeMethod)="searchStore($event)" placeholder="搜尋店家">
+      </p-autoComplete>
     </div>
 
     <!-- ========= 餐點種類（type）篩選 ========= -->

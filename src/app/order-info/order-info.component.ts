@@ -14,6 +14,7 @@ import { tap, switchMap, map } from 'rxjs/operators';
 import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
 import { catchError } from 'rxjs/operators';
+import { OrderTransferService } from '../@service/orderTransfer.service';
 
 
 
@@ -66,7 +67,6 @@ type OrderGroupVM = {
     StepsModule,
     ToastModule,
     FormsModule,
-    JsonPipe,
     CommonModule
   ],
   providers: [MessageService],
@@ -101,6 +101,7 @@ export class OrderInfoComponent implements OnInit {
     public auth: AuthService,
     public router: Router,
     private route: ActivatedRoute,
+    public transfer: OrderTransferService,
   ) { }
 
 
@@ -116,21 +117,34 @@ export class OrderInfoComponent implements OnInit {
     // 載入cart傳入開團訂單詳情
     this.route.queryParamMap.subscribe(params => {
       this.mode = (params.get('mode') == 'host') ? 'host' : 'member';
-      this.userId = params.get('user_id') || '';
       this.eventsId = Number(params.get('events_id') || 0);
-      this.eventName = params.get('eventName') || '';
-      this.storeName = params.get('storeName') || '';
-      this.pickLocation = params.get('pickLocation') || '';
-      this.pickupTime = params.get('pickupTime') || '';
-      this.latestOrderTime = params.get('latestOrderTime') || '';
-      this.totalAmount = params.get('totalAmount') || '';
-      this.storeLogo = params.get('storeLogo') || '';
-      this.hostLogo = params.get('hostLogo') || '';
       this.loadOrders();
+      if (this.eventsId) {
+        this.loadEventInfo();
+      }
     });
   }
 
+  private loadEventInfo() {
+    this.cart.getEventsByEventsId(this.eventsId).subscribe({
+      next: (res: any) => {
+        console.log('event res =', res);
 
+        const event = res.groupbuyEvents?.[0];
+        if (!event) return;
+
+        // 取得欄位
+        this.latestOrderTime = event.latestOrderTime ?? '';
+        this.eventName = event.eventName ?? '';
+        this.storeName = event.storeName ?? '';
+        this.pickupTime = event.pickupTime ?? '';
+        this.pickLocation = event.pickLocation ?? '';
+      },
+      error: (err: any) => {
+        console.error('getEventsByEventsId 失敗', err);
+      }
+    });
+  }
   private flattenOrdersDto(dto: any): any[] {
     const base = {
       id: dto.id ?? dto.orderId,
@@ -199,9 +213,14 @@ export class OrderInfoComponent implements OnInit {
     return this.activeIndex / (n - 1); // 0~1
   }
 
+  clear() {
+    localStorage.removeItem('latestOrderTime');
+  }
+
   // 返回購物車
   backtorder() {
-    this.router.navigate(['/user/orders'])
+    this.router.navigate(['/user/orders']);
+    this.clear();
   }
   // 返回繼續購物
   gotoshop() {
@@ -459,12 +478,12 @@ export class OrderInfoComponent implements OnInit {
           confirmButtonColor: "#3085d6",
           cancelButtonColor: "rgb(24, 173, 54)",
           confirmButtonText: "返回首頁",
-          cancelButtonText: "返回購物車"
+          cancelButtonText: "返回訂單"
         }).then((result) => {
           if (result.isConfirmed) {
             this.router.navigate(['/gogobuy/home'])
           } else if (result.dismiss == Swal.DismissReason.cancel) {
-            this.router.navigate(['/user/cart'])
+            this.router.navigate(['/user/orders'])
           }
         })
 

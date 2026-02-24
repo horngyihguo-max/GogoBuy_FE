@@ -29,6 +29,8 @@ import Swal from 'sweetalert2';
 import { ImageService } from '../../@service/image.service';
 import { FileUploadModule } from 'primeng/fileupload';
 import { ToastModule } from 'primeng/toast';
+import { OverlayPanelModule } from 'primeng/overlaypanel';
+import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
   selector: 'app-store',
@@ -42,7 +44,7 @@ import { ToastModule } from 'primeng/toast';
     InputGroupModule, InputGroupAddonModule, FloatLabelModule,
     InputNumberModule, SelectModule, InputTextModule,
     IconFieldModule, InputIconModule, CheckboxModule,
-    FileUploadModule, ToastModule
+    FileUploadModule, ToastModule, OverlayPanelModule
   ],
   templateUrl: './store.component.html',
   styleUrl: './store.component.scss'
@@ -55,6 +57,7 @@ export class StoreComponent {
     private route: ActivatedRoute,
     private storeService: StoreService,
     private imageService: ImageService,
+    private cdr: ChangeDetectorRef
   ) { }
 
   id!: number;
@@ -355,6 +358,7 @@ export class StoreComponent {
   // 商品分類 ---------------------------------------------------------
   addCategories() {
     this.isEditMode = false;
+    this.submitted = false;
     this.currentCategories = this.getNewCategories();
     this.displayCategoriesDialog = true;
   }
@@ -469,6 +473,7 @@ export class StoreComponent {
   // 規格 ---------------------------------------------------------
   addSpecs() {
     this.isEditMode = false;
+    this.submitted = false;
     this.editingSpecIndex = -1;
     this.currentGroup = this.getNewGroups();
     this.selectedSpecsCategories = [];
@@ -559,6 +564,12 @@ export class StoreComponent {
       return;
     }
 
+    if (this.currentGroup.maxSelection) {
+      if (this.currentGroup.maxSelection > this.currentGroup.items.length) {
+        return;
+      }
+    }
+
     this.currentGroup.applicableCategoryIds = this.selectedSpecsCategories.map(cate => cate.id);
 
     if (this.isEditMode && this.editingSpecIndex > -1) {
@@ -637,10 +648,14 @@ export class StoreComponent {
   // 新增商品 ---------------------------------------------------------
   openNewProduct() {
     this.isEditMode = false;
-
+    this.submitted = false;
     this.currentProduct = this.getNewProduct();
     this.displayProductDialog = true;
-
+    setTimeout(() => {
+      const id = this.currentProduct.categoryId;
+      this.currentProduct.categoryId = null;
+      this.currentProduct.categoryId = id;
+    });
   }
 
   // 商品圖片
@@ -747,9 +762,9 @@ export class StoreComponent {
   // 新增商品時 選擇category 帶入 optionGroup ---------------------------------
   onCategoryChange() {
     const selectedId = this.currentProduct.categoryId;
-    this.filteredSpecsForProduct = [];
 
-    if (!selectedId) {
+    if (selectedId == null) {
+      this.filteredSpecsForProduct = [];
       this.currentProduct.unusual = {};
       return;
     }
@@ -759,15 +774,21 @@ export class StoreComponent {
     );
 
     if (!this.isEditMode) {
-      if (!this.isEditMode) {
-        // 將所有符合的 spec 組合進同一個物件中，而不是變成陣列
-        const updatedUnusual: { [key: string]: string } = {};
-        this.filteredSpecsForProduct.forEach(spec => {
-          updatedUnusual[spec.id.toString()] = spec.name;
-        });
+      const updatedUnusual: { [key: string]: string } = {};
+      this.filteredSpecsForProduct.forEach(spec => {
+        updatedUnusual[spec.id.toString()] = spec.name;
+      });
+      this.currentProduct.unusual = updatedUnusual;
+    } else {
+      const currentUnusual = { ...this.currentProduct.unusual };
+      const validIds = this.filteredSpecsForProduct.map(s => s.id.toString());
 
-        this.currentProduct.unusual = updatedUnusual;
-      }
+      Object.keys(currentUnusual).forEach(key => {
+        if (!validIds.includes(key)) {
+          delete currentUnusual[key];
+        }
+      });
+      this.currentProduct.unusual = currentUnusual;
     }
   }
 
@@ -888,6 +909,7 @@ export class StoreComponent {
   }
 
   saveProduct() {
+    console.log(this.currentProduct.categoryId);
     this.submitted = true;
     const isNameValid = !!this.currentProduct.name?.trim();
     const isCategoryValid = !!this.currentProduct.categoryId;
@@ -1004,85 +1026,88 @@ export class StoreComponent {
   // 存資料庫 ---------------------------------------------------------
   async onSaveAll() {
     this.displayPublishConfirm = false;
-    const transformUnusual = (unusual: any) => {
-      if (!unusual || Object.keys(unusual).length === 0) {
-        return [];
-      }
-      if (Array.isArray(unusual) && unusual.length > 1) {
-        return unusual;
-      }
-      const targetObj = Array.isArray(unusual) ? unusual[0] : unusual;
+    this.loading = true;
+    this.cdr.detectChanges();
+    setTimeout(() => {
+      const transformUnusual = (unusual: any) => {
+        if (!unusual || Object.keys(unusual).length === 0) {
+          return [];
+        }
+        if (Array.isArray(unusual) && unusual.length > 1) {
+          return unusual;
+        }
+        const targetObj = Array.isArray(unusual) ? unusual[0] : unusual;
 
-      return Object.entries(targetObj).map(([key, value]) => ({
-        [key]: value
-      }));
-    }
-    if (this.storeData.id == 0) {
-      this.loading = true;
-      const payload = {
-        storesname: this.storeData.name,
-        phone: this.storeData.phone,
-        address: this.storeData.address,
-        category: this.storeData.category,
-        type: this.storeData.type,
-        memo: this.storeData.memo,
-        image: this.storeData.image,
-        publish: this.storeData.publish,
-        createdBy: this.userId,
-        operatingHoursVoList: this.normalizeOperatingHours(),
-        fee_description: this.storeData.feeDescription,
-        menuCategoriesVoList: this.storeData.menuCategoriesVoList.map(category => ({
-          name: category.name,
-          priceLevel: category.priceLevel,
-          menuVo: this.storeData.menuVoList.filter(item => item.categoryId === category.id)
-            .map(product => ({
-              ...product,
-              unusual: transformUnusual(product.unusual)
-            }))
-        })),
-        productOptionGroupsVoList: this.storeData.productOptionGroupsVoList
+        return Object.entries(targetObj).map(([key, value]) => ({
+          [key]: value
+        }));
       }
-      console.log("payload(create):", payload);
-      this.http.postApi('http://localhost:8080/gogobuy/store/create', payload)
-        .subscribe({
-          next: (res: any) => {
-            console.log("create store:", res);
-            if (res.code === 200) {
 
-              this.http.getApi('http://localhost:8080/gogobuy/store/all').subscribe((all: any) => {
-                const myStores = all.storeList.filter((s: any) => s.createdBy === this.userId);
-                if (myStores && myStores.length > 0) {
-                  const latestStore = myStores.reduce((prev: any, current: any) => (prev.id > current.id) ? prev : current);
-                  this.id = latestStore.id;
-                  this.afterSaveSuccess();
-                } else {
-                  this.router.navigate(['gogobuy/home']);
-                }
-              });
-            } else {
+      if (this.storeData.id == 0) {
+        this.loading = true;
+        const payload = {
+          storesname: this.storeData.name,
+          phone: this.storeData.phone,
+          address: this.storeData.address,
+          category: this.storeData.category,
+          type: this.storeData.type,
+          memo: this.storeData.memo,
+          image: this.storeData.image,
+          publish: this.storeData.publish,
+          createdBy: this.userId,
+          operatingHoursVoList: this.normalizeOperatingHours(),
+          fee_description: this.storeData.feeDescription,
+          menuCategoriesVoList: this.storeData.menuCategoriesVoList.map(category => ({
+            name: category.name,
+            priceLevel: category.priceLevel,
+            menuVo: this.storeData.menuVoList.filter(item => item.categoryId === category.id)
+              .map(product => ({
+                ...product,
+                unusual: transformUnusual(product.unusual)
+              }))
+          })),
+          productOptionGroupsVoList: this.storeData.productOptionGroupsVoList
+        }
+        console.log("payload(create):", payload);
+        this.http.postApi('http://localhost:8080/gogobuy/store/create', payload)
+          .subscribe({
+            next: (res: any) => {
+              console.log("create store:", res);
+              if (res.code === 200) {
+
+                this.http.getApi('http://localhost:8080/gogobuy/store/all').subscribe((all: any) => {
+                  const myStores = all.storeList.filter((s: any) => s.createdBy === this.userId);
+                  if (myStores && myStores.length > 0) {
+                    const latestStore = myStores.reduce((prev: any, current: any) => (prev.id > current.id) ? prev : current);
+                    this.id = latestStore.id;
+                    this.afterSaveSuccess();
+                  } else {
+                    this.router.navigate(['gogobuy/home']);
+                  }
+                });
+              } else {
+                this.loading = false;
+                this.resMessage = res.message;
+                this.displaySaveFailedDialog = true;
+              }
+            },
+            error: () => {
               this.loading = false;
-              this.resMessage = res.message;
-              this.displaySaveFailedDialog = true;
+            },
+            complete: () => {
+              this.loading = false;
             }
-          },
-          error: () => {
-            this.loading = false;
-          },
-          complete: () => {
-            this.loading = false;
-          }
-        });
-    } else {
-      if (this.activeEventsByStoreId && this.activeEventsByStoreId.length > 0) {
-        this.displaySureUpdateDialog = true;
-        console.log('有activeEventsByStoreId');
-
+          });
       } else {
-        this.updateStore();
-        console.log("一般更新");
+        if (this.activeEventsByStoreId && this.activeEventsByStoreId.length > 0) {
+          this.displaySureUpdateDialog = true;
+        } else {
+          this.updateStore();
+          console.log("一般更新");
 
+        }
       }
-    }
+    });
   }
 
   private afterSaveSuccess() {
@@ -1116,7 +1141,7 @@ export class StoreComponent {
     this.updateStore();
   }
 
-  updateStore(){
+  updateStore() {
     this.loading = true;
     const payload = {
       ...this.storeData, storesname: this.storeData.name,
@@ -1164,7 +1189,6 @@ export class StoreComponent {
           this.loading = false;
         }
       });
-    this.loading = false;
   }
 
   // 假資料 ---------------------------------------------------------

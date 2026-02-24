@@ -24,6 +24,7 @@ import { GroupEventComponent } from './groupbuy-event/group-event/group-event.co
 import { FollowGroupComponent } from './groupbuy-event/follow-group/follow-group.component';
 import { MyStoresComponent } from './account/my-stores/my-stores.component';
 import { VerifyEmailComponent } from './verify-email/verify-email.component';
+import { PopularComponent } from './popular/popular.component';
 
 export const routes: Routes = [
   // 1. 公開頁面與首頁
@@ -35,6 +36,7 @@ export const routes: Routes = [
       { path: 'home', component: GogoBuyComponent, data: { breadcrumb: '首頁' } },
       { path: 'login', component: LoginComponent, title: '登入', data: { breadcrumb: '登入' } },
       { path: 'list', component: StoreListComponent, title: '找附近', data: { breadcrumb: '找附近' } },
+      { path: 'popular', component: PopularComponent, title: '熱門團購', data: { breadcrumb: '熱門團購' } },
     ]
   },
 

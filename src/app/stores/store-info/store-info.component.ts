@@ -9,6 +9,8 @@ import { PaginatorModule } from 'primeng/paginator';
 import { DialogModule } from 'primeng/dialog';
 import { TooltipModule } from 'primeng/tooltip';
 import Swal from 'sweetalert2';
+import { MessageService } from 'primeng/api';
+import { Toast } from 'primeng/toast';
 
 type TabMode = 'info' | 'order';
 
@@ -21,7 +23,9 @@ type TabMode = 'info' | 'order';
     PaginatorModule,
     TabViewModule,
     TooltipModule,
+    Toast,
   ],
+  providers: [MessageService],
   templateUrl: './store-info.component.html',
   styleUrl: './store-info.component.scss',
 })
@@ -79,6 +83,7 @@ export class StoreInfoComponent implements OnInit {
     private router: Router,
     private http: HttpService,
     private auth: AuthService,
+    private messageService: MessageService,
   ) {}
 
   ngOnInit(): void {
@@ -104,6 +109,46 @@ export class StoreInfoComponent implements OnInit {
     // 載入資料
     this.loadStoreById(this.storeId);
     this.isEventOpen(this.storeId);
+  }
+
+  // 收藏的店家
+  isFavorite(storeId: number) {
+    const userDate = JSON.parse(this.user);
+    // console.log(userDate);
+    const favorite = userDate.favorite; // 這邊要確認
+    // console.log('喜愛的店家: ' + favorite);
+    if (!favorite || favorite === null || favorite === undefined) return false;
+
+    // 如果是陣列
+    if (Array.isArray(favorite)) {
+      return favorite.includes(storeId);
+    } else {
+      console.log('收藏店家的格式不是陣列');
+      return false;
+    }
+  }
+
+  // TODO 收藏店家
+  toggleFavorite(storeId: number) {
+    // this.http
+    //   .postApi(`http://localhost:8080/gogobuy/updateFavoriteStore`, storeId)
+    //   .subscribe((res: any) => {
+    //     if (res?.code === 200) {
+    //       this.toastSuccess('成功', '收藏店家成功');
+    //     } else {
+    //       this.toastWarn('失敗', res?.message || '收藏店家失敗');
+    //     }
+    //   });
+  }
+
+  // =========================
+  // 小工具：Toast (右上角)
+  // =========================
+  private toastSuccess(summary: string, detail: string): void {
+    this.messageService.add({ severity: 'success', summary, detail });
+  }
+  private toastInfo(summary: string, detail: string): void {
+    this.messageService.add({ severity: 'info', summary, detail });
   }
 
   // 判斷是否有團正在開
@@ -196,11 +241,6 @@ export class StoreInfoComponent implements OnInit {
         // console.log(JSON.stringify(this.store));
         this.afterLoaded();
       });
-
-    // 假資料 =============================================
-    // const res = this.getMockResponse(); // 假資料方法在這
-    // this.store = this.normalizeStoreResponse(res);
-    // this.afterLoaded();
   }
 
   afterLoaded(): void {
@@ -351,7 +391,7 @@ export class StoreInfoComponent implements OnInit {
       return;
     }
 
-    // 明天也沒有 → 先給保守文案
+    // 明天也沒有
     this.openStatusDot = 'closed';
     this.openStatusText = '已打烊';
     this.openStatusSubText = '近期無營業時段';
@@ -538,17 +578,17 @@ export class StoreInfoComponent implements OnInit {
   openProduct(p: any): void {
     this.selectedProduct = p;
 
-    // 【新增】清空上一個商品的選擇狀態
+    // 清空上一個商品的選擇狀態
     this.selectedOptionIdsByGroup = {};
 
-    // 【新增】規格（priceLevel）預設值
+    // 規格（priceLevel）預設值
     const levels = this.getPriceLevelsByCategoryId(p?.categoryId);
     this.selectedPriceLevel =
       levels.find((x: any) => String(x?.name || '') === '標準') ||
       levels.find((x: any) => Number(x?.price) === 0) ||
       null;
 
-    // 【新增】依 unusual 白名單初始化可選群組
+    // 依 unusual 白名單初始化可選群組
     this.initSelectedOptions();
 
     this.productVisible = true;
@@ -643,7 +683,7 @@ export class StoreInfoComponent implements OnInit {
     this.selectedPriceLevel = level;
   }
 
-  // 【新增】顯示用：basePrice + 規格加價 + 已選選項加價
+  // 顯示用：basePrice + 規格加價 + 已選選項加價
   getSelectedProductPrice(): number {
     const base = Number(this.selectedProduct?.basePrice || 0);
     const extra = Number(this.selectedPriceLevel?.price || 0);
@@ -851,243 +891,5 @@ export class StoreInfoComponent implements OnInit {
     const gmap = 'https://www.google.com/maps/search/?api=1&query=';
     let mapUrl = gmap + encodeURIComponent(address);
     return mapUrl;
-  }
-
-  // =========================
-  // 假資料
-  // =========================
-  getMockResponse(): any {
-    return {
-      code: 200,
-      message: '成功',
-      storeList: [
-        {
-          id: 40,
-          name: '微醺之夜餐酒館 (Vibe Night)',
-          phone: '0423218888',
-          address: '台中市西區公益路二段99號',
-          category: 'fast',
-          type: '異國料理',
-          memo: '本館提供頂級松露料理與特調調酒，週五六提供深夜駐唱。',
-          image:
-            'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&q=80&w=1200',
-          feeDescription:
-            '[{"km":1,"fee":0},{"km":3,"fee":45},{"km":7,"fee":85},{"km":15,"fee":150}]',
-          deleted: false,
-          publish: true,
-          force_closed: false,
-          createdBy: 'SystemManager',
-        },
-      ],
-      operatingHoursVoList: [
-        {
-          id: 61,
-          storesId: 40,
-          week: 1,
-          openTime: '11:00:00',
-          closeTime: '14:30:00',
-          closed: false,
-        },
-        {
-          id: 62,
-          storesId: 40,
-          week: 1,
-          openTime: '17:30:00',
-          closeTime: '22:00:00',
-          closed: false,
-        },
-        {
-          id: 63,
-          storesId: 40,
-          week: 2,
-          openTime: '11:00:00',
-          closeTime: '22:00:00',
-          closed: false,
-        },
-        {
-          id: 64,
-          storesId: 40,
-          week: 3,
-          openTime: '00:00:00',
-          closeTime: '00:00:00',
-          closed: true,
-        },
-        {
-          id: 65,
-          storesId: 40,
-          week: 4,
-          openTime: '11:00:00',
-          closeTime: '22:00:00',
-          closed: false,
-        },
-        {
-          id: 68,
-          storesId: 40,
-          week: 5,
-          openTime: '18:00:00',
-          closeTime: '02:00:00',
-          closed: false,
-        },
-        {
-          id: 69,
-          storesId: 40,
-          week: 6,
-          openTime: '18:00:00',
-          closeTime: '04:00:00',
-          closed: false,
-        },
-        {
-          id: 70,
-          storesId: 40,
-          week: 7,
-          openTime: '18:00:00',
-          closeTime: '00:00:00',
-          closed: false,
-        },
-      ],
-      menuVoList: [
-        {
-          id: 122,
-          storesId: 40,
-          categoryId: 1,
-          name: '松露金箔薯條',
-          description: '選用義大利頂級松露油與食用金箔裝飾',
-          basePrice: 220,
-          image:
-            'aHR0cHM6Ly9pbWdjZG4uY25hLmNvbS50dy93d3cvV2ViUGhvdG9zLzEwMjQvMjAyMTA3MjcvMTAyNHgxMDI0XzM3OTQyMDUzOTA4NS5qcGc=',
-          available: false,
-        },
-        {
-          id: 123,
-          storesId: 40,
-          categoryId: 1,
-          name: '紐奧良辣味雞翅翅翅翅翅翅翅',
-          description:
-            '獨家秘製辛香料，鮮嫩多汁。獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁',
-          basePrice: 280,
-          image:
-            'aHR0cHM6Ly9pbWFnZS1jZG4tZmxhcmUucWRtLmNsb3VkL3E2MDgxYzRmODFmMDFhL2ltYWdlL2RhdGEvJUU1JTk1JTg2JUU1JTkzJTgxJUU3JTg1JUE3JUU3JTg5JTg3LzEyXyVFNyVCNCU5MCVFNSVBNSVBNyVFOCU4OSVBRiVFOCVCRSVBMyVFNyVCRiU4NS8qJUU3JTk0JUEyJUU1JTkzJTgxJUU1JTlDJTk2LSVFNyVCNCU5MCVFNSVBNSVBNyVFOCU4OSVBRiVFOSU5QiU5RSVFNyVCRiU4NTAzLmpwZw==',
-          available: true,
-          unusual: {
-            '24': 'true',
-          },
-        },
-        {
-          id: 124,
-          storesId: 40,
-          categoryId: 59,
-          name: '午夜藍色夏威夷',
-          description: '伏特加基底搭配藍柑橘糖漿，口感清爽',
-          basePrice: 350,
-          image:
-            'aHR0cHM6Ly9hc3NldHMudG1lY29zeXMuY29tL2ltYWdlL3VwbG9hZC90X3dlYl9yZHBfcmVjaXBlXzU4NHg0ODBfMV81eC9pbWcvcmVjaXBlL3Jhcy9Bc3NldHMvOTA5REEyRjItODczOS00Mjk3LTkyQjAtMUQ4NkM5MjExMjMyL0Rlcml2YXRlcy8xMTZjZGIwNC05NDczLTQzZDAtOWVmZC1kOWY2ZjU5ZGZmYTMuanBn',
-          available: true,
-          unusual: {
-            '22': 'true',
-            '23': 'true',
-          },
-        },
-        {
-          id: 125,
-          storesId: 40,
-          categoryId: 58,
-          name: '深夜炸物大三元',
-          description: '包含雞塊、洋蔥圈、起司條',
-          basePrice: 450,
-          available: true,
-          unusual: {
-            '24': 'true',
-          },
-        },
-      ],
-      menuCategoriesVoList: [
-        {
-          id: 1,
-          storesId: 40,
-          name: '人氣單點小物',
-        },
-        {
-          id: 58,
-          storesId: 40,
-          name: '深夜炸物拼盤',
-          priceLevel: [
-            {
-              name: '雙人分享',
-              price: 250,
-            },
-            {
-              name: '派對特大',
-              price: 450,
-            },
-          ],
-        },
-        {
-          id: 59,
-          storesId: 40,
-          name: '特調調酒系列',
-          priceLevel: [
-            {
-              name: '標準',
-              price: 0,
-            },
-            {
-              name: '濃縮加強',
-              price: 200,
-            },
-          ],
-        },
-      ],
-      productOptionGroupsVoList: [
-        {
-          id: 22,
-          storesId: 40,
-          name: '基酒更換',
-          required: false,
-          maxSelection: 1,
-          items: [
-            { id: 47, groupId: 22, name: '換成琴酒 (Gin)', extraPrice: 50 },
-            { id: 48, groupId: 22, name: '換成伏特加 (Vodka)', extraPrice: 30 },
-            {
-              id: 55,
-              groupId: 22,
-              name: '換成威士忌 (Whisky)',
-              extraPrice: 80,
-            },
-          ],
-        },
-        {
-          id: 23,
-          storesId: 40,
-          name: '冰塊份量',
-          required: true,
-          maxSelection: 1,
-          items: [
-            { id: 49, groupId: 23, name: '正常冰', extraPrice: 0 },
-            { id: 50, groupId: 23, name: '少冰', extraPrice: 0 },
-            { id: 51, groupId: 23, name: '去冰', extraPrice: 0 },
-          ],
-        },
-        {
-          id: 24,
-          storesId: 40,
-          name: '加價沾醬 (可多選)',
-          required: false,
-          maxSelection: 3,
-          items: [
-            { id: 52, groupId: 24, name: '蜂蜜芥末醬', extraPrice: 20 },
-            { id: 53, groupId: 24, name: '松露蛋黃醬', extraPrice: 40 },
-            { id: 54, groupId: 24, name: '泰式酸辣醬', extraPrice: 20 },
-          ],
-        },
-      ],
-      feeDescriptionVoList: [
-        { km: 1, fee: 0 },
-        { km: 3, fee: 45 },
-        { km: 5, fee: 65 },
-        { km: 7, fee: 85 },
-        { km: 10, fee: 110 },
-        { km: 15, fee: 150 },
-      ],
-    };
   }
 }

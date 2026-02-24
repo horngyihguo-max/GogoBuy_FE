@@ -27,8 +27,7 @@ import { BlockUIModule } from 'primeng/blockui';
     SelectModule, FloatLabelModule,
     DatePickerModule, FormsModule, FluidModule,
     FormsModule, CheckboxModule, InputNumber,
-    DialogModule, AutoCompleteModule, BlockUIModule,
-    RouterLink
+    DialogModule, AutoCompleteModule, BlockUIModule
   ],
   templateUrl: './store-upsert.component.html',
   styleUrl: './store-upsert.component.scss'
@@ -285,7 +284,6 @@ export class StoreUpsertComponent {
           this.parseAddressToFields();
         }
       });
-    
   }
 
   // 檢查電話是否已使用過

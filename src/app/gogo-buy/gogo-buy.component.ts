@@ -154,13 +154,13 @@ export class GogoBuyComponent implements OnInit {
     // 建立一個包含所有營業中 ID 的 Set
     const operatingIds = new Set(operating.map(s => s.id));
 
-    // 1. 先處理全部店家，並標註狀態
+    // 先處理全部店家，並標註狀態
     const processedStores = allStores.map(store => ({
       ...store,
       isClosed: !operatingIds.has(store.id)
     }));
 
-    // 2. 根據選單狀態進行過濾
+    // 根據選單狀態進行過濾
     let filtered = processedStores;
     if (status === 'OPEN') {
       filtered = processedStores.filter(s => !s.isClosed);
@@ -168,13 +168,15 @@ export class GogoBuyComponent implements OnInit {
       filtered = processedStores.filter(s => s.isClosed);
     }
 
-    // 3. 回傳前 5 筆
-    return filtered.slice(0, this.storeInitial);
+    const sorted = [...filtered].sort((a, b) => Number(a.isClosed) - Number(b.isClosed));
+
+    // 回傳前 5 筆
+    return sorted.slice(0, this.storeInitial);
   });
   storeCountLabel = computed(() => {
     const status = this.statusFilter();
-    if (status === 'OPEN') return `${this.operatingStores().length} 間營業中`;
-    if (status === 'CLOSED') return `${this.auths.store().length - this.operatingStores().length} 間休息中`;
+    if (status == 'OPEN') return `${this.operatingStores().length} 間營業中`;
+    if (status == 'CLOSED') return `${this.auths.store().length - this.operatingStores().length} 間休息中`;
     return `${this.auths.store().length} 間店`;
   });
 
@@ -366,9 +368,9 @@ export class GogoBuyComponent implements OnInit {
   //輪播圖片
   banners: Banner[] = [
     {
-      image: '許願池2.jpg',
-      title: '許願池',
-      link: 'user/wishes'
+      image: 'popular2x.png',
+      title: '熱門團購',
+      link: 'gogobuy/popular'
     },
     {
       //位置
@@ -398,6 +400,12 @@ export class GogoBuyComponent implements OnInit {
       image: '許願池2.jpg',
       title: '許願池',
       link: 'user/wishes'
+    }
+    ,
+    {
+      image: 'popular2x.png',
+      title: '熱門團購',
+      link: 'gogobuy/popular'
     }
     ,
     {

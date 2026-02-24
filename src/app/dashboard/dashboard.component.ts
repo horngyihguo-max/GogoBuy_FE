@@ -198,6 +198,7 @@ export class DashboardComponent {
 
   addStore() {
     this.storeService.clearCurrentStore();
+    sessionStorage.removeItem('temp_order_info');
     this.router.navigate(['/management/store_upsert']);
   }
 
