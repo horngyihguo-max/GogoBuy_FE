@@ -152,12 +152,13 @@
   </a>
 
   <!-- 購物車 -->
-  <a>
+  <a routerLink="/user/wishes">
     <div>
-      <i class="pi pi-cart-plus cursor-pointer" style="font-size: 1.5rem"></i>
+      <i class="pi pi-star-fill cursor-pointer" style="font-size: 1.5rem"
+      [ngStyle]="{ 'color': (router.url == '/user/wishes') ? 'rgb(252, 165, 165)' : '' }"></i>
     </div>
-    <div>
-      購物車
+    <div [ngStyle]="{ 'color': (router.url == '/user/wishes') ? 'rgb(252, 165, 165)' : '' }">
+      許願池
     </div>
   </a>
   <!-- 訂單 -->
