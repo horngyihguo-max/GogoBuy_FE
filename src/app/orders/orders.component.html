@@ -165,6 +165,7 @@
                   </div>
 
                   <div class="flex items-center gap-3">
+                    <button (click)="edit(item)">修改</button>
                     <button type="button"
                       class="px-4 py-2 rounded-full text-white font-bold active:scale-[0.98] cursor-pointer"
                       [ngClass]="item.isHost? 'bg-emerald-600 hover:bg-emerald-700': 'bg-sky-600 hover:bg-sky-700'"

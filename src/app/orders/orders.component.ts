@@ -332,6 +332,15 @@ export class OrdersComponent {
   // ==================== 管理中心邏輯 ====================
   manageMembersMap = signal<Record<number, any[]>>({});
 
+  edit(item: CartGroup) {
+    this.router.navigate(['/groupbuy-event/group-event'], {
+      queryParams: {
+        event_id: item.eventsId, // 這裡應該傳實際的 eventsId
+      }
+    });
+    console.log(this.router.url)
+  }
+
   loadManageData(eventsId: number) {
     this.cart.getPersonalOrdersByEventId(eventsId).subscribe({
       next: (res: any) => {
