@@ -395,12 +395,44 @@ export class GroupEventComponent {
       .filter(each => each.week == today)
       .sort((a, b) => a.openTime.localeCompare(b.openTime));  // 排序 (字串比較)
     // --------有return放最後面--------
+    const yesterday = today === 1 ? 7 : today - 1;
+    // 找昨天「最後一段」營業時間
+    const yesterdayLastShift = this.operatingHoursVoList
+      .filter(each => each.week == yesterday)
+      .sort((a, b) => a.openTime.localeCompare(b.openTime))
+      .pop(); // 取最後一段
+    // 檢查是否處於「昨天跨過來」的營業時間
+    if (yesterdayLastShift) {
+      const yOpen = (+yesterdayLastShift.openTime.split(":")[0]) * 100 + (+yesterdayLastShift.openTime.split(":")[1]);
+      let yClose = (+yesterdayLastShift.closeTime.split(":")[0]) * 100 + (+yesterdayLastShift.closeTime.split(":")[1]);
+      if (yClose < yOpen && yClose !== 0) {
+        if (time < yClose) {
+          this.isOpen = true;
+          this.operateString = "營業至 " + yesterdayLastShift.closeTime.slice(0, 5);
+
+          // 下一段是今天的第 0 段
+          if (todayList.length > 0) {
+            this.nextOperating = "下次開始營業時間為 " + todayList[0].openTime.slice(0, 5);
+          } else {
+            this.nextOperating = this.getFutureOpenTime(today);
+          }
+          return; // 確定營業中，直接結束
+        }
+      }
+    }
     if (todayList.length > 0) {
       for (let i = 0; i < todayList.length; i++) {
         const open = (+todayList[i].openTime.split(":")[0]) * 100 + (+todayList[i].openTime.split(":")[1]);
-        const close = (+todayList[i].closeTime.split(":")[0]) * 100 + (+todayList[i].closeTime.split(":")[1]);
+        let close = (+todayList[i].closeTime.split(":")[0]) * 100 + (+todayList[i].closeTime.split(":")[1]);
+        if (close == 0) {
+          close = 2400;
+        }
+        const isOvernight = close < open;
+        const isCurrentOpen = isOvernight
+          ? (time >= open || time <= close)   // 跨夜：大於開始時間「或」小於結束時間
+          : (time >= open && time <= close); // 正常：介於兩者之間
         // --- 營業中 ---
-        if (time >= open && time <= close) {
+        if (isCurrentOpen) {
           this.isOpen = true;
           this.operateString = "營業至 " + todayList[i].closeTime.slice(0, 5);
 
@@ -413,11 +445,11 @@ export class GroupEventComponent {
         }
         // --- 休息中：但今天稍後還有開門 ---
         // 因為 todayList 排過序，第一個滿足 time < open 的就是最近的開門時間。
-        if (time < open) {
+        if (!isOvernight && time < open) {
           this.isOpen = false;
           this.operateString = "休息中";
           this.nextOperating = "下次開始營業時間為 " + todayList[i].openTime.slice(0, 5);
-          return; // 找到最近的開門時間，跳出
+          return;
         }
       }
       // --- 休息中：今天所有的時段都已經結束了 ---
