@@ -12,7 +12,7 @@
 }
 
 .storeName {
-  @apply text-2xl w-full sm:text-3xl md:text-4xl;
+  @apply text-3xl w-full sm:text-4xl;
   /* @media (min-width: 768px) {
     @apply text-4xl;
   } */
@@ -26,24 +26,24 @@
 }
 
 .store-table {
-  @apply max-w-[295px] mt-[5px] ml-[10px] md:max-w-none md:w-[100%] md:mt-[10px];
-
+  @apply max-w-[295px] mt-[5px] ml-[10px] md:w-[100%] md:max-w-none md:mt-[10px];
   /* @media (min-width: 768px) {
     @apply max-w-none !w-[100%] mt-[10px];
   } */
   tr {
     @apply w-[100vw];
   }
-
   .td-icon {
-    @apply text-lg md:max-w-[18px];
+    @apply text-lg pr-2 md:text-xl;
     /* @media (min-width: 768px) {
-      @apply max-w-[18px];
+      @apply text-xl;
     } */
   }
-
   td {
-    @apply text-lg;
+    @apply text-lg md:text-xl;
+    /* @media (min-width: 768px) {
+      @apply text-xl;
+    } */
   }
 }
 
@@ -61,7 +61,7 @@
     @apply px-4;
   } */
   .div-title {
-    @apply text-[#662222] text-lg md:text-xl;
+    @apply text-[#662222] text-xl md:text-2xl;
     /* @media (min-width: 768px) {
       @apply text-xl;
     } */
@@ -169,6 +169,7 @@
   padding: 0.5rem 0.5rem 0.5rem 0.5rem !important;
   background: white;
   flex-shrink: 0;
+  font-size: 18px;
 }
 @media (max-width: 523px) {
   :host ::ng-deep .p-listbox-list-container {
@@ -187,6 +188,7 @@
     min-height: fit-content;
     gap: 8px;
     /* 增加間距觀察是否有變化 */
+    font-size: 16px;
   }
 }
 @media (min-width: 524px) and (max-width: 1023px) {

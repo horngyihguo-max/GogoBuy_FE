@@ -932,7 +932,7 @@ export class GroupEventComponent {
   }
 
   cancel() {
-    this.router.navigate(['/management/store_info', this.storeId]);
+    this.location.back();
   }
   goCheck() {
     this.tempMenu = this.selectedItems.filter(item => item.id !== this.paddingItem.id).map(item => item.id);

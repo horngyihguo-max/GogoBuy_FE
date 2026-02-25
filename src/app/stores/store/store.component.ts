@@ -771,23 +771,12 @@ export class StoreComponent {
       spec.applicableCategoryIds?.includes(selectedId)
     );
 
-    if (!this.isEditMode) {
-      const updatedUnusual: { [key: string]: string } = {};
-      this.filteredSpecsForProduct.forEach(spec => {
-        updatedUnusual[spec.id.toString()] = spec.name;
-      });
-      this.currentProduct.unusual = updatedUnusual;
-    } else {
-      const currentUnusual = { ...this.currentProduct.unusual };
-      const validIds = this.filteredSpecsForProduct.map(s => s.id.toString());
+    const updatedUnusual: { [key: string]: string } = {};
 
-      Object.keys(currentUnusual).forEach(key => {
-        if (!validIds.includes(key)) {
-          delete currentUnusual[key];
-        }
-      });
-      this.currentProduct.unusual = currentUnusual;
-    }
+    this.filteredSpecsForProduct.forEach(spec => {
+      updatedUnusual[spec.id.toString()] = spec.name;
+    });
+    this.currentProduct.unusual = updatedUnusual;
   }
 
 
