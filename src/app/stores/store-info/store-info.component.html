@@ -40,7 +40,9 @@
                         isFavorite(storeId)
                           ? 'pi-heart-fill text-red-500'
                           : 'pi-heart text-gray-400',
-                        (userId && this.userId != 'null') ? 'cursor-pointer' : 'cursor-not-allowed',
+                        userId && this.userId != 'null'
+                          ? 'cursor-pointer'
+                          : 'cursor-not-allowed',
                       ]"
                     ></i>
 
@@ -145,11 +147,18 @@
                   >
                   <p
                     (click)="detailTabIndex = 1; openDetail()"
-                    class="cursor-pointer hover:border-b hover:border-slate-300"
+                    class="cursor-pointer hover:border-b hover:border-slate-300 hidden md:inline"
                   >
                     (詳細運費說明)
+                    <span class="md:hidden">(運費說明)</span>
                   </p>
                 </div>
+                <p
+                  (click)="detailTabIndex = 1; openDetail()"
+                  class="cursor-pointer hover:border-b hover:border-slate-300 md:hidden"
+                >
+                  (運費說明)
+                </p>
                 <div class="flex items-center gap-2">
                   <i class="pi pi-phone text-red-900"></i>
                   <span class="font-semibold text-[17px]">{{
@@ -310,7 +319,7 @@
     [draggable]="false"
     [resizable]="false"
     styleClass="max-w-[90vw] min-h-[500px]
-              md:w-[550px] md:max-w-[300vw] md:h-[72vh] md:min-h-[780px]
+              md:w-[550px] md:max-w-[300vw] h-[72vh] md:min-h-[780px]
               store-detail-dialog"
   >
     <!-- ===== Header ===== -->

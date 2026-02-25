@@ -1675,13 +1675,16 @@ export class FollowGroupComponent {
       icon: 'success',
       title,
       text,
-      timer: 1200,
+      timer: 2000, // 稍微延長到 2秒，對手機用戶比較友善
+      toast: true, // 開啟 Toast 模式
+      position: 'top-end', // 在手機上會自動適配
       showConfirmButton: false,
-      didOpen: () => {
-        const c = document.querySelector(
-          '.swal2-container',
-        ) as HTMLElement | null;
-        if (c) c.style.zIndex = '20000';
+      timerProgressBar: true, // 加上進度條，讓用戶知道它什麼時候會消失
+      didOpen: (toast) => {
+        toast.style.zIndex = '20000';
+        // 滑鼠移入或手指觸碰時停止計時，避免還沒看完就消失
+        toast.addEventListener('mouseenter', Swal.stopTimer);
+        toast.addEventListener('mouseleave', Swal.resumeTimer);
       },
     });
   }
