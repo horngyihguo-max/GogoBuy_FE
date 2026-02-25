@@ -1,5 +1,13 @@
 <div class="topbar-wrapper">
   <header class="relative flex items-center px-4">
+
+    <!-- 手機板附近按鈕 -->
+    @if(nearby) {
+    <div class="md:hidden">
+      <app-nearby-bar></app-nearby-bar>
+    </div>
+    }
+
     <!-- 左：LOGO + nearby（怎麼變寬都不影響置中） -->
     <!-- pTooltip說明：
           (1) pTooltip 為氣泡內容
@@ -7,6 +15,14 @@
           (3) [positionLeft] 適用於 tooltipPosition 為 right 或 left 的時候
           (4) [positionTop] 適用於 tooltipPosition 為 top 或 bottom 的時候
           (5) [showDelay] 用於調整 pTooltip 顯示延遲時間-->
+    @if (isMobile) {
+    <div class="flex-1 flex items-center justify-center">
+      <img routerLink="gogobuy" src="ggb3.png" class="logo cursor-pointer h-13" pTooltip="點擊返回首頁"
+        tooltipPosition="bottom" [showDelay]="50">
+    </div>
+    }
+
+    @if (!isMobile) {
     <div class="flex items-center gap-3 flex-none">
       <img routerLink="gogobuy" src="ggb3.png" class="logo cursor-pointer h-13" pTooltip="點擊返回首頁"
         tooltipPosition="bottom" [showDelay]="50">
@@ -15,6 +31,7 @@
         [positionTop]="5"></app-nearby-bar>
       }
     </div>
+    }
 
     <!-- 中：搜尋欄「固定置中」(桌機才顯示，手機用下面那條 search-mobile) -->
     @if (showSearch) {
@@ -155,7 +172,7 @@
   <a routerLink="/user/wishes">
     <div>
       <i class="pi pi-star-fill cursor-pointer" style="font-size: 1.5rem"
-      [ngStyle]="{ 'color': (router.url == '/user/wishes') ? 'rgb(252, 165, 165)' : '' }"></i>
+        [ngStyle]="{ 'color': (router.url == '/user/wishes') ? 'rgb(252, 165, 165)' : '' }"></i>
     </div>
     <div [ngStyle]="{ 'color': (router.url == '/user/wishes') ? 'rgb(252, 165, 165)' : '' }">
       許願池
