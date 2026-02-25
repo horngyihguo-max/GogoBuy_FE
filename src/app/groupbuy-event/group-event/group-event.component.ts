@@ -77,11 +77,12 @@ export class GroupEventComponent {
   pickLocation!: string;
 
   scrolllabelTabs: any = [];
-  isExist: boolean = true;
+  isExist: boolean = true;  //判斷店家存在
   userId!: string;
   storeId!: number;
   // wishId?: number;
   eventId?: number;
+  storeIdFromEvent!: number;
   isOpen!: boolean;
   operateString!: string;
   nextOperating!: string;
@@ -224,131 +225,109 @@ export class GroupEventComponent {
       weekHeader: '週'
     });
 
-    const now = new Date();
-    const today = this.dateFormat(now);
-    const time = now.getHours() * 100 + now.getMinutes();
-
-    //行為判斷：有 storeId 沒 eventId 是開團頁面；有 eventId 沒 storeId 是跟團頁面
+    //行為判斷：有 storeId 沒 eventId 是新增；有 eventId 沒 storeId 是修改
     if (this.storeId && !this.eventId) {
       this.http.getApi('http://localhost:8080/gogobuy/store/searchId?id=' + this.storeId).subscribe((res: any) => {
         if (res.code == 200) {
-          this.isExist = true;
-          this.storeList = res.storeList[0];
-          if (this.storeList) {
-            this.type = this.storeList.type;
-          }
-          this.menuVoList = res.menuVoList.filter((item: any) => item.available) || [];
-          this.menuCategoriesVoList = res.menuCategoriesVoList || [];
-          if (this.menuCategoriesVoList?.length > 0) {
-            const categoryMap = new Map(
-              this.menuCategoriesVoList.map(cat => [cat.id, cat])
-            );
-            for (const cate of this.menuVoList) {
-              const matchedCategory = categoryMap.get(cate.categoryId);
-              const perPrice: PriceLevel[] = [];
-              const base = Number(cate.basePrice) || 0;
-              if (matchedCategory?.priceLevel && matchedCategory.priceLevel.length > 0) {
-                matchedCategory.priceLevel.forEach(level => {
-                  perPrice.push({
-                    name: level.name,
-                    price: (level.price || 0) + base
-                  });
-                });
-              } else {
-                perPrice.push({
-                  name: '單價',
-                  price: base
-                });
-              }
-              cate.basePrice = perPrice;
-            }
-            this.activeTab = this.menuCategoriesVoList[0]?.id;
-          }
-          this.productOptionGroupsVoList = res.productOptionGroupsVoList;
-          this.feeDescriptionVoList = res.FeeDescription;
-
-          this.operatingHoursVoList = res.operatingHoursVoList.sort((a: any, b: any) => a.openTime.localeCompare(b.openTime));  // 排序 (字串比較)
-          const todayList = this.operatingHoursVoList
-            .filter(each => each.week == today)
-            .sort((a, b) => a.openTime.localeCompare(b.openTime));  // 排序 (字串比較)
-          // --------有return放最後面--------
-          if (todayList.length > 0) {
-            for (let i = 0; i < todayList.length; i++) {
-              const open = (+todayList[i].openTime.split(":")[0]) * 100 + (+todayList[i].openTime.split(":")[1]);
-              const close = (+todayList[i].closeTime.split(":")[0]) * 100 + (+todayList[i].closeTime.split(":")[1]);
-              // --- 營業中 ---
-              if (time >= open && time <= close) {
-                this.isOpen = true;
-                this.operateString = "營業至 " + todayList[i].closeTime.slice(0, 5);
-
-                if ((i + 1) < todayList.length) {
-                  this.nextOperating = "下次開始營業時間為 " + todayList[i + 1].openTime.slice(0, 5);
-                } else {
-                  this.nextOperating = this.getFutureOpenTime(today); // 抓明天的 function
-                }
-                return; // 找到狀態，跳出
-              }
-              // --- 休息中：但今天稍後還有開門 ---
-              // 因為 todayList 排過序，第一個滿足 time < open 的就是最近的開門時間。
-              if (time < open) {
-                this.isOpen = false;
-                this.operateString = "休息中";
-                this.nextOperating = "下次開始營業時間為 " + todayList[i].openTime.slice(0, 5);
-                return; // 找到最近的開門時間，跳出
-              }
-            }
-            // --- 休息中：今天所有的時段都已經結束了 ---
-            this.isOpen = false;
-            this.operateString = "休息中";
-            this.nextOperating = this.getFutureOpenTime(today);
-          } else {
-            // 今日整天公休
-            this.isOpen = false;
-            this.operateString = "休息中";
-            this.nextOperating = this.getFutureOpenTime(today);
-          }
+          this.getStore(res);
         } else {
           this.isExist = false;
         }
       });
     } else if (this.eventId && !this.storeId) {
-      this.http.getApi('http://localhost:8080/gogobuy/event/getEventsByEventsId?id=' + this.eventId).subscribe((res: any) => {
-        if (res.code = 200) {
-          if (this.userId == res.groupbuyEvents[0].hostId) {
-            this.eventName = res.groupbuyEvents[0].eventName;
-            this.endTime = res.groupbuyEvents[0].endTime;
-            this.splitType = res.groupbuyEvents[0].splitType;
-            this.announcement = res.groupbuyEvents[0].announcement;
-            this.type = res.groupbuyEvents[0].eventType;
-            this.tempMenu = res.groupbuyEvents[0].tempMenuList;
-            this.recommend = res.groupbuyEvents[0].recommendList;
-            this.recommendDescription = res.groupbuyEvents[0].recommendDescription;
-            this.limitation = res.groupbuyEvents[0].limitation;
-            this.pickTime = res.groupbuyEvents[0].pickupTime;
-            this.pickLocation = res.groupbuyEvents[0].pickLocation;
-          } else {
-            Swal.fire({
-              icon: 'warning',
-              title: '您沒有權限修改此活動資訊',
-              text: '即將返回上一頁',
-              width: 600,
-              timer: 2000,
-              showConfirmButton: false,
-              timerProgressBar: true,
-              didOpen: () => {
-                const c = document.querySelector('.swal2-container') as HTMLElement | null;
-                if (c) c.style.zIndex = '20000';
-              }
-            }).then((result) => {
-              if (window.history.length > 1) {
-                this.location.back();
+      this.http.getApi('http://localhost:8080/gogobuy/event/getEventsByEventsId?id=' + this.eventId).subscribe((eventRes: any) => {
+        if (eventRes.code == 200) {
+          this.http.getApi('http://localhost:8080/gogobuy/store/searchId?id=' + eventRes.groupbuyEvents[0].storeId).subscribe((storeRes: any) => {
+            if (storeRes.code == 200) {
+              this.getStore(storeRes);
+              if (this.userId == eventRes.groupbuyEvents[0].hostId) {
+                this.eventName = eventRes.groupbuyEvents[0].eventName;
+                this.storeIdFromEvent = eventRes.groupbuyEvents[0].storeId;
+
+                const rawEndTime = eventRes.groupbuyEvents[0].endTime; // "2026-02-25T11:08:00"
+                if (rawEndTime) {
+                  this.endTime = new Date(rawEndTime);
+                }
+
+                this.isConfirmed = true;
+                this.splitType = eventRes.groupbuyEvents[0].splitType;
+                this.choose(this.splitType);
+                this.announcement = eventRes.groupbuyEvents[0].announcement;
+                this.type = eventRes.groupbuyEvents[0].eventType;
+
+                this.tempMenu = eventRes.groupbuyEvents[0].tempMenuList
+                if (this.tempMenu.length > 0) {
+                  this.selectedItems = this.menuVoList.filter(item => this.tempMenu.includes(item.id));
+                  this.updateDisplaySource();
+                } else {
+                  this.updateDisplaySource();
+                };
+
+                const rawRecommend = eventRes.groupbuyEvents[0].recommendList;
+                if (rawRecommend) {
+                  let recommendArray: any[] = [];
+                  try {
+                    if (Array.isArray(rawRecommend)) {
+                      recommendArray = rawRecommend;
+                    } else if (typeof rawRecommend === 'string') {
+                      recommendArray = JSON.parse(rawRecommend);
+                    }
+                  } catch (e) {
+                    // 萬一 JSON.parse 失敗（例如格式真的是 "1021,1020"），回退到 split
+                    console.warn('JSON parse 失敗，嘗試使用 split 切割');
+                    recommendArray = String(rawRecommend).replace(/[\[\]]/g, '').split(',');
+                  }
+                  const savedIds: number[] = recommendArray.map(id => Number(id)).filter(id => !isNaN(id));
+                  this.recommend = [];
+                  savedIds.forEach(id => {
+                    // 搜尋對象建議包含 menuVoList 與 selectedItems 確保兩邊都標記到
+                    const product = this.selectedItems.find(item => Number(item.id) === id);
+                    if (product) {
+                      product.isRecommended = true;
+                      this.recommend.push(id);
+                    }
+                  });
+                  this.updateDisplaySource();
+                } else {
+                  this.recommend = [];
+                }
+
+                this.recommendDescription = eventRes.groupbuyEvents[0].recommendDescription;
+                this.limitation = eventRes.groupbuyEvents[0].limitation;
+
+                const rawPickTime = eventRes.groupbuyEvents[0].pickupTime;
+                if (rawPickTime) {
+                  this.pickTime = new Date(rawPickTime);
+                }
+
+                this.pickLocation = eventRes.groupbuyEvents[0].pickLocation;
               } else {
-                this.router.navigate(['/gogobuy/home']);
+                Swal.fire({
+                  icon: 'warning',
+                  title: '您沒有權限修改此活動資訊',
+                  text: '即將返回上一頁',
+                  width: 600,
+                  timer: 2000,
+                  showConfirmButton: false,
+                  timerProgressBar: true,
+                  didOpen: () => {
+                    const c = document.querySelector('.swal2-container') as HTMLElement | null;
+                    if (c) c.style.zIndex = '20000';
+                  }
+                }).then((result) => {
+                  if (window.history.length > 1) {
+                    this.location.back();
+                  } else {
+                    this.router.navigate(['/gogobuy/home']);
+                  }
+                });
               }
-            });
-          }
+            } else {
+              this.isExist = false;
+            }
+          });
         } else {
-          this.usualAlert(res.message);
+          this.usualAlert(eventRes.message);
         }
       });
     } else {
@@ -371,7 +350,119 @@ export class GroupEventComponent {
 
   }
 
+  getStore(res: any) {
+    const now = new Date();
+    const today = this.dateFormat(now);
+    const time = now.getHours() * 100 + now.getMinutes();
 
+    this.isExist = true;
+    this.storeList = res.storeList[0];
+    if (this.storeList) {
+      this.type = this.storeList.type;
+    }
+    this.menuVoList = res.menuVoList.filter((item: any) => item.available) || [];
+    this.menuCategoriesVoList = res.menuCategoriesVoList || [];
+    if (this.menuCategoriesVoList?.length > 0) {
+      const categoryMap = new Map(
+        this.menuCategoriesVoList.map(cat => [cat.id, cat])
+      );
+      for (const cate of this.menuVoList) {
+        const matchedCategory = categoryMap.get(cate.categoryId);
+        const perPrice: PriceLevel[] = [];
+        const base = Number(cate.basePrice) || 0;
+        if (matchedCategory?.priceLevel && matchedCategory.priceLevel.length > 0) {
+          matchedCategory.priceLevel.forEach(level => {
+            perPrice.push({
+              name: level.name,
+              price: (level.price || 0) + base
+            });
+          });
+        } else {
+          perPrice.push({
+            name: '單價',
+            price: base
+          });
+        }
+        cate.basePrice = perPrice;
+      }
+      this.activeTab = this.menuCategoriesVoList[0]?.id;
+    }
+    this.productOptionGroupsVoList = res.productOptionGroupsVoList;
+    this.feeDescriptionVoList = res.FeeDescription;
+
+    this.operatingHoursVoList = res.operatingHoursVoList.sort((a: any, b: any) => a.openTime.localeCompare(b.openTime));  // 排序 (字串比較)
+    const todayList = this.operatingHoursVoList
+      .filter(each => each.week == today)
+      .sort((a, b) => a.openTime.localeCompare(b.openTime));  // 排序 (字串比較)
+    // --------有return放最後面--------
+    const yesterday = today === 1 ? 7 : today - 1;
+    // 找昨天「最後一段」營業時間
+    const yesterdayLastShift = this.operatingHoursVoList
+      .filter(each => each.week == yesterday)
+      .sort((a, b) => a.openTime.localeCompare(b.openTime))
+      .pop(); // 取最後一段
+    // 檢查是否處於「昨天跨過來」的營業時間
+    if (yesterdayLastShift) {
+      const yOpen = (+yesterdayLastShift.openTime.split(":")[0]) * 100 + (+yesterdayLastShift.openTime.split(":")[1]);
+      let yClose = (+yesterdayLastShift.closeTime.split(":")[0]) * 100 + (+yesterdayLastShift.closeTime.split(":")[1]);
+      if (yClose < yOpen && yClose !== 0) {
+        if (time < yClose) {
+          this.isOpen = true;
+          this.operateString = "營業至 " + yesterdayLastShift.closeTime.slice(0, 5);
+
+          // 下一段是今天的第 0 段
+          if (todayList.length > 0) {
+            this.nextOperating = "下次開始營業時間為 " + todayList[0].openTime.slice(0, 5);
+          } else {
+            this.nextOperating = this.getFutureOpenTime(today);
+          }
+          return; // 確定營業中，直接結束
+        }
+      }
+    }
+    if (todayList.length > 0) {
+      for (let i = 0; i < todayList.length; i++) {
+        const open = (+todayList[i].openTime.split(":")[0]) * 100 + (+todayList[i].openTime.split(":")[1]);
+        let close = (+todayList[i].closeTime.split(":")[0]) * 100 + (+todayList[i].closeTime.split(":")[1]);
+        if (close == 0) {
+          close = 2400;
+        }
+        const isOvernight = close < open;
+        const isCurrentOpen = isOvernight
+          ? (time >= open || time <= close)   // 跨夜：大於開始時間「或」小於結束時間
+          : (time >= open && time <= close); // 正常：介於兩者之間
+        // --- 營業中 ---
+        if (isCurrentOpen) {
+          this.isOpen = true;
+          this.operateString = "營業至 " + todayList[i].closeTime.slice(0, 5);
+
+          if ((i + 1) < todayList.length) {
+            this.nextOperating = "下次開始營業時間為 " + todayList[i + 1].openTime.slice(0, 5);
+          } else {
+            this.nextOperating = this.getFutureOpenTime(today); // 抓明天的 function
+          }
+          return; // 找到狀態，跳出
+        }
+        // --- 休息中：但今天稍後還有開門 ---
+        // 因為 todayList 排過序，第一個滿足 time < open 的就是最近的開門時間。
+        if (!isOvernight && time < open) {
+          this.isOpen = false;
+          this.operateString = "休息中";
+          this.nextOperating = "下次開始營業時間為 " + todayList[i].openTime.slice(0, 5);
+          return;
+        }
+      }
+      // --- 休息中：今天所有的時段都已經結束了 ---
+      this.isOpen = false;
+      this.operateString = "休息中";
+      this.nextOperating = this.getFutureOpenTime(today);
+    } else {
+      // 今日整天公休
+      this.isOpen = false;
+      this.operateString = "休息中";
+      this.nextOperating = this.getFutureOpenTime(today);
+    }
+  }
   getFutureOpenTime(currentDay: number): string {
     const weekNames = ["", "週一", "週二", "週三", "週四", "週五", "週六", "週日"];
     if (!this.operatingHoursVoList || this.operatingHoursVoList.length === 0) {
@@ -968,32 +1059,54 @@ export class GroupEventComponent {
       pickupTime: pick,
       pickLocation: this.pickLocation
     }
-    this.http.postApi('http://localhost:8080/gogobuy/event/addEvent', req).subscribe({
-      next: (res: any) => {
-        console.log(req);
-        console.log(res);
-        if (res && res.id) {
-          // if (this.wishId) {  // 有許願，先結案再跳轉
-          //   const finishUrl = `http://localhost:8080/gogobuy/wish/finish_wish?id=${this.wishId}&userId=${this.userId}&targetUrl=http://localhost:4200/groupbuy-event/group-follow/${res.id}`;
-          //   this.http.postApi(finishUrl, {}).subscribe({
-          //     next: () => this.router.navigate(['/groupbuy-event/group-follow', res.id]),
-          //     error: (err) => {
-          //       console.error('許願結案失敗', err);
-          //     }
-          //   });
-          // } else {  // 沒有許願，直接跳轉
-          this.router.navigate(['/groupbuy-event/group-follow', res.id]);
-          // }
-        } else if (res && res.code == 400) {
-          const error: string[] = [];
-          error.push(res.message);
-          if (error.length > 0) {    // Swal 警告
-            const fieldList = error.join('、'); // 將陣列轉為 "欄位A、欄位B"
-            this.showAlert('新增失敗', `${fieldList}`);
+    if (this.storeId && !this.eventId) {
+      this.http.postApi('http://localhost:8080/gogobuy/event/addEvent', req).subscribe({
+        next: (res: any) => {
+          console.log(req);
+          console.log(res);
+          if (res && res.id) {
+            // if (this.wishId) {  // 有許願，先結案再跳轉
+            //   const finishUrl = `http://localhost:8080/gogobuy/wish/finish_wish?id=${this.wishId}&userId=${this.userId}&targetUrl=http://localhost:4200/groupbuy-event/group-follow/${res.id}`;
+            //   this.http.postApi(finishUrl, {}).subscribe({
+            //     next: () => this.router.navigate(['/groupbuy-event/group-follow', res.id]),
+            //     error: (err) => {
+            //       console.error('許願結案失敗', err);
+            //     }
+            //   });
+            // } else {  // 沒有許願，直接跳轉
+            this.router.navigate(['/groupbuy-event/group-follow', res.id]);
+            // }
+          } else if (res && res.code == 400) {
+            const error: string[] = [];
+            error.push(res.message);
+            if (error.length > 0) {    // Swal 警告
+              const fieldList = error.join('、'); // 將陣列轉為 "欄位A、欄位B"
+              this.showAlert('新增失敗', `${fieldList}`);
+            }
           }
         }
-      }
-    });
+      });
+    } else if (this.eventId && !this.storeId) {
+      req.id = this.eventId;
+      req.storesId = this.storeIdFromEvent;
+      console.log(JSON.stringify(req));
+      this.http.postApi('http://localhost:8080/gogobuy/event/updateEvent', req).subscribe({
+        next: (res: any) => {
+          console.log(req);
+          console.log(res);
+          if (res && res.code == 200) {
+            this.router.navigate(['/groupbuy-event/group-follow', req.id]);
+          } else if (res && res.code == 400) {
+            const error: string[] = [];
+            error.push("網站出現問題，請稍後再試");
+            if (error.length > 0) {    // Swal 警告
+              const fieldList = error.join('、'); // 將陣列轉為 "欄位A、欄位B"
+              this.showAlert('修改失敗', `${fieldList}`);
+            }
+          }
+        }
+      });
+    }
   }
 
 }
