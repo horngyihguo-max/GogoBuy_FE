@@ -811,7 +811,7 @@
   [draggable]="false"
   [resizable]="false"
   styleClass="max-w-[90vw] min-h-[500px]
-              md:w-[550px] md:max-w-[300vw] md:h-[72vh] md:min-h-[780px]
+              md:w-[550px] md:max-w-[300vw] h-[72vh] md:min-h-[780px]
               store-detail-dialog"
 >
   <!-- ===== Header ===== -->
@@ -1130,9 +1130,9 @@
       <!-- 底部固定操作列 -->
       <!-- ===================== -->
       <div
-        class="shrink-0 border-t border-black/10 bg-white/95 backdrop-blur p-4"
+        class="shrink-0 border-t border-black/10 bg-white/95 backdrop-blur p-4 h-[100px]"
       >
-        <div class="flex items-center justify-between gap-3">
+        <div class="flex items-center justify-between gap-1 md:gap-3">
           <!-- 左：數量 + 總價 -->
           <div class="min-w-0">
             <div class="text-[13px] text-gray-500 font-semibold">總金額</div>
@@ -1351,67 +1351,70 @@
   </div>
 </p-dialog>
 
-<p-dialog [(visible)]="openTermsDialog" appendTo="body" [modal]="true">
-  <h2
-    class="text-xl font-bold text-[#662222] border-b-2 border-dashed border-[#662222] pb-2 mb-4"
-  >
-    運費拆帳計算說明聲明
-  </h2>
-  <div
-    class="h-80 overflow-y-auto pr-2 text-base text-gray-700 leading-relaxed"
-  >
-    <p class="mb-4">
-      感謝您使用本平台團購服務，關於訂單運費之分攤方式，本平台依據以下邏輯進行運算，請詳細閱讀並同意後再行送出：
-    </p>
-    <div class="space-y-4">
-      <section>
-        <h4 class="font-bold text-gray-900 flex items-center gap-2">
-          <span class="w-2 h-2 bg-[#662222] rounded-full"></span> 1. 平分制計算
-        </h4>
-        <p class="pl-4 mt-1 text-gray-600">
-          系統將總運費平均分配予每一位參與團員。
-        </p>
-      </section>
-      <section>
-        <h4 class="font-bold text-gray-900 flex items-center gap-2">
-          <span class="w-2 h-2 bg-[#662222] rounded-full"></span> 2. 權重制計算
-        </h4>
-        <p class="pl-4 mt-1 text-gray-600">
-          依據每位團員之「訂單金額」比例進行運費分配。
-        </p>
-      </section>
-      <section class="bg-gray-50 p-3 rounded-md border-l-4 border-[#662222]">
-        <h4 class="font-bold text-[#662222]">※ 無法整除之處理 (餘數分配)</h4>
-        <p class="mt-1">
-          若分攤金額計算至最小貨幣單位仍有餘數（無法整除）時，系統將採取以下機制：
-        </p>
-        <ul class="list-disc pl-8 mt-2 space-y-1 text-gray-600">
-          <li>
-            <strong>隨機抽取：</strong>
-            由系統隨機抽取該訂單中之一至多名團員負擔該餘數款項。
-          </li>
-          <li>
-            <strong>公平原則：</strong> 每位團員被抽中負擔餘數之機率均等。
-          </li>
-        </ul>
-      </section>
-      <p class="text-sm text-gray-500 italic">
-        註：所有計算結果以系統最終產出之拆帳明細為準。
-      </p>
-    </div>
-  </div>
+<p-dialog
+  [(visible)]="openTermsDialog"
+  appendTo="body"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: '90vw', maxWidth: '600px' }"
+  styleClass="custom-terms-dialog"
+>
+  <ng-template pTemplate="header">
+    <div class="text-xl font-extrabold text-red-900">運費拆帳計算說明聲明</div>
+  </ng-template>
+  <div class="flex flex-col h-full max-h-[62vh] md:max-h-none">
 
-  <div class="mt-6 pt-4 border-t border-gray-100">
-    <div class="flex justify-end gap-3 mt-6">
+    <div
+      class="flex-grow overflow-y-auto pr-2 text-base text-gray-700 leading-relaxed custom-scrollbar"
+    >
+      <p class="mb-4">
+        感謝您使用本平台團購服務，關於訂單運費之分攤方式，本平台依據以下邏輯進行運算...
+      </p>
+      <div class="space-y-4">
+        <section>
+          <h4 class="font-bold text-gray-900 flex items-center gap-2">
+            <span class="w-2 h-2 bg-red-900 rounded-full"></span> 1. 平分制計算
+          </h4>
+          <p class="pl-4 mt-1 text-gray-600">
+            系統將總運費平均分配予每一位參與團員。
+          </p>
+        </section>
+        <section>
+          <h4 class="font-bold text-gray-900 flex items-center gap-2">
+            <span class="w-2 h-2 bg-red-900 rounded-full"></span> 2. 權重制計算
+          </h4>
+          <p class="pl-4 mt-1 text-gray-600">
+            依據每位團員之「訂單金額」比例進行運費分配。
+          </p>
+        </section>
+
+        <section class="bg-gray-50 p-3 rounded-md border-l-4 border-red-900">
+          <h4 class="font-bold text-red-900">※ 無法整除之處理 (餘數分配)</h4>
+          <p class="mt-1">若分攤金額計算至最小貨幣單位仍有餘數時...</p>
+          <ul class="list-disc pl-8 mt-2 space-y-1 text-gray-600">
+            <li><strong>隨機抽取：</strong>由系統隨機抽取負擔該餘數款項。</li>
+            <li><strong>公平原則：</strong>每位團員被抽中機率均等。</li>
+          </ul>
+        </section>
+        <p class="text-sm text-gray-500 italic">
+          註：所有計算結果以系統最終產出之拆帳明細為準。
+        </p>
+      </div>
+    </div>
+
+    <div
+      class="mt-2 pt-2 border-t border-gray-100 flex justify-end gap-3 flex-shrink-0 bg-white"
+    >
       <button
         (click)="onTermsReject()"
-        class="cursor-pointer px-4 py-2 text-gray-500 rounded-full w-24 mr-4 border-1 border-[#662222] hover:scale-[1.05] active:scale-[0.95]"
+        class="cursor-pointer px-4 py-2 text-gray-500 rounded-full w-24 border border-red-900 hover:bg-gray-50 transition-all active:scale-95"
       >
         不同意
       </button>
       <button
         (click)="onTermsAgree()"
-        class="cursor-pointer px-8 py-2 rounded-full font-bold transition-all bg-[#662222] text-white border-1 border-[#662222] hover:scale-[1.05] active:scale-[0.95]"
+        class="cursor-pointer px-6 py-2 rounded-full font-bold transition-all bg-red-900 text-white border border-red-900 hover:brightness-110 active:scale-95"
       >
         同意並送出
       </button>
@@ -1419,10 +1422,21 @@
   </div>
 </p-dialog>
 
-<p-dialog [(visible)]="loading" [modal]="true" [closable]="false" [showHeader]="false" appendTo="body"
-  [style]="{ 'background': 'transparent', 'border': 'none', 'box-shadow': 'none' }">
+<p-dialog
+  [(visible)]="loading"
+  [modal]="true"
+  [closable]="false"
+  [showHeader]="false"
+  appendTo="body"
+  [style]="{ background: 'transparent', border: 'none', 'box-shadow': 'none' }"
+>
   <div class="flex flex-col items-center w-full">
-    <i class="pi pi-spin pi-spinner-dotted" style="font-size: 3rem; color: white;"></i>
-    <span class="mt-2 text-white tracking-widest animate-pulse">正在送出訂單，請稍候...</span>
+    <i
+      class="pi pi-spin pi-spinner-dotted"
+      style="font-size: 3rem; color: white"
+    ></i>
+    <span class="mt-2 text-white tracking-widest animate-pulse"
+      >正在送出訂單，請稍候...</span
+    >
   </div>
 </p-dialog>
