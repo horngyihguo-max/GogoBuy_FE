@@ -22,35 +22,35 @@
   </div>
 }@else if(isExist && storeList) {
   <div class="area">
-    <div class="mt-[20px] area-block flex flex-col md:flex-row items-stretch bg-[#F5F0EB] rounded-lg overflow-hidden">
-      <div class="w-full md:w-1/3 lg:max-w-[350px] shrink-0">
+    <div class="mt-[20px] area-block flex flex-col md:flex-row items-stretch bg-[#F5F0EB] rounded-lg overflow-hidden md:max-h-[200px] lg:max-h-[300px]">
+      <div class="w-auto shrink-0">
         <img [src]="storeList?.image ? storeList?.image : 'no-product-image.jpg'"
-          (error)="$any($event.target).src = 'no-product-image.jpg'" class="w-full h-full object-cover aspect-[3/2]
+              (error)="$any($event.target).src = 'no-product-image.jpg'"
+              class="h-full object-cover aspect-[5/3] md:max-h-[200px] lg:max-h-[300px]
                       rounded-t-lg md:rounded-l-lg md:rounded-tr-none">
       </div>
-      <div class="py-[20px] ml-[10px] flex-1 min-w-0 h-full
-                      lg:my-[0px] lg:flex lg:flex-col lg:justify-center lg:align-center">
+      <div class="ml-[10px] flex-1 flex flex-col justify-center py-[20px]">
         <p class="storeName">{{storeList?.name}}</p>
         <table class="store-table">
           <tr>
-            <td><i class="pi pi-phone td-icon"></i></td>
+            <td class="w-[18px] whitespace-nowrap px-0"><i class="pi pi-phone td-icon"></i></td>
             <td>{{storeList?.phone}}</td>
           </tr>
           <tr>
-            <td><i class="pi pi-address-book td-icon"></i></td>
+            <td class="w-[18px] whitespace-nowrap px-0"><i class="pi pi-address-book td-icon"></i></td>
             <td>{{storeList?.address}}</td>
           </tr>
         </table>
         <label class="ml-[10px] mt-[20px]">
-          <span class="px-2 py-0.5 rounded text-base font-medium"
+          <span class="px-2 py-0.5 rounded text-md md:text-lg"
             [ngClass]="isOpen ? 'bg-emerald-400/20 text-green-800' : 'bg-red-100 text-red-800'">
             {{ isOpen ? '● 營業中' : '○ 休息中' }}
           </span>
           @if(operateString!="休息中"){
-            <span class="ml-[20px]">{{operateString}}</span>
+            <span class="ml-[20px] text-md md:text-lg">{{operateString}}</span>
           }
         </label>
-        <div class="ml-[10px] mt-[5px] text-small text-gray-500">{{nextOperating}}</div>
+        <div class="ml-[10px] mt-[5px] text-base md:text-md text-gray-500">{{nextOperating}}</div>
       </div>
     </div>
   </div>
@@ -64,7 +64,7 @@
             <div class="div-title">請選擇拆帳模式</div>
             <div class="div-content sm:flex sm:gap-15 lg:flex lg:gap-30">
               <div class="relative inline-block"> <!-- 下拉選單 -->
-                <button (click)="toggle($event)" class="w-64 px-4 py-2 bg-white text-[#662222] rounded-md flex justify-between items-center
+                <button (click)="toggle($event)" class="w-64 px-4 py-2 bg-white text-[#662222] rounded-md flex justify-between items-center text-md md:text-lg
                               lg:w-80"> <!-- 觸發按鈕 -->
                   {{choice || "運費拆帳方式"}}
                   <span class="transition-transform duration-200" [class.rotate-180]="splitOpen">▼</span>
@@ -110,7 +110,7 @@
               <div class="flex items-center gap-3 cursor-pointer group w-64 lg:w-auto">
                 <input type="checkbox" [checked]="isConfirmed" (change)="onCheckChange($event)"
                   class="w-4 h-4 rounded border-gray-300 text-[#662222] focus:ring-[#662222]">
-                <span class="text-base font-bold group-hover:text-[#662222] transition-colors" (click)="dialog()">
+                <span class=" text-md md:text-lg font-bold group-hover:text-[#662222] transition-colors" (click)="dialog()">
                   我已詳閱並同意「隨機餘數分配」等拆帳規則
                 </span>
               </div>
@@ -123,14 +123,14 @@
                 <label>
                   <input type="checkbox" class="w-4 h-4 rounded border-gray-300 mr-4" [checked]="useAll"
                     (change)="useAllChange($event)">
-                  <span class="text-lg">套用所有品項</span>
+                  <span class="text-md md:text-lg">套用所有品項</span>
                 </label>
               </div>
               <div class="flex flex-col lg:flex-row h-full bg-gray-100 rounded-lg">
                 <div class="flex w-full flex-shrink-0 bg-gray-100 overflow-x-auto
                                 lg:flex-col lg:w-30 lg:overflow-x-hidden lg:overflow-y-auto">
                   @for(cate of menuCategoriesVoList; track $index){
-                    <button class="relative py-4 px-6 transition-all duration-200 rounded-t-xl
+                    <button class="relative py-4 px-6 transition-all duration-200 rounded-t-xl text-md md:text-lg
                                         lg:rounded-tr-none lg:rounded-l-xl" (click)="activeTab = cate.id"
                       [class.active-tab]="activeTab === cate.id" [class.text-[#662222]]="activeTab === cate.id"
                       [class.font-bold]="activeTab === cate.id" [class.bg-white]="activeTab === cate.id"
@@ -161,7 +161,7 @@
                                                   (product.id === 'SOURCE_PADDING' && displaySource.length === 1)">
                             @if (product.id === 'BOTTOM_PADDING') {
                               @if (selectedItems.length === 1) {
-                                <span>請拖曳項目至此</span>
+                                <span class="text-md md:text-lg">請拖曳項目至此</span>
                               } @else {
                                 <div class="flex items-center" [style.height]="calculatePaddingHeight()">
                                   <i class="pi pi-plus"></i>
@@ -172,7 +172,7 @@
                               @if (displaySource.length === 1) {
                                 <div class="flex items-center justify-center w-full
                                             min-h-[280px] md:min-h-[380px] lg:min-h-[480px]">
-                                  <span class="text-gray-500">無可選品項</span>
+                                  <span class="text-gray-500 text-md md:text-lg">無可選品項</span>
                                 </div>
                               } @else {
                                 <div class="flex w-full flex-grow overflow-hidden">
@@ -191,7 +191,7 @@
                             }
                             <img [src]="product.image ? product.image : 'no-product-image.jpg'"
                               (error)="$any($event.target).src = 'no-product-image.jpg'"
-                              class="w-[100px] md:w-[60px] aspect-square object-cover rounded-sm mr-2">
+                              class="w-[100px] md:max-w-[100px] aspect-square object-cover rounded-sm mr-2">
                             <div class=" flex flex-col w-full lg:flex-1">
                               <div class="flex justify-between">
                                 <div class="font-bold">{{ product.name }}<i class="pi pi-tag text-sm"></i></div>
@@ -199,7 +199,7 @@
                                   <div>
                                     <button type="button" (click)="toggleRecommend(product, $event)"
                                       [class.recommended-active]="product.isRecommended"
-                                       class="bg-[#662222]/20 w-[105px] rounded-2xl border-[1px]
+                                       class="bg-[#662222]/20 w-[105px] rounded-2xl border-[1px] text-sm md:text-md
                                               border-[#662222]/20 px-2 py-1 transition-colors
                                               hover:bg-[#662222]/50 hover:text-white hover:border-[#662222]/50">
                                       @if(product.isRecommended){
@@ -214,7 +214,7 @@
                               </div>
                               <div class="flex flex-col sm:flex-row sm:align-items-center sm:gap-3">
                                 @for(each of product.basePrice;track $index){
-                                  <span class="sm:border-r sm:pr-1 sm:border-gray-300">{{each.name}} ${{ each.price }}</span>
+                                  <span class="sm:border-r sm:pr-1 sm:border-gray-300 text-md md:text-lg">{{each.name}} ${{ each.price }}</span>
                                 }
                               </div>
                             </div>
@@ -227,25 +227,25 @@
               </div>
               <div class="w-full bg-white h-auto flex flex-col mt-4 rounded-lg pt-4 px-4">
                 <div class="flex flex-col md:flex-row md:items-start mb-3">
-                  <div class="font-bold text-gray-700 md:w-24 shrink-0">推薦品項：</div>
+                  <div class="font-bold text-gray-700 md:w-24 shrink-0 text-md md:text-lg">推薦品項：</div>
                   <div class="text-gray-600 flex-1 mt-1 md:mt-0">
                     @for(item of menuVoList; track $index) {
                       @for(id of recommend; track $index) {
                         @if(item.id == id) {
-                        <span class="inline-block bg-white px-2 py-1 rounded border border-gray-200 text-xs mr-2 mb-2">{{item.name}}</span>
+                          <span class="inline-block bg-white px-2 py-1 rounded border border-gray-200 text-sm mr-2 mb-2">{{item.name}}</span>
                         }
                       }
                     }
                   </div>
                 </div>
-                <div class="flex flex-col md:flex-row md:items-start">
+                <div class="flex flex-col md:flex-row md:items-start text-md md:text-lg">
                   <div class="font-bold text-gray-700 md:w-24 shrink-0">推薦說明：</div>
                   <div class="flex flex-col flex-1">
                     <textarea class="border-1 border-gray-400/70 rounded-md resize-none p-1 overflow-y-auto placeholder:text-gray-500"
                       [(ngModel)]="recommendDescription" maxlength="200"
                       placeholder="請輸入說明 (限 200 字)" rows="3" style="min-height: 90px;">
                     </textarea>
-                    <div class="text-right text-xs text-gray-400 mt-2 mr-3 mb-1">
+                    <div class="text-right text-sm text-gray-400 mt-2 mr-3 mb-1">
                       {{ recommendDescription?.length || 0 }} / 200
                     </div>
                   </div>
@@ -255,7 +255,7 @@
           </div>
           <div class="event-div each-div pb-4 sm:pb-6 md:pb-8">
             <div class="div-title">填寫開團資料</div>
-            <div class="div-content w-full">
+            <div class="div-content w-full text-md md:text-lg">
               <div class="flex flex-col md:flex-row md:justify-between">
                 <span class="pb-2 md:pr-2 md:w-[25vw]">
               <!-- <div class="text-[15px] pr-2 pb-1">
@@ -273,7 +273,7 @@
                         </p-floatlabel>
                     </div>
                   </p-inputgroup>
-                  <div class="text-right text-[10px] text-gray-400 pr-2 pb-1">
+                  <div class="text-right text-[15px] text-gray-400 pr-2 pb-1">
                     {{ eventName?.length || 0 }} / 50
                   </div>
                 </span>
@@ -337,7 +337,7 @@
                         </p-floatlabel>
                     </div>
                   </p-inputgroup>
-                  <div class="text-right text-[10px] text-gray-400 pr-2 pb-1">
+                  <div class="text-right text-[15px] text-gray-400 pr-2 pb-1">
                     {{ pickLocation?.length || 0 }} / 50
                   </div>
                 </span>
@@ -380,7 +380,7 @@
                     </p-floatlabel>
                   </div>
                 </p-inputgroup>
-                <div class="text-right text-[10px] text-gray-400 pr-2 pb-1">
+                <div class="text-right text-[15px] text-gray-400 pr-2 pb-1">
                   {{ announcement?.length || 0 }} / 500
                 </div>
               </label>
@@ -389,8 +389,8 @@
         </div>
       </div>
     </div>
-    <div class="event-div each-div pb-4 sm:pb-6 md:pb-8 flex justify-around">
-      <button (click)="cancel()" class="Btn"><i class="pi pi-arrow-left mr-1"></i>取消填寫</button>
+    <div class="event-div each-div pb-4 sm:pb-6 md:pb-8 flex justify-around text-md md:text-lg">
+      <button (click)="cancel()" class="Btn"><i class="pi pi-arrow-left mr-1"></i>取消返回</button>
       <button (click)="goCheck()" class="Btn">送出預覽<i class="pi pi-arrow-right ml-1"></i></button>
     </div>
   }@else if(isPreview) {
@@ -402,8 +402,8 @@
           <div class="event-div each-div">
             <div class="div-title">拆帳模式</div>
             <div class="div-content">
-              <span>您已選擇 </span><span class="text-lg font-bold mr-4">{{choice}}</span>
-              <span class="text-sm text-red-500">(已同意拆帳聲明)</span>
+              <span class="text-md md:text-lg">您已選擇 </span><span class=" text-lg md:text-xl font-bold mr-4">{{choice}}</span>
+              <span class="text-md text-red-500">(已同意拆帳聲明)</span>
             </div>
           </div>
           <div class="event-div each-div">
@@ -415,7 +415,7 @@
                     <div class="relative flex-1 overflow-hidden">
                       <!-- TabList -->
                       <p-tablist class="flex h-full items-center overflow-x-auto whitespace-nowrap
-                                    pr-20 custom-scrollbar hide-scrollbar">
+                                    pr-20 custom-scrollbar hide-scrollbar text-md md:text-lg">
                         @for (type of uniqueTabs; track $index) {
                           <p-tab [value]="type.id">{{ type.categoryName }}</p-tab>
                         }
@@ -432,7 +432,7 @@
                           <div class="product-item md:min-w-[270px]">
                             <img [src]="item.image ? item.image : 'no-product-image.jpg'"
                               (error)="$any($event.target).src = 'no-product-image.jpg'"
-                              class="w-[100px] md:w-[60px] aspect-square object-cover rounded-sm mr-2">
+                              class="w-[100px] md:w-[100px] aspect-square object-cover rounded-sm mr-2">
                             <div class=" flex flex-col w-full lg:flex-1">
                               <div class="flex justify-between">
                                 <div class="font-bold">{{ item.name }}<i class="pi pi-tag text-sm"></i></div>
@@ -449,14 +449,14 @@
                     </p-tabpanel>
                   </div>
                 </p-tabs>
-                <div class="w-full bg-white h-auto flex flex-col mt-4 rounded-lg pt-4 px-4">
+                <div class="w-full bg-white h-auto flex flex-col mt-4 rounded-lg pt-4 px-4 text-md md:text-lg">
                   <div class="flex flex-col md:flex-row md:items-start mb-3">
                     <div class="font-bold text-gray-700 md:w-24 shrink-0">推薦品項：</div>
                     <div class="text-gray-600 flex-1 mt-1 md:mt-0">
                       @for(item of menuVoList; track $index) {
                         @for(id of recommend; track $index) {
                           @if(item.id == id) {
-                            <span class="inline-block bg-white px-2 py-1 rounded border border-gray-200 text-xs mr-2 mb-2">{{item.name}}</span>
+                            <span class="inline-block bg-white px-2 py-1 rounded border border-gray-200 text-sm mr-2 mb-2">{{item.name}}</span>
                           }
                         }
                       }
@@ -473,7 +473,7 @@
           </div>
           <div class="event-div each-div pb-4 sm:pb-6 md:pb-8">
             <div class="div-title">填寫開團資料</div>
-            <div class="div-content w-full">
+            <div class="div-content w-full text-md md:text-lg">
               <div class="setting-span">
                 <div class="pr-2 pb-1">
                   <span class="text-[#662222]">開團名稱：</span>
@@ -516,7 +516,7 @@
         </div>
       </div>
     </div>
-    <div class="event-div each-div pb-4 sm:pb-6 md:pb-8 flex justify-around">
+    <div class="event-div each-div pb-4 sm:pb-6 md:pb-8 flex justify-around text-md md:text-lg">
       <button (click)="revise()" class="Btn"><i class="pi pi-arrow-left mr-1"></i>返回修改</button>
       <button (click)="addEvent()" class="Btn">確認儲存<i class="pi pi-arrow-right ml-1"></i></button>
     </div>
