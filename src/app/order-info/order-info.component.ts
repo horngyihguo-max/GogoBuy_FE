@@ -107,6 +107,7 @@ export class OrderInfoComponent implements OnInit {
 
 
   ngOnInit() {
+    this.userId = String(localStorage.getItem('user_id') || '');
     this.host = [
       { label: 'Personal' },
       { label: 'Confirmation' }

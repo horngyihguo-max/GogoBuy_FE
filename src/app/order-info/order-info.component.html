@@ -1,43 +1,4 @@
-<!-- 電腦版專用底部固定導航 (Sticky Footer) - 僅在 md 以上顯示 -->
-<div
-  class="hidden md:block fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 shadow-[0_-10px_20px_rgba(0,0,0,0.05)] z-[100] py-4 px-6">
-  <div class="max-w-5xl mx-auto flex items-center justify-between">
-    <div class="flex items-center gap-6">
-      <div class="flex flex-col">
-        <span class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">應付總計</span>
-        <div class="text-2xl font-black text-emerald-600">NT$ {{ totalAmount }}</div>
-      </div>
-      @if (activeIndex === 0) {
-      <button type="button"
-        class="flex items-center px-4 py-2 rounded-lg border-2 border-slate-200 text-slate-600 text-sm font-bold hover:bg-slate-50 transition-colors cursor-pointer"
-        (click)="exportToCSV()">
-        <i class="pi pi-file-excel mr-2"></i>匯出 CSV
-      </button>
-      }
-    </div>
-    <div class="flex items-center gap-4">
-      <button type="button"
-        class="w-32 py-3 rounded-xl bg-slate-100 text-slate-700 font-bold hover:bg-slate-200 transition-colors active:scale-95 cursor-pointer text-center"
-        (click)="onSecondaryAction()">
-        {{ activeIndex === 0 ? '返回' : '上一步' }}
-      </button>
-      <button type="button"
-        class="w-48 py-3 rounded-xl bg-[#769902] text-white font-bold hover:bg-[#658302] shadow-lg shadow-[#769902]/20 transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
-        (click)="onPrimaryAction()">
-        <span>
-          @if (activeIndex === 0) {
-          {{ mode === 'host' ? '核對名單' : '確認送訂單' }}
-          } @else {
-          確認結算
-          }
-        </span>
-        <i class="pi" [ngClass]="(activeIndex === 0 && mode === 'host') ? 'pi-arrow-right' : 'pi-check-circle'"></i>
-      </button>
-    </div>
-  </div>
-</div>
-
-<section class="max-w-5xl mx-auto p-4 md:p-6 pb-20 md:pb-32">
+<section class="max-w-5xl mx-auto p-4 md:p-6 pb-12">
   <!-- 響應式 Header: 手機版垂直排列，電腦版水平分散 -->
   <div class="flex flex-col md:flex-row items-center justify-between gap-4 mb-6 mt-4">
     <div class="flex items-center gap-3">
@@ -231,28 +192,6 @@
         }
       </div>
 
-      <!-- 手機版專用操作按鈕區 (僅 mobile 顯示) -->
-      <div
-        class="flex md:hidden bg-slate-50 p-6 rounded-2xl border border-slate-200 flex-col sm:flex-row items-center justify-between gap-6">
-        <div class="flex flex-col items-center sm:items-start">
-          <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">應付總計</span>
-          <div class="text-3xl font-black text-emerald-600">NT$ {{ totalAmount }}</div>
-        </div>
-
-        <div class="flex flex-row w-full sm:w-auto gap-4">
-          <button type="button"
-            class="flex-1 sm:w-32 py-4 rounded-xl bg-white border border-slate-200 text-slate-700 font-bold hover:bg-slate-50 transition-colors active:scale-95 text-center cursor-pointer"
-            (click)="onSecondaryAction()">
-            返回
-          </button>
-          <button type="button"
-            class="flex-[2] sm:w-60 py-4 rounded-xl bg-[#769902] text-white font-bold hover:bg-[#658302] shadow-xl shadow-[#769902]/20 transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
-            (click)="onPrimaryAction()">
-            <span class="text-lg">{{ mode === 'host' ? '核對名單' : '確認送訂單' }}</span>
-            <i class="pi text-xl" [ngClass]="mode === 'host' ? 'pi-arrow-right' : 'pi-check-circle'"></i>
-          </button>
-        </div>
-      </div>
     </div>
     }
 
@@ -274,23 +213,65 @@
           點擊確認送出後，系統將結算訂單狀態並通知團員。此動作不可逆，請再次確認購物清單。
         </p>
 
-        <!-- 手機版專用按鈕區 -->
-        <div class="flex md:hidden flex-col sm:flex-row items-center justify-center gap-4">
-          <button type="button"
-            class="w-full sm:w-40 py-4 rounded-xl text-slate-600 font-bold border-2 border-slate-200 hover:bg-slate-50 transition-colors active:scale-95 cursor-pointer"
-            (click)="onSecondaryAction()">
-            返回檢查
-          </button>
-          <button type="button"
-            class="w-full sm:w-60 py-4 rounded-xl bg-[#769902] text-white font-bold hover:bg-[#658302] shadow-xl shadow-[#769902]/20 transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
-            (click)="onPrimaryAction()">
-            <i class="pi pi-check-circle text-xl"></i>
-            <span class="text-lg">確認結算</span>
-          </button>
-        </div>
       </div>
     </div>
     }
+    }
+  </div>
+
+  <!-- 統一底部操作區 (替代原本的 Sticky Footer) -->
+  <div class="mt-8 pt-8 border-t border-slate-200">
+    <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+      <!-- 左側：總計與匯出 (Desktop) / 總計 (Mobile) -->
+      <div class="flex flex-col md:flex-row items-center gap-6 w-full md:w-auto text-center md:text-left">
+        <div>
+          <span class="text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">應付總計</span>
+          <div class="text-3xl md:text-4xl font-black text-emerald-600">NT$ {{ totalAmount }}</div>
+        </div>
+
+        @if (activeIndex === 0 && groupedOrders.length) {
+        <button type="button"
+          class="hidden md:flex items-center px-5 py-2.5 rounded-xl border-2 border-slate-200 text-slate-600 text-sm font-bold hover:bg-slate-50 hover:border-slate-300 transition-all cursor-pointer"
+          (click)="exportToCSV()">
+          <i class="pi pi-file-excel mr-2"></i>匯出 CSV
+        </button>
+        }
+      </div>
+
+      <!-- 右側：主要操作按鈕 -->
+      <div class="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
+        <button type="button"
+          class="w-full sm:w-32 py-4 md:py-3.5 rounded-2xl bg-slate-100 text-slate-700 font-bold hover:bg-slate-200 transition-all active:scale-95 cursor-pointer text-center"
+          (click)="onSecondaryAction()">
+          {{ activeIndex === 0 ? '返回' : '上一步' }}
+        </button>
+
+        @if (mode === 'host') {
+        <button type="button"
+          class="w-full sm:w-64 py-4 md:py-3.5 rounded-2xl bg-[#769902] text-white font-bold hover:bg-[#658302] shadow-xl shadow-[#769902]/20 transition-all active:scale-95 flex items-center justify-center gap-3 cursor-pointer"
+          (click)="onPrimaryAction()">
+          <span class="text-lg md:text-base">
+            @if (activeIndex === 0) {
+            核對名單
+            } @else {
+            確認結算
+            }
+          </span>
+          <i class="pi text-xl md:text-lg" [ngClass]="(activeIndex === 0) ? 'pi-arrow-right' : 'pi-check-circle'"></i>
+        </button>
+        }
+      </div>
+    </div>
+
+    <!-- Mobile 專用：匯出按鈕 (放在最下面) -->
+    @if (activeIndex === 0 && groupedOrders.length) {
+    <div class="mt-4 md:hidden w-full">
+      <button type="button"
+        class="w-full flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-slate-200 text-slate-500 font-bold bg-white active:bg-slate-50 transition-colors"
+        (click)="exportToCSV()">
+        <i class="pi pi-file-excel"></i> 匯出明細 CSV
+      </button>
+    </div>
     }
   </div>
 </section>
