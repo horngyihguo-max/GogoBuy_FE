@@ -109,8 +109,8 @@ export class OrderInfoComponent implements OnInit {
   ngOnInit() {
     this.userId = String(localStorage.getItem('user_id') || '');
     this.host = [
-      { label: 'Personal' },
-      { label: 'Confirmation' }
+      { label: '查看訂單明細' },
+      { label: '確認' }
     ];
     this.member = [
       { label: 'Confirmation' }
@@ -555,7 +555,7 @@ export class OrderInfoComponent implements OnInit {
                 confirmButtonColor: "#3085d6",
                 cancelButtonColor: "rgb(24, 173, 54)",
                 confirmButtonText: "返回首頁",
-                cancelButtonText: "查看歷史訂單"
+                cancelButtonText: "查看訂單"
               }).then((result) => {
                 if (result.isConfirmed) {
                   this.router.navigate(['/gogobuy/home'])

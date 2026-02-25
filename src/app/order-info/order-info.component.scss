@@ -4,7 +4,7 @@
     --done: #769902;
     --todo: #e5e7eb;
     --seg: calc(100% / var(--ggb-count));
-
+    --p-steps-item-label-font-weight: 700;
   }
 
   /* 強制每個 step 等寬，點點中心才會等距 */
@@ -70,6 +70,7 @@
     :host ::ng-deep .ggb-progress .p-steps-item-label {
       display: none !important;
     }
+
     :host ::ng-deep .ggb-progress {
       --dot: 28px;
     }

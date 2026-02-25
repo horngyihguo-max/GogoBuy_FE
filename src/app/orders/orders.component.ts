@@ -85,6 +85,7 @@ export interface OrderHistoryDTO {
   pickupTime: string | null;
   eventPickupTime: string | null;
   pickLocation: string | null;
+  personalMemo: string | null;
 }
 
 export interface OrderHistoryRes {
@@ -219,11 +220,11 @@ export class OrdersComponent {
               pickupStatus: item.pickupStatus,
               pickupTime: item.pickupTime ? new Date(item.pickupTime) : null,
               eventPickupTime: item.eventPickupTime ? new Date(item.eventPickupTime) : null,
+              personalMemo: item.personalMemo,
               items: item.items.map(i => ({
                 name: i.menuName,
                 qty: i.quantity,
-                price: i.quantity > 0 ? (i.subtotal / i.quantity) : 0,
-                note: i.personalMemo
+                price: i.quantity > 0 ? (i.subtotal / i.quantity) : 0
               }))
             };
           });

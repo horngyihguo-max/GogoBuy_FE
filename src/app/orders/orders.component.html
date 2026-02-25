@@ -165,7 +165,11 @@
                   </div>
 
                   <div class="flex items-center gap-3">
-                    <button (click)="edit(item)">修改</button>
+                    <button type="button"
+                      class="px-4 py-2 rounded-full border border-slate-200 text-slate-600 font-bold hover:bg-slate-50 active:scale-[0.98] cursor-pointer"
+                      (click)="edit(item)">
+                      修改
+                    </button>
                     <button type="button"
                       class="px-4 py-2 rounded-full text-white font-bold active:scale-[0.98] cursor-pointer"
                       [ngClass]="item.isHost? 'bg-emerald-600 hover:bg-emerald-700': 'bg-sky-600 hover:bg-sky-700'"
@@ -353,7 +357,7 @@
         <p class="text-base font-medium text-slate-700">點擊按鈕可快速切換狀態</p>
       </div>
 
-      <div class="overflow-hidden rounded-2xl border border-slate-100 bg-slate-50/30">
+      <div class="overflow-hidden rounded-2xl border border-slate-100 bg-slate-50/30 table-auto md:table-fixed">
         <table class="w-full text-left border-collapse">
           <thead
             class="bg-white text-slate-500 text-base font-black uppercase tracking-wider border-b border-slate-100">
@@ -492,6 +496,16 @@
             <div class="font-bold text-base ">電話：{{ o.phone }}</div>
           </div>
 
+          @if (o.personalMemo) {
+          <div class="border-b pb-2">
+            <div
+              class="text-base text-slate-700 font-medium bg-amber-50 px-3 py-1.5 rounded-lg border border-amber-100">
+              <span class="text-amber-800 font-bold mr-2"><i class="pi pi-info-circle text-xs mr-1"></i>訂單備註：</span>
+              {{ o.personalMemo }}
+            </div>
+          </div>
+          }
+
           <!-- 訂單品項 -->
           <div class="items space-y-2">
             @for (it of o.items; track $index) {
@@ -499,9 +513,6 @@
               <div class="font-medium font-bold">{{ it.name }}</div>
               <div class="text-base font-bold text-slate-600">
                 x{{ it.qty }}｜{{ it.price }} 元
-
-                <!-- 只有有備註才顯示 -->
-                @if (it.note) { <span class="text-orange-500">｜備註：{{ it.note }}</span> }
               </div>
             </div>
             }
@@ -526,7 +537,7 @@
     } @empty {
 
     <!-- 當 orders 為空時顯示 -->
-    <div class="p-8 text-center font-bold text-lgtext-slate-700">目前沒有訂單</div>
+    <div class="p-8 text-center font-bold text-lg text-slate-700">目前沒有訂單</div>
     }
   </p-accordion>
 </ng-template>
