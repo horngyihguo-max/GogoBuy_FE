@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
 import { PopularService } from '../@service/popular.service';
+import { Router } from '@angular/router';
 
 interface StatusOption {
   label: string;
@@ -15,6 +16,7 @@ interface SalesLeaderboardProjection {
   salesVolume: number;
   menuId: number;
   productImage: string;
+  storeId: number;
 }
 @Component({
   selector: 'app-popular',
@@ -29,7 +31,7 @@ interface SalesLeaderboardProjection {
 })
 export class PopularComponent {
 
-  constructor(private popularService: PopularService) { }
+  constructor(private popularService: PopularService, private router: Router) { }
 
   salesDetailList = signal<SalesLeaderboardProjection[]>([]);
 
@@ -66,6 +68,10 @@ export class PopularComponent {
       },
       error: (err: any) => console.error(err),
     });
+  }
+
+  goStore(storeId: number) {
+    this.router.navigate(['/management/store_info', storeId])
   }
 
 }

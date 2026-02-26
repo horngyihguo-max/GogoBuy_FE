@@ -395,6 +395,13 @@ export class PersonInfoEditComponent {
             Swal.showValidationMessage('新密碼不可與確認新密碼不同');
             return;
           }
+
+          const pwdRegex = /^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z0-9]{8,16}$/;
+          if (!pwdRegex.test(newEl.value)) {
+            Swal.showValidationMessage('新密碼需包含英文與數字，長度 8–16 碼，不包含特殊符號');
+            return;
+          }
+
           return [oldEl.value, newEl.value] as [string, string];
         },
       });

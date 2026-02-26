@@ -36,8 +36,9 @@ export class NearbyBarComponent implements OnInit, OnDestroy {
   mode = signal<Mode>('idle');
   status = signal('');
 
-  radius = signal<5 | 10 | 15 | 20>(5);
+  radius = signal<0 | 5 | 10 | 15 | 20>(0);
   radiusOptions = [
+    { label: '全區搜尋', value: 0 },
     { label: '5 km', value: 5 },
     { label: '10 km', value: 10 },
     { label: '15 km', value: 15 },
@@ -102,7 +103,13 @@ export class NearbyBarComponent implements OnInit, OnDestroy {
         const lat = pos.coords.latitude;
         const lng = pos.coords.longitude;
         this.lastLatLng = { lat, lng };
-        this.fetchByGeo(lat, lng);
+
+        if (this.radius() > 0) {
+          this.fetchByGeo(lat, lng); // 只有半徑>0才偵測附近
+        } else {
+          this.clearNearby(); // 全區搜尋就直接全部商家
+        }
+
         this.dialogVisible = false;
         this.status.set('完成');
       },
@@ -123,16 +130,27 @@ export class NearbyBarComponent implements OnInit, OnDestroy {
   }
 
   onRadiusChange(v: number) {
-    const allowed = [5, 10, 15, 20] as const;
-    const next = allowed.includes(v as any) ? (v as 5 | 10 | 15 | 20) : 5;
+    const allowed = [0, 5, 10, 15, 20] as const;
+    const next = allowed.includes(v as any) ? (v as 0 | 5 | 10 | 15 | 20) : 5;
+    const prev = this.radius(); // 先記錄前一個值
     this.radius.set(next);
 
-    // 半徑改變就重查
+    if (next == 0) {
+      // 全區搜尋，不用定位
+      this.clearNearby();
+      return;
+    }
+
+    // 半徑 > 0 的情況
     if (this.mode() == 'auto' && this.lastLatLng) {
       this.fetchByGeo(this.lastLatLng.lat, this.lastLatLng.lng);
     }
-    if (this.mode() == 'manual' && this.address().trim()) {
+    else if (this.mode() == 'manual' && this.address().trim()) {
       this.fetchByAddress(this.address().trim());
+    }
+    else if (this.mode() == 'idle' && prev === 0 && this.lastLatLng) {
+      // 從全區搜尋切換到半徑時，自動啟動 GPS
+      this.startAutoOnce();
     }
   }
 
@@ -168,5 +186,7 @@ export class NearbyBarComponent implements OnInit, OnDestroy {
     // 回到原本「全部店家 + 全部開團」
     this.auths.performSearch('');
     this.auths.events.set(this.auths.eventsAll());
+    // 將半徑選單跳到「全區搜尋」
+    this.radius.set(0);
   }
 }
