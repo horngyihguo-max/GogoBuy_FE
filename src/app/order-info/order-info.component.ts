@@ -258,32 +258,46 @@ export class OrderInfoComponent implements OnInit {
   }
 
   exportToCSV() {
-    // 準備 CSV 的表頭
-    const headers = ['群組/訂購人', '商品名稱', '選項/備註', '單價', '數量', '小計'];
     const rows = [];
 
-    // 放入表頭
-    rows.push(headers.join(','));
+    // 1. [美化] 增加頂部活動摘要
+    rows.push(`"【團購訂單核對明細表】"`);
+    rows.push(`"活動名稱：","${this.eventName || '管理員團購'}"`);
+    rows.push(`"商店：","${this.storeName || '未知商家'}"`);
+    rows.push(`"全團結算金額：","$${this.totalAmount}"`);
+    rows.push(`"匯出時間：","${new Date().toLocaleString()}"`);
+    rows.push(''); // 空行
 
-    // 扁平化資料並放入 rows
+    // 2. [表格表頭]
+    const headers = ['群組/訂購人', '商品名稱', '選項細節', '個人備註', '單價', '數量', '小計'];
+    rows.push(headers.join(','));
+    rows.push('----------------------------------------------------------------------------------------------------');
+
+    // 3. [填充資料]
     const grouped = this.groupedOrders;
     for (const group of grouped) {
-      for (const order of group.orders) {
-        // 避免 CSV 欄位中含有逗號造成錯位，內容值用雙引號包起來
-        const person = `"${group.nickname}"`;
-        const item = `"${order.menuName}"`;
-        const optionsAndMemo = `"${this.formatSelectedOptionList(order.parsedOptions)} ${order.personalMemo || ''}"`.trim();
+      group.orders.forEach((order, index) => {
+        // 只有第一筆顯示頭像/暱稱
+        const personCell = index === 0 ? `"${group.nickname}"` : '""';
+        const memoCell = index === 0 ? `"${order.personalMemo || ''}"` : '""';
+
+        const itemName = `"${order.menuName}"`;
+        const options = `"${this.formatSelectedOptionList(order.parsedOptions)}"`;
         const price = order.quantity ? order.subtotal / order.quantity : 0;
         const qty = order.quantity;
-        const sub = order.subtotal;
+        const subtotal = order.subtotal;
 
-        rows.push([person, item, optionsAndMemo, price, qty, sub].join(','));
-      }
-      // 加入這個人的總計行
-      rows.push([`"${group.nickname} 總計"`, '', '', '', `"${group.totalQty}"`, `"${group.totalAmount}"`].join(','));
+        rows.push([personCell, itemName, options, memoCell, price, qty, subtotal].join(','));
+      });
+
+      // 個人小計行
+      rows.push([`"${group.nickname} 結算小計"`, '""', '""', '""', '""', `"${group.totalQty}"`, `"${group.totalAmount}"`].join(','));
+      rows.push('----------------------------------------------------------------------------------------------------');
     }
-    rows.push(['', '', '', '', '', '']);
-    rows.push([`"整筆總計"`, '', '', '', '', `"${this.totalAmount}"`].join(','));
+
+    // 4. [結尾總計]
+    rows.push('');
+    rows.push([`"★ 全報表核銷總計"`, '""', '""', '""', '""', '""', `"${this.totalAmount}"`].join(','));
 
     // 組合 CSV 字串
     const csvContent = rows.join('\n');
@@ -296,7 +310,7 @@ export class OrderInfoComponent implements OnInit {
     // 建立 <a> 元素下載檔案
     const link = document.createElement('a');
     link.href = url;
-    link.setAttribute('download', `${this.eventName || '訂單'}_明細.csv`);
+    link.setAttribute('download', `${this.eventName || '訂單'}_核對明細_${new Date().toLocaleDateString()}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
