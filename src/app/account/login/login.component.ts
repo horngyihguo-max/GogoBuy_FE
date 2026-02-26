@@ -35,6 +35,8 @@ export class LoginComponent {
     password: '',
   };
 
+  agreedToPrivacyPolicy = false;
+
   ngOnInit(): void {
     this.user.email = "test2@gmail.com";
     this.user.password = 'test1234';
@@ -256,7 +258,7 @@ export class LoginComponent {
               return false;
             }
             if (!pwdRegex.test(pwd)) {
-              Swal.showValidationMessage('密碼需為 8-16 位英數混和');
+              Swal.showValidationMessage('密碼需包含英文與數字，長度 8–16 碼，不包含特殊符號');
               return false;
             }
             if (pwd != conpwd) {
@@ -284,6 +286,23 @@ export class LoginComponent {
           });
         }
       },
+    });
+  }
+
+  showPrivacyPolicy() {
+    Swal.fire({
+      title: '隱私政策聲明',
+      html: `
+        <div style="text-align: left; font-size: 14px; line-height: 1.6; color: #475569;">
+          <p>歡迎您註冊本團購電商平台。為提供團購下單、付款交易、物流配送、售後服務、客服支援及行銷通知等相關服務，我們將蒐集您的姓名、電子郵件地址、聯絡電話、收件地址及付款資訊等必要資料。</p>
+          <p style="margin-top: 10px;">您的個人資料僅於提供服務、履行契約義務、會員管理、統計分析及行銷推廣之目的範圍內使用。我們將採取合理之資訊安全措施，防止資料遭未經授權之存取、洩漏、竄改或毀損。於配送商品、金流處理或依法令要求之情況下，您的資料可能提供予物流業者、金流服務商或相關主管機關。</p>
+          <p style="margin-top: 10px;">您得依法請求查詢、閱覽、更正、刪除您的個人資料，或請求停止蒐集、處理及利用。若您不同意提供必要資料，可能影響註冊或訂單服務之完成。</p>
+          <p style="margin-top: 10px; font-weight: bold; color: #1e293b;">點擊「註冊」即表示您已閱讀、瞭解並同意本平台之隱私政策與服務條款。</p>
+        </div>
+      `,
+      confirmButtonText: '我知道了',
+      confirmButtonColor: '#7f1d1d',
+      width: '500px'
     });
   }
 }
