@@ -67,6 +67,11 @@ export class ProblemsComponent {
     }, 100); // 如果您的頁面有非同步 API 載入，這裡的時間可以稍微加長
   }
 
+  // 發送電子郵件
+  sendSupportEmail() {
+    window.location.href = 'mailto:gogobuy1041013@gogobuy.com';
+  }
+
 }
 
 interface FaqItem {

@@ -1002,12 +1002,22 @@ export class StoreComponent {
 
   }
 
-  openPublic() {
+  openPublic() { // 無使用
     if (this.id === 0) {
       this.displayPublishConfirm = true;
     } else {
       this.onSaveAll();
     }
+  }
+
+  nonPublishStore() {
+    this.storeData.publish = false;
+    this.onSaveAll();
+  }
+
+  yesPublishStore() {
+    this.storeData.publish = true;
+    this.onSaveAll();
   }
 
   // 存資料庫 ---------------------------------------------------------
@@ -1031,7 +1041,6 @@ export class StoreComponent {
       }
 
       if (this.storeData.id == 0) {
-        this.loading = true;
         const payload = {
           storesname: this.storeData.name,
           phone: this.storeData.phone,
@@ -1129,7 +1138,6 @@ export class StoreComponent {
   }
 
   updateStore() {
-    this.loading = true;
     const payload = {
       ...this.storeData, storesname: this.storeData.name,
       phone: this.storeData.phone,
