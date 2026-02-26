@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../@service/auth.service';
 import { HttpService } from '../../@service/http.service';
@@ -29,7 +29,7 @@ type TabMode = 'info' | 'order';
   templateUrl: './store-info.component.html',
   styleUrl: './store-info.component.scss',
 })
-export class StoreInfoComponent implements OnInit {
+export class StoreInfoComponent implements OnInit, OnDestroy {
   // =========================
   // 狀態
   // =========================
@@ -112,6 +112,7 @@ export class StoreInfoComponent implements OnInit {
 
     // 載入資料
     this.loadStoreById(this.storeId);
+    this.loadPopular(this.storeId);
     this.isEventOpen(this.storeId);
   }
 
@@ -164,6 +165,37 @@ export class StoreInfoComponent implements OnInit {
     } else {
       this.toggleFavorite(id);
     }
+  }
+
+  popular: any[] = [];
+  // 取得熱門餐點
+  loadPopular(storeId: number) {
+    this.http
+      .getApi(
+        `http://localhost:8080/gogobuy/salesStats/top10/${storeId}?type=MONTHLY`,
+      )
+      .subscribe({
+        next: (res: any) => {
+          console.log(res);
+          if (res?.code === 200) {
+            const pop = res.salesDetailList || [];
+            if (pop && pop.length > 0) {
+              // map只會取key值不重複的
+              this.popular = Array.from(
+                new Map(pop.map((item: any) => [item.menuId, item])).values(),
+              ).slice(0, 3); // 取最多3個但少於也不會報錯
+            }
+            console.log(this.popular);
+          }
+        },
+        error: () => {
+          console.log('熱門產品取得失敗');
+        },
+      });
+  }
+  // 判斷是不是熱門商品
+  isPopular(menuId: number) {
+    return this.popular.some((i) => i.menuId === menuId);
   }
 
   // =========================
@@ -460,20 +492,22 @@ export class StoreInfoComponent implements OnInit {
   // 按鈕：編輯 / 開團
   // =========================
   goEdit(): void {
-    const userDate = JSON.parse(this.user);
-    const role = userDate.role;
-    if (!this.userId) return;
-    if (!this.user || role === 'user') {
+    if (!this.isAdmin()) {
       this.toastWarn('無法修改', '只有管理員可以修改店家資訊');
       return;
     }
-    // if (this.isGroupOpening) {
-    //   this.toastWarn(
-    //     '重要警示',
-    //     '目前此店家正在開團，若進行修改，將強制終止所有正在進行的團購',
-    //   );
-    // }
     this.router.navigate(['/management/store_upsert', this.storeId]);
+  }
+
+  isAdmin() {
+    const userDate = JSON.parse(this.user);
+    const role = userDate.role;
+    if (!this.userId || !this.user) return false;
+    if (role === 'admin') {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   // 開團按鈕目前只有鎖 未登入 || 今日公休 || fast的休息時間
@@ -910,5 +944,9 @@ export class StoreInfoComponent implements OnInit {
     const gmap = 'https://www.google.com/maps/search/?api=1&query=';
     let mapUrl = gmap + encodeURIComponent(address);
     return mapUrl;
+  }
+
+  ngOnDestroy(): void {
+    this.enableScroll();
   }
 }

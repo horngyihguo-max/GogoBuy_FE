@@ -518,10 +518,15 @@
                       <div class="flex items-start justify-between gap-2">
                         <div
                           class="text-[20px] font-black text-red-950 truncate"
-                          pTooltip="{{ p.name }}"
-                          tooltipPosition="top"
                         >
-                          {{ p.name }}
+                          @if (isPopular(p.id)) {
+                            <label pTooltip="熱門商品" tooltipPosition="top"
+                              >🔥</label
+                            >
+                          }
+                          <span pTooltip="{{ p.name }}" tooltipPosition="top">{{
+                            p.name
+                          }}</span>
                         </div>
                         <div class="text-[18px] font-extrabold text-red-900">
                           ${{ p.basePrice }}
@@ -663,11 +668,16 @@
                     <div class="flex-1 min-w-0">
                       <div class="flex items-start justify-between gap-2">
                         <div
-                          class="text-[18px] md:text-[20px] font-black text-red-950 truncate"
-                          pTooltip="{{ p.name }}"
-                          tooltipPosition="top"
+                          class="text-[20px] font-black text-red-950 truncate"
                         >
-                          {{ p.name }}
+                          @if (isPopular(p.id)) {
+                            <label pTooltip="熱門商品" tooltipPosition="top"
+                              >🔥</label
+                            >
+                          }
+                          <span pTooltip="{{ p.name }}" tooltipPosition="top">{{
+                            p.name
+                          }}</span>
                         </div>
 
                         <div
@@ -967,7 +977,10 @@
           <div class="mt-4 flex items-start justify-between gap-3">
             <div class="min-w-0">
               <div class="text-[22px] md:text-[26px] font-black text-red-950">
-                {{ selectedProduct.name }}
+                @if (isPopular(selectedProduct.id)) {
+                  <label>🔥</label>
+                }
+                <span>{{ selectedProduct.name }}</span>
               </div>
 
               @if (selectedProduct.description) {
