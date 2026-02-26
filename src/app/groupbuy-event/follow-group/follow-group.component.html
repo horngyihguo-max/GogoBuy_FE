@@ -89,13 +89,13 @@
                         </span>
 
                         <!-- splitType badge -->
-                        <span
+                        <!-- <span
                           class="inline-flex items-center px-2.5 py-1 rounded-full text-sm font-bold bg-indigo-50 text-indigo-700"
                         >
                           {{
                             group.splitType === "EQUAL" ? "平分制" : "權重制"
                           }}
-                        </span>
+                        </span> -->
                       </div>
 
                       <h3
@@ -217,11 +217,11 @@
 
                   <!-- 詳細資訊卡片：RWD 1/2/3 欄 -->
                   <div
-                    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 md:gap-4"
+                    class="grid grid-cols-2 sm:grid-cols-6 lg:grid-cols-8 gap-3 md:gap-4"
                   >
                     <!-- type -->
                     <div
-                      class="rounded-2xl bg-gray-50 p-4 border border-black/5 lg:col-span-2"
+                      class="rounded-2xl bg-gray-50 p-4 border border-black/5 lg:col-span-2 sm:col-span-2"
                     >
                       <div class="text-sm text-gray-500 font-semibold">
                         類型
@@ -233,7 +233,7 @@
 
                     <!-- status -->
                     <div
-                      class="rounded-2xl bg-gray-50 p-4 border border-black/5 lg:col-span-2"
+                      class="rounded-2xl bg-gray-50 p-4 border border-black/5 lg:col-span-2 sm:col-span-2"
                     >
                       <div class="text-sm text-gray-500 font-semibold">
                         狀態
@@ -251,7 +251,7 @@
 
                     <!-- nickname -->
                     <div
-                      class="rounded-2xl bg-gray-50 p-4 border border-black/5 lg:col-span-2"
+                      class="rounded-2xl bg-gray-50 p-4 border border-black/5 lg:col-span-2 sm:col-span-2"
                     >
                       <div class="text-sm text-gray-500 font-semibold">
                         團主暱稱
@@ -265,7 +265,7 @@
 
                     <!-- shippingFee -->
                     <div
-                      class="rounded-2xl bg-gray-50 p-4 border border-black/5 lg:col-span-2"
+                      class="rounded-2xl bg-gray-50 p-4 border border-black/5 lg:col-span-2 sm:col-span-2"
                     >
                       <div class="text-sm text-gray-500 font-semibold">
                         運費
@@ -277,7 +277,7 @@
 
                     <!-- limitation -->
                     <div
-                      class="rounded-2xl bg-gray-50 p-4 border border-black/5 lg:col-span-2"
+                      class="rounded-2xl bg-gray-50 p-4 border border-black/5 lg:col-span-2 sm:col-span-2"
                     >
                       <div class="text-sm text-gray-500 font-semibold">
                         成團門檻
@@ -287,8 +287,20 @@
                       </div>
                     </div>
 
-                    <!-- splitType -->
+                    <!-- totalOrderAmount -->
                     <div
+                      class="rounded-2xl bg-gray-50 p-4 border border-black/5 lg:col-span-2 sm:col-span-2"
+                    >
+                      <div class="text-sm text-gray-500 font-semibold">
+                        目前累積金額
+                      </div>
+                      <div class="mt-1 text-lg font-bold text-gray-900">
+                        {{ group.totalOrderAmount }} 元
+                      </div>
+                    </div>
+
+                    <!-- splitType -->
+                    <!-- <div
                       class="rounded-2xl bg-gray-50 p-4 border border-black/5 lg:col-span-2"
                     >
                       <div class="text-sm text-gray-500 font-semibold">
@@ -297,11 +309,11 @@
                       <div class="mt-1 text-lg font-bold text-gray-900">
                         {{ group.splitType === "EQUAL" ? "平分制" : "權重制" }}
                       </div>
-                    </div>
+                    </div> -->
 
                     <!-- pickupTime -->
                     <div
-                      class="rounded-2xl bg-gray-50 p-4 sm:col-span-2 lg:col-span-3 border border-black/5"
+                      class="rounded-2xl bg-gray-50 p-4 sm:col-span-2 lg:col-span-4 border border-black/5 col-span-2"
                     >
                       <div class="text-sm text-gray-500 font-semibold">
                         預計取餐時間
@@ -313,7 +325,7 @@
 
                     <!-- pickLocation -->
                     <div
-                      class="rounded-2xl bg-gray-50 p-4 border border-black/5 lg:col-span-3"
+                      class="rounded-2xl bg-gray-50 p-4 border border-black/5 lg:col-span-4 sm:col-span-2 col-span-2"
                     >
                       <div class="text-sm text-gray-500 font-semibold">
                         取餐地點
@@ -325,25 +337,13 @@
 
                     <!-- endTime -->
                     <div
-                      class="rounded-2xl bg-gray-50 p-4 sm:col-span-2 lg:col-span-3 border border-black/5"
+                      class="rounded-2xl bg-gray-50 p-4 sm:col-span-2 lg:col-span-4 border border-black/5 col-span-2"
                     >
                       <div class="text-sm text-gray-500 font-semibold">
                         截止時間
                       </div>
                       <div class="mt-1 text-lg font-bold text-gray-900">
                         {{ formatDateTime(group.endTime) }}
-                      </div>
-                    </div>
-
-                    <!-- totalOrderAmount -->
-                    <div
-                      class="rounded-2xl bg-gray-50 p-4 border border-black/5 lg:col-span-3"
-                    >
-                      <div class="text-sm text-gray-500 font-semibold">
-                        目前累積金額
-                      </div>
-                      <div class="mt-1 text-lg font-bold text-gray-900">
-                        {{ group.totalOrderAmount }} 元
                       </div>
                     </div>
                   </div>
@@ -518,10 +518,15 @@
                       <div class="flex items-start justify-between gap-2">
                         <div
                           class="text-[20px] font-black text-red-950 truncate"
-                          pTooltip="{{ p.name }}"
-                          tooltipPosition="top"
                         >
-                          {{ p.name }}
+                          @if (isPopular(p.id)) {
+                            <label pTooltip="熱門商品" tooltipPosition="top"
+                              >🔥</label
+                            >
+                          }
+                          <span pTooltip="{{ p.name }}" tooltipPosition="top">{{
+                            p.name
+                          }}</span>
                         </div>
                         <div class="text-[18px] font-extrabold text-red-900">
                           ${{ p.basePrice }}
@@ -663,11 +668,16 @@
                     <div class="flex-1 min-w-0">
                       <div class="flex items-start justify-between gap-2">
                         <div
-                          class="text-[18px] md:text-[20px] font-black text-red-950 truncate"
-                          pTooltip="{{ p.name }}"
-                          tooltipPosition="top"
+                          class="text-[20px] font-black text-red-950 truncate"
                         >
-                          {{ p.name }}
+                          @if (isPopular(p.id)) {
+                            <label pTooltip="熱門商品" tooltipPosition="top"
+                              >🔥</label
+                            >
+                          }
+                          <span pTooltip="{{ p.name }}" tooltipPosition="top">{{
+                            p.name
+                          }}</span>
                         </div>
 
                         <div
@@ -967,7 +977,10 @@
           <div class="mt-4 flex items-start justify-between gap-3">
             <div class="min-w-0">
               <div class="text-[22px] md:text-[26px] font-black text-red-950">
-                {{ selectedProduct.name }}
+                @if (isPopular(selectedProduct.id)) {
+                  <label>🔥</label>
+                }
+                <span>{{ selectedProduct.name }}</span>
               </div>
 
               @if (selectedProduct.description) {
@@ -1364,41 +1377,57 @@
     <div class="text-xl font-extrabold text-red-900">運費拆帳計算說明聲明</div>
   </ng-template>
   <div class="flex flex-col h-full max-h-[62vh] md:max-h-none">
-
     <div
       class="flex-grow overflow-y-auto pr-2 text-base text-gray-700 leading-relaxed custom-scrollbar"
     >
-      <p class="mb-4">
-        感謝您使用本平台團購服務，關於訂單運費之分攤方式，本平台依據以下邏輯進行運算...
+      <p class="mb-4 font-bold text-gray-800">
+        感謝您參與本平台團購，關於本訂單之運費收繳與退款機制，請詳細閱讀並同意以下聲明：
       </p>
+
       <div class="space-y-4">
         <section>
           <h4 class="font-bold text-gray-900 flex items-center gap-2">
-            <span class="w-2 h-2 bg-red-900 rounded-full"></span> 1. 平分制計算
+            <span class="w-2 h-2 bg-red-900 rounded-full"></span> 1.
+            固定運費預收制
           </h4>
           <p class="pl-4 mt-1 text-gray-600">
-            系統將總運費平均分配予每一位參與團員。
-          </p>
-        </section>
-        <section>
-          <h4 class="font-bold text-gray-900 flex items-center gap-2">
-            <span class="w-2 h-2 bg-red-900 rounded-full"></span> 2. 權重制計算
-          </h4>
-          <p class="pl-4 mt-1 text-gray-600">
-            依據每位團員之「訂單金額」比例進行運費分配。
+            為確保成團效率，所有參與團員於結帳時，系統將根據「開團者設定之配送距離」預收一筆固定金額運費。
           </p>
         </section>
 
-        <section class="bg-gray-50 p-3 rounded-md border-l-4 border-red-900">
-          <h4 class="font-bold text-red-900">※ 無法整除之處理 (餘數分配)</h4>
-          <p class="mt-1">若分攤金額計算至最小貨幣單位仍有餘數時...</p>
+        <section>
+          <h4 class="font-bold text-gray-900 flex items-center gap-2">
+            <span class="w-2 h-2 bg-red-900 rounded-full"></span> 2.
+            支付方式說明
+          </h4>
+          <p class="pl-4 mt-1 text-gray-600">
+            本平台之訂單費用（含預收運費）一律採取
+            <span class="font-bold text-[#00c300]">LINE PAY</span>
+            進行全額支付，不支援其他付款方式。
+          </p>
+        </section>
+
+        <section class="bg-red-50 p-4 rounded-md border-l-4 border-red-900">
+          <h4 class="font-bold text-red-900 flex items-center gap-2">
+            <i class="pi pi-info-circle"></i> 3. 結單後退款機制
+          </h4>
+          <p class="mt-2 text-gray-700">
+            待該團正式結單並確認最終參與人數後，系統將自動重新計算每位團員應負擔之實際運費，並採取以下措施：
+          </p>
           <ul class="list-disc pl-8 mt-2 space-y-1 text-gray-600">
-            <li><strong>隨機抽取：</strong>由系統隨機抽取負擔該餘數款項。</li>
-            <li><strong>公平原則：</strong>每位團員被抽中機率均等。</li>
+            <li>
+              <strong>溢收退回：</strong>
+              系統將自動計算預收與實際金額之差額，並退回至您的支付帳戶。
+            </li>
+            <li>
+              <strong>透明計算：</strong>
+              實際運費金額將顯示於訂單明細中，供隨時查閱。
+            </li>
           </ul>
         </section>
+
         <p class="text-sm text-gray-500 italic">
-          註：所有計算結果以系統最終產出之拆帳明細為準。
+          註：退款作業時間依金流平台處理進度為準，所有計算結果以系統產出之拆帳明細為最終依據。
         </p>
       </div>
     </div>

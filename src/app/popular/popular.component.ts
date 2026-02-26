@@ -1,8 +1,9 @@
-import { Component, signal } from '@angular/core';
+import { Component, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
 import { PopularService } from '../@service/popular.service';
+import { Router } from '@angular/router';
 
 interface StatusOption {
   label: string;
@@ -14,10 +15,12 @@ interface SalesLeaderboardProjection {
   productName: string;
   salesVolume: number;
   menuId: number;
+  productImage: string;
+  storeId: number;
 }
-
 @Component({
   selector: 'app-popular',
+  standalone: true,
   imports: [
     SelectModule,
     FormsModule,
@@ -28,7 +31,7 @@ interface SalesLeaderboardProjection {
 })
 export class PopularComponent {
 
-  constructor(private popularService: PopularService) { }
+  constructor(private popularService: PopularService, private router: Router) { }
 
   salesDetailList = signal<SalesLeaderboardProjection[]>([]);
 
@@ -37,6 +40,8 @@ export class PopularComponent {
 
   // 排行榜資料
   top10List = signal<any[]>([]);
+
+  topFive = computed(() => this.salesDetailList().slice(0, 5));
 
   statusOptions: StatusOption[] = [
     { label: '顯示全部時間', value: 'ALL' },
@@ -63,6 +68,10 @@ export class PopularComponent {
       },
       error: (err: any) => console.error(err),
     });
+  }
+
+  goStore(storeId: number) {
+    this.router.navigate(['/management/store_info', storeId])
   }
 
 }

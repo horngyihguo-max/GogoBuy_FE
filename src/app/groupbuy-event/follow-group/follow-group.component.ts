@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../@service/auth.service';
@@ -60,7 +60,7 @@ type ProductOptionGroup = {
   templateUrl: './follow-group.component.html',
   styleUrl: './follow-group.component.scss',
 })
-export class FollowGroupComponent {
+export class FollowGroupComponent implements OnDestroy {
   constructor(
     private auth: AuthService,
     private http: HttpService,
@@ -337,16 +337,8 @@ export class FollowGroupComponent {
       error: () => {
         this.toastWarn('讀取失敗', '取得既有訂單失敗');
         this.router.navigate(['/gogobuy/home']);
-        this.isLoading = false;
       },
     });
-
-    // =========================
-    // 假資料
-    // =========================
-    // const res = this.getMockOrderResponse();
-    // const parsed = this.parseGetOrderResponse(res);
-    // this.handleParsedExistingOrder(parsed);
   }
 
   // 將後端回傳的「大包」解析成我要的格式
@@ -491,32 +483,8 @@ export class FollowGroupComponent {
         }
         this.applyGroup(g);
         this.loadStoreById(g.storeId);
+        this.loadPopular(g.storeId);
       });
-
-    // 假資料
-    // const gRes = this.getMockGroupResponse();
-    // const g = gRes?.groupbuyEvents?.[0] as GroupbuyEvents | undefined;
-
-    // if (!g) {
-    //   this.toastWarn('錯誤', '找不到團資料');
-    //   this.goBack();
-    //   return;
-    // } else {
-    //   // 現在時間
-    //   const now = new Date();
-    //   const target = new Date(g.endTime);
-    //   if (now.getTime() > target.getTime()) {
-    //     this.toastWarn('超時', '此團已過期');
-    //     this.router.navigate(['/gogobuy/home']);
-    //     return;
-    //   }
-    // }
-
-    // this.applyGroup(g);
-
-    // =============================================
-    // STORE
-    // this.loadStoreById(this.storeId);
   }
 
   // 讀取店家資訊
@@ -532,12 +500,6 @@ export class FollowGroupComponent {
         this.afterLoaded();
         this.loadExistingOrder(this.groupId, this.userId);
       });
-
-    // 假資料
-    // const sRes = this.getMockResponse();
-    // this.store = this.normalizeStoreResponse(sRes);
-    // this.afterLoaded();
-    // this.loadExistingOrder(this.groupId, this.userId);
   }
 
   // 套用團資料：解析 tempMenuList / recommendList + 基本防呆
@@ -1832,6 +1794,10 @@ export class FollowGroupComponent {
     window.scrollTo(0, -parseInt(scrollY || '0'));
   }
 
+  ngOnDestroy(): void {
+    this.enableScroll();
+  }
+
   // 處理營業時間 ==============================================
   getGroupedOperatingHours(): Array<{
     dayLabel: string;
@@ -1960,322 +1926,37 @@ export class FollowGroupComponent {
     return [];
   }
 
-  // =========================
-  // 假資料
-  // =========================
-  // getMockGroupResponse(): any {
-  //   return {
-  //     code: 200,
-  //     message: '成功查詢資料',
-  //     groupbuyEvents: [
-  //       {
-  //         id: 8,
-  //         type: '餐廳',
-  //         status: 'OPEN',
-  //         hostId: '16c88406-e303-454d-bf60-508eb0f6ba83',
-  //         nickname: '王大明',
-  //         eventName:
-  //           '快來買快來買快來買快來買快來買快來買快來買快來買快來買快來買快來買快來買快來買',
-  //         shippingFee: 0,
-  //         limitation: 200,
-  //         splitType: 'EQUAL',
-  //         endTime: '2026-02-20T21:20:30',
-  //         announcement:
-  //           '每杯買二送一～每杯買二送一～每杯買二送一～每杯買二送一～每杯買二送一～',
-  //         storesId: 70,
-  //         recommendList: '[123,124]',
-  //         tempMenuList: '[122,123,124]',
-  //         recommendDescription:
-  //           '強推雞尾酒強推雞尾酒強推雞尾酒強推雞尾酒強推雞尾酒強推雞尾酒強推雞尾酒強推雞尾酒強推雞尾酒強推雞尾酒強推雞尾酒強推雞尾酒強推雞尾酒強推雞尾酒',
-  //         totalOrderAmount: 100,
-  //         deleted: 0,
-  //       },
-  //     ],
-  //   };
-  // }
-
-  // getMockResponse(): any {
-  //   return {
-  //     code: 200,
-  //     message: '成功',
-  //     storeList: [
-  //       {
-  //         id: 70,
-  //         name: '微醺之夜餐酒館 (Vibe Night)',
-  //         phone: '0423218888',
-  //         address: '台中市西區公益路二段99號',
-  //         category: 'fast',
-  //         type: '異國料理',
-  //         memo: '本館提供頂級松露料理與特調調酒，週五六提供深夜駐唱。',
-  //         image:
-  //           'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&q=80&w=1200',
-  //         feeDescription:
-  //           '[{"km":1,"fee":0},{"km":3,"fee":45},{"km":7,"fee":85},{"km":15,"fee":150}]',
-  //         deleted: false,
-  //         publish: true,
-  //         force_closed: false,
-  //         created_by: 'SystemManager',
-  //       },
-  //     ],
-  //     operatingHoursVoList: [
-  //       {
-  //         id: 61,
-  //         storesId: 70,
-  //         week: 1,
-  //         openTime: '11:00:00',
-  //         closeTime: '14:30:00',
-  //         closed: false,
-  //       },
-  //       {
-  //         id: 62,
-  //         storesId: 70,
-  //         week: 1,
-  //         openTime: '17:30:00',
-  //         closeTime: '22:00:00',
-  //         closed: false,
-  //       },
-  //       {
-  //         id: 63,
-  //         storesId: 70,
-  //         week: 2,
-  //         openTime: '11:00:00',
-  //         closeTime: '22:00:00',
-  //         closed: false,
-  //       },
-  //       {
-  //         id: 64,
-  //         storesId: 70,
-  //         week: 3,
-  //         openTime: '00:00:00',
-  //         closeTime: '00:00:00',
-  //         closed: true,
-  //       },
-  //       {
-  //         id: 65,
-  //         storesId: 70,
-  //         week: 4,
-  //         openTime: '11:00:00',
-  //         closeTime: '22:00:00',
-  //         closed: false,
-  //       },
-  //       {
-  //         id: 68,
-  //         storesId: 70,
-  //         week: 5,
-  //         openTime: '18:00:00',
-  //         closeTime: '02:00:00',
-  //         closed: false,
-  //       },
-  //       {
-  //         id: 69,
-  //         storesId: 70,
-  //         week: 6,
-  //         openTime: '18:00:00',
-  //         closeTime: '04:00:00',
-  //         closed: false,
-  //       },
-  //       {
-  //         id: 70,
-  //         storesId: 70,
-  //         week: 7,
-  //         openTime: '18:00:00',
-  //         closeTime: '00:00:00',
-  //         closed: false,
-  //       },
-  //     ],
-  //     menuVoList: [
-  //       {
-  //         id: 122,
-  //         storesId: 70,
-  //         categoryId: 1,
-  //         name: '松露金箔薯條',
-  //         description: '選用義大利頂級松露油與食用金箔裝飾',
-  //         basePrice: 220,
-  //         image:
-  //           'aHR0cHM6Ly9pbWdjZG4uY25hLmNvbS50dy93d3cvV2ViUGhvdG9zLzEwMjQvMjAyMTA3MjcvMTAyNHgxMDI0XzM3OTQyMDUzOTA4NS5qcGc=',
-  //         available: false,
-  //       },
-  //       {
-  //         id: 123,
-  //         storesId: 70,
-  //         categoryId: 1,
-  //         name: '紐奧良辣味雞翅翅翅翅翅翅翅',
-  //         description:
-  //           '獨家秘製辛香料，鮮嫩多汁。獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁獨家秘製辛香料，鮮嫩多汁',
-  //         basePrice: 280,
-  //         image:
-  //           'aHR0cHM6Ly9pbWFnZS1jZG4tZmxhcmUucWRtLmNsb3VkL3E2MDgxYzRmODFmMDFhL2ltYWdlL2RhdGEvJUU1JTk1JTg2JUU1JTkzJTgxJUU3JTg1JUE3JUU3JTg5JTg3LzEyXyVFNyVCNCU5MCVFNSVBNSVBNyVFOCU4OSVBRiVFOCVCRSVBMyVFNyVCRiU4NS8qJUU3JTk0JUEyJUU1JTkzJTgxJUU1JTlDJTk2LSVFNyVCNCU5MCVFNSVBNSVBNyVFOCU4OSVBRiVFOSU5QiU5RSVFNyVCRiU4NTAzLmpwZw==',
-  //         available: true,
-  //         unusual: {
-  //           '24': 'true',
-  //         },
-  //       },
-  //       {
-  //         id: 124,
-  //         storesId: 70,
-  //         categoryId: 59,
-  //         name: '午夜藍色夏威夷',
-  //         description: '伏特加基底搭配藍柑橘糖漿，口感清爽',
-  //         basePrice: 350,
-  //         image:
-  //           'aHR0cHM6Ly9hc3NldHMudG1lY29zeXMuY29tL2ltYWdlL3VwbG9hZC90X3dlYl9yZHBfcmVjaXBlXzU4NHg0ODBfMV81eC9pbWcvcmVjaXBlL3Jhcy9Bc3NldHMvOTA5REEyRjItODczOS00Mjk3LTkyQjAtMUQ4NkM5MjExMjMyL0Rlcml2YXRlcy8xMTZjZGIwNC05NDczLTQzZDAtOWVmZC1kOWY2ZjU5ZGZmYTMuanBn',
-  //         available: true,
-  //         unusual: {
-  //           '22': 'true',
-  //           '23': 'true',
-  //         },
-  //       },
-  //       {
-  //         id: 125,
-  //         storesId: 70,
-  //         categoryId: 58,
-  //         name: '深夜炸物大三元',
-  //         description: '包含雞塊、洋蔥圈、起司條',
-  //         basePrice: 450,
-  //         available: true,
-  //         unusual: {
-  //           '24': 'true',
-  //         },
-  //       },
-  //     ],
-  //     menuCategoriesVoList: [
-  //       {
-  //         id: 158,
-  //         storesId: 70,
-  //         name: '人氣單點小物',
-  //       },
-  //       {
-  //         id: 159,
-  //         storesId: 70,
-  //         name: '深夜炸物拼盤',
-  //         priceLevel: [
-  //           {
-  //             name: '雙人分享',
-  //             price: 250,
-  //           },
-  //           {
-  //             name: '派對特大',
-  //             price: 450,
-  //           },
-  //         ],
-  //       },
-  //       {
-  //         id: 160,
-  //         storesId: 70,
-  //         name: '特調調酒系列',
-  //         priceLevel: [
-  //           {
-  //             name: '標準',
-  //             price: 0,
-  //           },
-  //           {
-  //             name: '濃縮加強',
-  //             price: 200,
-  //           },
-  //         ],
-  //       },
-  //     ],
-  //     productOptionGroupsVoList: [
-  //       {
-  //         id: 145,
-  //         storesId: 70,
-  //         name: '基酒更換',
-  //         required: false,
-  //         maxSelection: 1,
-  //         items: [
-  //           { id: 47, groupId: 22, name: '換成琴酒 (Gin)', extraPrice: 50 },
-  //           { id: 48, groupId: 22, name: '換成伏特加 (Vodka)', extraPrice: 30 },
-  //           {
-  //             id: 55,
-  //             groupId: 22,
-  //             name: '換成威士忌 (Whisky)',
-  //             extraPrice: 80,
-  //           },
-  //         ],
-  //       },
-  //       {
-  //         id: 146,
-  //         storesId: 70,
-  //         name: '冰塊份量',
-  //         required: true,
-  //         maxSelection: 1,
-  //         items: [
-  //           { id: 49, groupId: 23, name: '正常冰', extraPrice: 0 },
-  //           { id: 50, groupId: 23, name: '少冰', extraPrice: 0 },
-  //           { id: 51, groupId: 23, name: '去冰', extraPrice: 0 },
-  //         ],
-  //       },
-  //       {
-  //         id: 144,
-  //         storesId: 70,
-  //         name: '加價沾醬 (可多選)',
-  //         required: false,
-  //         maxSelection: 3,
-  //         items: [
-  //           { id: 52, groupId: 24, name: '蜂蜜芥末醬', extraPrice: 20 },
-  //           { id: 53, groupId: 24, name: '松露蛋黃醬', extraPrice: 40 },
-  //           { id: 54, groupId: 24, name: '泰式酸辣醬', extraPrice: 20 },
-  //         ],
-  //       },
-  //     ],
-  //     feeDescriptionVoList: [
-  //       { km: 1, fee: 0 },
-  //       { km: 3, fee: 45 },
-  //       { km: 5, fee: 65 },
-  //       { km: 7, fee: 85 },
-  //       { km: 10, fee: 110 },
-  //       { km: 15, fee: 150 },
-  //     ],
-  //   };
-  // }
-
-  // 取得既存訂單資料（假資料）
-  // getMockOrderResponse(): any {
-  //   // 模擬未有既存資料
-  //   // return {
-  //   //   code: 404,
-  //   //   message: '未找到資料',
-  //   // };
-
-  //   // 模擬已有既存資料
-  //   return {
-  //     code: 0,
-  //     message: 'OK',
-  //     // 其他欄位先不管
-  //     groupbuyEvents: [],
-  //     orders: [],
-  //     personalOrder: [],
-  //     menuList: [],
-  //     groupsSearchViewList: [],
-  //     ordersSearchViewList: [],
-  //     cartData: [],
-  //     // 只要這個
-  //     ordersDto: {
-  //       eventsId: 8,
-  //       userId: 'string',
-  //       menuList: [
-  //         {
-  //           menuId: 124,
-  //           quantity: 1,
-  //           specName: '標準',
-  //           selectedOptionList: [
-  //             { optionName: '冰塊', value: '少冰' },
-  //             {
-  //               optionName: '基酒更換',
-  //               value: '換成伏特加 (Vodka)',
-  //               extraPrice: 30,
-  //             },
-  //           ],
-  //         },
-  //       ],
-  //       personalMemo: '要吸管',
-  //       weight: 0.1,
-  //     },
-  //   };
-  // }
-
-  // 測試用變數
-  test = {};
+  popular: any[] = [];
+  // 取得熱門餐點
+  loadPopular(storeId: number) {
+    this.http
+      .getApi(
+        `http://localhost:8080/gogobuy/salesStats/top10/${storeId}?type=MONTHLY`,
+      )
+      .subscribe({
+        next: (res: any) => {
+          console.log(res);
+          if (res?.code === 200) {
+            const pop = res.salesDetailList || [];
+            if (pop && pop.length > 0) {
+              // map只會取key值不重複的
+              this.popular = Array.from(
+                new Map(pop.map((item: any) => [item.menuId, item])).values(),
+              ).slice(0, 3); // 取最多3個但少於也不會報錯
+            }
+            console.log(this.popular);
+            this.isLoading = false;
+          }
+        },
+        error: () => {
+          console.log('熱門產品取得失敗');
+        },
+      });
+  }
+  // 判斷是不是熱門商品
+  isPopular(menuId: number) {
+    return this.popular.some((i) => i.menuId === menuId);
+  }
 }
 
 // 團的資料的interface

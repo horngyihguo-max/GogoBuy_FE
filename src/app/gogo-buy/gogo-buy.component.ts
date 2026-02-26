@@ -19,6 +19,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { AuthService } from '../@service/auth.service';
 import { SelectModule } from 'primeng/select';
 import { FeeDescriptionVoList, StoreService } from '../@service/store.service';
+import { PopularComponent } from '../popular/popular.component';
 
 export type Stores = {
   id: number;
@@ -119,6 +120,7 @@ interface StatusOption {
     TooltipModule,
     PanelModule,
     SelectModule,
+    PopularComponent
   ],
   templateUrl: './gogo-buy.component.html',
   styleUrl: './gogo-buy.component.scss'
