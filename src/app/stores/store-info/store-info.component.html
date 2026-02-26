@@ -94,7 +94,8 @@
                     </div>
                   </button>
 
-                  <button
+                  @if(isAdmin()){
+                    <button
                     (click)="goEdit()"
                     [disabled]="!userId || !user"
                     class="cursor-pointer px-5 py-2 rounded-full text-[17px] font-extrabold border transition disabled:opacity-50 disabled:cursor-not-allowed bg-white text-red-900 border-red-900 hover:bg-red-50"
@@ -105,6 +106,7 @@
                       <span class="hidden sm:inline">資訊</span>
                     </div>
                   </button>
+                  }
 
                   <button
                     (click)="goStartGroup()"
@@ -252,10 +254,17 @@
                         <div class="flex items-start justify-between gap-2">
                           <div
                             class="text-[20px] font-black text-red-950 truncate"
-                            pTooltip="{{ p.name }}"
-                            tooltipPosition="top"
                           >
-                            {{ p.name }}
+                            @if (isPopular(p.id)) {
+                              <label pTooltip="熱門商品" tooltipPosition="top"
+                                >🔥</label
+                              >
+                            }
+                            <span
+                              pTooltip="{{ p.name }}"
+                              tooltipPosition="top"
+                              >{{ p.name }}</span
+                            >
                           </div>
                           <div class="text-[18px] font-extrabold text-red-900">
                             ${{ p.basePrice }}
