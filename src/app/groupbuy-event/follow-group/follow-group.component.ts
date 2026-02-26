@@ -74,6 +74,7 @@ export class FollowGroupComponent {
   // =========================
   isLoading = true; // 是否讀取中
   userId = ''; // 用戶Id（未登入就空字串）
+  user: any | null = null; // 存用戶資料
   groupId = 0; // 團Id
   storeId = 0; // 店家Id
   openedPanels: string[] = []; // 目前展開的 panel value
@@ -124,7 +125,6 @@ export class FollowGroupComponent {
   // 前往店家 =======================================
   goToStore() {
     this.router.navigate(['/management/store_info', this.storeId]);
-    console.log('前往店面: ' + this.storeId);
   }
 
   // =========================
@@ -305,6 +305,7 @@ export class FollowGroupComponent {
   ngOnInit(): void {
     scroll(0, 0);
     this.userId = String(localStorage.getItem('user_id') || '');
+    this.user = localStorage.getItem('user_info');
     this.groupId = Number(this.route.snapshot.paramMap.get('id') || 0);
 
     if (!this.groupId) {
@@ -316,13 +317,18 @@ export class FollowGroupComponent {
     this.loadGroupById(this.groupId);
   }
 
+  getPhone() {
+    const userDate = JSON.parse(this.user);
+    const phone = userDate.phone;
+    return phone;
+  }
+
   // 取得既存訂單
   loadExistingOrder(groupId: number, userId: string): void {
     // =========================
     // 正式接 API 時
     // =========================
     const url = `http://localhost:8080/gogobuy/event/getAllOrdersByUserIdAndEventsId?user_id=${userId}&events_id=${groupId}`;
-    console.log('groupId是: ' + groupId + ' userId是: ' + userId);
     this.http.getApi(url).subscribe({
       next: (res: any) => {
         const parsed = this.parseGetOrderResponse(res);
@@ -484,7 +490,7 @@ export class FollowGroupComponent {
           }
         }
         this.applyGroup(g);
-        this.loadStoreById(g.storesId);
+        this.loadStoreById(g.storeId);
       });
 
     // 假資料
@@ -523,7 +529,6 @@ export class FollowGroupComponent {
       .subscribe((res: any) => {
         const normalized = this.normalizeStoreResponse(res);
         this.store = normalized;
-        console.log('店家資訊: ' + this.store);
         this.afterLoaded();
         this.loadExistingOrder(this.groupId, this.userId);
       });
@@ -538,8 +543,7 @@ export class FollowGroupComponent {
   // 套用團資料：解析 tempMenuList / recommendList + 基本防呆
   applyGroup(g: GroupbuyEvents): void {
     this.group = g;
-    this.storeId = Number(g.storesId);
-    console.log('店家的ID是: ' + this.storeId);
+    this.storeId = Number(g.storeId);
 
     if (g.deleted === true) {
       this.toastWarn('此團不存在', '此團已被刪除');
@@ -551,6 +555,9 @@ export class FollowGroupComponent {
     this.recommendMenuIds = this.parseIdList(g.recommendList);
     // allowedMenuIds 空陣列代表「顯示全部」
   }
+
+  // 最後確認條款 Dialog
+  openTermsDialog = false;
 
   // =========================
   // 訂單詳情 Dialog
@@ -633,28 +640,8 @@ export class FollowGroupComponent {
     this.orderItems.splice(index, 1);
   }
 
-  // TODO 刪除整筆訂單（此團此人）
+  // 刪除整筆訂單（此團此人）
   deleteOrderApi(): void {
-    // const url = 'http://localhost:8080/gogobuy/event/deleteOrder';
-    // const params = {
-    //   user_id: String(this.userId),
-    //   events_id: String(this.groupId),
-    // };
-
-    // this.http.postApi<any>(url, { params }).subscribe({
-    //   next: () => {
-    //     this.toastSuccess('已移除全部訂單', '此團訂單已清除');
-    //     // 關閉訂單詳情 dialog（停留本頁）
-    //     this.orderDetailDialogVisible = false;
-    //     // 刷新本頁狀態（不跳頁）
-    //     this.resetOrderStateAfterDelete();
-    //   },
-    //   error: (err) => {
-    //     console.error('deleteOrder error:', err);
-    //     this.toastWarn('移除失敗', '請稍後再試');
-    //   },
-    // });
-
     this.cart
       .deleteOrderByUserIdAndEventsId(this.userId, this.groupId)
       .subscribe({
@@ -702,7 +689,7 @@ export class FollowGroupComponent {
           this.group.limitation = g.limitation;
           this.group.shippingFee = g.shippingFee;
           this.group.splitType = g.splitType;
-          this.group.status = g.status;
+          this.group.eventStatus = g.eventStatus;
         } else {
           // 保險：如果 group 還沒初始化（通常不會），就整包套用
           this.applyGroup(g);
@@ -805,34 +792,63 @@ export class FollowGroupComponent {
   // 原始既存資料對照
   private originalOrderSnapshot: string | null = null;
 
-  // 送出訂單
-  submitOrder(): void {
+  // 是否確認最後條款
+  isConfirmed = false;
+
+  // 訂單確認的下一步按鈕
+  confirmOrder() {
+    if (!this.userId) {
+      this.toastWarn('請先登入', '');
+      this.router.navigate(['/gogobuy/login']);
+      return;
+    }
+    let phone = this.getPhone();
+    if (phone === '未提供電話') {
+      this.toastWarn('電話號碼尚未填寫', '請先提供電話號碼');
+      this.router.navigate(['/user/profile']);
+      return;
+    }
     if ((this.orderItems?.length || 0) === 0) {
       this.toastWarn('尚未點餐', '請先點餐後再送出');
       return;
     }
+    this.openTermsDialog = true;
+  }
 
+  // 條款確認 dialog
+  onTermsAgree(): void {
+    // 使用者按「同意」
+    this.openTermsDialog = false;
+    this.loading = true;
+    this.submitOrder();
+  }
+  onTermsReject(): void {
+    // 使用者按「不同意」
+    this.openTermsDialog = false;
+  }
+
+  // 送出時 loading
+  loading = false;
+
+  // 送出訂單
+  submitOrder(): void {
     const eventsId = this.groupId;
     const userId = this.userId;
     const payload = this.buildOrderPostPayload(eventsId, userId);
 
-    // 暫時先 console 看結果，之後接 API
-    // console.log('order payload:', JSON.stringify(payload));
-    // this.toastSuccess('已建立送出資料', '（尚未串接 API）');
-    // this.router.navigate(['/user/cart']);
-
-    // =========================
     // 正式接 API
     const url = 'http://localhost:8080/gogobuy/event/addOrders';
 
     this.http.postApi<any>(url, payload).subscribe({
       next: (res) => {
         // 送出成功
-        this.toastSuccess('送出成功', '訂單已送出');
-        this.router.navigate(['/user/cart']);
+        this.loading = false;
+        this.toastSuccess('送出成功', '訂單已送給團長');
+        this.router.navigate(['/user/orders']);
       },
       error: (err) => {
         console.error('addOrders error:', err);
+        this.loading = false;
         // 送出失敗
         this.toastWarn('送出失敗', '請稍後再試');
       },
@@ -1143,6 +1159,17 @@ export class FollowGroupComponent {
 
   // 卡片上的「+」：能快加就快加；要選就開 dialog
   onPlusClick(product: any): void {
+    if (!this.userId) {
+      this.toastWarn('請先登入', '');
+      this.router.navigate(['/gogobuy/login']);
+      return;
+    }
+    let phone = this.getPhone();
+    if (phone === '未提供電話') {
+      this.toastWarn('電話號碼尚未填寫', '請先提供電話號碼');
+      this.router.navigate(['/user/profile']);
+      return;
+    }
     if (!this.productNeedsDialog(product)) {
       this.quickAdd(product);
       return;
@@ -1152,6 +1179,17 @@ export class FollowGroupComponent {
 
   // 卡片上的「-」：只針對「快加商品」直減（有規格/選項的先不做卡片直減，避免規格混在一起）
   onMinusClick(product: any): void {
+    if (!this.userId) {
+      this.toastWarn('請先登入', '');
+      this.router.navigate(['/gogobuy/login']);
+      return;
+    }
+    let phone = this.getPhone();
+    if (phone === '未提供電話') {
+      this.toastWarn('電話號碼尚未填寫', '請先提供電話號碼');
+      this.router.navigate(['/user/profile']);
+      return;
+    }
     if (!product) return;
 
     if (this.productNeedsDialog(product)) {
@@ -1209,6 +1247,17 @@ export class FollowGroupComponent {
 
   // 在菜單卡片上點擊商品時呼叫它
   openProductDialog(product: any): void {
+    if (!this.userId) {
+      this.toastWarn('請先登入', '');
+      this.router.navigate(['/gogobuy/login']);
+      return;
+    }
+    let phone = this.getPhone();
+    if (phone === '未提供電話') {
+      this.toastWarn('電話號碼尚未填寫', '請先提供電話號碼');
+      this.router.navigate(['/user/profile']);
+      return;
+    }
     if (!product) return;
 
     this.selectedProduct = product;
@@ -1619,13 +1668,16 @@ export class FollowGroupComponent {
       icon: 'success',
       title,
       text,
-      timer: 1200,
+      timer: 2000, // 稍微延長到 2秒，對手機用戶比較友善
+      toast: true, // 開啟 Toast 模式
+      position: 'top-end', // 在手機上會自動適配
       showConfirmButton: false,
-      didOpen: () => {
-        const c = document.querySelector(
-          '.swal2-container',
-        ) as HTMLElement | null;
-        if (c) c.style.zIndex = '20000';
+      timerProgressBar: true, // 加上進度條，讓用戶知道它什麼時候會消失
+      didOpen: (toast) => {
+        toast.style.zIndex = '20000';
+        // 滑鼠移入或手指觸碰時停止計時，避免還沒看完就消失
+        toast.addEventListener('mouseenter', Swal.stopTimer);
+        toast.addEventListener('mouseleave', Swal.resumeTimer);
       },
     });
   }
@@ -1753,9 +1805,6 @@ export class FollowGroupComponent {
     const body = document.body;
     const scrollbarWidth =
       window.innerWidth - document.documentElement.clientWidth;
-
-    console.log('scrollbarWidth:', scrollbarWidth);
-
     // 設定 CSS variable
     document.documentElement.style.setProperty(
       '--scrollbar-offset',
@@ -1878,6 +1927,8 @@ export class FollowGroupComponent {
         menuId: it.menuId,
         quantity: it.quantity,
         specName: it.specName ?? null,
+        menuName: it.name,
+        basePrice: it.basePrice,
         selectedOptionList: it.selectedOptionList ?? [],
       })),
       personalMemo: this.personalMemo || '',
@@ -2229,23 +2280,25 @@ export class FollowGroupComponent {
 
 // 團的資料的interface
 export interface GroupbuyEvents {
-  id: number;
-  hostId: string;
-  storesId: number;
-  eventName: string;
-  status: 'OPEN' | 'LOCKED' | 'FINISHED';
-  endTime: string;
-  totalOrderAmount: number;
-  shippingFee: number;
-  splitType: 'EQUAL' | 'WEIGHT';
-  announcement: string;
-  type: string;
-  tempMenuList: string;
-  recommendList: string;
-  recommendDescription: string;
-  limitation: number;
-  deleted: boolean;
-  nickname?: string;
-  hostAvatar?: string;
-  store_category?: 'fast' | 'slow';
+  eventId: number; // ○
+  hostId: string; // ○
+  storeId: number; // ○
+  eventName: string; // ○
+  eventStatus: 'OPEN' | 'LOCKED' | 'FINISHED'; // ○
+  endTime: string; // ○
+  pickupTime: string; // ○
+  pickLocation: string; // ○
+  totalOrderAmount: number; // ○
+  shippingFee: number; // ○
+  splitType: 'EQUAL' | 'WEIGHT'; // ○
+  announcement: string; // ○
+  eventType: string; // ○
+  tempMenuList: string; // ○
+  recommendList: string; // ○
+  recommendDescription: string; // ○
+  limitation: number; // ○
+  deleted: boolean; // ○
+  hostNickname?: string; // ○
+  hostAvatar?: string; // ○
+  storeCategory?: 'fast' | 'slow'; // ○
 }

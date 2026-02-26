@@ -31,7 +31,6 @@ body {
   --footer-text: #f4eaea;
 
   --p-popover-arrow-offset: 10px;
-
 }
 
 /* 針對 Chrome, Edge, Safari */
@@ -47,9 +46,11 @@ body {
 
 ::-webkit-scrollbar-thumb {
   /* 使用品牌色到懸停色的漸層 */
-  background: linear-gradient(180deg,
-      var(--brand-primary) 0%,
-      var(--brand-primary-hover) 100%);
+  background: linear-gradient(
+    180deg,
+    var(--brand-primary) 0%,
+    var(--brand-primary-hover) 100%
+  );
   border-radius: 10px;
   /* 增加邊界讓滑塊看起來像浮在軌道中央 */
   border: 3px solid var(--bg-section);
@@ -88,6 +89,17 @@ body {
 /* 確保橫條在 Hover 或切換時不會變回原本的顏色 */
 .p-tablist-tab-list .p-tablist-active-bar {
   background-color: #662222 !important;
+}
+
+/* 全域縮小 Toast */
+.p-toast {
+  max-width: 320px; /* 固定最大寬度 */
+}
+
+/* 微調Toast裡面的內距，讓它看起來更精緻 */
+.p-toast .p-toast-message .p-toast-message-content {
+  padding: 0.75rem;
+  font-size: 0.9rem;
 }
 
 /* 針對行動端 Webkit 瀏覽器 (Chrome, Safari, Android Browser) */

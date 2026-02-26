@@ -1,5 +1,5 @@
 import { AuthService } from './../../@service/auth.service';
-import { Component } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpService } from '../../@service/http.service';
@@ -25,6 +25,8 @@ export class LoginComponent {
   // 密碼顯示用boolean
   showPassword = false;
 
+  errorMessage: string = '';
+
   // 表單資料模型
   user = {
     nickname: '',
@@ -34,16 +36,74 @@ export class LoginComponent {
   };
 
   ngOnInit(): void {
-    //Called after the constructor, initializing input properties, and the first call to ngOnChanges.
-    //Add 'implements OnInit' to the class.
     this.user.email = "test2@gmail.com";
     this.user.password = 'test1234';
+
+    this.route.queryParams.subscribe(params => {
+      // 1. 處理停權 (舊有邏輯，來自攔截器)
+      if (params['reason'] === 'suspended') {
+        this.errorMessage = '您的帳號已被停權，請聯繫管理員。';
+      }
+
+      // 2. 處理 OAuth 登入錯誤 (來自 SecurityConfig 的 failureHandler)
+      if (params['errorMsg']) {
+        const errorMsg = params['errorMsg'];
+        // 為了避免 refresh 一直看到錯誤，可以考慮清除為空，但這裡先顯示
+        Swal.fire({
+          icon: 'error',
+          title: '登入失敗',
+          text: errorMsg,
+          confirmButtonText: '確定'
+        });
+
+        // 替換 URL，移除參數避免重整後還在 (Optional)
+        this.router.navigate([], {
+          queryParams: { errorMsg: null },
+          queryParamsHandling: 'merge'
+        });
+      }
+
+      // 3. 處理 OAuth 註冊成功 (需驗證信箱)
+      if (params['verificationSent']) {
+        const msg = params['message'] || '請前往信箱收取驗證信';
+        Swal.fire({
+          icon: 'success',
+          title: '註冊成功',
+          text: msg,
+          confirmButtonText: '好的'
+        });
+
+        this.router.navigate([], {
+          queryParams: { verificationSent: null, message: null },
+          queryParamsHandling: 'merge'
+        });
+      }
+    });
+
+  }
+
+  // 取得右側容器的引用
+  @ViewChild('rightPanel') rightPanel!: ElementRef;
+  // 切換模式
+  setPageMode(mode: 'login' | 'register') {
+    if (this.pageMode !== mode) {
+      this.pageMode = mode;
+      this.resetForm();
+    }
   }
 
   // 切換模式
   toggleMode() {
-    this.pageMode = this.pageMode == 'login' ? 'register' : 'login';
-    this.resetForm();
+    this.setPageMode(this.pageMode == 'login' ? 'register' : 'login');
+    // 當切換回登入時，強制將右側容器捲動回最上方
+    if (this.pageMode === 'login') {
+      // 延遲一小段時間確保 DOM 已更新 class (如 overflow-hidden)
+      setTimeout(() => {
+        if (this.rightPanel) {
+          this.rightPanel.nativeElement.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      }, 0);
+    }
   }
 
   // 清空所有欄位
@@ -90,11 +150,11 @@ export class LoginComponent {
         if (res.code == 200) {
           localStorage.setItem('user_session', payload.email);
           Swal.fire({
-            title: "創建帳號成功",
-            text: "請返回登入頁面登入",
+            title: "註冊成功",
+            text: "已發送驗證信至您的信箱，請開通後再登入",
             icon: "success",
             showConfirmButton: false,
-            timer: 1000,
+            timer: 3000,
             timerProgressBar: true,
           }).then(() => window.location.reload());
         } else {

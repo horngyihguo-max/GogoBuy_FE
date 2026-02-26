@@ -19,7 +19,7 @@ import { BehaviorSubject } from 'rxjs';
 export class AuthService {
   // 這邊專門放用戶資料相關API和變數
   constructor(
-    private https: HttpService,
+    public https: HttpService,
     private router: Router,
     private route: ActivatedRoute,) { }
   user: any = null;
@@ -57,6 +57,7 @@ export class AuthService {
       eventName: e.eventName ?? '',
       announcement: e.announcement ?? '',
       recommendDescription: e.recommendDescription ?? '',
+      nickname: e.nickname ?? e.hostNickname,
       image: e.image || this.eventDemoImages[i % this.eventDemoImages.length],
     }));
   }
@@ -114,6 +115,7 @@ export class AuthService {
       next: (res: any) => {
         const userData = res;
         localStorage.setItem('user_avatar_url', res.avatarUrl);
+        localStorage.setItem('user_role', res.role);
         if (userData && (userData.id || userData.userId)) {
           this.setUser(userData);
         }
@@ -152,12 +154,29 @@ export class AuthService {
             setTimeout(() => {
               this.router.navigateByUrl(returnUrl);
             }, 500);
-          } else {
+          } else if (res.code == 403) {
+            let title = '存取被拒';
+            let icon: 'error';
+
+            if (res.message.includes('開通')) {
+              title = '帳號尚未驗證';
+            } else if (res.message.includes('停權') || res.message.includes('停用')) {
+              title = '帳號狀態異常';
+              icon = 'error';
+            }
             Swal.fire({
-              title: res.message || '登入失敗',
+              title: title,
               icon: 'error',
+              text: res.message,
               showConfirmButton: false,
               timer: 1000
+            });
+          } else {
+            Swal.fire({
+              title: '登入失敗',
+              text: res.message || '請檢查帳號密碼',
+              icon: 'error',
+              timer: 2000
             });
           }
         },
@@ -418,7 +437,7 @@ export class AuthService {
   getGroupbuyEventByName(hostNickname: string) {
     const encoded = encodeURIComponent(hostNickname);
     return this.https.getApi(
-      `http://localhost:8080/gogobuy/getGroupbuyEventByNickName?host_nickname=${encoded}`
+      `http://localhost:8080/gogobuy/event/getGroupbuyEventByNickname?host_nickname=${encoded}`
     );
   }
 
@@ -523,5 +542,21 @@ export class AuthService {
    */
   getEventOrderView(eventId: number) {
     return this.https.getApi(`http://localhost:8080/gogobuy/event/getOrdersView?event_id=${eventId}`);
+  }
+
+  /**
+   * 停權用戶 (後台用)
+   * POST gogobuy/ban-user?id={userId}
+   */
+  banUser(userId: string) {
+    return this.https.postApi(`http://localhost:8080/gogobuy/ban-user?id=${userId}`, {});
+  }
+
+  /**
+   * 恢復用戶 (後台用)
+   * POST gogobuy/active-user?id={userId}
+   */
+  activeUser(userId: string) {
+    return this.https.postApi(`http://localhost:8080/gogobuy/active-user?id=${userId}`, {});
   }
 }

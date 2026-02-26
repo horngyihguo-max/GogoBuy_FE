@@ -1,0 +1,139 @@
+<section class="max-w-[1440px] mx-auto px-4 mt-10">
+  <h2 class="text-3xl font-black text-slate-900 flex items-center gap-3 mb-6">
+    <span class="w-2 h-8 bg-red-600 rounded-full"></span>
+    熱門商品
+  </h2>
+  <div class="flex gap-2 mb-6">
+    @for (opt of statusOptions; track opt.value) {
+    <button (click)="onStatusChange(opt.value)" class="px-4 py-1 rounded-full text-sm font-semibold transition"
+      [ngClass]="
+        statusFilter() == opt.value
+          ? 'bg-red-600 text-white'
+          : 'bg-slate-200 text-slate-700'
+      ">
+      {{ opt.label }}
+    </button>
+    }
+  </div>
+  <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+
+    <!-- No.1 大卡 -->
+    @if (salesDetailList().length > 0) {
+    <div class="md:col-span-2 md:row-span-2
+            relative overflow-hidden rounded-3xl
+            shadow-xl hover:shadow-2xl
+            hover:-translate-y-1 transition-all duration-500 cursor-pointer">
+
+      <!-- 背景底色 -->
+      <div class="absolute inset-0 bg-slate-200"></div>
+
+      <!-- 商品圖 -->
+      @if (salesDetailList()[0].productImage) {
+      <img [src]="salesDetailList()[0].productImage" class="absolute inset-0 w-full h-full object-cover" />
+      }
+
+      <!-- 漸層遮罩（讓字更清楚） -->
+      <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
+
+      <!-- 內容 -->
+      <div class="absolute bottom-6 left-6 text-white z-10">
+        <div class="text-5xl font-black text-yellow-400 drop-shadow-lg">
+          #1
+        </div>
+        <div class="text-2xl font-bold mt-2">
+          {{ salesDetailList()[0].productName }}
+        </div>
+        <div class="text-base opacity-90">
+          {{ salesDetailList()[0].storeName }}
+        </div>
+        <div class="mt-2 font-bold text-lg">
+          {{ salesDetailList()[0].salesVolume }} 份
+        </div>
+      </div>
+    </div>
+    }
+
+    <!-- 2 ~ 5 -->
+    @for (item of salesDetailList().slice(1, 5); track item.menuId; let i = $index) {
+
+    <div class="group bg-white rounded-3xl shadow-md
+            hover:shadow-xl hover:-translate-y-1
+            transition-all duration-300 overflow-hidden relative">
+
+      <!-- 商品圖 -->
+      <div class="relative aspect-square bg-slate-100 overflow-hidden">
+
+        @if (item.productImage) {
+        <img [src]="item.productImage"
+          class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+        }
+
+        <div class="absolute top-2 left-2 bg-red-600 text-white text-base font-bold px-2 py-0.5 rounded-full">
+          #{{ i + 2 }}
+        </div>
+
+      </div>
+
+      <div class="p-4">
+        <div class="text-base font-bold text-slate-900 truncate">
+          {{ item.productName }}
+        </div>
+
+        <div class="text-base text-gray-500 truncate">
+          {{ item.storeName }}
+        </div>
+
+        <div class="text-base mt-2 font-bold text-slate-700">
+          {{ item.salesVolume }} 份
+        </div>
+      </div>
+
+    </div>
+    }
+
+    <!-- 6 ~ 10 -->
+    @if (salesDetailList().length > 5) {
+
+    <div class="col-span-full mt-8">
+      <div class="grid grid-cols-5 gap-4">
+
+        @for (item of salesDetailList().slice(5, 10); track item.menuId; let i = $index) {
+
+        <div class="flex-shrink-0
+                bg-white rounded-2xl shadow-sm
+                hover:shadow-md hover:-translate-y-1
+                transition-all duration-300 overflow-hidden">
+
+          <!-- 圖片區 -->
+          <div class="relative h-[110px] bg-slate-100 flex items-center justify-center overflow-hidden">
+            @if (item.productImage) {
+            <img [src]="item.productImage" class="max-w-full max-h-full object-contain" />
+            }
+            <div class="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+              #{{ i + 6 }}
+            </div>
+          </div>
+
+          <!-- 文字區 -->
+          <div class="p-3 text-sm">
+            <div class="text-base font-semibold truncate">
+              {{ item.productName }}
+            </div>
+            <div class="text-base text-gray-500 truncate">
+              {{ item.storeName }}
+            </div>
+            <div class="text-base text-gray-500 truncate">
+              {{ item.salesVolume }} 份
+            </div>
+          </div>
+
+        </div>
+
+        }
+
+      </div>
+    </div>
+    }
+
+  </div>
+</section>

@@ -1,3 +1,4 @@
+import { Router } from '@angular/router';
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../@service/auth.service';
@@ -17,6 +18,7 @@ import { TextareaModule } from 'primeng/textarea';
 import { TieredMenu } from 'primeng/tieredmenu';
 import { FormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
+import { StoreService } from '../@service/store.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -49,6 +51,8 @@ export class DashboardComponent {
   users: any[] = [];
   loading = false;
   items: any[] | undefined;
+  minDate: Date = new Date();
+
 
   currentView: 'announce' | 'stores' | 'events' | 'users' = 'announce';
 
@@ -73,7 +77,9 @@ export class DashboardComponent {
 
   constructor(
     private authService: AuthService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private router: Router,
+    private storeService: StoreService,
   ) { }
 
   ngOnInit() {
@@ -190,9 +196,25 @@ export class DashboardComponent {
     });
   }
 
+  addStore() {
+    this.storeService.clearCurrentStore();
+    sessionStorage.removeItem('temp_order_info');
+    this.router.navigate(['/management/store_upsert']);
+  }
+
   getSeverity(status: string) {
     switch (status) {
       case 'GOOGLE': return 'info';
+      default: return 'success';
+    }
+  }
+
+  getUserStatusSeverity(status: string) {
+    switch (status) {
+      case 'banned': return 'danger';
+      case 'pending_active': return 'info';
+      case 'self_suspended': return 'warn';
+
       default: return 'success';
     }
   }
@@ -238,7 +260,7 @@ export class DashboardComponent {
       timeStr = iso.split('.')[0]; // 拿掉毫秒, 變成 2023-10-27T10:00:00
     }
 
-  // 2. 組合 msg 內容並轉換成JSON格式內容以讓 SSE 收到後能解析成 title/content/link
+    // 2. 組合 msg 內容並轉換成JSON格式內容以讓 SSE 收到後能解析成 title/content/link
     const payloadMsgObj = {
       title: this.announceData.title,
       content: this.announceData.content,
@@ -318,8 +340,8 @@ export class DashboardComponent {
         // 暫時帶入 event.hostId 嘗試
         this.authService.forceCloseEvent(event.id, event.hostId).subscribe({
           next: () => {
-             Swal.fire('結單成功', '該活動已結束', 'success');
-             this.loadData();
+            Swal.fire('結單成功', '該活動已結束', 'success');
+            this.loadData();
           },
           error: (err) => Swal.fire('操作失敗', err?.message, 'error')
         });
@@ -350,5 +372,69 @@ export class DashboardComponent {
         });
       }
     });
+  }
+
+  /**
+   * 停權用戶
+   */
+  onUserBan(user: any) {
+    if (user.role === 'admin') {
+      Swal.fire('無法執行', '不能停權管理員', 'warning');
+      return;
+    }
+
+    Swal.fire({
+      title: '確定要停權此用戶?',
+      text: `用戶: ${user.nickname} (${user.email})\n停權後該用戶將無法登入`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: '確定停權',
+      cancelButtonText: '取消',
+      confirmButtonColor: '#d33'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.authService.banUser(user.id).subscribe({
+          next: () => {
+            Swal.fire('已停權', '該用戶已被停權', 'success');
+            this.loadData();
+          },
+          error: (err) => Swal.fire('操作失敗', err?.message, 'error')
+        });
+      }
+    });
+  }
+
+  /**
+   * 恢復用戶帳號
+   */
+  onUserActive(user: any) {
+    Swal.fire({
+      title: '確定要恢復此用戶帳號?',
+      text: `用戶: ${user.nickname} (${user.email})\n恢復後該用戶將可以正常登入`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: '確定恢復',
+      cancelButtonText: '取消',
+      confirmButtonColor: '#3085d6'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.authService.activeUser(user.id).subscribe({
+          next: () => {
+            Swal.fire('已恢復', '該用戶帳號已恢復為活躍狀態', 'success');
+            this.loadData();
+          },
+          error: (err) => Swal.fire('操作失敗', err?.message, 'error')
+        });
+      }
+    });
+  }
+
+  /**
+   * 查看活動 (跳轉至跟團頁面)
+   */
+  onEventView(event: any) {
+    // 您可以根據需求決定跳轉到 "group-event/:id" (開團設定) 或 "group-follow/:id" (跟團頁)
+    // 這裡假設管理者想看公開的活動詳情
+    this.router.navigate(['/groupbuy-event/group-follow', event.id]);
   }
 }

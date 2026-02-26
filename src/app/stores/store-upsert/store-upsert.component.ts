@@ -1,4 +1,4 @@
-import { Component, HostListener } from '@angular/core';
+import { Component, HostListener, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
@@ -16,6 +16,7 @@ import { HttpService } from '../../@service/http.service';
 import { AutoCompleteModule } from 'primeng/autocomplete';
 import { ImageService } from '../../@service/image.service';
 import Swal from 'sweetalert2';
+import { BlockUIModule } from 'primeng/blockui';
 
 @Component({
   selector: 'app-store-upsert',
@@ -26,7 +27,7 @@ import Swal from 'sweetalert2';
     SelectModule, FloatLabelModule,
     DatePickerModule, FormsModule, FluidModule,
     FormsModule, CheckboxModule, InputNumber,
-    DialogModule, AutoCompleteModule
+    DialogModule, AutoCompleteModule, BlockUIModule
   ],
   templateUrl: './store-upsert.component.html',
   styleUrl: './store-upsert.component.scss'
@@ -46,14 +47,25 @@ export class StoreUpsertComponent {
   wishId!: number;
   storeList: any[] = [];
   filteredStores: any[] = [];
-  displayAlertDialog: boolean = false;
-  alertMessage!: string;
   selectCategory!: string;
-  phoneRegex = /^(09\d{8}|0\d{1,2}-?\d{6,8})$/;
   districtsLoaded = false;
+
+  // 團團團
+  isHaveEvent: boolean = false;
+  activeEventsByStoreId: any[] = [];
+
+  // 載入掃描時間
+  scanning: boolean = false;
+  scanErrorMessage: string = '';
+
+  // 電話
+  phoneRegex = /^(09\d{8}|0\d{1,2}\d{6,8})$/;
+  existingPhones: string[] = [];
+  isPhoneUsed: boolean = false;
 
   // 暫存輸入時間
   timeSlots: TimeSlotUI[] = [];
+  openDaily: boolean = false;
 
   // 行政地區
   cityOptions: any[] = [];
@@ -61,10 +73,16 @@ export class StoreUpsertComponent {
   selectedDistrict: any = null;
   detailAddress: string = '';
 
+  displayHaveEventDialog: boolean = false;
+  displayPhoneUsedDialog: boolean = false;
+  displayScanFailedDialog: boolean = false;
+  displayAlertDialog: boolean = false;
+  alertMessage!: string;
+
   // 行政地區 API 排除釣魚台
   loadTaiwanDistricts() {
-    const url = 'https://raw.githubusercontent.com/donma/TaiwanAddressCityAreaRoadChineseEnglishJSON/master/AllData.json';
-    this.http.getDApi(url, false).subscribe((data: any) => {
+    const url = 'taiwan-districts.json';
+    this.http.getApi(url).subscribe((data: any) => {
       this.cityOptions = data.filter((city: any) => city.CityName !== '釣魚臺' && city.CityName !== '南海島')
         .map((city: any) => {
           if (city.CityName == '宜蘭縣') {
@@ -75,11 +93,16 @@ export class StoreUpsertComponent {
           }
           return city;
         });
-        this.districtsLoaded = true;
-        if (this.storeData && this.storeData.address) {
-          this.parseAddressToFields();
-        }
+      this.districtsLoaded = true;
+      if (this.storeData && this.storeData.address) {
+        this.parseAddressToFields();
+      }
     });
+  }
+
+  private zhHant(text: string): string {
+    if (!text) return '';
+    return text.replace(/台/g, '臺');
   }
 
   updateFullAddress() {
@@ -150,6 +173,92 @@ export class StoreUpsertComponent {
     productOptionGroupsVoList: [] as ProductOptionGroupsVoList[]
   }
 
+  // 菜單掃描 ---------------------------------------------------------
+  @ViewChild('fileInput') fileInputVariable: any;
+
+  onFileChange(event: any) {
+    const element = event.target as HTMLInputElement;
+    if (element.files && element.files.length > 0) {
+      this.scanning = true;
+      const file = element.files[0];
+      this.menuScan(file);
+    }
+  }
+
+  menuScan(file: File) {
+    const menuImg = new FormData();
+    menuImg.append('file', file);
+    this.http.postApi('http://localhost:8080/gogobuy/store/menuScan', menuImg).subscribe({
+      next: (res: any) => {
+        let cateIdCount: number = 0;
+        let menuIdCount: number = 0;
+        let groupIdCount: number = 0;
+        const categories = (res.menuCategoriesVoList || []).map((cate: any) => {
+          return {
+            ...cate,
+            id: ++cateIdCount,
+            menuVo: (cate.menuVo || []).map((p: any) => {
+              return {
+                ...p,
+                id: ++menuIdCount,
+                categoryId: cateIdCount,
+                available: true,
+                unusual: null
+              }
+            })
+          }
+        });
+        const optionGroup = (res.productOptionGroupsVoList || []).map((group: any) => {
+          let itemIdCount: number = 0;
+          return {
+            ...group,
+            id: ++groupIdCount,
+            items: (group.items || []).map((items: any) => {
+              return {
+                ...items,
+                id: ++itemIdCount,
+                groupId: groupIdCount
+              }
+            })
+          }
+        });
+
+        this.storeData = {
+          ...res,
+          name: res.storesname,
+          publish: true,
+          feeDescription: res.fee_description,
+          operatingHoursVoList: this.convertVoToTimeSlots(res.operatingHoursVoList || []),
+          menuCategoriesVoList: categories,
+          menuVoList: categories.flatMap((cate: any) => cate.menuVo),
+          productOptionGroupsVoList: optionGroup,
+        };
+        this.parseAddressToFields()
+        this.scanning = false;
+        console.log('掃描後的 storeData:', this.storeData);
+      },
+      error: (err) => {
+        if (err.status === 503) {
+          this.scanErrorMessage = "伺服器目前過於繁忙，請稍候幾秒再試一次。";
+        } else if (err.status === 429) {
+          this.scanErrorMessage = "今日辨識次數已達上限，或請求過於頻繁。\n請稍候約一分鐘再試，或明天再使用。";
+        }
+        else {
+          this.scanErrorMessage = "AI辨識失敗或正在忙碌中，請確保圖片清晰並稍候再試。";
+        }
+        this.displayScanFailedDialog = true;
+        this.scanning = false;
+        this.resetFileInput();
+      }
+    });
+  }
+
+  resetFileInput() {
+    if (this.fileInputVariable) {
+      this.fileInputVariable.nativeElement.value = ""; // 清空值
+    }
+  }
+
   // 店家輸入時顯示搜尋
   searchStore(event: any) {
     const query = event.query.toLowerCase();
@@ -163,30 +272,49 @@ export class StoreUpsertComponent {
     const selected = event.value;
     this.id = selected.id;
     this.http.getApi(`http://localhost:8080/gogobuy/store/searchId?id=${this.id}`)
-        .subscribe((res: any) => {
-          if (res.storeList && res.storeList.length > 0) {
-            this.storeData = { ...res.storeList[0] };
+      .subscribe((res: any) => {
+        if (res.storeList && res.storeList.length > 0) {
+          this.storeData = { ...res.storeList[0] };
 
-            if (typeof this.storeData.feeDescription === 'string') {
-              this.storeData.feeDescription = JSON.parse(this.storeData.feeDescription);
-            }
-
-            this.convertVoToTimeSlots(res.operatingHoursVoList || []);
-            this.parseAddressToFields();
+          if (typeof this.storeData.feeDescription === 'string') {
+            this.storeData.feeDescription = JSON.parse(this.storeData.feeDescription);
           }
-        });
+
+          this.convertVoToTimeSlots(res.operatingHoursVoList || []);
+          this.parseAddressToFields();
+        }
+      });
+  }
+
+  // 檢查電話是否已使用過
+  checkPhone(phone: string): boolean {
+    if (!phone) {
+      this.isPhoneUsed = false;
+      return false;
+    }
+    const samePhone = this.existingPhones.some(p => p === phone);
+
+    if (samePhone) {
+      this.isPhoneUsed = true;
+      return samePhone;
+    } else {
+      return false;
+    }
+  }
+
+  onPhoneInput(event: any) {
+    this.isPhoneUsed = false;
   }
 
   // 將完整地址拆分成 縣市/行政區域/路巷號
   parseAddressToFields() {
-    if (!this.storeData.address) return;
     if (!this.storeData.address || typeof this.storeData.address !== 'string') return;
 
     const regex = /^(\D+?[縣市])(\D+?[區鄉鎮市])(.*)$/;
     const match = this.storeData.address.match(regex);
 
     if (match) {
-      const cityName = match[1];
+      const cityName = this.zhHant(match[1]);
       const districtName = match[2];
       const restAddress = match[3].trim();
 
@@ -216,15 +344,31 @@ export class StoreUpsertComponent {
 
   ngOnInit(): void {
     this.userId = String(localStorage.getItem('user_id') || '');
+    this.id = Number(this.route.snapshot.paramMap.get('id'));
     this.loadTaiwanDistricts();
     this.initTimeOptions();
+
+    this.http.getApi(`http://localhost:8080/gogobuy/event/getGroupbuyEventByStoresId?stores_id=${this.id}`)
+      .subscribe({
+        next: (res: any) => {
+          if (res.code === 200) {
+            this.activeEventsByStoreId = res.groupbuyEvents.filter((g: any) =>
+              g.status !== "FINISHED"
+            );
+
+            if (this.activeEventsByStoreId && this.activeEventsByStoreId.length > 0) {
+              this.isHaveEvent = true;
+              this.displayHaveEventDialog = true;
+            }
+          }
+        }
+      });
 
     this.http.getApi('http://localhost:8080/gogobuy/store/all').subscribe((res: any) => {
       this.storeList = res.storeList;
       console.log("this.storeList", this.storeList);
+      this.existingPhones = this.storeList.map((s: any) => s.phone);
     });
-
-    this.id = Number(this.route.snapshot.paramMap.get('id'));
 
     // service 讀取資料
     if (!this.wishId && this.storeService.storeData && this.storeService.storeData.name !== '') {
@@ -239,7 +383,8 @@ export class StoreUpsertComponent {
 
       this.parseAddressToFields();
       this.convertVoToTimeSlots(source.operatingHoursVoList || []);
-    } else {
+    }
+    else {
       this.addTimeSlot();
     }
 
@@ -275,8 +420,6 @@ export class StoreUpsertComponent {
         this.parseAddressToFields();
       }
     }
-    console.log('storeData ngOnInt', this.storeData);
-
   }
 
   // 從 service 拿到的資料 ( 新增店家又回來修改店家資訊 )
@@ -288,6 +431,22 @@ export class StoreUpsertComponent {
 
     if (sourceData.operatingHoursVoList) {
       this.convertVoToTimeSlots(sourceData.operatingHoursVoList);
+    }
+  }
+
+  onOpenDailyChange() {
+    if (this.openDaily) {
+      this.timeSlots = [{
+        selectedWeeks: [1, 2, 3, 4, 5, 6, 7],
+        openHour: '00',
+        openMinute: '00',
+        closeHour: '23',
+        closeMinute: '59'
+      }];
+    } else {
+      if (this.timeSlots.length > 0) {
+        this.timeSlots[0].selectedWeeks = [];
+      }
     }
   }
 
@@ -511,6 +670,8 @@ export class StoreUpsertComponent {
 
   // 下一步
   onSubmit() {
+    console.log('active', this.activeEventsByStoreId);
+
     const missingFields: string[] = [];
 
     if (!this.storeData.name) missingFields.push('商店名稱');
@@ -521,7 +682,7 @@ export class StoreUpsertComponent {
 
     const finalVoList = this.timeSlots.map(slot => {
       return {
-        week: slot.selectedWeeks && slot.selectedWeeks.length > 0 ? slot.selectedWeeks : [],
+        week: (slot.selectedWeeks || []).filter(w => !Number.isNaN(w)),
         openTime: `${slot.openHour || '00'}:${slot.openMinute || '00'}`,
         closeTime: `${slot.closeHour || '00'}:${slot.closeMinute || '00'}`
       };
@@ -537,18 +698,28 @@ export class StoreUpsertComponent {
       return;
     }
 
+    if (this.isPhoneUsed || !this.phoneRegex.test(this.storeData.phone)) {
+      this.displayPhoneUsedDialog = true;
+      return;
+    }
+
     this.storeData.operatingHoursVoList = finalVoList;
     const readyToSave = { ...this.storeData } as any;
 
     this.storeService.wishId = this.wishId;
+    this.storeService.activeEventsByStoreId = this.activeEventsByStoreId;
     this.storeService.storeData = readyToSave;
 
     console.log('同步到 Service 成功：', this.storeService.storeData);
 
     if (this.id !== 0) {
-      this.router.navigate(['/management/store', this.id]);
+      this.router.navigate(['/management/store', this.id]).then(() => {
+        window.scrollTo(0, 0);
+      });
     } else {
-      this.router.navigate(['/management/store']);
+      this.router.navigate(['/management/store']).then(() => {
+        window.scrollTo(0, 0);
+      });;
     }
 
     sessionStorage.removeItem('temp_order_info');

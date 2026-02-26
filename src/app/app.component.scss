@@ -68,8 +68,13 @@ nav i.nav-icon:hover {
 /* --- MAIN --- */
 main {
   flex: 1;
-  padding-top:112px;
+  padding-top: 64px;
 }
+
+main.has-marquee {
+  padding-top: 112px;
+}
+
 
 .marquee {
   top: 64px;
@@ -243,9 +248,9 @@ footer {
     position: static;
   }
 
-main {
-  padding-top:0px;
-}
+  main {
+    padding-top: 0px;
+  }
 
   header {
     position: relative;
@@ -392,6 +397,7 @@ main {
     background-color: var(--footer-bg);
     justify-content: space-around;
     align-items: center;
+    z-index: 2000;
 
     a {
       flex: 1;

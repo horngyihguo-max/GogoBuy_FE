@@ -6,41 +6,92 @@
 
       <!-- 訂單分頁名稱 -->
       <p-tablist class="text-lg">
-        <p-tab value="myCreate">我的店家</p-tab>
-        <p-tab value="nonPublic">未公開店家</p-tab>
+        <p-tab value="favorite">所有收藏店家</p-tab>
+        <p-tab value="favoriteFast">外送店家</p-tab>
+        <p-tab value="favoriteSlow">團購店家</p-tab>
       </p-tablist>
 
       <!-- 切換到該value，顯示對應畫面 -->
       <p-tabpanels>
-        <p-tabpanel value="myCreate">
-          <ng-container
-            *ngTemplateOutlet="storeList; context: { $implicit: allStores, openValues: publicStoreExpandedIds }">
+        <p-tabpanel value="favorite">
+          <ng-container *ngTemplateOutlet="storeList; context: { $implicit: favoriteStores }">
           </ng-container>
         </p-tabpanel>
 
-        <p-tabpanel value="nonPublic">
-          <ng-container
-            *ngTemplateOutlet="storeList; context: { $implicit: privateStores, openValues: privateStoreExpandedIds }">
+        <p-tabpanel value="favoriteFast">
+          <ng-container *ngTemplateOutlet="storeList; context: { $implicit: favoriteFastStores }">
+          </ng-container>
+        </p-tabpanel>
+
+        <p-tabpanel value="favoriteSlow">
+          <ng-container *ngTemplateOutlet="storeList; context: { $implicit: favoriteSlowStores }">
           </ng-container>
         </p-tabpanel>
       </p-tabpanels>
     </p-tabs>
+  </div>
+  <div class="card flex justify-center">
+    <p-toast />
+    <p-confirmpopup #cp>
+      <ng-template #headless let-message>
+        <div class="bg-white p-6 flex flex-col items-center">
+
+          <span class="text-gray-700 font-semibold text-lg mb-6">{{ message.message }}</span>
+
+          <div class="flex items-center gap-4 w-full">
+            <button (click)="cp.onReject()" class="flex-1 px-4 py-2 text-gray-400 hover:text-gray-600 font-medium
+                transition-colors">取消
+            </button>
+
+            <button (click)="cp.onAccept()" class="flex-1 px-6 py-2 bg-[#662222] text-white rounded-lg font-medium
+                shadow-md hover:bg-[#4d1a1a] active:scale-95 transition-all">移除
+            </button>
+          </div>
+        </div>
+      </ng-template>
+    </p-confirmpopup>
   </div>
 </body>
 
 <!--  -->
 <ng-template #storeList let-stores let-openValues="openValues">
   <p-accordion [value]="openValues" [multiple]="true" class="w-full">
+    @if(stores.length !== 0){
+    <div class="flex items-center mb-3">
+      <input type="checkbox" class="appearance-none w-5 h-5 border-2 border-[#662222]/50 rounded-xl
+        checked:bg-[#662222] checked:border-[#662222] cursor-pointer transition-all relative after:content-['']
+        after:absolute after:hidden checked:after:block after:left-[4.5px] after:w-[6px] after:h-[12px]
+        after:border-white after:border-r-2 after:border-b-2 after:rotate-45 mr-1" (click)="$event.stopPropagation()"
+        [checked]="isAllSelected" (change)="toggleSelectAll($event)"> 選取全部
+
+      <button (click)="displayRemoveConfirm = true" [disabled]="selectedStoreIds.length === 0"
+        [class.opacity-50]="selectedStoreIds.length === 0" [class.cursor-not-allowed]="selectedStoreIds.length === 0"
+        class="ml-3 px-4 py-2 text-[#662222] border-2 border-[#662222] font-bold rounded-full
+         enabled:hover:bg-[#662222] enabled:hover:text-white enabled:hover:shadow-lg
+         active:scale-95 transition-all duration-300">
+        移除選取 ({{ selectedStoreIds.length }})
+      </button>
+    </div>
+    }
     @for (s of stores; track s.id) {
-    <p-accordion-panel [value]="s.id" class="mb-4 border border-slate-200 rounded-xl overflow-hidden shadow-sm bg-white">
+    <p-accordion-panel [value]="s.id"
+      class="mb-4 border border-slate-200 rounded-xl overflow-hidden shadow-sm bg-white">
       <p-accordion-header>
+
+        <input type="checkbox" class="appearance-none w-5 h-5 border-2 border-[#662222]/50 rounded-xl
+        checked:bg-[#662222] checked:border-[#662222] cursor-pointer transition-all relative checked:after:block
+        after:content-[''] after:absolute after:hidden after:border-white after:border-r-2 after:border-b-2
+        after:left-[4.5px] after:w-[6px] after:h-[12px] after:rotate-45 mr-5" (click)="$event.stopPropagation()"
+          [checked]="isStoreSelected(s.id)" (change)="toggleStoreSelection(s.id)">
+
         <div class="flex items-center justify-between w-full pr-4">
           <div class="flex items-center gap-4">
-            <div class="h-20 w-40 shrink-0 bg-slate-100 rounded-lg overflow-hidden border border-slate-100 shadow-inner">
+            <div
+              class="h-20 w-40 shrink-0 bg-slate-100 rounded-lg overflow-hidden border border-slate-100 shadow-inner">
               @if(s.image){
-                <img [src]="s.image" class="w-full h-full object-cover" />
+              <img [src]="s.image" class="w-full h-full object-cover" />
               } @else {
-                <img src="Store Default Cover Image.webp" class="w-full h-full object-cover" />
+              <img src="Store Default Cover Image.webp" class="w-full h-full object-cover" />
               }
             </div>
 
@@ -48,9 +99,9 @@
               <span class="text-xl font-bold tracking-tight text-[#662222]">{{ s.name }}</span>
               <div class="flex items-center gap-2">
                 @if(isStoreOpen(s)){
-                  <p-tag severity="success" value="營業中" [rounded]="true" class="text-xs" />
+                <p-tag severity="success" value="營業中" [rounded]="true" class="text-xs" />
                 } @else {
-                  <p-tag severity="warn" value="已打烊" [rounded]="true" class="text-xs" />
+                <p-tag severity="warn" value="已打烊" [rounded]="true" class="text-xs" />
                 }
                 <span class="text-xs px-2 py-0.5 rounded-full bg-[#662222]/10 text-[#662222] font-medium">
                   {{ s.category == 'fast' ? '外送' : '團購' }}
@@ -58,6 +109,13 @@
               </div>
             </div>
           </div>
+          <button (click)="handleFavoriteClick($event, s.id); $event.stopPropagation()"
+            class="relative p-2 border-none bg-transparent cursor-pointer">
+            <i class="pi text-2xl transition-all"
+              [ngClass]="isFavorite(s.id) ? 'pi-heart-fill text-red-500' : 'pi-heart text-gray-400'"
+              [style.transform]="isFavorite(s.id) ? 'scale(1.1)' : 'scale(1)'">
+            </i>
+          </button>
         </div>
       </p-accordion-header>
 
@@ -71,38 +129,65 @@
               <i class="pi pi-map-marker text-[#662222] opacity-80"></i> {{ s.address }}
             </p>
           </div>
-
-          <button [routerLink]="['/management/store_upsert', s.id]" class="flex items-center justify-center gap-2 px-6 py-2 border
+          <div class="flex gap-3">
+            <button [routerLink]="['/management/store_info', s.id]"
+              class="flex items-center justify-center gap-2 px-6 py-2 border
             border-[#662222] rounded-lg text-[#662222] hover:bg-[#662222] hover:text-white transition-all font-medium shadow-sm active:scale-95">
-            <i class="pi pi-pencil text-sm"></i> 管理店家資訊
-          </button>
+              <i class="pi pi-info-circle text-sm"></i> 店家詳細資訊
+            </button>
+            <button [routerLink]="['/groupbuy-event/group-event']" [queryParams]="{ store_id: s.id }"
+              class="flex items-center justify-center gap-2 px-6 py-2 border
+            border-[#662222] rounded-lg text-[#662222] hover:bg-[#662222] hover:text-white transition-all font-medium shadow-sm active:scale-95">
+              <i class="pi pi-bolt text-sm"></i> 去開團
+            </button>
+          </div>
         </div>
       </p-accordion-content>
     </p-accordion-panel>
     } @empty {
-      <div class="p-12 text-center border-2 border-dashed border-slate-200 rounded-2xl bg-white/50">
-        <div class="mb-4">
-          <i class="pi pi-shop text-5xl text-slate-200"></i>
-        </div>
-        @if(activeTab === 'myCreate'){
-          <p class="text-slate-500 mb-6 font-medium">您目前尚未建立任何公開店家</p>
-          <button routerLink="/management/store_upsert"
-             class="px-10 py-3 bg-[#662222] text-white rounded-full hover:bg-[#4d1a1a] transition-all shadow-lg active:scale-95">
-             + 立即建立新店家
-          </button>
-        } @else {
-          <p class="text-slate-400 italic">目前無未公開店家紀錄</p>
-        }
+    <div class="p-12 text-center border-2 border-dashed border-slate-200 rounded-2xl bg-white/50">
+      <div class="mb-4">
+        <i class="pi pi-shop text-5xl text-slate-200"></i>
       </div>
+      @if(activeTab === 'favoriteSlow'){
+      <p class="text-slate-500 mb-6 font-medium">您目前尚未收藏團購店家</p>
+      }@else if (activeTab === ' favoriteFast') {
+      <p class="text-slate-500 mb-6 font-medium">您目前尚未收藏外送店家</p>
+      }@else {
+      <p class="text-slate-500 mb-6 font-medium">您目前尚未收藏任何店家</p>
+      }
+    </div>
     }
   </p-accordion>
+</ng-template>
 
-  @if(stores.length > 0 && activeTab === 'myCreate') {
-    <div class="mt-10 flex justify-center">
-      <button (click)="addStore()"
-         class="flex items-center gap-2 px-8 py-3 text-[#662222] rounded-xl hover:bg-[#662222]/5 transition-all font-bold tracking-wide">
-        <i class="pi pi-plus-circle"></i> 建立另一間新店家
+<!---------------------------- 確定移除最愛 Dialog ------------------------------>
+<p-dialog [(visible)]="displayRemoveConfirm" [modal]="true" [closable]="false" [showHeader]="false" [draggable]="false"
+  [resizable]="false" [closeOnEscape]="false" styleClass="custom-confirm-dialog"
+  [style]="{ width: '90vw', maxWidth: '26rem', border: 'none', borderRadius: '1.25rem' }">
+
+  <div class="bg-white px-6 pb-6 pt-8 text-center">
+    <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-50 mb-6">
+      <i class="pi pi-trash text-[#662222]" style="font-size: 2rem"></i>
+    </div>
+
+    <div class="space-y-2">
+      <h3 class="text-xl font-bold tracking-tight text-gray-900">確認移除選取的店家</h3>
+      <p class="text-gray-500 text-sm">
+        您已選取了 <span class="text-[#662222] font-bold">{{ selectedStoreIds.length }}</span> 間店家，<br>
+        移除後將無法自動恢復，確定要繼續嗎？
+      </p>
+    </div>
+
+    <div class="mt-8 flex gap-3">
+      <button type="button" (click)="displayRemoveConfirm = false"
+        class="flex-1 justify-center rounded-xl bg-gray-50 px-4 py-3 font-bold text-gray-500 hover:bg-gray-100 transition-all active:scale-95 border border-gray-100">
+        返回
+      </button>
+      <button type="button" (click)="removeFavorite()"
+        class="flex-1 justify-center rounded-xl bg-[#662222] px-4 py-3 font-bold text-white shadow-lg shadow-red-900/20 hover:bg-[#4d1a1a] transition-all active:scale-95">
+        確認移除
       </button>
     </div>
-  }
-</ng-template>
+  </div>
+</p-dialog>

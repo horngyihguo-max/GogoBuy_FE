@@ -23,6 +23,8 @@ import { OrderInfoComponent } from './order-info/order-info.component';
 import { GroupEventComponent } from './groupbuy-event/group-event/group-event.component';
 import { FollowGroupComponent } from './groupbuy-event/follow-group/follow-group.component';
 import { MyStoresComponent } from './account/my-stores/my-stores.component';
+import { VerifyEmailComponent } from './verify-email/verify-email.component';
+import { PopularComponent } from './popular/popular.component';
 
 export const routes: Routes = [
   // 1. 公開頁面與首頁
@@ -34,6 +36,7 @@ export const routes: Routes = [
       { path: 'home', component: GogoBuyComponent, data: { breadcrumb: '首頁' } },
       { path: 'login', component: LoginComponent, title: '登入', data: { breadcrumb: '登入' } },
       { path: 'list', component: StoreListComponent, title: '找附近', data: { breadcrumb: '找附近' } },
+      { path: 'popular', component: PopularComponent, title: '熱門團購', data: { breadcrumb: '熱門團購' } },
     ]
   },
 
@@ -58,10 +61,10 @@ export const routes: Routes = [
     path: 'management',
     data: { breadcrumb: '後台管理' },
     children: [
-      { path: 'store', component: StoreComponent, title: '店家管理', data: { breadcrumb: '我的店家' } },
-      { path: 'store/:id', component: StoreComponent, title: '店家管理', data: { breadcrumb: '我的店家' } },
-      { path: 'store_upsert', component: StoreUpsertComponent, title: '創建店家', data: { breadcrumb: '創建店家' } },
-      { path: 'store_upsert/:id', component: StoreUpsertComponent, title: '創建店家', data: { breadcrumb: '創建店家' } },
+      { path: 'store', component: StoreComponent, title: '店家管理', data: { breadcrumb: '我的店家', expectedRole: 'admin' }, canActivate: [authGuard] },
+      { path: 'store/:id', component: StoreComponent, title: '店家管理', data: { breadcrumb: '我的店家', expectedRole: 'admin' }, canActivate: [authGuard] },
+      { path: 'store_upsert', component: StoreUpsertComponent, title: '創建店家', data: { breadcrumb: '創建店家', expectedRole: 'admin' }, canActivate: [authGuard] },
+      { path: 'store_upsert/:id', component: StoreUpsertComponent, title: '創建店家', data: { breadcrumb: '創建店家', expectedRole: 'admin' }, canActivate: [authGuard] },
       { path: 'store_info/:id', component: StoreInfoComponent, title: '店家資訊', data: { breadcrumb: '店家資訊' } },
     ]
   },
@@ -71,7 +74,7 @@ export const routes: Routes = [
     path: 'groupbuy-event',
     data: { breadcrumb: '團購活動' },
     children: [
-      { path: 'group-event/:id', component: GroupEventComponent, title: '開團資料設定', data: { breadcrumb: '開團' } },
+      { path: 'group-event', component: GroupEventComponent, title: '開團資料設定', data: { breadcrumb: '開團' } },
       { path: 'group-follow/:id', component: FollowGroupComponent, title: '跟團店家頁面', data: { breadcrumb: '跟團' } },
     ]
   },
@@ -90,7 +93,7 @@ export const routes: Routes = [
   // 6.GOOGLE登入跳轉頁面
   { path: 'auth-callback', component: AuthCallbackComponent },
 
-  // 6. 管理員頁面
+  // 7. 管理員頁面
   {
     path: 'admin',
     component: DashboardComponent, // 關鍵：這是一個有側邊欄的後台專用版型
@@ -115,6 +118,8 @@ export const routes: Routes = [
     //     }
     //   ]
   },
+
+  { path: 'active-account', component: VerifyEmailComponent },
 
   // 8. 錯誤處理
   { path: '', redirectTo: 'gogobuy', pathMatch: 'full' },

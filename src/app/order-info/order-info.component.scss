@@ -4,7 +4,7 @@
     --done: #769902;
     --todo: #e5e7eb;
     --seg: calc(100% / var(--ggb-count));
-
+    --p-steps-item-label-font-weight: 700;
   }
 
   /* 強制每個 step 等寬，點點中心才會等距 */
@@ -63,4 +63,15 @@
   /* 移除跟團者線條 */
   :host ::ng-deep .ggb-progress:not(.is-host) .p-steps-item:before {
     display: none !important;
+  }
+
+  /* 手機版 RWD 優化：隱藏文字標籤避免碰撞 */
+  @media (max-width: 640px) {
+    :host ::ng-deep .ggb-progress .p-steps-item-label {
+      display: none !important;
+    }
+
+    :host ::ng-deep .ggb-progress {
+      --dot: 28px;
+    }
   }

@@ -40,8 +40,8 @@ export class WishesComponent implements OnInit {
     public auth: AuthService,
     private messageService: MessageService,
     private route: ActivatedRoute,
-    private router: Router
-  ) { }
+    private router: Router,
+  ) {}
 
   // =========================
   // 用戶資料(ngOnInt注入)
@@ -101,16 +101,13 @@ export class WishesComponent implements OnInit {
     // 訂閱 User 狀態流
     this.auth.user$.subscribe((user) => {
       if (user) {
-        console.log('接收到用戶資料:', user);
         this.userId = user.id;
         this.timesRemaining = user.timesRemaining;
+        this.role = user.role;
       }
     });
     // 刷新資料
     this.auth.refreshUser();
-
-    console.log('用戶id : ' + this.userId);
-    console.log('許願次數 : ' + this.timesRemaining);
 
     this.loadWishes();
   }
@@ -132,9 +129,9 @@ export class WishesComponent implements OnInit {
 
       this.pendingFilter =
         filter === 'all' ||
-          filter === 'active' ||
-          filter === 'finished' ||
-          filter === 'expired'
+        filter === 'active' ||
+        filter === 'finished' ||
+        filter === 'expired'
           ? filter
           : null;
 
@@ -150,72 +147,6 @@ export class WishesComponent implements OnInit {
         this.afterLoad();
         this.applyScrollAndHighlight();
       });
-
-    // 假資料
-    // this.wishes = [
-    //   {
-    //     id: 1,
-    //     user_id: '5274e1a0-40cd-4e2b-9528-a3779e2f84a6',
-    //     nickname: '小林',
-    //     title: '喝不喝五十嵐（這邊故意做很長很長用來測試省略）',
-    //     followers: [
-    //       '74db5f21-f331-4824-853b-0be13d633c80',
-    //       '12b7bf42-57af-4e3f-acfc-b9a2ba3342aa',
-    //     ],
-    //     finished: false,
-    //     type: '手搖店',
-    //     buildDate: '2026-01-09',
-    //     location: '資安大樓（這邊也做很長測測測測測測測測測試）',
-    //   },
-    //   {
-    //     id: 2,
-    //     user_id: '12b7bf42-57af-4e3f-acfc-b9a2ba3342aa',
-    //     nickname: null,
-    //     title: '全聯火鍋吃起來',
-    //     followers: [],
-    //     finished: false,
-    //     type: '生鮮雜貨',
-    //     buildDate: '2026-01-06',
-    //     location: '台南市歸仁區',
-    //   },
-    //   {
-    //     id: 3,
-    //     user_id: '74db5f21-f331-4824-853b-0be13d633c80',
-    //     nickname: null,
-    //     title: '大祥燒臘',
-    //     followers: ['12b7bf42-57af-4e3f-acfc-b9a2ba3342aa'],
-    //     finished: false,
-    //     type: '餐廳',
-    //     buildDate: '2026-01-01',
-    //     location: '資安大樓',
-    //   },
-    //   {
-    //     id: 4,
-    //     user_id: '12b7bf42-57af-4e3f-acfc-b9a2ba3342aa',
-    //     nickname: null,
-    //     title: '我好想喝迷克夏',
-    //     followers: ['74db5f21-f331-4824-853b-0be13d633c80'],
-    //     finished: true,
-    //     type: '手搖店',
-    //     buildDate: '2026-01-05',
-    //     location: '高雄小港',
-    //   },
-    //   {
-    //     id: 5,
-    //     user_id: '12b7bf42-57af-4e3f-acfc-b9a2ba3342aa',
-    //     nickname: null,
-    //     title: '可不可要不要',
-    //     followers: ['74db5f21-f331-4824-853b-0be13d633c80'],
-    //     finished: false,
-    //     type: '餐廳',
-    //     buildDate: '2025-10-01',
-    //     location: '資安大樓',
-    //   },
-    // ];
-
-    // this.afterLoad();
-    // this.applyScrollAndHighlight();
-    // 這邊實際上線時記得要刪掉
   }
 
   // 讀取完資料後的整理小工具
@@ -612,7 +543,6 @@ export class WishesComponent implements OnInit {
     };
 
     this.isCreating = true;
-    console.log('送出新增資料：' + JSON.stringify(payload, null, 2));
 
     // 後端上線後使用（成功再刷新/更新畫面）
     this.http
@@ -723,9 +653,9 @@ export class WishesComponent implements OnInit {
     this.selectedWish = null;
   }
 
+  role = 'user';
   startGroupFromWish(): void {
     if (!this.selectedWish) return;
-
     if (!this.userId) {
       this.toastWarn('請先登入', '登入後才可以開團');
       return;
@@ -733,6 +663,7 @@ export class WishesComponent implements OnInit {
 
     const wishId = this.selectedWish.id;
     const wishTitle = encodeURIComponent(this.selectedWish.title || '');
+    sessionStorage.removeItem('temp_order_info');
     window.location.href = `/management/store_upsert?wish_id=${wishId}&wish_title=${wishTitle}`;
   }
 
@@ -866,9 +797,6 @@ export class WishesComponent implements OnInit {
     const body = document.body;
     const scrollbarWidth =
       window.innerWidth - document.documentElement.clientWidth;
-
-    console.log('scrollbarWidth:', scrollbarWidth);
-
     // 設定 CSS variable
     document.documentElement.style.setProperty(
       '--scrollbar-offset',

@@ -49,6 +49,24 @@ export class ProblemsComponent {
   toggleFaq(item: FaqItem) {
     item.isOpen = !item.isOpen;
   }
+
+  ngAfterViewInit() {
+    // 檢查是否有從 router 傳過來的 state
+    if (history.state?.scrollToBottom) {
+      this.scrollToBottom();
+    }
+  }
+
+  private scrollToBottom() {
+    // 使用 setTimeout 確保 DOM 渲染與佈局計算完成
+    setTimeout(() => {
+      window.scrollTo({
+        top: document.documentElement.scrollHeight,
+        behavior: 'smooth' // 加入平滑捲動效果
+      });
+    }, 100); // 如果您的頁面有非同步 API 載入，這裡的時間可以稍微加長
+  }
+
 }
 
 interface FaqItem {

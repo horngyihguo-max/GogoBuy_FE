@@ -1,13 +1,24 @@
 import { Injectable } from '@angular/core';
+import { HttpService } from './http.service';
+import { map } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
 })
 export class StoreService {
 
-  constructor() { }
+  constructor(private http: HttpService) { }
+
+  deleteEventPhysically(id: number, group: any){
+    return this.http.postApi(`http://localhost:8080/gogobuy/event/deleteEventPhysically?id=${id}`, group)
+      .subscribe((res: any) => {
+        console.log("res", res);
+      })
+
+  }
 
   wishId!: number;
+  activeEventsByStoreId: any[] = [];
 
   storeData: Stores = {
     id: 0,

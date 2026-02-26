@@ -14,7 +14,7 @@ import { SelectButtonModule } from 'primeng/selectbutton';
 import { DialogModule } from 'primeng/dialog';
 import { HttpService } from '../../@service/http.service';
 import { ActivatedRoute, Router, RouterLink } from "@angular/router";
-import { Category, Items, MenuCategoriesVoList, MenuVoList, OperatingHoursVoList, ProductOptionGroupsVoList, Stores } from '../../@service/store.service';
+import { Items, MenuCategoriesVoList, MenuVoList, OperatingHoursVoList, ProductOptionGroupsVoList } from '../../@service/store.service';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { FloatLabelModule } from 'primeng/floatlabel';
@@ -23,9 +23,12 @@ import { SelectModule } from 'primeng/select';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { CheckboxModule } from 'primeng/checkbox';
-import { CdkDrag } from '@angular/cdk/drag-drop';
 import Swal from 'sweetalert2';
 import { ImageService } from '../../@service/image.service';
+import { FileUploadModule } from 'primeng/fileupload';
+import { ToastModule } from 'primeng/toast';
+import { OverlayPanelModule } from 'primeng/overlaypanel';
+import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
   selector: 'app-store',
@@ -39,6 +42,7 @@ import { ImageService } from '../../@service/image.service';
     InputGroupModule, InputGroupAddonModule, FloatLabelModule,
     InputNumberModule, SelectModule, InputTextModule,
     IconFieldModule, InputIconModule, CheckboxModule,
+    FileUploadModule, ToastModule, OverlayPanelModule
   ],
   templateUrl: './store.component.html',
   styleUrl: './store.component.scss'
@@ -51,11 +55,13 @@ export class StoreComponent {
     private route: ActivatedRoute,
     private storeService: StoreService,
     private imageService: ImageService,
+    private cdr: ChangeDetectorRef
   ) { }
 
   id!: number;
   userId = '';
   wishId!: number;
+  activeEventsByStoreId!: any[];
 
   // 開啟dialog
   displayStoreInfoDialog = false;
@@ -73,6 +79,7 @@ export class StoreComponent {
   displayUnableDeleteSpec = false;
   displayPublishConfirm = false
   displaySaveFailedDialog = false;
+  displaySureUpdateDialog = false;
 
   selectedProduct!: MenuVoList;
   selectedCategoryId: number | null = null;
@@ -128,6 +135,9 @@ export class StoreComponent {
 
   // res.message
   resMessage!: string;
+
+  // loading
+  loading: boolean = false;
 
   // 清空欄位
   getNewProduct(): MenuVoList {
@@ -216,17 +226,22 @@ export class StoreComponent {
     this.userId = String(localStorage.getItem('user_id') || '');
     this.id = Number(this.route.snapshot.paramMap.get('id'));
     this.wishId = this.storeService.wishId;
+    this.activeEventsByStoreId = this.storeService.activeEventsByStoreId;
 
     if (this.id !== 0) {
       this.http.getApi(`http://localhost:8080/gogobuy/store/searchId?id=${this.id}`)
         .subscribe((res: any) => {
+          console.log('res', res);
 
           if (res.storeList && res.storeList.length > 0) {
             this.storeData.menuCategoriesVoList = res.menuCategoriesVoList;
             this.storeData.productOptionGroupsVoList = res.productOptionGroupsVoList;
             this.storeData.menuVoList = res.menuVoList.map((product: any) => {
               if (Array.isArray(product.unusual) && product.unusual.length > 0) {
-                product.unusual = product.unusual[0];
+                // 將 [{124: '湯頭'}, {125: '麵條'}] 合併成 {124: '湯頭', 125: '麵條'}
+                product.unusual = product.unusual.reduce((acc: any, curr: any) => {
+                  return { ...acc, ...curr };
+                }, {});
               } else if (!product.unusual) {
                 product.unusual = {};
               }
@@ -240,7 +255,6 @@ export class StoreComponent {
           }
         });
     }
-    this.filteredProducts = [...this.storeData.menuVoList];
 
     if (this.storeService.storeData && this.storeService.storeData.name !== '') {
       const source = this.storeService.storeData;
@@ -342,6 +356,7 @@ export class StoreComponent {
   // 商品分類 ---------------------------------------------------------
   addCategories() {
     this.isEditMode = false;
+    this.submitted = false;
     this.currentCategories = this.getNewCategories();
     this.displayCategoriesDialog = true;
   }
@@ -418,6 +433,11 @@ export class StoreComponent {
       return;
     }
 
+    const e = this.storeData.menuCategoriesVoList.find(c => c.name === this.currentCategories.name)
+    if (e && !this.isEditMode) {
+      return;
+    }
+
     if (this.isEditMode && this.editingIndex !== -1) {
       this.storeData.menuCategoriesVoList[this.editingIndex] = { ...this.currentCategories };
     } else {
@@ -451,6 +471,7 @@ export class StoreComponent {
   // 規格 ---------------------------------------------------------
   addSpecs() {
     this.isEditMode = false;
+    this.submitted = false;
     this.editingSpecIndex = -1;
     this.currentGroup = this.getNewGroups();
     this.selectedSpecsCategories = [];
@@ -461,21 +482,18 @@ export class StoreComponent {
     this.isEditMode = true;
     this.editingSpecIndex = index;
     this.currentGroup = JSON.parse(JSON.stringify(spec));
+    console.log('currentGroup', this.currentGroup);
 
-    const categoryIds = this.storeData.menuVoList
-      .filter(menu => menu.unusual && menu.unusual[spec.id])
-      .map(menu => menu.categoryId);
 
-    this.selectedSpecsCategories =
-      this.storeData.menuCategoriesVoList!.filter(cate =>
-        categoryIds.includes(cate.id)
+    if (this.currentGroup.applicableCategoryIds) {
+      this.selectedSpecsCategories = this.storeData.menuCategoriesVoList!.filter(cate =>
+        this.currentGroup.applicableCategoryIds!.includes(cate.id)
       );
+    } else {
+      this.selectedSpecsCategories = [];
+    }
 
-    this.newItemId = Math.max(
-      0,
-      ...this.currentGroup.items.map(i => i.id || 0)
-    ) + 1;
-
+    this.newItemId = Math.max(0, ...this.currentGroup.items.map(i => i.id || 0)) + 1;
     this.displaySpecsDialog = true;
   }
 
@@ -544,6 +562,12 @@ export class StoreComponent {
       return;
     }
 
+    if (this.currentGroup.maxSelection) {
+      if (this.currentGroup.maxSelection > this.currentGroup.items.length) {
+        return;
+      }
+    }
+
     this.currentGroup.applicableCategoryIds = this.selectedSpecsCategories.map(cate => cate.id);
 
     if (this.isEditMode && this.editingSpecIndex > -1) {
@@ -558,6 +582,7 @@ export class StoreComponent {
         ...this.storeData.productOptionGroupsVoList, newSpec
       ];
     }
+    console.log('OptionGroupsVoList', this.storeData.productOptionGroupsVoList);
 
     this.displaySpecsDialog = false;
     this.currentGroup = this.getNewGroups();
@@ -576,13 +601,16 @@ export class StoreComponent {
 
     menus.forEach(menu => {
       if (!menu.unusual) return;
+
       Object.keys(menu.unusual).forEach(specIdStr => {
         const specId = Number(specIdStr);
         const specGroup = groups.find(g => g.id === specId);
-        if (!specGroup) return;
 
-        if (!specGroup.applicableCategoryIds!.includes(menu.categoryId)) {
-          specGroup.applicableCategoryIds!.push(menu.categoryId);
+        if (specGroup) {
+          if (!specGroup.applicableCategoryIds) specGroup.applicableCategoryIds = [];
+          if (!specGroup.applicableCategoryIds.includes(menu.categoryId)) {
+            specGroup.applicableCategoryIds.push(menu.categoryId);
+          }
         }
       });
     });
@@ -611,24 +639,20 @@ export class StoreComponent {
     }
 
     this.filteredProducts = results;
+    console.log('filteredProducts', this.filteredProducts);
+
   }
 
   // 新增商品 ---------------------------------------------------------
   openNewProduct() {
     this.isEditMode = false;
-    const defaultCategoryId = this.storeData.menuCategoriesVoList.length > 0
-      ? this.storeData.menuCategoriesVoList[0].id
-      : null as any as number;
-
+    this.submitted = false;
     this.currentProduct = this.getNewProduct();
     this.displayProductDialog = true;
-
     setTimeout(() => {
-      if (this.storeData.menuCategoriesVoList.length === 1) {
-        this.currentProduct.categoryId =
-          this.storeData.menuCategoriesVoList[0].id;
-        this.onCategoryChange(); // 同步規格
-      }
+      const id = this.currentProduct.categoryId;
+      this.currentProduct.categoryId = null;
+      this.currentProduct.categoryId = id;
     });
   }
 
@@ -700,7 +724,7 @@ export class StoreComponent {
       icon: 'warning',
       title,
       text,
-      // timer: 200,
+      timer: 1200,
       showConfirmButton: false,
       didOpen: () => {
         const c = document.querySelector(
@@ -736,13 +760,10 @@ export class StoreComponent {
   // 新增商品時 選擇category 帶入 optionGroup ---------------------------------
   onCategoryChange() {
     const selectedId = this.currentProduct.categoryId;
-    this.currentProduct.unusual = {};
 
-    if (!selectedId) {
+    if (selectedId == null) {
       this.filteredSpecsForProduct = [];
-      if (!this.isEditMode) {
-        this.currentProduct.unusual = {};
-      }
+      this.currentProduct.unusual = {};
       return;
     }
 
@@ -750,15 +771,12 @@ export class StoreComponent {
       spec.applicableCategoryIds?.includes(selectedId)
     );
 
-    if (!this.isEditMode) {
-      const updatedUnusual: { [key: string]: string } = { ...this.currentProduct.unusual };
-      this.filteredSpecsForProduct.forEach(spec => {
-        if (!updatedUnusual[spec.id]) {
-          updatedUnusual[spec.id] = 'true';
-        }
-      });
-      this.currentProduct.unusual = updatedUnusual;
-    }
+    const updatedUnusual: { [key: string]: string } = {};
+
+    this.filteredSpecsForProduct.forEach(spec => {
+      updatedUnusual[spec.id.toString()] = spec.name;
+    });
+    this.currentProduct.unusual = updatedUnusual;
   }
 
 
@@ -878,6 +896,7 @@ export class StoreComponent {
   }
 
   saveProduct() {
+    console.log(this.currentProduct.categoryId);
     this.submitted = true;
     const isNameValid = !!this.currentProduct.name?.trim();
     const isCategoryValid = !!this.currentProduct.categoryId;
@@ -912,6 +931,7 @@ export class StoreComponent {
     this.isEditMode = true;
     this.currentProduct = { ...product };
 
+    console.log('currentProduct(上)', this.currentProduct);
     this.currentProduct.unusual = this.currentProduct.unusual ? { ...this.currentProduct.unusual } : {};
 
     this.displayProductDialog = true;
@@ -993,89 +1013,88 @@ export class StoreComponent {
   // 存資料庫 ---------------------------------------------------------
   async onSaveAll() {
     this.displayPublishConfirm = false;
-    if (this.storeData.id == 0) {
-      const payload = {
-        storesname: this.storeData.name,
-        phone: this.storeData.phone,
-        address: this.storeData.address,
-        category: this.storeData.category,
-        type: this.storeData.type,
-        memo: this.storeData.memo,
-        image: this.storeData.image,
-        publish: this.storeData.publish,
-        createdBy: this.userId,
-        operatingHoursVoList: this.normalizeOperatingHours(),
-        fee_description: this.storeData.feeDescription,
-        menuCategoriesVoList: this.storeData.menuCategoriesVoList.map(category => ({
-          name: category.name,
-          priceLevel: category.priceLevel,
-          menuVo: this.storeData.menuVoList.filter(item => item.categoryId === category.id)
-            .map(product => ({
-              ...product,
-              unusual: product.unusual ? [product.unusual] : []
-            }))
-        })),
-        productOptionGroupsVoList: this.storeData.productOptionGroupsVoList
-      }
-      console.log("payload(create):", payload);
-      this.http.postApi('http://localhost:8080/gogobuy/store/create', payload)
-        .subscribe((res: any) => {
-          console.log("create store:", res);
-          if (res.code === 200) {
+    this.loading = true;
+    this.cdr.detectChanges();
+    setTimeout(() => {
+      const transformUnusual = (unusual: any) => {
+        if (!unusual || Object.keys(unusual).length === 0) {
+          return [];
+        }
+        if (Array.isArray(unusual) && unusual.length > 1) {
+          return unusual;
+        }
+        const targetObj = Array.isArray(unusual) ? unusual[0] : unusual;
 
-            this.http.getApi('http://localhost:8080/gogobuy/store/all').subscribe((all: any) => {
-              const myStores = all.storeList.filter((s: any) => s.createdBy === this.userId);
-              if (myStores && myStores.length > 0) {
-                const latestStore = myStores.reduce((prev: any, current: any) => (prev.id > current.id) ? prev : current);
-                this.id = latestStore.id;
-                this.afterSaveSuccess();
+        return Object.entries(targetObj).map(([key, value]) => ({
+          [key]: value
+        }));
+      }
+
+      if (this.storeData.id == 0) {
+        this.loading = true;
+        const payload = {
+          storesname: this.storeData.name,
+          phone: this.storeData.phone,
+          address: this.storeData.address,
+          category: this.storeData.category,
+          type: this.storeData.type,
+          memo: this.storeData.memo,
+          image: this.storeData.image,
+          publish: this.storeData.publish,
+          createdBy: this.userId,
+          operatingHoursVoList: this.normalizeOperatingHours(),
+          fee_description: this.storeData.feeDescription,
+          menuCategoriesVoList: this.storeData.menuCategoriesVoList.map(category => ({
+            name: category.name,
+            priceLevel: category.priceLevel,
+            menuVo: this.storeData.menuVoList.filter(item => item.categoryId === category.id)
+              .map(product => ({
+                ...product,
+                unusual: transformUnusual(product.unusual)
+              }))
+          })),
+          productOptionGroupsVoList: this.storeData.productOptionGroupsVoList
+        }
+        console.log("payload(create):", payload);
+        this.http.postApi('http://localhost:8080/gogobuy/store/create', payload)
+          .subscribe({
+            next: (res: any) => {
+              console.log("create store:", res);
+              if (res.code === 200) {
+
+                this.http.getApi('http://localhost:8080/gogobuy/store/all').subscribe((all: any) => {
+                  const myStores = all.storeList.filter((s: any) => s.createdBy === this.userId);
+                  if (myStores && myStores.length > 0) {
+                    const latestStore = myStores.reduce((prev: any, current: any) => (prev.id > current.id) ? prev : current);
+                    this.id = latestStore.id;
+                    this.afterSaveSuccess();
+                  } else {
+                    this.router.navigate(['gogobuy/home']);
+                  }
+                });
               } else {
-                this.router.navigate(['gogobuy/home']);
+                this.loading = false;
+                this.resMessage = res.message;
+                this.displaySaveFailedDialog = true;
               }
-            });
-          } else {
-            console.log(res.message);
-            this.resMessage = res.message;
-            this.displaySaveFailedDialog = true;
-          }
-        });
-    } else {
-      const payload = {
-        ...this.storeData, storesname: this.storeData.name,
-        phone: this.storeData.phone,
-        address: this.storeData.address,
-        category: this.storeData.category,
-        type: this.storeData.type,
-        memo: this.storeData.memo,
-        image: this.storeData.image,
-        publish: this.storeData.publish,
-        createdBy: this.userId,
-        operatingHoursVoList: this.normalizeOperatingHours(),
-        fee_description: this.storeData.feeDescription,
-        menuCategoriesVoList: this.storeData.menuCategoriesVoList.map(category => ({
-          name: category.name,
-          priceLevel: category.priceLevel,
-          menuVo: this.storeData.menuVoList.filter(item => item.categoryId === category.id)
-            .map(product => ({
-              ...product,
-              unusual: product.unusual ? [product.unusual] : []
-            }))
-        })),
-        productOptionGroupsVoList: this.storeData.productOptionGroupsVoList
-      }
-      console.log("payload(update):", payload);
+            },
+            error: () => {
+              this.loading = false;
+            },
+            complete: () => {
+              this.loading = false;
+            }
+          });
+      } else {
+        if (this.activeEventsByStoreId && this.activeEventsByStoreId.length > 0) {
+          this.displaySureUpdateDialog = true;
+        } else {
+          this.updateStore();
+          console.log("一般更新");
 
-      this.http.postApi(`http://localhost:8080/gogobuy/store/update?id=${this.storeData.id}`, payload)
-        .subscribe((res: any) => {
-          if (res.code === 200) {
-            console.log("update store:", res);
-            this.id = this.storeData.id;
-            this.afterSaveSuccess();
-          } else {
-            console.error('更新失敗:', res.message);
-          }
-        });
-    }
+        }
+      }
+    });
   }
 
   private afterSaveSuccess() {
@@ -1085,18 +1104,78 @@ export class StoreComponent {
   }
 
   closeSaveDialog() {
-    console.log('closeSaveDialog() this.id', this.id);
     this.displaySaveDialog = false;
-    if (!this.wishId) {
-      console.log('no wish');
+    // if (!this.wishId) {
+    this.router.navigate(['/management/store_info', this.id]);
+    // } else {
+    //   this.router.navigate(['/groupbuy-event/group-event', this.id], {
+    //     queryParams: { wish_id: this.wishId }
+    //   });
+    // }
+  }
 
-      this.router.navigate(['/management/store_info', this.id]);
-    } else {
-      console.log('have wish');
-      this.router.navigate(['/groupbuy-event/group-event', this.id], {
-        queryParams: { wish_id: this.wishId }
-      });
+  // 更新店家資訊並刪正在開的團
+  deleteEvent() {
+    this.displaySureUpdateDialog = false;
+    let deleteEventIdList: any[] = [];
+    deleteEventIdList = this.activeEventsByStoreId.map((event: any) => event.id)
+
+    this.loading = true;
+    for (let id of deleteEventIdList) {
+      this.storeService.deleteEventPhysically(id, this.activeEventsByStoreId)
     }
+
+    this.updateStore();
+  }
+
+  updateStore() {
+    this.loading = true;
+    const payload = {
+      ...this.storeData, storesname: this.storeData.name,
+      phone: this.storeData.phone,
+      address: this.storeData.address,
+      category: this.storeData.category,
+      type: this.storeData.type,
+      memo: this.storeData.memo,
+      image: this.storeData.image,
+      publish: this.storeData.publish,
+      createdBy: this.userId,
+      operatingHoursVoList: this.normalizeOperatingHours(),
+      fee_description: this.storeData.feeDescription,
+      menuCategoriesVoList: this.storeData.menuCategoriesVoList.map(category => ({
+        name: category.name,
+        priceLevel: category.priceLevel,
+        menuVo: this.storeData.menuVoList.filter(item => item.categoryId === category.id)
+          .map(product => ({
+            ...product,
+            unusual: (Array.isArray(product.unusual) || !product.unusual || Object.keys(product.unusual).length === 0)
+              ? null : [product.unusual]
+          }))
+      })),
+      productOptionGroupsVoList: this.storeData.productOptionGroupsVoList
+    }
+    console.log("payload(update):", payload);
+
+    this.http.postApi(`http://localhost:8080/gogobuy/store/update?id=${this.storeData.id}`, payload)
+      .subscribe({
+        next: (res: any) => {
+          if (res.code === 200) {
+            console.log("update store:", res);
+            this.id = this.storeData.id;
+            this.afterSaveSuccess();
+          } else {
+            this.resMessage = res.message;
+            this.displaySaveFailedDialog = true;
+          }
+          this.loading = false;
+        },
+        error: (err) => {
+          this.loading = false;
+        },
+        complete: () => {
+          this.loading = false;
+        }
+      });
   }
 
   // 假資料 ---------------------------------------------------------

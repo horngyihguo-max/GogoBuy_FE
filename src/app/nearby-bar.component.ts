@@ -6,16 +6,29 @@ import { SelectModule } from 'primeng/select';
 import { InputTextModule } from 'primeng/inputtext';
 import { DialogModule } from 'primeng/dialog';
 import { AuthService } from './@service/auth.service';
+import { TooltipModule } from 'primeng/tooltip';
+import { MessageService } from 'primeng/api';
+import { ToastModule } from 'primeng/toast';
 
 type Mode = 'idle' | 'auto' | 'manual';
 
 @Component({
   selector: 'app-nearby-bar',
   standalone: true,
-  imports: [CommonModule, FormsModule, ButtonModule, SelectModule, InputTextModule, DialogModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    ButtonModule,
+    SelectModule,
+    InputTextModule,
+    DialogModule,
+    TooltipModule,
+    ToastModule],
+  providers: [MessageService],
   templateUrl: './nearby-bar.component.html',
 })
 export class NearbyBarComponent implements OnInit, OnDestroy {
+  private messageService = inject(MessageService);
   private auths = inject(AuthService);
 
   dialogVisible = false;
@@ -38,7 +51,7 @@ export class NearbyBarComponent implements OnInit, OnDestroy {
   private lastFetchAt = 0;
 
   ngOnInit() {
-      this.startAutoOnce();
+    this.startAutoOnce();
   }
 
   ngOnDestroy() {
@@ -49,32 +62,57 @@ export class NearbyBarComponent implements OnInit, OnDestroy {
     this.dialogVisible = true;
   }
 
-  startAutoOnce() {
-  if (!navigator.geolocation) {
-    this.mode.set('manual');
-    this.status.set('此裝置不支援定位，請改用地址搜尋');
-    return;
-  }
-
-  this.mode.set('auto');
-  this.status.set('定位中...');
-
-  navigator.geolocation.getCurrentPosition(
-    (pos) => {
-      const lat = pos.coords.latitude;
-      const lng = pos.coords.longitude;
-      this.lastLatLng = { lat, lng };
-      this.fetchByGeo(lat, lng);
-      this.dialogVisible = false;
-      this.status.set('完成');
-    },
-    () => {
+  async startAutoOnce() {
+    if (!navigator.geolocation) {
       this.mode.set('manual');
-      this.status.set('定位被拒絕/失敗，請改用地址搜尋');
-    },
-    { enableHighAccuracy: true, maximumAge: 30000, timeout: 10000 }
-  );
-}
+      this.status.set('此裝置不支援定位，請改用地址搜尋');
+      this.messageService.add({
+        severity: 'error',
+        summary: '不支援定位',
+        detail: '您的瀏覽器不支援地理定位功能。',
+      });
+      return;
+    }
+
+    // 檢查定位權限
+    try {
+      const permissionStatus = await navigator.permissions.query({ name: 'geolocation' });
+
+      if (permissionStatus.state == 'denied') {
+        this.mode.set('manual');
+        this.status.set('定位被拒絕，請改用地址搜尋');
+        this.messageService.add({
+          severity: 'warn',
+          summary: '定位已關閉',
+          detail: '請點擊網址列左側的「鎖頭」圖示，重新允許定位權限後重新整理網頁。',
+          sticky: true,
+        });
+        return;
+      }
+    } catch (err) {
+      console.warn('無法檢查定位權限', err);
+    }
+
+    // 如果允許
+    this.mode.set('auto');
+    this.status.set('定位中...');
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        this.lastLatLng = { lat, lng };
+        this.fetchByGeo(lat, lng);
+        this.dialogVisible = false;
+        this.status.set('完成');
+      },
+      () => {
+        this.mode.set('manual');
+        this.status.set('定位被拒絕/失敗，請改用地址搜尋');
+      },
+      { enableHighAccuracy: true, maximumAge: 30000, timeout: 10000 }
+    );
+  }
 
 
   stopWatch() {

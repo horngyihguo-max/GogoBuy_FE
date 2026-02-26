@@ -1,225 +1,284 @@
-<section class="max-w-[1440px] mx-auto p-4">
-  <div class="relative flex items-center mb-4 mt-5">
-    <a class="absolute left-1/2 -translate-x-1/2 text-3xl font-bold">
-      購物車({{ mode == 'host' ? '開團者版本' : '跟團者版本' }})
-    </a>
-    <p class="ml-auto font-normal text-lg">
-      更新時間：{{ formatDateTime(latestOrderTime) }}
-    </p>
-  </div>
-</section>
-
-<div class="card">
-  <p-toast></p-toast>
-  <p-steps [model]="mode == 'host' ? host : member" [readonly]="true" [activeIndex]="activeIndex"
-    [styleClass]="'ggb-progress ' + (mode == 'host' ? 'is-host completed-' : 'is-member completed-') + activeIndex"
-    [style.--ggb-count]="(mode == 'host' ? host?.length : member?.length) || 1" [style.--ggb-progress]="progressRatio">
-  </p-steps>
-</div>
-
-<div class="Outline mt-4">
-  @switch (activeIndex) {
-  @case (0) {
-  <section class="max-w-[1440px] mx-auto p-4">
-    <div class="bg-white py-[32px] px-[16px] mt-[16px] font-bold text-2xl rounded-lg shadow-sm">
-      團購名稱：<p class="font-normal text-lg">{{ eventName }}</p><br>
-      商店名稱：<p class="font-normal text-lg">{{ storeName }}</p>
+<section class="max-w-5xl mx-auto p-4 md:p-6 pb-12">
+  <!-- 響應式 Header: 手機版垂直排列，電腦版水平分散 -->
+  <div class="flex flex-col md:flex-row items-center justify-between gap-4 mb-6 mt-4">
+    <div class="flex items-center gap-3">
+      <i class="pi pi-receipt text-2xl md:text-3xl text-slate-700"></i>
+      <h1 class="text-xl md:text-3xl font-bold text-slate-800">
+        訂單明細 <span class="text-base font-semibold md:text-lg text-slate-700 ml-1">({{ mode == 'host' ? '主揪' :
+          '跟團'
+          }})</span>
+      </h1>
     </div>
+    <div
+      class="flex items-center text-[12px] font-semibold md:text-sm text-slate-500 bg-white px-3 py-1.5 rounded-full shadow-sm border border-slate-100">
+      <i class="pi pi-clock mr-2"></i>
+      <span>更新於 {{ formatDateTime(transfer.latestOrderTime()) }}</span>
+    </div>
+  </div>
 
-    <div class="bg-white py-[24px] px-[16px] mt-[16px] rounded-2xl shadow-sm">
-      <div class="text-[20px] font-extrabold text-slate-900">購物內容</div>
+  <div class="card mb-8">
+    <p-toast></p-toast>
+    <p-steps class="font-semibold! text-slate-700" [model]="mode == 'host' ? host : member" [readonly]="true"
+      [activeIndex]="activeIndex"
+      [styleClass]="'ggb-progress ' + (mode == 'host' ? 'is-host completed-' : 'is-member completed-') + activeIndex"
+      [style.--ggb-count]="(mode == 'host' ? host?.length : member?.length) || 1"
+      [style.--ggb-progress]="progressRatio">
+    </p-steps>
+  </div>
 
-      @if (groupedOrders.length) {
-      @for (g of groupedOrders; track g.key) {
-      <div class="mt-4 border-t border-slate-100 pt-4">
-        <button type="button" class="w-full flex items-center gap-3" (click)="toggleGroup(g.key)">
-          <div class="w-10 h-10 rounded-full bg-sky-500 text-white flex items-center justify-center font-bold">
-            @if (avatarMap[g.key]) {
-            <img [src]="avatarMap[g.key]"
-              class="w-10 h-10 rounded-full bg-sky-500 text-white flex items-center justify-center font-bold" />
-            } @else {
-            {{ g.nickname?.[0] }}
-            }
+  <div class="Outline mt-4">
+    @switch (activeIndex) {
+    @case (0) {
+    <div>
+      <!-- 頂部資訊卡片列 (Bento Grid Style) -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div
+          class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-start gap-4 transition-shadow hover:shadow-md">
+          <div class="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+            <i class="pi pi-shopping-bag text-xl"></i>
           </div>
-          <div class="font-bold text-[18px] text-slate-900">{{ g.nickname }}</div>
-          <div class="ml-auto flex items-center gap-3 text-slate-700">
-            <div class="font-semibold">${{ g.totalAmount }} / {{ g.totalQty }} 份</div>
-            <i class="pi" [ngClass]="isGroupOpen(g.key) ? 'pi-angle-up' : 'pi-angle-down'"></i>
+          <div>
+            <p class="text-xl font-extrabold text-slate-900 mb-1">團購/商店</p>
+            <p class="text-base text-slate-900 font-bold leading-tight">{{ eventName }}</p>
+            <p class="text-sm font-semibold text-slate-700 mt-1">{{ storeName }}</p>
           </div>
-        </button>
+        </div>
 
-        @if (isGroupOpen(g.key)) {
-        <div class="mt-3 space-y-3">
-          @for (order of g.orders; track order.id) {
-          <div class="bg-slate-50 rounded-xl px-5 py-4 flex items-start gap-4">
-            <div class="flex-1">
-              <div class="font-bold text-slate-900">{{ order.menuName }}</div>
+        <div
+          class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-start gap-4 transition-shadow hover:shadow-md">
+          <div class="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+            <i class="pi pi-calendar text-xl"></i>
+          </div>
+          <div>
+            <p class="text-xl font-extrabold text-slate-900 mb-1">取貨時間</p>
+            <p class="text-base text-slate-900 font-bold">{{ formatDateTime(pickupTime) || '待確認' }}</p>
+          </div>
+        </div>
 
-              <div class="mt-2 text-[14px] text-slate-500">
-                {{ formatSelectedOptionList(order.parsedOptions) }}
-              </div>
+        <div
+          class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-start gap-4 transition-shadow hover:shadow-md">
+          <div class="w-10 h-10 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+            <i class="pi pi-map-marker text-xl"></i>
+          </div>
+          <div>
+            <p class="text-xl font-extrabold text-slate-900 mb-1">取貨地點</p>
+            <p class="text-base text-slate-900 font-bold line-clamp-2">{{ pickLocation || '待確認' }}</p>
+          </div>
+        </div>
+      </div>
 
-              <div class="mt-2 text-[14px] text-slate-700">
-                共{{ order.quantity }}份/小計：<span class="font-semibold">${{ order.subtotal }}</span>
-              </div>
+      <!-- 購物清單主區塊 -->
+      <div class="bg-white p-5 md:p-8 rounded-2xl shadow-sm border border-slate-100 mb-8">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-xl font-extrabold text-slate-900 flex items-center gap-2">
+            <i class="pi pi-list text-slate-400"></i> 購物清單
+          </h2>
+
+          <!-- CSV匯出按鈕 -->
+          @if (groupedOrders.length) {
+          <!-- <button type="button"
+            class="flex items-center px-4 py-2 rounded-lg border-2 cursor-pointer border-slate-200 text-slate-600 text-sm font-bold hover:bg-slate-50 hover:text-emerald-600 hover:border-emerald-200 transition-colors"
+            (click)="exportToCSV()">
+            <i class="pi pi-file-excel mr-2"></i>匯出明細
+          </button> -->
+          }
+        </div>
+
+        @if (groupedOrders.length) {
+        @for (g of groupedOrders; track g.key) {
+        <div class="mb-4 bg-white rounded-xl border border-slate-200 overflow-hidden transition-all duration-200"
+          [ngClass]="isGroupOpen(g.key) ? 'shadow-md ring-1 ring-slate-100' : 'shadow-sm hover:shadow-md'">
+          <button type="button"
+            class="w-full flex items-center gap-4 cursor-pointer p-4 select-none hover:bg-slate-50 transition-colors"
+            (click)="toggleGroup(g.key)">
+
+            <div
+              class="w-10 h-10 rounded-full bg-gradient-to-br from-sky-400 to-blue-500 text-white flex items-center justify-center font-bold shadow-inner shrink-0 overflow-hidden">
+              @if (avatarMap[g.key]) {
+              <img [src]="avatarMap[g.key]" class="w-full h-full object-cover" alt="avatar" />
+              } @else {
+              <span class="text-sm">{{ g.nickname[0] || '' }}</span>
+              }
             </div>
 
-            <div class="flex flex-col items-end gap-3">
-              <div class="text-slate-900 font-extrabold text-[16px]">
-                ${{ order.subtotal / order.quantity }}/1份
-              </div>
-
-              <button type="button"
-                class="w-9 h-9 rounded-full bg-slate-300 text-white flex items-center justify-center hover:bg-slate-400"
-                (click)="removeorder(order.id)">
-                <i class="pi pi-trash"></i>
-              </button>
+            <div class="text-left flex-1 min-w-0">
+              <div class="font-bold text-base text-slate-900 truncate">{{ g.nickname }}</div>
+              <div class="text-sm text-slate-500 mt-0.5">{{ g.totalQty }} 項商品</div>
             </div>
+
+            <div class="flex items-center gap-4 text-slate-700">
+              <div class="text-right">
+                <span class="text-xs text-slate-500 mr-1">小計</span>
+                <span class="font-bold text-lg text-emerald-600">${{ g.totalAmount }}</span>
+              </div>
+              <div
+                class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 transition-transform duration-200"
+                [ngClass]="{'rotate-180': isGroupOpen(g.key)}">
+                <i class="pi pi-chevron-down text-sm"></i>
+              </div>
+            </div>
+          </button>
+
+          @if (isGroupOpen(g.key)) {
+          <div class="px-4 pb-2 bg-slate-50/50 border-t border-slate-100">
+
+            <ul class="divide-y divide-slate-100">
+              @for (order of g.orders; track order.id) {
+              <li class="flex items-start gap-4 py-4">
+                <div class="flex-1 min-w-0">
+                  <div class="font-bold text-base text-slate-800">{{ order.menuName }}</div>
+
+                  <div class="mt-1 text-sm text-slate-500 leading-snug">
+                    {{ formatSelectedOptionList(order.parsedOptions) }}
+                  </div>
+
+                  <div class="mt-2 flex items-center text-sm text-slate-600 gap-3">
+                    <span>單價 ${{ order.quantity ? order.subtotal/order.quantity : 0 }}</span>
+                    <span class="text-slate-300">|</span>
+                    <span class="font-medium">數量: {{ order.quantity }}</span>
+                  </div>
+                </div>
+
+                <div class="flex flex-col items-end gap-2 shrink-0">
+                  <div class="font-bold text-lg text-slate-900">${{ order.subtotal }}</div>
+                  <!-- 只有自己的訂單或是主揪可以刪除 -->
+                  <button type="button"
+                    class="w-8 h-8 rounded-full text-slate-400 hover:text-red-500 hover:bg-red-50 cursor-pointer flex items-center justify-center transition-colors focus:ring-2 focus:ring-red-200 outline-none"
+                    (click)="removeorder(order.id)" title="刪除項目">
+                    <i class="pi pi-trash"></i>
+                  </button>
+                </div>
+              </li>
+              }
+            </ul>
+          </div>
+          }
+
+          @if (g.orders[0]?.personalMemo) {
+          <div class="mt-3 mb-2 px-3 py-2 bg-amber-50 border border-amber-100 rounded-lg">
+            <p class="text-sm font-bold text-amber-800 flex items-center gap-1.5">
+              <i class="pi pi-info-circle text-xs"></i> 訂單備註：
+            </p>
+            <p class="text-sm text-slate-700 mt-1 pl-5">{{ g.orders[0].personalMemo }}</p>
           </div>
           }
         </div>
         }
-      </div>
-      }
 
-      <div class="mt-6 text-center">
-        <button type="button" class="px-6 py-3 rounded-lg bg-[#769902] text-white font-bold hover:bg-[#5f7a02]"
-          (click)="router.navigate(['groupbuy-event/group-follow', eventsId])">
-          加購更多商品
+
+        <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
+          <button type="button"
+            class="w-full cursor-pointer sm:w-auto px-6 py-3 rounded-xl border-2 border-[#769902] text-[#769902] font-bold hover:bg-[#769902] hover:text-white transition-colors active:scale-95 flex items-center justify-center gap-2"
+            (click)="router.navigate(['groupbuy-event/group-follow', eventsId])">
+            <i class="pi pi-plus-circle"></i> 繼續加購
+          </button>
+        </div>
+
+        @if (mode == 'host') {
+        <div class="mt-6 flex justify-center">
+          <button type="button"
+            class="text-sm cursor-pointer font-semibold text-slate-500 hover:text-slate-800 transition-colors flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-slate-100"
+            (click)="reloadOrders()">
+            <i class="pi pi-sync"></i> 重新載入最新訂單
+          </button>
+        </div>
+        }
+        } @else {
+        <div class="text-center bg-slate-50 rounded-xl py-16 border border-dashed border-slate-200">
+          <div
+            class="w-16 h-16 rounded-full bg-white flex items-center justify-center mx-auto shadow-sm mb-4 text-slate-300">
+            <i class="pi pi-shopping-cart text-2xl"></i>
+          </div>
+          <p class="text-slate-500 font-medium">目前購物清單空空如也</p>
+          <button type="button"
+            class="mt-4 px-6 py-2 rounded-lg bg-[#769902] text-white font-bold hover:bg-[#658302] transition-colors"
+            (click)="router.navigate(['groupbuy-event/group-follow', eventsId])">
+            去逛逛
+          </button>
+        </div>
+        }
+      </div>
+
+    </div>
+    }
+
+    <!-- 第1頁(原本為付款方式，現已從步驟中移除或簡化為直接確認，故這個區塊保留做歷史功能參考) -->
+    <!-- @case (1) 以前是這裡 -->
+    <!-- @case (2) 確認送出頁面 (由於減去了一個步驟，確認頁對應的主揪為 case (1)) -->
+
+    @case (1) {
+    <div class="max-w-3xl mx-auto">
+      <div class="bg-white p-8 md:p-12 mb-8 rounded-3xl shadow-sm border border-slate-100 text-center">
+        <div
+          class="w-20 h-20 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center mx-auto mb-6">
+          <i class="pi pi-check text-4xl"></i>
+        </div>
+        <h2 class="text-2xl font-extrabold text-slate-900 mb-2">
+          內容已核對無誤？
+        </h2>
+        <p class="text-slate-500 mb-8 max-w-md mx-auto">
+          點擊確認送出後，系統將結算訂單狀態並通知團員。此動作不可逆，請再次確認購物清單。
+        </p>
+
+      </div>
+    </div>
+    }
+    }
+  </div>
+
+  <!-- 統一底部操作區 (替代原本的 Sticky Footer) -->
+  <div class="mt-8 pt-8 border-t border-slate-200">
+    <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+      <!-- 左側：總計與匯出 (Desktop) / 總計 (Mobile) -->
+      <div class="flex flex-col md:flex-row items-center gap-6 w-full md:w-auto text-center md:text-left">
+        <div>
+          <span class="text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">應付總計</span>
+          <div class="text-3xl md:text-4xl font-black text-emerald-600">NT$ {{ totalAmount }}</div>
+        </div>
+
+        @if (activeIndex === 0 && groupedOrders.length) {
+        <button type="button"
+          class="hidden md:flex items-center px-5 py-2.5 rounded-xl border-2 border-slate-200 text-slate-600 text-sm font-bold hover:bg-slate-50 hover:border-slate-300 transition-all cursor-pointer"
+          (click)="exportToCSV()">
+          <i class="pi pi-file-excel mr-2"></i>匯出 CSV
         </button>
+        }
       </div>
-      @if (mode == 'host') {
-      <div class="mt-6 flex flex-col items-center gap-3 text-slate-600">
-        <button type="button" class="flex items-center gap-2 hover:underline" (click)="reloadOrders()">
-          <i class="pi pi-refresh"></i> 重新取得團員訂單
+
+      <!-- 右側：主要操作按鈕 -->
+      <div class="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
+        <button type="button"
+          class="w-full sm:w-32 py-4 md:py-3.5 rounded-2xl bg-slate-100 text-slate-700 font-bold hover:bg-slate-200 transition-all active:scale-95 cursor-pointer text-center"
+          (click)="onSecondaryAction()">
+          {{ activeIndex === 0 ? '返回' : '上一步' }}
         </button>
-      </div>
-      }
-      } @else {
-      <div class="text-center text-slate-500 py-10">目前沒有購物內容</div>
-      }
-    </div>
-  </section>
-  <section class="max-w-[1440px] mx-auto p-4">
 
-    <div class="bg-white rounded-2xl shadow-sm p-4 mt-4 flex items-center justify-between">
-      <div class="text-slate-800 font-bold text-base">整筆總計</div>
-      <div class="text-2xl font-extrabold text-slate-900">${{ totalAmount }}</div>
-    </div>
-  </section>
-
-  <section class="max-w-[1340px] mx-auto p-4">
-    <div class="h-[60px] mt-[16px] rounded-lg shadow-sm flex flex-row gap-4">
-      <div class="bg-gray-300 flex-1 text-center font-bold flex items-center justify-center cursor-pointer"
-        (click)="backtocart()">
-        <span class="font-bold text-2xl">返回購物車</span>
-      </div>
-
-      <div class="flex-1 text-center font-bold flex items-center justify-center cursor-pointer bg-[#769902]"
-        (click)="mode == 'host' ? nextStep() : submitOrder()">
-        <span class="font-bold text-white text-2xl">
-          {{ mode == 'host' ? '下一步' : '送單' }}
-        </span>
-      </div>
-    </div>
-  </section>
-  }
-
-  <!-- 第1頁(團長結帳方式) -->
-  @case (1) {
-  <section class="max-w-[1440px] mx-auto p-4">
-    <div class="bg-white py-[32px] px-[16px] mt-[16px] font-bold text-2xl rounded-lg shadow-sm">
-      取貨人姓名
-      <br>
-      <div class="mt-2 mb-4">
-        <input
-          class="w-full px-4 py-3 rounded-xl border border-red-900/15 bg-white/80 outline-none focus:border-red-900/40"
-          placeholder="請填入訂購者取貨名稱" />
-      </div>
-
-      連絡電話
-      <div class="mt-2 mb-4">
-        <input
-          class="w-full px-4 py-3 rounded-xl border border-red-900/15 bg-white/80 outline-none focus:border-red-900/40"
-          placeholder="請填入訂購者連絡電話" />
-      </div>
-
-      備註
-      <div class="mt-2">
-        <input
-          class="w-full px-4 py-3 rounded-xl border border-red-900/15 bg-white/80 outline-none focus:border-red-900/40"
-          placeholder="請填入給店家的備註" />
+        @if (mode === 'host') {
+        <button type="button"
+          class="w-full sm:w-64 py-4 md:py-3.5 rounded-2xl bg-[#769902] text-white font-bold hover:bg-[#658302] shadow-xl shadow-[#769902]/20 transition-all active:scale-95 flex items-center justify-center gap-3 cursor-pointer"
+          (click)="onPrimaryAction()">
+          <span class="text-lg md:text-base">
+            @if (activeIndex === 0) {
+            下一步
+            } @else {
+            確認結算
+            }
+          </span>
+          <i class="pi text-xl md:text-lg" [ngClass]="(activeIndex === 0) ? 'pi-arrow-right' : 'pi-check-circle'"></i>
+        </button>
+        }
       </div>
     </div>
 
-    <div class="bg-white py-[32px] px-[16px] mt-[16px] font-bold text-2xl rounded-lg shadow-sm flex flex-col gap-6">
-      付款方式
-      <br>
-      <div class="flex flex-row gap-4">
-        <input type="radio" id="CASH" name="payment" value="CASH">
-        <label for="CASH">現金</label>
-      </div>
-
-      <div class="flex flex-row gap-4">
-        <input type="radio" id="LINEPAY" name="payment" value="LINEPAY">
-        <label for="LINEPAY"><img src="/LINEPAY.webp" class="h-[60px] w-[210px]"></label>
-      </div>
-
-      <!-- <div class="flex flex-row gap-4">
-        <input type="radio" id="CARD" name="payment" value="CARD" disabled>
-        <label for="CARD"><img src="/CArD.webp" class="h-[60px] w-[210px]"></label>
-      </div> -->
-
-      <!-- <div class="flex flex-row gap-4">
-        <input type="radio" id="TWPAY" name="payment" value="TWPAY" disabled>
-        <label for="TWPAY"><img src="/twpay-logo.png" class="h-[60px] w-[210px]"></label>
-      </div> -->
-
-      <!-- <div class="flex flex-row gap-4">
-        <input type="radio" id="PAYPAL" name="payment" value="PAYPAL" disabled>
-        <label for="PAYPAL"><img src="/pp_h_rgb.jpg" class="h-[60px] w-[210px]"></label>
-      </div> -->
-
-      <div class="flex flex-row gap-4">
-        <input type="radio" id="GREEN" name="payment" value="GREEN">
-        <label for="GREEN"><img src="/Ecpay_logo.svg.png" class="h-[60px] w-[210px]"></label>
-      </div>
-
-      <!-- <div class="flex flex-row gap-4">
-        <input type="radio" id="ALIPAY" name="payment" value="ALIPAY" disabled>
-        <label for="ALIPAY"><img src="/ALIPAY.png" class="h-[60px] w-[210px]"></label>
-      </div> -->
+    <!-- Mobile 專用：匯出按鈕 (放在最下面) -->
+    @if (activeIndex === 0 && groupedOrders.length) {
+    <div class="mt-4 md:hidden w-full">
+      <button type="button"
+        class="w-full flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-slate-200 text-slate-500 font-bold bg-white active:bg-slate-50 transition-colors"
+        (click)="exportToCSV()">
+        <i class="pi pi-file-excel"></i> 匯出明細 CSV
+      </button>
     </div>
-  </section>
-
-  <section class="max-w-[1340px] mx-auto p-4">
-    <div class="h-[60px] mt-[16px] rounded-lg shadow-sm flex flex-row gap-4">
-      <div class="flex-1 flex items-center justify-center cursor-pointer" (click)="prevStep()"><span
-          class="font-bold text-xl">上一步</span></div>
-      <div class="flex-1 flex items-center justify-center cursor-pointer bg-[#769902]" (click)="nextStep()"><span
-          class="font-bold text-white text-xl">下一步</span></div>
-    </div>
-  </section>
-  }
-
-
-  <!-- 第2頁(確認送出頁面) -->
-  @case (2) {
-  <section class="max-w-[1440px] mx-auto p-4">
-    <div class="bg-white py-[32px] px-[16px] mt-[16px] font-bold text-2xl rounded-lg shadow-sm">
-      內容
-    </div>
-  </section>
-
-
-  <section class="max-w-[1340px] mx-auto p-4">
-    <div class="h-[60px] mt-[16px] rounded-lg shadow-sm flex flex-row gap-4">
-      <div class="flex-1 flex items-center justify-center cursor-pointer" (click)="prevStep()"><span
-          class="font-bold text-xl">上一步</span></div>
-      <div class="flex-1 flex items-center justify-center cursor-pointer bg-[#769902]" (click)="nextStep()"><span
-          class="font-bold text-white text-xl">確認送出</span></div>
-    </div>
-  </section>
-  }
-  }
-</div>
+    }
+  </div>
+</section>

@@ -62,8 +62,16 @@ export class CartService {
     return this.https.getApi(url);
   }
 
+  // 取得用戶歷史訂單
+  getHistoryOrders(userId: string) {
+    return this.https.getApi(`http://localhost:8080/gogobuy/orders/history?user_id=${encodeURIComponent(userId)}`);
+  }
 
-  // 刪除訂單（後端用 POST 做刪除，不是 RESTful 的 DELETE）
+  // 確認訂單 (將狀態轉為 CONFIRMED)
+  confirmPersonalOrder(userId: string, eventsId: number) {
+    const url = `http://localhost:8080/gogobuy/event/confirmPersonalOrder?user_id=${encodeURIComponent(userId)}&events_id=${eventsId}`;
+    return this.https.postApi<BasicRes>(url, null);
+  }  // 刪除訂單（後端用 POST 做刪除，不是 RESTful 的 DELETE）
   // body 不需要資料，所以傳 null
   deleteOrderByUserIdAndEventsId(userId: string, eventsId: number) {
     const url =
@@ -72,14 +80,31 @@ export class CartService {
     return this.https.postApi(url, null);
   }
 
+  // 物理性刪除團購活動
+  deleteEventPhysically(id: number) {
+    const url =
+      `http://localhost:8080/gogobuy/event/deleteEventPhysically?id=${encodeURIComponent(id)}`;
+    return this.https.postApi(url, null);
+  }
   // 刪除單筆品項
   deleteOrderById(orderId: number) {
     const url = `http://localhost:8080/gogobuy/order/deleteOrderById?order_id=${orderId}`;
     return this.https.postApi<BasicRes>(url, null);
   }
 
+  // [管理中心] 取得該團所有人的結算單
+  getPersonalOrdersByEventId(eventsId: number) {
+    return this.https.getApi(`http://localhost:8080/gogobuy/event/getPersonalOrdersByEventId?events_id=${eventsId}`);
+  }
 
+  // [管理中心] 更新結算單 (付款狀態、取餐狀態等)
+  updatePersonalOrder(payload: any) {
+    return this.https.postApi(`http://localhost:8080/gogobuy/event/updatePersonalOrder`, payload);
+  }
 
+  // [團長] 手動結單 (結帳完成，正式關閉活動並生成各員帳單)
+  hostCloseEvent(eventsId: number, hostId: string) {
+    const url = `http://localhost:8080/gogobuy/event/hostCloseEvent?id=${eventsId}&host_id=${encodeURIComponent(hostId)}`;
+    return this.https.postApi<BasicRes>(url, null);
+  }
 }
-
-

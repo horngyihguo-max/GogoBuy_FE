@@ -28,14 +28,20 @@
                     <div
                       class="flex md:flex-col items-center justify-center gap-2 flex-shrink-0 md:w-[90px] border-r border-gray-100 md:pr-4 md:mt-5"
                     >
-                      <div
-                        class="w-12 h-12 rounded-full bg-red-900 flex items-center justify-center text-white shadow-inner"
-                      >
-                        <span class="text-lg font-bold">{{
-                          (group.nickname || "G")[0]
-                        }}</span>
-                      </div>
-
+                      @if (group.hostAvatar) {
+                        <img
+                          [src]="group.hostAvatar"
+                          class="w-16 h-16 rounded-full flex items-center justify-center shadow-sm"
+                        />
+                      } @else {
+                        <div
+                          class="w-12 h-12 rounded-full bg-red-900 flex items-center justify-center text-white shadow-inner"
+                        >
+                          <span class="text-lg font-bold">{{
+                            (group.hostNickname || "G")[0]
+                          }}</span>
+                        </div>
+                      }
                       <div class="flex flex-col items-center">
                         <span
                           class="text-[10px] font-bold text-red-900/60 uppercase tracking-widest"
@@ -43,8 +49,10 @@
                         >
                         <div
                           class="font-extrabold text-gray-900 text-lg truncate max-w-[80px]"
+                          pTooltip="{{ group.hostNickname }}"
+                          tooltipPosition="bottom"
                         >
-                          {{ group.nickname || "匿名" }}
+                          {{ group.hostNickname || "匿名" }}
                         </div>
                       </div>
                     </div>
@@ -57,16 +65,17 @@
                           class="inline-flex items-center px-2.5 py-1 rounded-full text-sm font-bold bg-gray-100 text-gray-700"
                           [ngClass]="{
                             'bg-green-100 text-green-700':
-                              group.status === 'OPEN',
-                            'bg-red-900 text-white': group.status === 'LOCKED',
+                              group.eventStatus === 'OPEN',
+                            'bg-red-900 text-white':
+                              group.eventStatus === 'LOCKED',
                             'bg-gray-200 text-gray-500':
-                              group.status === 'FINISHED',
+                              group.eventStatus === 'FINISHED',
                           }"
                         >
                           {{
-                            group.status === "OPEN"
+                            group.eventStatus === "OPEN"
                               ? "進行中"
-                              : group.status === "LOCKED"
+                              : group.eventStatus === "LOCKED"
                                 ? "鎖定"
                                 : "已結束"
                           }}
@@ -76,7 +85,7 @@
                         <span
                           class="inline-flex items-center px-2.5 py-1 rounded-full text-sm font-bold bg-orange-50 text-orange-700"
                         >
-                          {{ group.type }}
+                          {{ group.eventType }}
                         </span>
 
                         <!-- splitType badge -->
@@ -208,32 +217,32 @@
 
                   <!-- 詳細資訊卡片：RWD 1/2/3 欄 -->
                   <div
-                    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4"
+                    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 md:gap-4"
                   >
                     <!-- type -->
                     <div
-                      class="rounded-2xl bg-gray-50 p-4 border border-black/5"
+                      class="rounded-2xl bg-gray-50 p-4 border border-black/5 lg:col-span-2"
                     >
                       <div class="text-sm text-gray-500 font-semibold">
                         類型
                       </div>
                       <div class="mt-1 text-lg font-bold text-gray-900">
-                        {{ group.type }}
+                        {{ group.eventType }}
                       </div>
                     </div>
 
                     <!-- status -->
                     <div
-                      class="rounded-2xl bg-gray-50 p-4 border border-black/5"
+                      class="rounded-2xl bg-gray-50 p-4 border border-black/5 lg:col-span-2"
                     >
                       <div class="text-sm text-gray-500 font-semibold">
                         狀態
                       </div>
                       <div class="mt-1 text-lg font-bold text-gray-900">
                         {{
-                          group.status === "OPEN"
+                          group.eventStatus === "OPEN"
                             ? "進行中"
-                            : group.status === "LOCKED"
+                            : group.eventStatus === "LOCKED"
                               ? "鎖定"
                               : "已結束"
                         }}
@@ -242,7 +251,7 @@
 
                     <!-- nickname -->
                     <div
-                      class="rounded-2xl bg-gray-50 p-4 border border-black/5"
+                      class="rounded-2xl bg-gray-50 p-4 border border-black/5 lg:col-span-2"
                     >
                       <div class="text-sm text-gray-500 font-semibold">
                         團主暱稱
@@ -250,13 +259,13 @@
                       <div
                         class="mt-1 text-lg font-bold text-gray-900 truncate"
                       >
-                        {{ group.nickname || "未命名" }}
+                        {{ group.hostNickname || "未命名" }}
                       </div>
                     </div>
 
                     <!-- shippingFee -->
                     <div
-                      class="rounded-2xl bg-gray-50 p-4 border border-black/5"
+                      class="rounded-2xl bg-gray-50 p-4 border border-black/5 lg:col-span-2"
                     >
                       <div class="text-sm text-gray-500 font-semibold">
                         運費
@@ -268,7 +277,7 @@
 
                     <!-- limitation -->
                     <div
-                      class="rounded-2xl bg-gray-50 p-4 border border-black/5"
+                      class="rounded-2xl bg-gray-50 p-4 border border-black/5 lg:col-span-2"
                     >
                       <div class="text-sm text-gray-500 font-semibold">
                         成團門檻
@@ -280,7 +289,7 @@
 
                     <!-- splitType -->
                     <div
-                      class="rounded-2xl bg-gray-50 p-4 border border-black/5"
+                      class="rounded-2xl bg-gray-50 p-4 border border-black/5 lg:col-span-2"
                     >
                       <div class="text-sm text-gray-500 font-semibold">
                         運費分攤
@@ -290,9 +299,33 @@
                       </div>
                     </div>
 
+                    <!-- pickupTime -->
+                    <div
+                      class="rounded-2xl bg-gray-50 p-4 sm:col-span-2 lg:col-span-3 border border-black/5"
+                    >
+                      <div class="text-sm text-gray-500 font-semibold">
+                        預計取餐時間
+                      </div>
+                      <div class="mt-1 text-lg font-bold text-gray-900">
+                        {{ formatDateTime(group.pickupTime) }}
+                      </div>
+                    </div>
+
+                    <!-- pickLocation -->
+                    <div
+                      class="rounded-2xl bg-gray-50 p-4 border border-black/5 lg:col-span-3"
+                    >
+                      <div class="text-sm text-gray-500 font-semibold">
+                        取餐地點
+                      </div>
+                      <div class="mt-1 text-lg font-bold text-gray-900">
+                        {{ group.pickLocation }}
+                      </div>
+                    </div>
+
                     <!-- endTime -->
                     <div
-                      class="rounded-2xl bg-gray-50 p-4 sm:col-span-2 lg:col-span-2 border border-black/5"
+                      class="rounded-2xl bg-gray-50 p-4 sm:col-span-2 lg:col-span-3 border border-black/5"
                     >
                       <div class="text-sm text-gray-500 font-semibold">
                         截止時間
@@ -304,7 +337,7 @@
 
                     <!-- totalOrderAmount -->
                     <div
-                      class="rounded-2xl bg-gray-50 p-4 border border-black/5"
+                      class="rounded-2xl bg-gray-50 p-4 border border-black/5 lg:col-span-3"
                     >
                       <div class="text-sm text-gray-500 font-semibold">
                         目前累積金額
@@ -474,15 +507,6 @@
                   "
                   (click)="!isSoldOut(p) && openProductDialog(p)"
                 >
-                  <!-- 已售完標籤 -->
-                  @if (isSoldOut(p)) {
-                    <div
-                      class="absolute top-3 right-3 text-[12px] font-extrabold px-3 py-1 rounded-full bg-gray-800 text-white"
-                    >
-                      已售完
-                    </div>
-                  }
-
                   <div class="flex gap-4">
                     <img
                       [src]="getProductImage(p)"
@@ -627,15 +651,6 @@
                   "
                   (click)="!isSoldOut(p) && openProductDialog(p)"
                 >
-                  <!-- 已售完標籤 -->
-                  <!-- @if (isSoldOut(p)) {
-                    <div
-                      class="absolute top-3 right-3 text-[12px] font-extrabold px-3 py-1 rounded-full bg-gray-800 text-white"
-                    >
-                      已售完
-                    </div>
-                  } -->
-
                   <div class="flex gap-4">
                     <!-- 圖片 -->
                     <img
@@ -796,7 +811,7 @@
   [draggable]="false"
   [resizable]="false"
   styleClass="max-w-[90vw] min-h-[500px]
-              md:w-[550px] md:max-w-[300vw] md:h-[72vh] md:min-h-[780px]
+              md:w-[550px] md:max-w-[300vw] h-[72vh] md:min-h-[780px]
               store-detail-dialog"
 >
   <!-- ===== Header ===== -->
@@ -981,7 +996,7 @@
         </div>
 
         <!-- ===================== -->
-        <!-- 規格（單選，必選） -->
+        <!-- 規格 -->
         <!-- ===================== -->
         <div class="mt-4 bg-white/70 border border-zinc-200 rounded-[16px] p-4">
           <div class="flex items-center justify-between">
@@ -1115,9 +1130,9 @@
       <!-- 底部固定操作列 -->
       <!-- ===================== -->
       <div
-        class="shrink-0 border-t border-black/10 bg-white/95 backdrop-blur p-4"
+        class="shrink-0 border-t border-black/10 bg-white/95 backdrop-blur p-4 h-[100px]"
       >
-        <div class="flex items-center justify-between gap-3">
+        <div class="flex items-center justify-between gap-1 md:gap-3">
           <!-- 左：數量 + 總價 -->
           <div class="min-w-0">
             <div class="text-[13px] text-gray-500 font-semibold">總金額</div>
@@ -1226,13 +1241,13 @@
 
                 <!-- 右側操作 -->
                 <div class="shrink-0 flex flex-col items-end gap-2">
-                  <button
+                  <!-- <button
                     type="button"
                     class="cursor-pointer px-3 py-2 rounded-full bg-gray-100 font-extrabold active:scale-95 transition"
                     (click)="editLine($index)"
                   >
                     修改
-                  </button>
+                  </button> -->
 
                   <button
                     type="button"
@@ -1296,17 +1311,13 @@
       <div
         class="mt-4 rounded-2xl bg-white/80 border border-black/5 shadow-sm p-4"
       >
-        <div class="flex items-end justify-between">
-          <div>
-            <div class="text-lg font-semibold text-gray-500">訂單總金額</div>
-            <div class="text-[26px] font-extrabold text-gray-900">
+        <div class="flex items-start justify-between">
+          <div class="text-lg font-semibold text-gray-500">訂單總金額</div>
+          <div class="text-right">
+            <div class="text-[26px] font-extrabold text-gray-900 mr-1">
               ${{ orderSubtotal }}
             </div>
             <div class="text-sm text-gray-500 mt-1">（尚未計入運費）</div>
-          </div>
-
-          <div class="text-lg text-gray-500 font-semibold">
-            運費：{{ group?.shippingFee }} 元
           </div>
         </div>
       </div>
@@ -1331,11 +1342,101 @@
           type="button"
           class="cursor-pointer px-6 py-3 rounded-full bg-red-900 text-white font-extrabold active:scale-95 transition disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed"
           [disabled]="orderItems.length === 0 || !isOrderChanged"
-          (click)="submitOrder()"
+          (click)="confirmOrder()"
         >
-          確認送出
+          下一步
         </button>
       </div>
     </div>
+  </div>
+</p-dialog>
+
+<p-dialog
+  [(visible)]="openTermsDialog"
+  appendTo="body"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: '90vw', maxWidth: '600px' }"
+  styleClass="custom-terms-dialog"
+>
+  <ng-template pTemplate="header">
+    <div class="text-xl font-extrabold text-red-900">運費拆帳計算說明聲明</div>
+  </ng-template>
+  <div class="flex flex-col h-full max-h-[62vh] md:max-h-none">
+
+    <div
+      class="flex-grow overflow-y-auto pr-2 text-base text-gray-700 leading-relaxed custom-scrollbar"
+    >
+      <p class="mb-4">
+        感謝您使用本平台團購服務，關於訂單運費之分攤方式，本平台依據以下邏輯進行運算...
+      </p>
+      <div class="space-y-4">
+        <section>
+          <h4 class="font-bold text-gray-900 flex items-center gap-2">
+            <span class="w-2 h-2 bg-red-900 rounded-full"></span> 1. 平分制計算
+          </h4>
+          <p class="pl-4 mt-1 text-gray-600">
+            系統將總運費平均分配予每一位參與團員。
+          </p>
+        </section>
+        <section>
+          <h4 class="font-bold text-gray-900 flex items-center gap-2">
+            <span class="w-2 h-2 bg-red-900 rounded-full"></span> 2. 權重制計算
+          </h4>
+          <p class="pl-4 mt-1 text-gray-600">
+            依據每位團員之「訂單金額」比例進行運費分配。
+          </p>
+        </section>
+
+        <section class="bg-gray-50 p-3 rounded-md border-l-4 border-red-900">
+          <h4 class="font-bold text-red-900">※ 無法整除之處理 (餘數分配)</h4>
+          <p class="mt-1">若分攤金額計算至最小貨幣單位仍有餘數時...</p>
+          <ul class="list-disc pl-8 mt-2 space-y-1 text-gray-600">
+            <li><strong>隨機抽取：</strong>由系統隨機抽取負擔該餘數款項。</li>
+            <li><strong>公平原則：</strong>每位團員被抽中機率均等。</li>
+          </ul>
+        </section>
+        <p class="text-sm text-gray-500 italic">
+          註：所有計算結果以系統最終產出之拆帳明細為準。
+        </p>
+      </div>
+    </div>
+
+    <div
+      class="mt-2 pt-2 border-t border-gray-100 flex justify-end gap-3 flex-shrink-0 bg-white"
+    >
+      <button
+        (click)="onTermsReject()"
+        class="cursor-pointer px-4 py-2 text-gray-500 rounded-full w-24 border border-red-900 hover:bg-gray-50 transition-all active:scale-95"
+      >
+        不同意
+      </button>
+      <button
+        (click)="onTermsAgree()"
+        class="cursor-pointer px-6 py-2 rounded-full font-bold transition-all bg-red-900 text-white border border-red-900 hover:brightness-110 active:scale-95"
+      >
+        同意並送出
+      </button>
+    </div>
+  </div>
+</p-dialog>
+
+<p-dialog
+  [(visible)]="loading"
+  [modal]="true"
+  [closable]="false"
+  [showHeader]="false"
+  appendTo="body"
+  [style]="{ background: 'transparent', border: 'none', 'box-shadow': 'none' }"
+>
+  <div class="flex flex-col items-center w-full">
+    <i
+      class="pi pi-spin pi-spinner-dotted"
+      style="font-size: 3rem; color: white"
+    ></i>
+    <span class="mt-2 text-white tracking-widest animate-pulse"
+      >正在送出訂單，請稍候...</span
+    >
   </div>
 </p-dialog>

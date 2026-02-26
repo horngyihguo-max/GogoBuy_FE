@@ -21,6 +21,7 @@ import { Subscription } from 'rxjs';
 import { filter, distinctUntilChanged, map } from 'rxjs/operators';
 import { SseService } from './@service/sse.service';
 import { AvatarModule } from 'primeng/avatar';
+import { TooltipModule } from 'primeng/tooltip';
 
 
 // 選擇欄位
@@ -48,7 +49,8 @@ export interface Category {
     SelectModule,
     FormsModule,
     NearbyBarComponent,
-    AvatarModule
+    AvatarModule,
+    TooltipModule
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
@@ -204,8 +206,7 @@ export class AppComponent {
   // 用戶頭向下拉選單
   items: MenuItem[] = [
     { label: '用戶首頁', icon: 'pi pi-user', routerLink: '/user/profile' },
-    { label: '我的訂單', icon: 'pi pi-receipt', routerLink: '/user/orders' },
-    { label: '我的店家', icon: 'pi pi-shop', routerLink: '/user/my_store' },
+    { label: '最愛店家', icon: 'pi pi-heart', routerLink: '/user/my_store' },
     { label: '許願池', icon: 'pi pi-sparkles', routerLink: '/user/wishes' },
     { label: '登入', icon: 'pi pi-sign-in', routerLink: '/gogobuy/login' },
     { label: '登出', icon: 'pi pi-sign-out', command: () => { this.logout(); } }
@@ -221,6 +222,20 @@ export class AppComponent {
   // startsWith：讓 /gogobuy/home 及其子路由都顯示搜尋欄
   get showSearch(): boolean {
     return this.router.url.startsWith('/gogobuy/home');
+  }
+
+  get nearby(): boolean {
+    const url = this.router.url;
+    return url.startsWith('/gogobuy/home');
+  }
+
+
+  get showMarquee(): boolean {
+    return this.router.url.startsWith('/gogobuy/home');
+  }
+
+  get showProblem(): boolean {
+    return this.router.url.startsWith('/admin');
   }
 
   // 滾動時收起 PrimeNG Menu，避免遮擋內容與定位錯亂
@@ -285,8 +300,8 @@ export class AppComponent {
   }
 
   // 跳轉購物車頁面
-  gocart() {
-    this.router.navigate(['/user/cart']);
+  goorders() {
+    this.router.navigate(['/user/orders']);
   }
 
   toDashboard() {
@@ -372,6 +387,12 @@ export class AppComponent {
     this.nearbyStatus.set(''); // 清空提示
     this.stopNearbyWatch(); // 停掉 watchPosition
     this.lastLatLng = null; // 避免半徑變更又用舊座標重查
+  }
+
+  contactUs() {
+    this.router.navigate(['/support/faq'],
+      { state: { scrollToBottom: true } }
+    )
   }
 
 
