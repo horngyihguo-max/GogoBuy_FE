@@ -482,6 +482,91 @@ export class OrdersComponent {
       }
     });
   }
+  formatSelectedOptionList(list: any[]): string {
+    return (list ?? [])
+      .map(o => `${o.optionName}:${o.value}${o.extraPrice ? `(+${o.extraPrice})` : ''}`)
+      .join('、');
+  }
+
+  exportManageCSV(item: CartGroup) {
+    this.cart.getOrdersAll(item.eventsId).subscribe({
+      next: (res: any) => {
+        if (res.code === 200 && res.ordersSearchViewList) {
+          const list = res.ordersSearchViewList;
+          const rows = [];
+
+          // 1. [美化] 增加頂部活動摘要 (這在 Excel 開啟時會出現在最前幾行)
+          rows.push(`"【團購管理明細報表】"`);
+          rows.push(`"活動名稱：","${item.eventName}"`);
+          rows.push(`"商家：","${item.storeName}"`);
+          rows.push(`"全團總計金額：","$${item.totalAmount}"`);
+          rows.push(`"匯出時間：","${new Date().toLocaleString()}"`);
+          rows.push(''); // 空行
+
+          // 2. [表格表頭]
+          const headers = ['成員', '商品名稱', '規格與選項', '單價', '數量', '小計', '個人備註', '領取狀態'];
+          rows.push(headers.join(','));
+          rows.push('----------------------------------------------------------------------------------------------------');
+
+          // 把資料按使用者 ID 分組
+          const userMap = new Map<string, any[]>();
+          list.forEach((order: any) => {
+            const uid = order.userId || 'unknown';
+            if (!userMap.has(uid)) userMap.set(uid, []);
+            userMap.get(uid)!.push(order);
+          });
+
+          // 3. [分組填充資料]
+          let grandTotal = 0;
+          userMap.forEach((userOrders) => {
+            let userSubtotal = 0;
+            const nickname = userOrders[0].hostNickname || '匿名';
+            const memo = userOrders[0].personalMemo || '';
+            const pickupStatus = userOrders[0].pickupStatus === 'PICKED_UP' ? '【已領取】' : '〔未取〕';
+
+            userOrders.forEach((order, index) => {
+              const menuName = `"${order.menuName}"`;
+              const options = this.formatSelectedOptionList(order.selectedOptionList);
+              const specAndOptions = `"${(order.specName || '') + ' ' + options}"`.trim();
+              const unitPrice = order.quantity ? order.subtotal / order.quantity : 0;
+              const qty = order.quantity;
+              const subtotal = order.subtotal;
+              userSubtotal += subtotal;
+              grandTotal += subtotal;
+
+              // 格式化每一列資料
+              const memberCell = index === 0 ? `"${nickname}"` : '""';
+              const memoCell = index === 0 ? `"${memo}"` : '""';
+              const pickupCell = index === 0 ? `"${pickupStatus}"` : '""';
+
+              rows.push([memberCell, menuName, specAndOptions, unitPrice, qty, subtotal, memoCell, pickupCell].join(','));
+            });
+
+            // [美化] 增加成員小計行
+            rows.push([`"${nickname} 結算小計"`, '""', '""', '""', '""', `"${userSubtotal}"`, '""', '""'].join(','));
+            rows.push('----------------------------------------------------------------------------------------------------');
+          });
+
+          // 4. [結尾] 總計行
+          rows.push('');
+          rows.push([`"★ 全報表核銷總計"`, '""', '""', '""', '""', `"${grandTotal}"`, '""', '""'].join(','));
+
+          const csvContent = rows.join('\n');
+          const BOM = '\uFEFF';
+          const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.setAttribute('download', `${item.eventName}_管理明細_${new Date().toLocaleDateString()}.csv`);
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        }
+      },
+      error: (err: any) => console.error(err)
+    });
+  }
+
   edit(item: CartGroup) {
     this.router.navigate(['/groupbuy-event/group-event'], {
       queryParams: {

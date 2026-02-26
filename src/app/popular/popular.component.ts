@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
@@ -14,10 +14,11 @@ interface SalesLeaderboardProjection {
   productName: string;
   salesVolume: number;
   menuId: number;
+  productImage: string;
 }
-
 @Component({
   selector: 'app-popular',
+  standalone: true,
   imports: [
     SelectModule,
     FormsModule,
@@ -37,6 +38,8 @@ export class PopularComponent {
 
   // 排行榜資料
   top10List = signal<any[]>([]);
+
+  topFive = computed(() => this.salesDetailList().slice(0, 5));
 
   statusOptions: StatusOption[] = [
     { label: '顯示全部時間', value: 'ALL' },
