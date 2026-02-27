@@ -75,6 +75,7 @@ export class GroupEventComponent {
   limitation!: number;
   pickTime!: Date;
   pickLocation!: string;
+  shippingFee: number = 0;
 
   scrolllabelTabs: any = [];
   isExist: boolean = true;  //判斷店家存在
@@ -254,6 +255,7 @@ export class GroupEventComponent {
                 this.choose(this.splitType);
                 this.announcement = eventRes.groupbuyEvents[0].announcement;
                 this.type = eventRes.groupbuyEvents[0].eventType;
+                this.shippingFee = eventRes.groupbuyEvents[0].shippingFee || 0;
 
                 this.tempMenu = eventRes.groupbuyEvents[0].tempMenuList
                 if (this.tempMenu.length > 0) {
@@ -1046,7 +1048,7 @@ export class GroupEventComponent {
       eventName: this.eventName,
       endTime: end,
       status: "OPEN",
-      shippingFee: 0,
+      shippingFee: this.shippingFee || 0,
       splitType: this.splitType,
       announcement: this.announcement,
       type: this.type,

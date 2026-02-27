@@ -61,6 +61,7 @@ type ProductOptionGroup = {
   styleUrl: './follow-group.component.scss',
 })
 export class FollowGroupComponent implements OnDestroy {
+  targetUserId = ''; // 新增：如果是團長幫成員修改，這裡會存成員 ID
   constructor(
     private auth: AuthService,
     private http: HttpService,
@@ -308,6 +309,13 @@ export class FollowGroupComponent implements OnDestroy {
     this.user = localStorage.getItem('user_info');
     this.groupId = Number(this.route.snapshot.paramMap.get('id') || 0);
 
+    // 取得 target_user_id (由管理中心帶過來)
+    this.route.queryParams.subscribe(params => {
+      if (params['target_user_id']) {
+        this.targetUserId = params['target_user_id'];
+      }
+    });
+
     if (!this.groupId) {
       this.toastWarn('錯誤', '找不到團 id');
       this.goBack();
@@ -498,7 +506,10 @@ export class FollowGroupComponent implements OnDestroy {
         const normalized = this.normalizeStoreResponse(res);
         this.store = normalized;
         this.afterLoaded();
-        this.loadExistingOrder(this.groupId, this.userId);
+        
+        // 如果有指定目標用戶，載入該用戶的訂單，否則載入目前登入者的
+        const loadId = this.targetUserId || this.userId;
+        this.loadExistingOrder(this.groupId, loadId);
       });
   }
 
@@ -1886,9 +1897,12 @@ export class FollowGroupComponent implements OnDestroy {
 
   // 建構POST資料
   buildOrderPostPayload(eventsId: number, userId: string): any {
+    const targetUserId = this.targetUserId || userId; // 如果有指定目標，就是幫目標下單
+    
     return {
       eventsId,
-      userId,
+      userId: targetUserId,
+      actingUserId: this.userId, // 當前操作者 (可能是自己，也可能是團長)
       menuList: this.orderItems.map((it) => ({
         menuId: it.menuId,
         quantity: it.quantity,

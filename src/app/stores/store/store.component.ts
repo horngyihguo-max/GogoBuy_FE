@@ -1076,6 +1076,17 @@ export class StoreComponent {
                   if (myStores && myStores.length > 0) {
                     const latestStore = myStores.reduce((prev: any, current: any) => (prev.id > current.id) ? prev : current);
                     this.id = latestStore.id;
+
+                    // 如果是許願池來的，通知對應許願者與跟隨者
+                    if (this.wishId) {
+                      const targetUrl = `http://localhost:4200/management/store_info/${this.id}`;
+                      const finishUrl = `http://localhost:8080/gogobuy/wish/finish_wish?id=${this.wishId}&userId=${this.userId}&targetUrl=${encodeURIComponent(targetUrl)}`;
+                      this.http.postApi(finishUrl, {}).subscribe({
+                        next: () => console.log('願望結案通知成功'),
+                        error: (err) => console.error('願望結案通知失敗', err)
+                      });
+                    }
+
                     this.afterSaveSuccess();
                   } else {
                     this.router.navigate(['gogobuy/home']);

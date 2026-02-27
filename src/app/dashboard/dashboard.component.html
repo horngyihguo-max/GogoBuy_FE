@@ -124,11 +124,13 @@
             </th>
             <th class="text-xl!" pSortableColumn="category" style="width:10%">分類 <p-sortIcon
                 field="category"></p-sortIcon></th>
-            <th class="text-xl!" pSortableColumn="address" style="width:25%">地址 <p-sortIcon
+            <th class="text-xl!" pSortableColumn="address" style="width:20%">地址 <p-sortIcon
                 field="address"></p-sortIcon></th>
-            <th class="text-xl!" pSortableColumn="phone" style="width:15%">電話 <p-sortIcon field="phone"></p-sortIcon>
+            <th class="text-xl!" pSortableColumn="phone" style="width:12%">電話 <p-sortIcon field="phone"></p-sortIcon>
             </th>
-            <th class="text-xl!" style="width:30%">操作</th>
+            <th class="text-xl!" pSortableColumn="publish" style="width:10%">狀態 <p-sortIcon field="publish"></p-sortIcon>
+            </th>
+            <th class="text-xl!" style="width:18%">操作</th>
           </tr>
         </ng-template>
         <ng-template pTemplate="body" let-store>
@@ -142,6 +144,11 @@
             </td>
             <td class="text-base font-bold text-gray-800">{{ store.address }}</td>
             <td class="text-base font-semibold text-gray-600">{{ store.phone }}</td>
+            <td>
+              <p-tag class="text-base!" [value]="store.publish ? '公開' : '隱藏'"
+                [severity]="getPublishSeverity(store.publish)" [rounded]="true">
+              </p-tag>
+            </td>
             <td>
               <div class="flex gap-2">
                 <p-button label="詳情" icon="pi pi-file-edit" styleClass="p-button-text p-button-base p-button-rounded"

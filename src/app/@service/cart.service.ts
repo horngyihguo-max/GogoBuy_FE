@@ -73,9 +73,13 @@ export class CartService {
     return this.https.postApi<BasicRes>(url, null);
   }  // 刪除訂單（後端用 POST 做刪除，不是 RESTful 的 DELETE）
   // body 不需要資料，所以傳 null
-  deleteOrderByUserIdAndEventsId(userId: string, eventsId: number) {
-    const url =
+  deleteOrderByUserIdAndEventsId(userId: string, eventsId: number, actingUserId?: string) {
+    let url =
       `http://localhost:8080/gogobuy/event/deleteOrderByUserIdAndEventsId?user_id=${encodeURIComponent(userId)}&events_id=${eventsId}`;
+
+    if (actingUserId) {
+      url += `&acting_user_id=${encodeURIComponent(actingUserId)}`;
+    }
 
     return this.https.postApi(url, null);
   }
@@ -87,8 +91,11 @@ export class CartService {
     return this.https.postApi(url, null);
   }
   // 刪除單筆品項
-  deleteOrderById(orderId: number) {
-    const url = `http://localhost:8080/gogobuy/order/deleteOrderById?order_id=${orderId}`;
+  deleteOrderById(orderId: number, actingUserId?: string) {
+    let url = `http://localhost:8080/gogobuy/order/deleteOrderById?order_id=${orderId}`;
+    if (actingUserId) {
+      url += `&acting_user_id=${encodeURIComponent(actingUserId)}`;
+    }
     return this.https.postApi<BasicRes>(url, null);
   }
 
