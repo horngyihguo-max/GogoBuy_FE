@@ -865,6 +865,15 @@ export class FollowGroupComponent implements OnDestroy {
     return item ? item.name : value;
   }
 
+  isFast(category: string) {
+    let c = this.getCategoryName(category);
+    if (c === '外送') {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   // 地址帶入GoogleMap ==========================================================
   getMap(address: string | undefined) {
     if (!address) return '#';
