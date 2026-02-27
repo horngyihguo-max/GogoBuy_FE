@@ -112,6 +112,10 @@ export class WishesComponent implements OnInit {
     this.loadWishes();
   }
 
+  isUser() {
+    return this.role === 'user';
+  }
+
   // =========================
   // 載入願望
   // =========================

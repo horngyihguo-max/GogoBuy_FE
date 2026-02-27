@@ -26,16 +26,18 @@
         <div class="flex flex-col items-end gap-2">
           <button
             (click)="onCreateWish()"
-            [disabled]="!userId || timesRemaining === 0"
+            [disabled]="!userId || timesRemaining === 0 || !isUser()"
             class="cursor-pointer flex items-center gap-2 px-5 md:px-6 py-3 rounded-full font-bold shadow-lg transition-all duration-200 text-[15px] enabled:bg-red-900 enabled:text-white enabled:hover:bg-red-950 enabled:active:scale-95 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed"
           >
             <i class="pi pi-plus-circle"></i>
             <span class="md:text-[20px]">我要許願</span>
-            <span
+            @if(isUser()){
+              <span
               class="ml-1 px-2 py-0.5 rounded-full bg-white/20 text-[12px] md:text-[15px]"
             >
               剩餘 {{ timesRemaining }} 次
             </span>
+            }
           </button>
 
           @if(!userId){

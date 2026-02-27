@@ -128,6 +128,31 @@ export class FollowGroupComponent implements OnDestroy {
     this.router.navigate(['/management/store_info', this.storeId]);
   }
 
+  // QR CORD =======================================
+  QRCodeVisible = false;
+  currentUrl: string = window.location.href;
+  currentUrl2: string = window.location.href;
+
+  openShareDialog() {
+    // 使用 encodeURIComponent 把網址編碼，這能解決「炸掉」的問題
+    this.currentUrl2 = encodeURIComponent(window.location.href);
+    this.QRCodeVisible = true;
+  }
+
+  showCopyTip: boolean = false;
+
+  copyLink() {
+    const url = window.location.href;
+    navigator.clipboard.writeText(url).then(() => {
+      // 顯示提示
+      this.showCopyTip = true;
+      // 2 秒後自動關閉
+      setTimeout(() => {
+        this.showCopyTip = false;
+      }, 2000);
+    });
+  }
+
   // =========================
   // 店家卡：顯示圖
   // =========================

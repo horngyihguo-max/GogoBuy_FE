@@ -428,6 +428,14 @@
                     <span class="inline">店家頁面</span>
                   </div>
                 </button>
+                <button
+                  (click)="openShareDialog()"
+                  pTooltip="分享"
+                  tooltipPosition="top"
+                  class="cursor-pointer px-5 py-2 rounded-full text-[17px] font-extrabold border transition bg-white text-red-900 border-red-900 hover:brightness-95"
+                >
+                  <i class="pi pi-share-alt"></i>
+                </button>
               </div>
             </div>
 
@@ -1468,5 +1476,101 @@
     <span class="mt-2 text-white tracking-widest animate-pulse"
       >正在送出訂單，請稍候...</span
     >
+  </div>
+</p-dialog>
+
+<p-dialog
+  [(visible)]="QRCodeVisible"
+  appendTo="body"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: '90vw', maxWidth: '450px' }"
+  styleClass="custom-sharing-dialog"
+>
+  <ng-template pTemplate="header">
+    <div class="flex items-center gap-1">
+      <i class="pi pi-share-alt text-red-900 font-bold"></i>
+      <div class="text-xl font-extrabold text-red-900">分享團購</div>
+    </div>
+  </ng-template>
+
+  <div class="flex flex-col items-center h-full max-h-[62vh] md:max-h-none">
+    <div
+      class="bg-white p-4 rounded-xl shadow-inner border-2 border-dashed border-gray-200 mb-6 group transition-all hover:border-red-900"
+    >
+      <div
+        class="relative w-48 h-48 md:w-56 md:h-56 flex items-center justify-center bg-gray-50"
+      >
+        <img
+          [src]="
+            'https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=' +
+            currentUrl
+          "
+          alt="QR Code"
+          class="w-full h-full object-contain"
+        />
+        <div
+          class="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-red-900"
+        ></div>
+        <div
+          class="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-red-900"
+        ></div>
+        <div
+          class="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-red-900"
+        ></div>
+        <div
+          class="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-red-900"
+        ></div>
+      </div>
+    </div>
+
+    <div class="text-center mb-2 px-4">
+      <p class="text-gray-800 font-bold text-lg mb-1">掃描上方 QR Code</p>
+      <p class="text-gray-500 text-sm">讓好友快速加入您的團購行列</p>
+    </div>
+
+    <div
+      class="flex flex-col sm:flex-row sm:items-center gap-2 bg-gray-100 rounded-xl p-3 border border-gray-200"
+    >
+      <!-- input 區塊 -->
+      <div class="relative flex-1">
+        <input
+          type="text"
+          readonly
+          [value]="currentUrl"
+          class="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-900/20"
+        />
+      </div>
+
+      <!-- 按鈕區塊 -->
+      <div class="relative shrink-0">
+        <div
+          *ngIf="showCopyTip"
+          class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1 bg-gray-800 text-white text-[11px] rounded shadow-lg whitespace-nowrap animate-bounce-short"
+        >
+          已複製！
+          <div
+            class="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-gray-800"
+          ></div>
+        </div>
+
+        <button
+          (click)="copyLink()"
+          class="w-full sm:w-auto bg-red-900 text-white text-sm px-4 py-2 rounded-lg hover:bg-red-950 active:scale-95 transition-all font-extrabold"
+        >
+          複製連結
+        </button>
+      </div>
+    </div>
+
+    <div class="w-full mt-2 pt-4 border-t border-gray-100 flex justify-center">
+      <button
+        (click)="QRCodeVisible = false"
+        class="cursor-pointer px-10 py-2 rounded-full font-bold transition-all bg-white text-red-900 border-2 border-red-900 hover:bg-red-50 active:scale-95"
+      >
+        關閉
+      </button>
+    </div>
   </div>
 </p-dialog>
