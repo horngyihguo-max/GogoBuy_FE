@@ -520,10 +520,27 @@ export class FollowGroupComponent implements OnDestroy {
             return;
           }
         }
+        console.log(g);
+        this.isHost(g.hostId);
         this.applyGroup(g);
         this.loadStoreById(g.storeId);
         this.loadPopular(g.storeId);
       });
+  }
+
+  userIsHost = false;
+
+  isHost(id: string) {
+    this.userIsHost = id === this.userId;
+    console.log(this.userIsHost);
+  }
+
+  // Host 編輯團資訊
+  goToGroupEventEdit() {
+    // 導到：/groupbuy-event/group-event?event_id=xxx
+    this.router.navigate(['/groupbuy-event/group-event'], {
+      queryParams: { event_id: this.groupId },
+    });
   }
 
   // 讀取店家資訊
