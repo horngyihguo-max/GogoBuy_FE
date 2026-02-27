@@ -1,4 +1,4 @@
-import { FeeDescriptionVoList, StoreService } from './../../@service/store.service';
+import { FeeDescriptionVoList, StoreService, OperatingHoursVoList } from './../../@service/store.service';
 import { Component, ElementRef, HostListener, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { StepperModule } from 'primeng/stepper';
 import { ButtonModule } from 'primeng/button';
@@ -14,7 +14,7 @@ import { SelectButtonModule } from 'primeng/selectbutton';
 import { DialogModule } from 'primeng/dialog';
 import { HttpService } from '../../@service/http.service';
 import { ActivatedRoute, Router, RouterLink } from "@angular/router";
-import { Items, MenuCategoriesVoList, MenuVoList, OperatingHoursVoList, ProductOptionGroupsVoList } from '../../@service/store.service';
+import { Items, MenuCategoriesVoList, MenuVoList, ProductOptionGroupsVoList } from '../../@service/store.service';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { FloatLabelModule } from 'primeng/floatlabel';
@@ -222,6 +222,20 @@ export class StoreComponent {
     sessionStorage.setItem('temp_order_info', JSON.stringify(this.storeData));
   }
 
+  private syncIdCounters() {
+    this.newCateId = this.storeData.menuCategoriesVoList?.length
+      ? Math.max(...this.storeData.menuCategoriesVoList.map(c => c.id || 0))
+      : 0;
+
+    this.newSpecId = this.storeData.productOptionGroupsVoList?.length
+      ? Math.max(...this.storeData.productOptionGroupsVoList.map(g => g.id || 0))
+      : 0;
+
+    this.newPId = this.storeData.menuVoList?.length
+      ? Math.max(...this.storeData.menuVoList.map(p => p.id || 0))
+      : 0;
+  }
+
   ngOnInit() {
     this.userId = String(localStorage.getItem('user_id') || '');
     this.id = Number(this.route.snapshot.paramMap.get('id'));
@@ -253,6 +267,8 @@ export class StoreComponent {
             this.newSpecId = this.storeData.productOptionGroupsVoList.length + 1;
             this.newCateId = this.storeData.menuCategoriesVoList.length + 1;
           }
+          
+          this.syncIdCounters();
         });
     }
 
@@ -449,6 +465,8 @@ export class StoreComponent {
       };
 
       this.storeData.menuCategoriesVoList.push(newCategory);
+      console.log("this.storeData.menuCategoriesVoList", this.storeData.menuCategoriesVoList);
+
     }
 
     this.storeData.menuCategoriesVoList = [...this.storeData.menuCategoriesVoList];

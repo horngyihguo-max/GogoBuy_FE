@@ -213,6 +213,7 @@ export class StoreUpsertComponent {
           return {
             ...group,
             id: ++groupIdCount,
+            maxSelection: 1,
             items: (group.items || []).map((items: any) => {
               return {
                 ...items,
