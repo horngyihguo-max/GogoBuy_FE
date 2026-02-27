@@ -139,7 +139,7 @@ export class FollowGroupComponent implements OnDestroy {
   readonly defaultProductCover = '/Default Product Image.webp';
 
   // =========================
-  // 營業狀態計算
+  // 營業狀態計算（修正跨日/凌晨問題）
   // =========================
   buildOpenStatus(): void {
     // force_closed：直接覆蓋顯示
@@ -153,44 +153,65 @@ export class FollowGroupComponent implements OnDestroy {
     const hours: any[] = this.store?.operatingHoursVoList || [];
     const now = new Date();
 
-    // 取今天星期（資料是 1~7：週一=1…週日=7）
-    const jsDay = now.getDay(); // 0(日)~6(六)
-    const dayNum = jsDay === 0 ? 7 : jsDay; // 轉成 1~7
+    const getDayNum = (d: Date) => {
+      const jsDay = d.getDay(); // 0(日)~6(六)
+      return jsDay === 0 ? 7 : jsDay; // 轉成 1~7
+    };
 
-    // 找今天的時段
-    const todaySlots = hours
-      .filter((h) => Number(h.dayOfWeek) === dayNum)
-      .map((h) => ({
-        start: String(h.startTime || ''),
-        end: String(h.endTime || ''),
-      }))
-      .filter((s) => this.isValidTime(s.start) && this.isValidTime(s.end));
+    const buildSlots = (dayNum: number) => {
+      return hours
+        .filter((h) => Number(h.dayOfWeek) === dayNum)
+        .map((h) => ({
+          start: String(h.startTime || ''),
+          end: String(h.endTime || ''),
+        }))
+        .filter((s) => this.isValidTime(s.start) && this.isValidTime(s.end));
+    };
 
-    // 如果今天完全沒有營業時間
-    if (todaySlots.length === 0) {
-      this.openStatusDot = 'closed';
-      this.openStatusText = '休息中';
-      this.openStatusSubText = '今日無營業時段';
-      return;
-    }
+    const todayDayNum = getDayNum(now);
 
-    // 轉成區間（處理跨日）
-    const intervals = todaySlots
-      .map((s) => this.toInterval(now, s.start, s.end))
-      .sort((a, b) => a.start.getTime() - b.start.getTime());
+    // 今天的時段
+    const todaySlots = buildSlots(todayDayNum);
 
-    // now 是否在任何區間內
+    // 昨天（用來處理跨日延伸到今天凌晨）
+    const yesterday = new Date(now);
+    yesterday.setDate(now.getDate() - 1);
+    const yesterdayDayNum = getDayNum(yesterday);
+    const yesterdaySlots = buildSlots(yesterdayDayNum);
+
+    // 今天 intervals（baseDate=now）
+    const todayIntervals = todaySlots.map((s) =>
+      this.toInterval(now, s.start, s.end),
+    );
+
+    // 昨天跨日 intervals（只取 end<=start 的那些，才會延伸到今天）
+    // 注意：24H 若用 00:00~00:00 表示，end<=start 也會成立，這裡也會正確覆蓋到今天
+    const yesterdayCrossIntervals = yesterdaySlots
+      .filter((s) => {
+        // 判斷是否跨日：用 toInterval 的邏輯等價條件 end<=start
+        // 這裡不用 parse 太複雜，直接借用 setTime 比較最穩
+        const st = this.setTime(new Date(yesterday), s.start).getTime();
+        const ed = this.setTime(new Date(yesterday), s.end).getTime();
+        return ed <= st;
+      })
+      .map((s) => this.toInterval(yesterday, s.start, s.end));
+
+    // 合併並排序
+    const intervals = [...yesterdayCrossIntervals, ...todayIntervals].sort(
+      (a, b) => a.start.getTime() - b.start.getTime(),
+    );
+
+    // 先看現在是否在任何區間內（這一步修掉你 00:30 變休息中的 bug）
     const current = intervals.find((it) => now >= it.start && now < it.end);
 
     if (current) {
-      // 營業中 → 顯示將於 XX:XX 結束
       this.openStatusDot = 'open';
       this.openStatusText = '營業中';
       this.openStatusSubText = `將於 ${this.formatTime(current.end)} 休息`;
       return;
     }
 
-    // 不在區間內 → 找下一段開始
+    // 不在區間內 → 找下一段開始（優先找今天接下來的）
     const next = intervals.find((it) => now < it.start);
 
     if (next) {
@@ -200,30 +221,23 @@ export class FollowGroupComponent implements OnDestroy {
       return;
     }
 
-    // 今天沒有下一段 → 已打烊，找明天第一段
+    // 今天＆昨跨日都沒有下一段 → 找明天第一段
     const tomorrow = new Date(now);
     tomorrow.setDate(now.getDate() + 1);
-    const tomorrowJsDay = tomorrow.getDay();
-    const tomorrowDayNum = tomorrowJsDay === 0 ? 7 : tomorrowJsDay;
+    const tomorrowDayNum = getDayNum(tomorrow);
 
-    const tomorrowSlots = hours
-      .filter((h) => Number(h.dayOfWeek) === tomorrowDayNum)
-      .map((h) => ({
-        start: String(h.startTime || ''),
-        end: String(h.endTime || ''),
-      }))
-      .filter((s) => this.isValidTime(s.start) && this.isValidTime(s.end))
+    const tomorrowIntervals = buildSlots(tomorrowDayNum)
       .map((s) => this.toInterval(tomorrow, s.start, s.end))
       .sort((a, b) => a.start.getTime() - b.start.getTime());
 
-    if (tomorrowSlots.length > 0) {
+    if (tomorrowIntervals.length > 0) {
       this.openStatusDot = 'closed';
       this.openStatusText = '已打烊';
-      this.openStatusSubText = `明日 ${this.formatTime(tomorrowSlots[0].start)} 開始營業`;
+      this.openStatusSubText = `明日 ${this.formatTime(tomorrowIntervals[0].start)} 開始營業`;
       return;
     }
 
-    // 明天也沒有 → 先給保守文案
+    // 明天也沒有
     this.openStatusDot = 'closed';
     this.openStatusText = '已打烊';
     this.openStatusSubText = '近期無營業時段';
