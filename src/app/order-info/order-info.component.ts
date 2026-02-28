@@ -16,6 +16,7 @@ import { CommonModule } from '@angular/common';
 import { catchError } from 'rxjs/operators';
 import { OrderTransferService } from '../@service/orderTransfer.service';
 import { MessageService as NotifiService, NotifiCategoryEnum, NotifiMesReq } from '../@service/message.service';
+import { LinePayService } from '../@service/linepay.service';
 
 
 
@@ -108,17 +109,20 @@ export class OrderInfoComponent implements OnInit {
     private route: ActivatedRoute,
     public transfer: OrderTransferService,
     private notifiService: NotifiService,
+    private linePayService: LinePayService,
   ) { }
 
 
   ngOnInit() {
     this.userId = String(localStorage.getItem('user_id') || '');
     this.host = [
-      { label: '查看訂單明細' },
-      { label: '確認' }
+      { label: '核對訂單' },
+      { label: '付費階段' },
+      { label: '確認結算' }
     ];
     this.member = [
-      { label: 'Confirmation' }
+      { label: '核對訂單' },
+      { label: '確認訂單' }
     ];
     // 載入cart傳入開團訂單詳情
     this.route.queryParamMap.subscribe(params => {
@@ -250,11 +254,47 @@ export class OrderInfoComponent implements OnInit {
 
   // 統一處理主按鈕點擊
   onPrimaryAction() {
-    if (this.activeIndex === 0 && this.mode === 'host') {
+    if (this.activeIndex === 0) {
+      this.nextStep();
+    } else if (this.activeIndex === 1 && this.mode === 'host') {
       this.nextStep();
     } else {
       this.submitOrder();
     }
+  }
+
+  payByLinePay() {
+    Swal.fire({
+      title: '即將跳轉至 LINE Pay',
+      text: `支付金額：NT$ ${this.totalAmount}`,
+      icon: 'info',
+      showCancelButton: true,
+      confirmButtonText: '確定前往',
+      cancelButtonText: '取消'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        Swal.fire({
+          title: '準備中...',
+          didOpen: () => Swal.showLoading()
+        });
+        
+        const payUserId = (this.mode === 'member') ? (this.userId || this.auth.user?.id) : undefined;
+        
+        this.linePayService.requestPayment(this.eventsId, payUserId).subscribe({
+          next: (payUrl: string) => {
+            if (payUrl && payUrl.startsWith('http')) {
+              window.location.href = payUrl;
+            } else {
+              Swal.fire('支付失敗', '無法取得支付連結', 'error');
+            }
+          },
+          error: (err) => {
+            console.error('LinePay Error:', err);
+            Swal.fire('系統錯誤', '發送支付請求失敗', 'error');
+          }
+        });
+      }
+    });
   }
 
   // 統一處理返回/次要按鈕點擊

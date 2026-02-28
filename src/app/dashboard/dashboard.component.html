@@ -204,9 +204,11 @@
             </td>
             <td>
               <div class="flex gap-2">
+                @if(event.status === 'OPEN') {
                 <p-button label="查看" icon="pi pi-eye" styleClass="p-button-text p-button-info p-button-rounded"
                   (onClick)="onEventView(event)">
                 </p-button>
+                }
 
                 <p-button label="刪除" icon="pi pi-trash" styleClass="p-button-text p-button-danger p-button-rounded"
                   (onClick)="onEventDelete(event)"></p-button>
