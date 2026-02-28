@@ -1,5 +1,5 @@
 import { FeeDescriptionVoList, MenuCategoriesVoList, MenuVoList, OperatingHoursVoList, PriceLevel, ProductOptionGroupsVoList, Stores } from './../../@service/store.service';
-import { Component } from '@angular/core';
+import { Component, NgZone, ViewChild } from '@angular/core';
 import { HttpService } from '../../@service/http.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule, Location } from '@angular/common';
@@ -15,6 +15,9 @@ import { DatePickerModule } from 'primeng/datepicker';
 import { PrimeNG } from 'primeng/config';
 import Swal from 'sweetalert2';
 import { TabsModule } from 'primeng/tabs';
+import { Popover } from 'primeng/popover';
+import * as L from 'leaflet';
+import { PositionService } from '../../@service/position.service';
 
 
 
@@ -43,7 +46,8 @@ import { TabsModule } from 'primeng/tabs';
   imports: [
     CommonModule, Dialog, PickListModule, DragDropModule,
     InputGroupModule, InputGroupAddonModule, InputNumberModule, FloatLabelModule,
-    FormsModule, DatePickerModule, TabsModule
+    FormsModule, DatePickerModule, TabsModule,
+    Popover
   ],
   templateUrl: './group-event.component.html',
   styleUrl: './group-event.component.scss'
@@ -54,7 +58,9 @@ export class GroupEventComponent {
     private router: Router,
     private route: ActivatedRoute,
     private primeng: PrimeNG,
-    private location: Location
+    private location: Location,
+    private ngZone: NgZone,
+    private positionService: PositionService
   ) { };
 
   storeList: Stores | null = null;
@@ -93,6 +99,9 @@ export class GroupEventComponent {
   maxEndDate: Date = new Date(new Date().setMonth(new Date().getMonth() + 2));
   maxPickDate!: Date;
   previewTab!: number;
+  isLoadingLocation = false;
+  currentLocation: any = null;
+  currentAddress!: string;
 
 
   dateFormat(date: Date) {  //後端回傳營業間轉換
@@ -194,12 +203,36 @@ export class GroupEventComponent {
       }
     });
   }
+  positionSpinnerAlert() {
+    Swal.fire({
+      title: '正在定位請稍後',
+      allowOutsideClick: false,
+      showConfirmButton: false,
+      width: '300px',
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+  }
+  positionSuccessAlert() {
+    Swal.fire({
+      icon: 'success',
+      title: '定位更新成功',
+      text: this.currentAddress,
+      timer: 2000,
+      showConfirmButton: false
+    });
+  }
 
 
   ngOnInit(): void {
     this.userId = String(localStorage.getItem('user_id'));
     if (!this.userId || this.userId === 'null') {
       this.loginFirst();
+    }
+    if (this.positionService.lastCoords) {
+      this.currentLocation = this.positionService.lastCoords;
+      console.log('載入快取位置:', this.currentLocation);
     }
     this.route.queryParams.subscribe(params => {
       if (params['event_id']) {
@@ -703,7 +736,7 @@ export class GroupEventComponent {
   handleOnShow() {
     if (!this.endTime) {
       const nextMinute = new Date();
-      nextMinute.setMinutes(nextMinute.getMinutes() + 1);
+      nextMinute.setMinutes(nextMinute.getMinutes() + 5);
       nextMinute.setSeconds(0);
       nextMinute.setMilliseconds(0);
       // 設定初始預設時間
@@ -1111,4 +1144,197 @@ export class GroupEventComponent {
     }
   }
 
+
+  async getGeolocation() {
+    const now = Date.now();
+    const cooldown = 15000;
+    if (now - this.positionService.lastFetchAt < cooldown && this.positionService.lastCoords) {
+      this.currentLocation = this.positionService.lastCoords;
+      Swal.fire({
+        icon: 'info',
+        title: '位置已是最新的',
+        text: '請稍後再試 (冷卻時間 15s)',
+        timer: 1500,
+        showConfirmButton: false
+      });
+      return;
+    }
+    this.isLoadingLocation = true;
+    if (this.isLoadingLocation == true) {
+      this.positionSpinnerAlert();
+    }
+    try {
+      // 取得新座標
+      const newCoords = await this.positionService.getCurrentPosition();
+      // 計算新舊距離差距
+      if (this.currentLocation && this.currentAddress) {
+        const distance = this.positionService.getDistance(
+          this.currentLocation.lat, this.currentLocation.lng,
+          newCoords.lat, newCoords.lng
+        );
+        // 如果移動距離小於 10 公尺，就不重新抓地址，避免門牌跳動
+        if (distance < 10) {
+          console.log(`移動距離僅 ${distance.toFixed(1)}m，忽略更新以穩定地址`);
+          this.isLoadingLocation = false;
+          this.positionSuccessAlert();
+          return;
+        }
+      }
+      this.currentLocation = newCoords;
+      // 呼叫地址解析
+      this.positionService.getAddressFromOSM(this.currentLocation.lat, this.currentLocation.lng).subscribe({
+        next: (res) => {
+          const addr = res.address;
+          let hNum = addr.house_number || '';
+          if (hNum && !hNum.includes('號')) hNum += '號';
+          const addressParts = [
+            addr.city || addr.town || addr.county || '',
+            addr.suburb || addr.district || addr.village || '',
+            addr.road || addr.pedestrian || '',
+            hNum
+          ];
+          this.currentAddress = addressParts.filter(part => !!part).join('');
+          if (this.currentAddress.length < 5) {
+            this.currentAddress = res.display_name;
+          }
+          this.pickLocation = this.currentAddress;
+          this.positionSuccessAlert();
+        },
+        error: (err) => {
+          console.error('解析失敗', err);
+          this.currentAddress = '無法解析詳細地址';
+        }
+      });
+    } catch (err) {
+      Swal.fire({
+        icon: 'error',
+        title: '定位失敗',
+        text: '請確認瀏覽器定位權限'
+      });
+    } finally {
+      this.isLoadingLocation = false;
+    }
+  }
+  @ViewChild('op') op!: Popover;
+  selectedLat: number = 22.997; // 預設台南座標
+  selectedLng: number = 120.211;
+  // Leaflet 實例
+  map!: L.Map;
+  marker!: L.Marker;
+  /**
+   * 💡 當 Popover 顯示時初始化地圖
+   * 必須在 Popover 顯示後才 init，否則地圖容器寬高為 0 會導致破圖
+   */
+  onMapShow() {
+    if (this.currentLocation) {
+      this.selectedLat = this.currentLocation.lat;
+      this.selectedLng = this.currentLocation.lng;
+    }
+    setTimeout(() => {
+      this.ngZone.runOutsideAngular(() => {
+        if (this.map) {
+          // 解決 RWD 寬度變動後地圖顯示異常
+          this.map.invalidateSize();
+        } else {
+          this.initMap();
+        }
+      });
+    }, 300); // 延遲時間避開動畫
+  }
+  private initMap() {
+    // 1. 初始化地圖中心
+    this.map = L.map('map').setView([this.selectedLat, this.selectedLng], 16);
+    // 2. 載入 OpenStreetMap 圖資
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(this.map);
+    // 3. 建立可拖拽的標記
+    this.marker = L.marker([this.selectedLat, this.selectedLng], {
+      draggable: true
+    }).addTo(this.map);
+    // 4. 監聽標記拖拽結束
+    this.marker.on('dragend', () => {
+      const pos = this.marker.getLatLng();
+      this.updateLocation(pos.lat, pos.lng);
+    });
+    // 5. 監聽地圖點擊
+    this.map.on('click', (e: L.LeafletMouseEvent) => {
+      this.marker.setLatLng(e.latlng);
+      this.updateLocation(e.latlng.lat, e.latlng.lng);
+    });
+    console.log('Map Container:', document.getElementById('map'));
+  }
+
+  /**
+   * 搜尋地點功能 (連動 OpenStreetMap API)
+   */
+  searchLocation(event: any) {
+    const query = event.target.value;
+    if (!query) return;
+    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.length > 0) {
+          const first = data[0];
+          const lat = parseFloat(first.lat);
+          const lon = parseFloat(first.lon);
+          this.ngZone.run(() => {
+            this.map.setView([lat, lon], 16);
+            this.marker.setLatLng([lat, lon]);
+            this.updateLocation(lat, lon);
+          });
+        }
+      });
+  }
+  /**
+   * 更新經緯度並反查地址
+   */
+  private updateLocation(lat: number, lng: number) {
+    this.selectedLat = lat;
+    this.selectedLng = lng;
+    // 反查地址 API
+    // fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+    //   .then(res => res.json())
+    //   .then(data => {
+    //     this.ngZone.run(() => {
+    //       this.pickLocation = data.display_name;
+    //       console.log(data);
+    //     });
+    //   });
+    this.positionService.getAddressFromOSM(lat, lng).subscribe({
+      next: (res) => {
+        console.log(res);
+        if (res.name.length > 0) {
+          this.pickLocation = res.name;
+        } else {
+          const addr = res.address;
+          let hNum = addr.house_number || '';
+          if (hNum && !hNum.includes('號')) hNum += '號';
+          const addressParts = [
+            addr.city || addr.town || addr.county || '',
+            addr.suburb || addr.district || addr.village || '',
+            addr.road || addr.pedestrian || '',
+            hNum
+          ];
+          this.currentAddress = addressParts.filter(part => !!part).join('');
+          if (this.currentAddress.length < 5) {
+            this.currentAddress = res.display_name;
+          }
+          this.pickLocation = this.currentAddress;
+        }
+      },
+      error: (err) => {
+        console.error('解析失敗', err);
+        this.currentAddress = '無法解析詳細地址';
+      }
+    });
+  }
+
+  /**
+   * 確認選取，可整合進你的後端 API 串接分工 [cite: 2026-02-12]
+   */
+  confirmLocation() {
+    console.log('最終選定位置:', this.pickLocation, { lat: this.selectedLat, lng: this.selectedLng });
+    // 這裡可以呼叫 SweetAlert2 提示 [cite: 2026-02-12]
+  }
 }

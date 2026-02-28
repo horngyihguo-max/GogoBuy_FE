@@ -7,10 +7,19 @@ import Swal from 'sweetalert2';
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
 
-  const authReq = req.clone({ withCredentials: true });
+  // 檢查是否為外部地圖 API 請求
+  const isMapApi = req.url.includes('openstreetmap.org') || req.url.includes('maps.co');
+
+  // 根據是否為地圖請求來決定 clone 方式
+  const authReq = isMapApi
+    ? req.clone({ withCredentials: false }) // 地圖 API 不帶憑證
+    : req.clone({ withCredentials: true });  // 你的後端請求維持原樣
 
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {
+      // 如果是地圖 API 報錯，不執行跳轉登入的邏輯
+      if (isMapApi) return throwError(() => error);
+
       if (error.status == 401) {
         localStorage.removeItem('user_id');
         router.navigate(['/login']);

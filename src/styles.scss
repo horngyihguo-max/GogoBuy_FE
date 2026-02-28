@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "primeicons/primeicons.css";
+@import "leaflet/dist/leaflet.css";
 
 /* 強制鎖定 html 與 body，不准任何動態 Style 改變 padding */
 html,
@@ -46,11 +47,9 @@ body {
 
 ::-webkit-scrollbar-thumb {
   /* 使用品牌色到懸停色的漸層 */
-  background: linear-gradient(
-    180deg,
-    var(--brand-primary) 0%,
-    var(--brand-primary-hover) 100%
-  );
+  background: linear-gradient(180deg,
+      var(--brand-primary) 0%,
+      var(--brand-primary-hover) 100%);
   border-radius: 10px;
   /* 增加邊界讓滑塊看起來像浮在軌道中央 */
   border: 3px solid var(--bg-section);
@@ -93,7 +92,8 @@ body {
 
 /* 全域縮小 Toast */
 .p-toast {
-  max-width: 320px; /* 固定最大寬度 */
+  max-width: 320px;
+  /* 固定最大寬度 */
 }
 
 /* 微調Toast裡面的內距，讓它看起來更精緻 */
