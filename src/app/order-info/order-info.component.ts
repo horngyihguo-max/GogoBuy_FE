@@ -15,6 +15,8 @@ import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
 import { catchError } from 'rxjs/operators';
 import { OrderTransferService } from '../@service/orderTransfer.service';
+import { MessageService as NotifiService, NotifiCategoryEnum, NotifiMesReq } from '../@service/message.service';
+import { LinePayService } from '../@service/linepay.service';
 
 
 
@@ -94,6 +96,9 @@ export class OrderInfoComponent implements OnInit {
   res: any;
   storeLogo: any;
   hostLogo: any;
+  hostId = '';
+  hostEmail = '';
+  hostNickname = '';
 
 
   constructor(
@@ -103,17 +108,21 @@ export class OrderInfoComponent implements OnInit {
     public router: Router,
     private route: ActivatedRoute,
     public transfer: OrderTransferService,
+    private notifiService: NotifiService,
+    private linePayService: LinePayService,
   ) { }
 
 
   ngOnInit() {
     this.userId = String(localStorage.getItem('user_id') || '');
     this.host = [
-      { label: '查看訂單明細' },
-      { label: '確認' }
+      { label: '核對訂單' },
+      { label: '付費階段' },
+      { label: '確認結算' }
     ];
     this.member = [
-      { label: 'Confirmation' }
+      { label: '核對訂單' },
+      { label: '確認訂單' }
     ];
     // 載入cart傳入開團訂單詳情
     this.route.queryParamMap.subscribe(params => {
@@ -140,6 +149,9 @@ export class OrderInfoComponent implements OnInit {
         this.storeName = event.storeName ?? '';
         this.pickupTime = event.pickupTime ?? '';
         this.pickLocation = event.pickLocation ?? '';
+        this.hostId = event.hostId ?? '';
+        this.hostEmail = event.hostEmail ?? '';
+        this.hostNickname = event.hostNickname ?? '';
       },
       error: (err: any) => {
         console.error('getEventsByEventsId 失敗', err);
@@ -192,6 +204,7 @@ export class OrderInfoComponent implements OnInit {
       hostNickname: o.hostNickname ?? o.userNickname ?? o.user_nickname ?? null,
       parsedOptions,
       menuName: o.menuName ?? null,
+      userEmail: o.email ?? o.userEmail ?? o.user_email ?? '',
     };
   }
 
@@ -241,11 +254,47 @@ export class OrderInfoComponent implements OnInit {
 
   // 統一處理主按鈕點擊
   onPrimaryAction() {
-    if (this.activeIndex === 0 && this.mode === 'host') {
+    if (this.activeIndex === 0) {
+      this.nextStep();
+    } else if (this.activeIndex === 1 && this.mode === 'host') {
       this.nextStep();
     } else {
       this.submitOrder();
     }
+  }
+
+  payByLinePay() {
+    Swal.fire({
+      title: '即將跳轉至 LINE Pay',
+      text: `支付金額：NT$ ${this.totalAmount}`,
+      icon: 'info',
+      showCancelButton: true,
+      confirmButtonText: '確定前往',
+      cancelButtonText: '取消'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        Swal.fire({
+          title: '準備中...',
+          didOpen: () => Swal.showLoading()
+        });
+        
+        const payUserId = (this.mode === 'member') ? (this.userId || this.auth.user?.id) : undefined;
+        
+        this.linePayService.requestPayment(this.eventsId, payUserId).subscribe({
+          next: (payUrl: string) => {
+            if (payUrl && payUrl.startsWith('http')) {
+              window.location.href = payUrl;
+            } else {
+              Swal.fire('支付失敗', '無法取得支付連結', 'error');
+            }
+          },
+          error: (err) => {
+            console.error('LinePay Error:', err);
+            Swal.fire('系統錯誤', '發送支付請求失敗', 'error');
+          }
+        });
+      }
+    });
   }
 
   // 統一處理返回/次要按鈕點擊
@@ -374,9 +423,35 @@ export class OrderInfoComponent implements OnInit {
         allowEscapeKey: false,
         didOpen: () => Swal.showLoading()
       });
-      this.cart.deleteOrderById(orderId).subscribe({
+      const currentUserId = this.userId || this.auth.user?.id || localStorage.getItem('user_id') || '';
+      const actingUserId = this.mode === 'host' ? currentUserId : undefined;
+      
+      // 先找出這筆訂單的擁有者，以便通知 (如果操作者是團長且刪除的是別人的)
+      const orderToDel = this.res?.orders?.find((o: any) => (o.id ?? o.orderId) === orderId);
+
+      console.log('[DEBUG] removeorder:', { orderId, actingUserId, mode: this.mode });
+
+      this.cart.deleteOrderById(orderId, actingUserId).subscribe({
         next: (res) => {
           if (res.code == 200) {
+            // 如果是團長刪除成員的商品，發送通知
+            if (this.mode === 'host' && orderToDel && orderToDel.userId !== currentUserId) {
+              const req: NotifiMesReq = {
+                category: NotifiCategoryEnum.GROUP_BUY,
+                title: '訂單品項被移除',
+                content: `很抱歉，團長「${this.auth.user?.nickname || '團長'}」將您在「${this.eventName}」中的「${orderToDel.menuName}」移除了。`,
+                eventId: this.eventsId,
+                userId: currentUserId,
+                targetUrl: '/user/orders',
+                expiredAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                userNotificationVoList: [{
+                  userId: orderToDel.userId,
+                  email: orderToDel.userEmail || ''
+                }]
+              };
+              this.notifiService.create(req).subscribe();
+            }
+
             this.res.orders = (this.res.orders ?? []).filter(
               (o: any) => (o.id ?? o.orderId) !== orderId
             );
@@ -389,6 +464,7 @@ export class OrderInfoComponent implements OnInit {
               icon: "success"
             });
           } else {
+            console.error('[API Error] deleteOrderById:', res);
             Swal.fire({
               title: "刪除失敗",
               text: res.message ?? "請稍後再試",
@@ -397,10 +473,10 @@ export class OrderInfoComponent implements OnInit {
           }
         },
         error: (err) => {
-          console.error(err);
+          console.error('[Network Error] deleteOrderById:', err);
           Swal.fire({
             title: "刪除失敗",
-            text: "刪除失敗，請稍後再試",
+            text: "刪除失敗，請連繫系統開發者或稍後再試",
             icon: "error"
           });
         }
@@ -561,6 +637,52 @@ export class OrderInfoComponent implements OnInit {
         request$.subscribe({
           next: (res: any) => {
             if (res.code == 200) {
+              // --- SSE 通知邏輯 ---
+              if (this.mode === 'host') {
+                // 團長結單：通知所有成員
+                this.cart.getPersonalOrdersByEventId(this.eventsId).subscribe({
+                  next: (memberRes: any) => {
+                    const members = memberRes.personalOrder || [];
+                    const membersToNotify = members.filter((m: any) => m.userId !== this.userId);
+                    if (membersToNotify.length > 0) {
+                      const req: NotifiMesReq = {
+                        category: NotifiCategoryEnum.GROUP_BUY,
+                        title: '團購結單通知',
+                        content: `您參加的團購「${this.eventName}」已結單！請查看訂單明細並配合團長後續取貨通知。`,
+                        eventId: this.eventsId,
+                        userId: this.userId,
+                        targetUrl: '/user/orders?tab=history',
+                        expiredAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                        userNotificationVoList: membersToNotify.map((m: any) => ({
+                          userId: m.userId,
+                          email: m.userEmail
+                        }))
+                      };
+                      this.notifiService.create(req).subscribe();
+                    }
+                  }
+                });
+              } else {
+                // 成員確認訂單：通知團長
+                if (this.hostId && this.hostId !== this.userId) {
+                  const req: NotifiMesReq = {
+                    category: NotifiCategoryEnum.GROUP_BUY,
+                    title: '成員訂單確認',
+                    content: `成員「${this.auth.user?.nickname || '有人'}」已確認了在「${this.eventName}」中的訂單。`,
+                    eventId: this.eventsId,
+                    userId: this.userId,
+                    targetUrl: `/user/orders/info?events_id=${this.eventsId}&mode=host`,
+                    expiredAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                    userNotificationVoList: [{
+                      userId: this.hostId,
+                      email: this.hostEmail
+                    }]
+                  };
+                  this.notifiService.create(req).subscribe();
+                }
+              }
+              // --- SSE 通知邏輯結束 ---
+
               Swal.fire({
                 title: "送出!",
                 text: this.mode === 'host' ? "全團已成功結算" : "您的個人訂單已確認",

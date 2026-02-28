@@ -233,6 +233,10 @@ export class DashboardComponent {
     }
   }
 
+  getPublishSeverity(publish: boolean) {
+    return publish ? 'success' : 'secondary';
+  }
+
   // 開啟公告視窗
   openAnnounceDialog() {
     this.displayAnnounceDialog = true;

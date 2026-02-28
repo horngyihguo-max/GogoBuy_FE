@@ -26,7 +26,7 @@
 }
 
 .store-table {
-  @apply max-w-[295px] mt-[5px] ml-[10px] md:w-[100%] md:max-w-none md:mt-[10px];
+  @apply max-w-[295px] mt-[5px] ml-[10px] md:w-[100%] md:max-w-none md:mt-[3px] lg:mt-[10px];
   /* @media (min-width: 768px) {
     @apply max-w-none !w-[100%] mt-[10px];
   } */
@@ -93,6 +93,35 @@
   @apply w-[13vw] bg-[#F4E7E1] text-[#662222] border-1 border-[#662222] rounded-3xl h-[7vh] min-w-[100px] font-bold transition-all
          hover:bg-[#662222]/20 hover:text-[#662222] hover:border-[#662222] hover:scale-[1.05]
          active:bg-white active:text-[#662222] active:scale-[0.85];
+}
+
+/* 1. 讀取中的快速左右反轉動畫 */
+@keyframes fast-flip {
+  0%, 100% { transform: scaleX(1); }
+  50% { transform: scaleX(-1); }
+}
+
+.flipping {
+  /* 0.4s 快速翻轉，增加「搜尋中」的急迫感 */
+  animation: fast-flip 1s infinite linear;
+  background-color: #cc7a5c !important; /* 確保讀取時背景不變透明 */
+  color: white !important;
+}
+
+/* 2. 原本的未定位彈跳動畫 (維持你之前的需求) */
+@keyframes mega-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+
+.super-bounce {
+  animation: mega-bounce 0.8s infinite ease-in-out;
+}
+
+/* 確保圖示置中 */
+.pi-map-marker {
+  /* 有些版本圖示位置稍微偏上，微調它 */
+  transform: translateY(-1px);
 }
 
 

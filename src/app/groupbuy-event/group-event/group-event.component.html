@@ -22,35 +22,39 @@
   </div>
 }@else if(isExist && storeList) {
   <div class="area">
-    <div class="mt-[20px] area-block flex flex-col md:flex-row items-stretch bg-[#F5F0EB] rounded-lg overflow-hidden md:max-h-[200px] lg:max-h-[300px]">
-      <div class="w-auto shrink-0">
+    <div class="mt-[20px] area-block flex flex-col md:flex-row items-stretch bg-[#F5F0EB] rounded-lg
+            md:max-h-[200px] lg:max-h-[300px] lg:py-6">
+      <div class="w-auto shrink-0 md:flex md:justify-center md:items-center md:basis-3/7 md:w-full">
         <img [src]="storeList?.image ? storeList?.image : 'no-product-image.jpg'"
-              (error)="$any($event.target).src = 'no-product-image.jpg'"
-              class="h-full object-cover aspect-[5/3] md:max-h-[200px] lg:max-h-[300px]
-                      rounded-t-lg md:rounded-l-lg md:rounded-tr-none">
+            (error)="$any($event.target).src = 'no-product-image.jpg'"
+            class="w-full md:w-auto h-full object-cover aspect-[5/3] md:max-h-[200px] lg:max-h-[300px]
+                    rounded-t-lg md:rounded-xl">
       </div>
-      <div class="ml-[10px] flex-1 flex flex-col justify-center py-[20px]">
-        <p class="storeName">{{storeList?.name}}</p>
-        <table class="store-table">
+      <div class="flex-1 flex flex-col justify-center py-[20px] px-[20px] md:ml-[20px] basis-4/7">
+        <p class="storeName font-bold text-xl">{{storeList?.name}}</p>
+
+        <table class="store-table w-full">
           <tr>
             <td class="w-[18px] whitespace-nowrap px-0"><i class="pi pi-phone td-icon"></i></td>
-            <td>{{storeList?.phone}}</td>
+            <td class="pl-2">{{storeList?.phone}}</td>
           </tr>
           <tr>
             <td class="w-[18px] whitespace-nowrap px-0"><i class="pi pi-address-book td-icon"></i></td>
-            <td>{{storeList?.address}}</td>
+            <td class="pl-2">{{storeList?.address}}</td>
           </tr>
         </table>
-        <label class="ml-[10px] mt-[20px]">
+
+        <label class="md:mt-[3px] lg:mt-[15px] flex items-center">
           <span class="px-2 py-0.5 rounded text-md md:text-lg"
-            [ngClass]="isOpen ? 'bg-emerald-400/20 text-green-800' : 'bg-red-100 text-red-800'">
+                [ngClass]="isOpen ? 'bg-emerald-400/20 text-green-800' : 'bg-red-100 text-red-800'">
             {{ isOpen ? '● 營業中' : '○ 休息中' }}
           </span>
-          @if(operateString!="休息中"){
-            <span class="ml-[20px] text-md md:text-lg">{{operateString}}</span>
+          @if(operateString != "休息中"){
+            <span class="ml-[15px] text-md md:text-lg">{{operateString}}</span>
           }
         </label>
-        <div class="ml-[10px] mt-[5px] text-base md:text-md text-gray-500">{{nextOperating}}</div>
+
+        <div class="mt-[5px] text-base md:text-md text-gray-500">{{nextOperating}}</div>
       </div>
     </div>
   </div>
@@ -60,17 +64,17 @@
         <div class="w-full px-4 lg:pl-8">
           <div class="text-[#662222] font-bold text-2xl
                           lg:text-3xl event-div">開團資料設定</div>
-          <div class="event-div each-div">
+          <!-- <div class="event-div each-div">
             <div class="div-title">請選擇拆帳模式</div>
             <div class="div-content sm:flex sm:gap-15 lg:flex lg:gap-30">
-              <div class="relative inline-block"> <!-- 下拉選單 -->
+              <div class="relative inline-block"> 下拉選單
                 <button (click)="toggle($event)" class="w-64 px-4 py-2 bg-white text-[#662222] rounded-md flex justify-between items-center text-md md:text-lg
-                              lg:w-80"> <!-- 觸發按鈕 -->
+                              lg:w-80"> 觸發按鈕
                   {{choice || "運費拆帳方式"}}
                   <span class="transition-transform duration-200" [class.rotate-180]="splitOpen">▼</span>
                 </button>
                 @if(splitOpen){
-                  <!-- ================= 桌機下拉 ================= -->
+                  ================= 桌機下拉 =================
                   <div class="hidden sm:block absolute mt-2 w-full bg-white rounded-md shadow-lg z-50 animate-fade-in"
                     (click)="$event.stopPropagation()">
                     @if(storeList.category=="fast"){
@@ -80,11 +84,11 @@
                       <div class="px-4 py-2 hover:bg-gray-100 cursor-pointer" (click)="choose('WEIGHT')">權重制</div>
                     }
                   </div>
-                  <!-- ================= 手機 Bottom Sheet ================= -->
-                <div class="sm:hidden fixed inset-0 z-[1102] bg-black/50 backdrop-blur-sm"></div> <!-- 背景遮罩 -->
+                  ================= 手機 Bottom Sheet =================
+                <div class="sm:hidden fixed inset-0 z-[1102] bg-black/50 backdrop-blur-sm"></div> 背景遮罩
                 <div class="sm:hidden fixed inset-0 z-[1102] flex items-end" (click)="close()">
                   <div class="relative w-full max-h-[85vh] bg-white rounded-t-xl px-5 pt-4 pb-6
-                                  shadow-2xl animate-slide-up" (click)="$event.stopPropagation()"> <!-- 底部選單 -->
+                                  shadow-2xl animate-slide-up" (click)="$event.stopPropagation()"> 底部選單
                     <h3 class="text-base font-semibold text-gray-900 mb-4">請選擇拆帳模式</h3>
                     @if(storeList.category=="fast"){
                       <button class="w-full flex items-center justify-between py-4 px-3 rounded-xl
@@ -115,7 +119,7 @@
                 </span>
               </div>
             </div>
-          </div>
+          </div> -->
           <div class="event-div each-div">
             <div class="div-title">編輯開團菜單</div>
             <div class="div-content">
@@ -238,7 +242,7 @@
                     }
                   </div>
                 </div>
-                <div class="flex flex-col md:flex-row md:items-start text-md md:text-lg">
+                <!-- <div class="flex flex-col md:flex-row md:items-start text-md md:text-lg">
                   <div class="font-bold text-gray-700 md:w-24 shrink-0">推薦說明：</div>
                   <div class="flex flex-col flex-1">
                     <textarea class="border-1 border-gray-400/70 rounded-md resize-none p-1 overflow-y-auto placeholder:text-gray-500"
@@ -249,15 +253,15 @@
                       {{ recommendDescription?.length || 0 }} / 200
                     </div>
                   </div>
-                </div>
+                </div> -->
               </div>
             </div>
           </div>
           <div class="event-div each-div pb-4 sm:pb-6 md:pb-8">
             <div class="div-title">填寫開團資料</div>
             <div class="div-content w-full text-md md:text-lg">
-              <div class="flex flex-col md:flex-row md:justify-between">
-                <span class="pb-2 md:pr-2 md:w-[25vw]">
+              <div class="flex-col md:grid md:grid-cols-2 md:flex-row md:justify-between">
+                <span class="pb-2 md:pr-4">
               <!-- <div class="text-[15px] pr-2 pb-1">
                     開團名稱：</div> -->
                   <p-inputgroup>
@@ -277,7 +281,7 @@
                     {{ eventName?.length || 0 }} / 50
                   </div>
                 </span>
-                <span class="pb-2 md:px-2 md:w-[25vw]">
+                <span class="pb-2 md:pl-4">
                   <!-- <div class="text-[15px] pr-2 pb-1">
                     成團門檻金額：
                   </div> -->
@@ -298,7 +302,9 @@
                     請輸入阿拉伯數字，最小金額為1元
                   </div>
                 </span>
-                <span class="pb-2 md:pl-2 md:w-[25vw]">
+              </div>
+              <div class="flex flex-col md:grid md:grid-cols-2 md:flex-row md:justify-between">
+                <span class="pb-2 md:pr-4">
                   <!-- <div class="text-[15px] pr-2 pb-1">
                     截止時間：
                   </div> -->
@@ -321,27 +327,7 @@
                   </p-inputgroup>
                   <div class="md:text-center text-[15px] text-gray-400 pr-2 pb-1">截止時間不得早於或等於當下時間，且須於兩個月內</div>
                 </span>
-              </div>
-              <div class="flex flex-col md:grid md:grid-cols-2 md:flex-row md:justify-between">
-                <span class="pb-2 md:pr-8">
-                  <p-inputgroup>
-                    <p-inputgroup-addon>
-                      <i class="pi pi-map-marker"></i>
-                    </p-inputgroup-addon>
-                    <div class="flex-1 flex flex-col border border-gray-300 rounded-r-md bg-white">
-                      <p-floatlabel variant="on" autocomplete="off">
-                        <input type="text" class="outline-none w-full p-2 pl-3 rounded-r-md transition-all bg-white
-                        focus:!border-1 focus:!border-[#662222]"
-                          [class.p-filled]="!!pickLocation" [(ngModel)]="pickLocation" maxlength="50" />
-                        <label>取貨地點</label>
-                        </p-floatlabel>
-                    </div>
-                  </p-inputgroup>
-                  <div class="text-right text-[15px] text-gray-400 pr-2 pb-1">
-                    {{ pickLocation?.length || 0 }} / 50
-                  </div>
-                </span>
-                <span class="pb-2 md:pl-8">
+                <span class="pb-2 md:pl-4">
                   <p-inputgroup class="w-full">
                     <p-inputgroup-addon>
                       <i class="pi pi-calendar-clock"></i>
@@ -361,6 +347,48 @@
                   </p-inputgroup>
                   <div class="md:text-center text-[15px] text-gray-400 pr-2 pb-1">取貨時間不得早於或等於截止時間，且須於截止後一個月內取貨</div>
                 </span>
+              </div>
+              <div class="pb-2">
+                <p-inputgroup>
+                  <p-inputgroup-addon>
+                    <div class="location-wrapper flex items-center gap-2">
+                      <button type="button" (click)="getGeolocation()" [disabled]="isLoadingLocation"
+                        class="flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors">
+                        <i class="pi pi-map-marker"
+                          [class.super-bounce]="!isLoadingLocation && !currentLocation"
+                          [class.flipping]="isLoadingLocation"
+                          [style.background-color]="'#cc7a5c'" [style.color]="'#fff'"
+                          style="cursor: pointer; display: inline-flex; align-items: center;
+                                  justify-content: center; border-radius: 50%; font-size: 1.2rem;
+                                  transition: all 0.3s ease-in-out;
+                                  box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        </i>
+                      </button>
+
+                      <!-- <span class="text-sm text-gray-500" *ngIf="currentLocation">
+                        {{ currentAddress || (currentLocation ? '正在解析地址...' : '尚未定位') }}
+                      </span> -->
+                    </div>
+                  </p-inputgroup-addon>
+                  <div class="flex-1 flex flex-col border border-gray-300 rounded-r-md bg-white">
+                    <p-floatlabel variant="on" autocomplete="off" (click)="op.toggle($event)">
+                      <input type="text" class="outline-none w-full p-2 pl-3 rounded-r-md transition-all bg-white
+                      focus:!border-1 focus:!border-[#662222]" (keyup.enter)="searchLocation($event)"
+                        [class.p-filled]="!!pickLocation" [(ngModel)]="pickLocation" maxlength="50" />
+                      <label>取貨地點</label>
+                    </p-floatlabel>
+                  </div>
+                </p-inputgroup>
+                <p-popover #op [style]="{ width: '90vw', maxWidth: '450px' }" (onShow)="onMapShow()">
+                  <ng-template pTemplate="content">
+                    <div class="flex flex-col gap-2">
+                      <div id="map" style="height: 300px; width: 100%;" class="rounded-lg border"></div>
+                      <button pButton label="確認選中此地點" class="p-button-sm w-full mt-2"
+                              (click)="confirmLocation(); op.hide()"></button>
+                    </div>
+                  </ng-template>
+                </p-popover>
+                <div class="md:ml-10 text-[15px] text-gray-400 pr-2 pb-1">定位資訊可能有誤，請注意修改</div>
               </div>
               <label class="w-full">
                 <!-- <div class="text-[15px] pr-2 pb-1">
@@ -399,13 +427,13 @@
         <div class="w-full px-4 lg:pl-8">
           <div class="text-[#662222] font-bold text-2xl
                           lg:text-3xl event-div">開團資料確認</div>
-          <div class="event-div each-div">
+          <!-- <div class="event-div each-div">
             <div class="div-title">拆帳模式</div>
             <div class="div-content">
               <span class="text-md md:text-lg">您已選擇 </span><span class=" text-lg md:text-xl font-bold mr-4">{{choice}}</span>
               <span class="text-md text-red-500">(已同意拆帳聲明)</span>
             </div>
-          </div>
+          </div> -->
           <div class="event-div each-div">
             <div class="div-title">開團菜單</div>
             <div class="div-content">
@@ -462,11 +490,11 @@
                       }
                     </div>
                   </div>
-                  <div class="flex flex-col md:flex-row md:items-start">
+                  <!-- <div class="flex flex-col md:flex-row md:items-start">
                     <div class="font-bold text-gray-700 md:w-24 shrink-0">推薦說明：</div>
                     <div class="flex-1 p-1 overflow-y-auto break-words whitespace-pre-wrap text-gray-600">
                       {{ recommendDescription }}</div>
-                  </div>
+                  </div> -->
                 </div>
               }
             </div>

@@ -57,12 +57,16 @@ export class SseService {
       this.zone.run(() => console.log('[SSE] connected'));
     };
 
-    // INIT（可選）
-    this.es.addEventListener('INIT', (event: any) => {
+    // 監聽所有事件的 Debug 邏輯
+    this.es.onmessage = (event: any) => {
       this.zone.run(() => {
-        console.log('[SSE] INIT:', event.data);
+        console.log('[SSE] Raw Data Received:', event.data);
+        const item = this.toUiNotification(event.data);
+        console.log('[SSE] UI Notification Object:', item);
+        this.addNotification(item);
       });
-    });
+    };
+
 
     // 公告（SYSTEM_NOTICE）
     this.es.addEventListener('SYSTEM_NOTICE', (event: any) => {
@@ -76,9 +80,31 @@ export class SseService {
     this.es.addEventListener('message', (event: any) => {
       this.zone.run(() => {
         const item = this.toUiNotification(event.data);
-        this.notifications = [item, ...this.notifications];
-        this.cleanup();
-        this.emit();
+        this.addNotification(item);
+      });
+    });
+
+    // 團購通知（GROUP_BUY）
+    this.es.addEventListener('GROUP_BUY', (event: any) => {
+      this.zone.run(() => {
+        const item = this.toUiNotification(event.data);
+        this.addNotification(item);
+      });
+    });
+
+    // 系統通知（SYSTEM）
+    this.es.addEventListener('SYSTEM', (event: any) => {
+      this.zone.run(() => {
+        const item = this.toUiNotification(event.data);
+        this.addNotification(item);
+      });
+    });
+
+    // 許願通知（WISH）
+    this.es.addEventListener('WISH', (event: any) => {
+      this.zone.run(() => {
+        const item = this.toUiNotification(event.data);
+        this.addNotification(item);
       });
     });
 
@@ -94,6 +120,15 @@ export class SseService {
     this.es?.close();
     this.es = undefined;
     this.connectedUserId = null;
+  }
+
+  private addNotification(item: any) {
+    // 檢查是否已存在 (避免重複)
+    if (this.notifications.some(n => n.id === item.id)) return;
+    
+    this.notifications = [item, ...this.notifications];
+    this.cleanup();
+    this.emit();
   }
 
 
@@ -162,9 +197,10 @@ export class SseService {
 
     return {
       id: data.id ?? this.fallbackId(),
+      category: data.category ?? 'SYSTEM',
       title: data.title ?? data.type ?? '通知',
       message: data.message ?? data.content ?? '',
-      createdAt: data.createdAt ?? new Date().toLocaleString(),
+      createdAt: this.formatDate(data.createdAt),
       isRead: false,
       link: data.link ?? null,
     };
@@ -185,7 +221,7 @@ export class SseService {
       id,
       title: data.title ?? '系統公告',
       message: data.message ?? data.content ?? raw ?? '',
-      createdAt: data.createdAt ?? new Date().toLocaleString(),
+      createdAt: this.formatDate(data.createdAt),
       isRead: false,
       link: data.link ?? null,
     };
@@ -202,6 +238,15 @@ export class SseService {
   // 自動生成ID小工具
   private fallbackId() {
     return (crypto as any).randomUUID?.() ?? String(Date.now() + Math.random());
+  }
+
+  private formatDate(rawDate: any): string {
+    if (!rawDate) return new Date().toLocaleString();
+    const d = new Date(rawDate);
+    if (isNaN(d.getTime())) return String(rawDate); // 原樣回傳
+
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}/${pad(d.getMonth() + 1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
   }
 
   // 條件清理小工具
