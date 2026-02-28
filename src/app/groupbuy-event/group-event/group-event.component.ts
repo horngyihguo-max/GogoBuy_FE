@@ -72,7 +72,7 @@ export class GroupEventComponent {
 
   eventName!: string;
   endTime!: Date;
-  splitType!: string;
+  // splitType!: string;
   announcement!: string;
   type!: string;
   tempMenu: number[] = [];  //存品項id
@@ -283,9 +283,9 @@ export class GroupEventComponent {
                   this.endTime = new Date(rawEndTime);
                 }
 
-                this.isConfirmed = true;
-                this.splitType = eventRes.groupbuyEvents[0].splitType;
-                this.choose(this.splitType);
+                // this.isConfirmed = true;
+                // this.splitType = eventRes.groupbuyEvents[0].splitType;
+                // this.choose(this.splitType);
                 this.announcement = eventRes.groupbuyEvents[0].announcement;
                 this.type = eventRes.groupbuyEvents[0].eventType;
                 this.shippingFee = eventRes.groupbuyEvents[0].shippingFee || 0;
@@ -530,28 +530,28 @@ export class GroupEventComponent {
     event.stopPropagation();
     this.splitOpen = !this.splitOpen;
   }
-  choice!: string;
-  choose(choice: string) {
-    if (choice == "EQUAL") {
-      this.choice = "平分制";
-      this.splitType = "EQUAL";
-    } else {
-      this.choice = "權重制";
-      this.splitType = "WEIGHT";
-    }
-    this.splitOpen = false;
-  }
-  close() {
-    this.splitOpen = false;
-  }
-  openDialog: boolean = false;
-  dialog() {
-    this.openDialog = true;
-  }
-  isConfirmed!: boolean;
-  onCheckChange(event: any) {
-    this.isConfirmed = event.target.checked;
-  }
+  // choice!: string;
+  // choose(choice: string) {
+  //   if (choice == "EQUAL") {
+  //     this.choice = "平分制";
+  //     this.splitType = "EQUAL";
+  //   } else {
+  //     this.choice = "權重制";
+  //     this.splitType = "WEIGHT";
+  //   }
+  //   this.splitOpen = false;
+  // }
+  // close() {
+  //   this.splitOpen = false;
+  // }
+  // openDialog: boolean = false;
+  // dialog() {
+  //   this.openDialog = true;
+  // }
+  // isConfirmed!: boolean;
+  // onCheckChange(event: any) {
+  //   this.isConfirmed = event.target.checked;
+  // }
 
 
   useAllChange(event: any) {
@@ -973,8 +973,8 @@ export class GroupEventComponent {
     this.tempMenu = this.selectedItems.filter(item => item.id !== this.paddingItem.id).map(item => item.id);
     const missingFields: string[] = [];
     if (!this.eventName) missingFields.push('開團名稱');
-    if (!this.choice) missingFields.push('運費拆帳方式');
-    if (!this.isConfirmed) missingFields.push('同意拆帳規則');
+    // if (!this.choice) missingFields.push('運費拆帳方式');
+    // if (!this.isConfirmed) missingFields.push('同意拆帳規則');
     if (!this.tempMenu) missingFields.push('菜單品項')
     if (this.limitation && this.limitation < 1) {
       missingFields.push('成團門檻金額至少為1');
@@ -1082,7 +1082,8 @@ export class GroupEventComponent {
       endTime: end,
       status: "OPEN",
       shippingFee: this.shippingFee || 0,
-      splitType: this.splitType,
+      // splitType: this.splitType,
+      splitType: 'EQUAL',
       announcement: this.announcement,
       type: this.type,
       tempMenuList: [...this.tempMenu],
