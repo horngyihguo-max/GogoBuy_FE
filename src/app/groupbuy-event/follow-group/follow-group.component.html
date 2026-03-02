@@ -941,7 +941,7 @@
             </section>
 
             <!-- 運費 -->
-            <section>
+            <!-- <section>
               <div class="text-gray-500 font-semibold mb-2">運費規則</div>
 
               @if (store?.feeDescriptionVoList?.length) {
@@ -960,7 +960,7 @@
               } @else {
                 <div class="text-gray-500">（無運費資料）</div>
               }
-            </section>
+            </section> -->
 
             <div class="h-4"></div>
           </div>
@@ -1357,7 +1357,7 @@
             <div class="text-[26px] font-extrabold text-gray-900 mr-1">
               ${{ orderSubtotal }}
             </div>
-            <div class="text-sm text-gray-500 mt-1">（尚未計入運費）</div>
+            <div class="text-sm text-gray-500 mt-1">（尚未計入平台費）</div>
           </div>
         </div>
       </div>
@@ -1401,7 +1401,7 @@
   styleClass="custom-terms-dialog"
 >
   <ng-template pTemplate="header">
-    <div class="text-xl font-extrabold text-red-900">運費拆帳計算說明聲明</div>
+    <div class="text-xl font-extrabold text-red-900">結帳聲明</div>
   </ng-template>
   <div class="flex flex-col h-full max-h-[62vh] md:max-h-none">
     <div
