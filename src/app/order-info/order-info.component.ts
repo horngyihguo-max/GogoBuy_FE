@@ -90,6 +90,7 @@ export class OrderInfoComponent implements OnInit {
   latestOrderTime = '';
   userId = '';
   totalAmount = '';
+  thresholdAmount = 0;
   eventsId = 0;
   activeIndex: number = 0;
   menuDate: any;
@@ -117,8 +118,8 @@ export class OrderInfoComponent implements OnInit {
     this.userId = String(localStorage.getItem('user_id') || '');
     this.host = [
       { label: '核對訂單' },
-      { label: '付費階段' },
-      { label: '確認結算' }
+      { label: '確認結算' },
+      { label: '付費階段' }
     ];
     this.member = [
       { label: '核對訂單' },
@@ -152,6 +153,7 @@ export class OrderInfoComponent implements OnInit {
         this.hostId = event.hostId ?? '';
         this.hostEmail = event.hostEmail ?? '';
         this.hostNickname = event.hostNickname ?? '';
+        this.thresholdAmount = event.limitation ?? 0;
       },
       error: (err: any) => {
         console.error('getEventsByEventsId 失敗', err);
@@ -255,9 +257,20 @@ export class OrderInfoComponent implements OnInit {
   // 統一處理主按鈕點擊
   onPrimaryAction() {
     if (this.activeIndex === 0) {
+      if (this.mode === 'host' && Number(this.totalAmount) < this.thresholdAmount) {
+        Swal.fire({
+          icon: 'warning',
+          title: '未達門檻金額',
+          text: `目前總額 $${this.totalAmount} 低於門檻金額 $${this.thresholdAmount}，無法結算。`,
+          confirmButtonText: '確定'
+        });
+        return;
+      }
       this.nextStep();
     } else if (this.activeIndex === 1 && this.mode === 'host') {
-      this.nextStep();
+      this.submitOrder();
+    } else if (this.activeIndex === 2 && this.mode === 'host') {
+      this.router.navigate(['/user/orders'], { queryParams: { tab: 'history' } });
     } else {
       this.submitOrder();
     }
@@ -277,9 +290,9 @@ export class OrderInfoComponent implements OnInit {
           title: '準備中...',
           didOpen: () => Swal.showLoading()
         });
-        
+
         const payUserId = (this.mode === 'member') ? (this.userId || this.auth.user?.id) : undefined;
-        
+
         this.linePayService.requestPayment(this.eventsId, payUserId).subscribe({
           next: (payUrl: string) => {
             if (payUrl && payUrl.startsWith('http')) {
@@ -425,7 +438,7 @@ export class OrderInfoComponent implements OnInit {
       });
       const currentUserId = this.userId || this.auth.user?.id || localStorage.getItem('user_id') || '';
       const actingUserId = this.mode === 'host' ? currentUserId : undefined;
-      
+
       // 先找出這筆訂單的擁有者，以便通知 (如果操作者是團長且刪除的是別人的)
       const orderToDel = this.res?.orders?.find((o: any) => (o.id ?? o.orderId) === orderId);
 
@@ -683,22 +696,33 @@ export class OrderInfoComponent implements OnInit {
               }
               // --- SSE 通知邏輯結束 ---
 
-              Swal.fire({
-                title: "送出!",
-                text: this.mode === 'host' ? "全團已成功結算" : "您的個人訂單已確認",
-                icon: "success",
-                showCancelButton: true,
-                confirmButtonColor: "#3085d6",
-                cancelButtonColor: "rgb(24, 173, 54)",
-                confirmButtonText: "返回首頁",
-                cancelButtonText: "查看訂單"
-              }).then((result) => {
-                if (result.isConfirmed) {
-                  this.router.navigate(['/gogobuy/home'])
-                } else {
-                  this.router.navigate(['/user/orders'], { queryParams: { tab: 'history' } })
-                }
-              });
+              if (this.mode === 'host') {
+                Swal.fire({
+                  title: "結算成功!",
+                  text: "全團已成功結算，請進行後續付款。",
+                  icon: "success",
+                  timer: 2000,
+                  showConfirmButton: false
+                });
+                this.nextStep();
+              } else {
+                Swal.fire({
+                  title: "送出!",
+                  text: "您的個人訂單已確認",
+                  icon: "success",
+                  showCancelButton: true,
+                  confirmButtonColor: "#3085d6",
+                  cancelButtonColor: "rgb(24, 173, 54)",
+                  confirmButtonText: "返回首頁",
+                  cancelButtonText: "查看訂單"
+                }).then((result) => {
+                  if (result.isConfirmed) {
+                    this.router.navigate(['/gogobuy/home'])
+                  } else {
+                    this.router.navigate(['/user/orders'], { queryParams: { tab: 'history' } })
+                  }
+                });
+              }
             } else {
               Swal.fire("錯誤", res.message || "作業失敗", "error");
             }
