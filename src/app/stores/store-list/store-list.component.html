@@ -7,7 +7,7 @@
       <h2 class="font-bold text-lg">商店篩選器</h2>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
 
       <div class="flex flex-col gap-2">
         <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">搜尋店家</label>
@@ -17,14 +17,14 @@
         </p-autoComplete>
       </div>
 
-      <div class="flex flex-col gap-2">
+      <!-- <div class="flex flex-col gap-2">
         <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">餐點種類</label>
         <p-multiselect [options]="foodTypeOptions()" optionLabel="label" optionValue="value"
           [ngModel]="selectedFoodTypes()" (ngModelChange)="selectedFoodTypes.set($event ?? [])" [filter]="true"
           display="chip" placeholder="請選擇種類" styleClass="w-full border-gray-300 rounded-lg h-10 overflow-hidden"
           class="w-full">
         </p-multiselect>
-      </div>
+      </div> -->
 
       <div class="flex flex-col gap-2">
         <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">商店類型</label>

@@ -245,8 +245,18 @@ export class StoreListComponent {
     this.auths.getallstore().subscribe({
       next: (res: any) => {
         const list = res?.storeList ?? [];
-        this.stores.set(list);
-        if (list.length > 0) this.fetchOperatingStatus(list.map((s: { id: any; }) => s.id));
+        console.log('storeList raw =', list);
+
+        const processedList = list.map((s: any) => ({
+          ...s,
+          type: s.type || (s.category == 'fast' ? '外送' : '團購')
+        }));
+
+        this.stores.set(processedList);
+
+        if (processedList.length > 0) {
+          this.fetchOperatingStatus(processedList.map((s: any) => s.id));
+        }
       }
     });
   }
