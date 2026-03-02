@@ -608,30 +608,30 @@
 
 <p-dialog [(visible)]="openDisclaimer" appendTo="body" [modal]="true" [style]="{width: '90vw', maxWidth: '500px'}" [closable]="false">
   <h2 class="text-xl font-bold text-[#662222] border-b-2 border-dashed border-[#662222] pb-2 mb-4 flex items-center gap-2">
-    <i class="pi pi-exclamation-triangle"></i> 平台開團服務免責聲明
+    <i class="pi pi-exclamation-triangle"></i> 平台開團服務權責聲明
   </h2>
 
   <div class="h-80 overflow-y-auto pr-2 text-base text-gray-700 leading-relaxed">
-    <div class="bg-red-50 p-3 rounded-md border-l-4 border-red-500 mb-4 text-red-800 font-bold">
-      請注意：本平台僅提供「訂單媒合與計算」技術服務，不涉及任何金流代收付。
+    <div class="bg-amber-50 p-3 rounded-md border-l-4 border-amber-500 mb-4 text-amber-900 font-bold text-sm">
+      請注意：本平台依合約協助轉付貨款予店家，但不介入開團者與團員間之私人收款行為。
     </div>
 
     <div class="space-y-5">
       <section>
         <h4 class="font-bold text-gray-900 flex items-center gap-2">
-          <span class="w-2 h-2 bg-[#662222] rounded-full"></span> 1. 開團者付款義務
+          <span class="w-2 h-2 bg-[#662222] rounded-full"></span> 1. 開團者支付義務 (對平台)
         </h4>
         <p class="pl-4 mt-1 text-gray-600">
-          開團者（主揪）須負擔向店家**先行全額支付**貨款之責任。本平台無義務代為墊付任何款項。
+          開團者（主揪）須於訂單成立後，依系統計算金額**先行支付予本平台**。本平台將依據與店家簽署之合約條款，確保款項安全轉付予供應商。
         </p>
       </section>
 
       <section>
         <h4 class="font-bold text-gray-900 flex items-center gap-2">
-          <span class="w-2 h-2 bg-[#662222] rounded-full"></span> 2. 跟團者收費責任
+          <span class="w-2 h-2 bg-[#662222] rounded-full"></span> 2. 團員收款責任 (對私下)
         </h4>
         <p class="pl-4 mt-1 text-gray-600">
-          所有訂單款項之收取，須由**開團者自行聯繫跟團者**進行結清。若產生跑單、欠款或金額爭議，均屬開團者與跟團者間之私人行為。
+          本平台僅提供分攤金額計算參考，**跟團者之款項收取須由開團者自行負責**。若發生團員跑單、拒付或金額爭議，開團者仍須履行對平台之原始支付義務。
         </p>
       </section>
 
@@ -640,12 +640,12 @@
           <span class="w-2 h-2 bg-[#662222] rounded-full"></span> 3. 糾紛免責聲明
         </h4>
         <p class="pl-4 mt-1 text-gray-600">
-          本平台對於交易過程中產生之財物損失、訂單爭議或個人信用風險**不負損害賠償責任**。開團前請務必自行評估跟團成員之誠信狀態。
+          本平台不對開團者與跟團者間之「代收代付」關係負擔擔保責任。任何私下款項交割產生之財物損失或信用風險，均由雙方自行承擔。
         </p>
       </section>
 
       <p class="text-sm text-gray-500 italic mt-4">
-        ※ 點擊「我已閱讀並同意」即代表您理解並接受上述責任歸屬。
+        ※ 點擊「同意」代表您已清楚了解：您對平台的支付責任，與您對團員的收款行為係屬獨立事件。
       </p>
     </div>
   </div>
