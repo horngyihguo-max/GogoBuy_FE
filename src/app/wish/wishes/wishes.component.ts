@@ -554,7 +554,7 @@ export class WishesComponent implements OnInit {
       .subscribe((res: any) => {
         this.isCreating = false;
         if (res?.code === 200) {
-          this.toastSuccess('成功', '創建成功');
+          this.toastSuccess('願望創建成功', '~ 敬請期待 ~');
           this.timesRemaining -= 1;
           this.closeCreateDialog();
           this.loadWishes(); // 重新抓一次

@@ -144,20 +144,20 @@
                     [href]="getMap(store?.address)"
                     >{{ store?.address || "—" }}</a
                   >
-                  <p
+                  <!-- <p
                     (click)="detailTabIndex = 1; openDetail()"
                     class="cursor-pointer hover:border-b hover:border-slate-300 hidden md:inline"
                   >
                     (詳細運費說明)
                     <span class="md:hidden">(運費說明)</span>
-                  </p>
+                  </p> -->
                 </div>
-                <p
+                <!-- <p
                   (click)="detailTabIndex = 1; openDetail()"
                   class="cursor-pointer hover:border-b hover:border-slate-300 md:hidden"
                 >
                   (運費說明)
-                </p>
+                </p> -->
                 <div class="flex items-center gap-2">
                   <i class="pi pi-phone text-red-900"></i>
                   <span class="font-semibold text-[17px]">{{
@@ -417,7 +417,7 @@
             </section>
 
             <!-- 運費 -->
-            <section>
+            <!-- <section>
               <div class="text-gray-500 font-semibold mb-2">運費規則</div>
 
               @if (store?.feeDescriptionVoList?.length) {
@@ -436,7 +436,7 @@
               } @else {
                 <div class="text-gray-500">（無運費資料）</div>
               }
-            </section>
+            </section> -->
           </div>
         }
 

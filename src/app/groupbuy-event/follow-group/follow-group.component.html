@@ -941,7 +941,7 @@
             </section>
 
             <!-- 運費 -->
-            <section>
+            <!-- <section>
               <div class="text-gray-500 font-semibold mb-2">運費規則</div>
 
               @if (store?.feeDescriptionVoList?.length) {
@@ -960,7 +960,7 @@
               } @else {
                 <div class="text-gray-500">（無運費資料）</div>
               }
-            </section>
+            </section> -->
 
             <div class="h-4"></div>
           </div>
@@ -1357,7 +1357,7 @@
             <div class="text-[26px] font-extrabold text-gray-900 mr-1">
               ${{ orderSubtotal }}
             </div>
-            <div class="text-sm text-gray-500 mt-1">（尚未計入運費）</div>
+            <div class="text-sm text-gray-500 mt-1">（尚未計入平台費）</div>
           </div>
         </div>
       </div>
@@ -1401,14 +1401,14 @@
   styleClass="custom-terms-dialog"
 >
   <ng-template pTemplate="header">
-    <div class="text-xl font-extrabold text-red-900">運費拆帳計算說明聲明</div>
+    <div class="text-xl font-extrabold text-red-900">結帳聲明</div>
   </ng-template>
   <div class="flex flex-col h-full max-h-[62vh] md:max-h-none">
     <div
       class="flex-grow overflow-y-auto pr-2 text-base text-gray-700 leading-relaxed custom-scrollbar"
     >
       <p class="mb-4 font-bold text-gray-800">
-        感謝您參與本平台團購服務，關於本訂單之支付流程與相關權益，請詳細閱讀並同意以下聲明：
+        感謝您參與本平台團購服務，關於本訂單之支付流程與使用者規範，請詳細閱讀並同意以下聲明：
       </p>
 
       <div class="space-y-4">
@@ -1418,35 +1418,47 @@
             取餐付款機制
           </h4>
           <p class="pl-4 mt-1 text-gray-600">
-            本平台目前<strong>不進行預先收款</strong>。當開團者取得餐點並發送「取餐通知」後，跟團者應於領取餐點時，將應付費用直接支付予開團者。
+            本平台目前不進行預先收款。當開團者取得餐點並發送「取餐通知」後，跟團者應於領取餐點時，將應付費用直接支付予開團者。
           </p>
         </section>
 
         <section>
           <h4 class="font-bold text-gray-900 flex items-center gap-2">
-            <span class="w-2 h-2 bg-red-900 rounded-full"></span> 2.
-            支付方式不限
+            <span class="w-2 h-2 bg-red-900 rounded-full"></span> 2. 支付協議
           </h4>
           <p class="pl-4 mt-1 text-gray-600">
-            支付方式（如：現金、私下轉帳等）由雙方自行協議，本平台不限制亦不干涉雙方之支付選擇。
+            具體支付方式（如：現金、私下轉帳等）由雙方自行協議，本平台不介入雙方之金流往來細節。
           </p>
         </section>
 
-        <section class="bg-gray-50 p-4 rounded-md border-l-4 border-gray-400">
-          <h4 class="font-bold text-gray-700 flex items-center gap-2">
-            <i class="pi pi-exclamation-circle"></i> 3. 交易安全須知
+        <section>
+          <h4 class="font-bold text-gray-900 flex items-center gap-2">
+            <span class="w-2 h-2 bg-red-900 rounded-full"></span> 3.
+            現場確認須知
           </h4>
-          <p class="mt-2 text-gray-600 text-sm">
-            本平台僅提供資訊撮合服務。考量到線下支付之多樣性，<strong
-              >凡涉及實際支付金額之點收、找零或轉帳等過程，請雙方務必於面交時現場確認。</strong
-            >
-            若於支付過程中產生相關疑慮，建議由雙方即時溝通解決，平台方不介入後續私下交易細節。
+          <p class="pl-4 mt-1 text-gray-600">
+            凡涉及實際金額之點收、找零或轉帳，請雙方務必於面交現場確認完畢。若於離開現場後產生之爭議，本平台僅提供資訊撮合，不負責代位追償。
           </p>
         </section>
 
-        <div class="bg-red-50 p-3 rounded text-sm text-red-900 italic">
-          <p>※ 提醒：請於領取餐點後立即確認品項與金額，以保障您的消費權益。</p>
-        </div>
+        <section class="bg-red-50 p-4 rounded-md border-l-4 border-red-900">
+          <h4 class="font-bold text-red-900 flex items-center gap-2">
+            <i class="pi pi-shield"></i> 4. 平台誠信守則
+          </h4>
+          <p class="mt-2 text-gray-700 font-medium">
+            為維護良好的團購環境，本平台嚴禁惡意棄單之行為。
+          </p>
+          <ul class="list-disc pl-8 mt-1 space-y-1 text-gray-600 text-sm">
+            <li>
+              <strong>惡意行為：</strong
+              >若經查證有惡意不取餐、無故拒絕支付費用等行為。
+            </li>
+            <li>
+              <strong>處置措施：</strong
+              >管理者有權採取相關懲處，包括但不限於<strong>永久封禁帳號</strong>、限制未來參與權限。
+            </li>
+          </ul>
+        </section>
       </div>
     </div>
 
