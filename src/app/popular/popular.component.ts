@@ -44,8 +44,8 @@ export class PopularComponent {
   topFive = computed(() => this.salesDetailList().slice(0, 5));
 
   statusOptions: StatusOption[] = [
-    { label: '顯示全部時間', value: 'ALL' },
-    { label: '顯示 1 年', value: 'YEAR' },
+    // { label: '顯示全部時間', value: 'ALL' },
+    // { label: '顯示 1 年', value: 'YEAR' },
     { label: '顯示 1 個月', value: 'MONTHLY' },
     { label: '顯示 1 個禮拜', value: 'WEEKLY' },
     { label: '顯示 1 天', value: 'DAILY' },
@@ -61,7 +61,7 @@ export class PopularComponent {
   }
 
   loadTop10() {
-    const type = this.statusFilter() == 'ALL' ? undefined : this.statusFilter();
+    const type = this.statusFilter() == 'MONTHLY' ? undefined : this.statusFilter();
     this.popularService.getTop10(type).subscribe({
       next: (res: any) => {
         this.salesDetailList.set(res.salesDetailList ?? []);
