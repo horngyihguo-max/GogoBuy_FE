@@ -92,12 +92,10 @@ export class MyStoresComponent {
 
   // 店家目前營業狀態
   isStoreOpen(store: any) {
-    if (store.force_closed) {
+    if (store.force_closed || !store.operatingHoursVoList?.length) {
       return false;
     }
-    if (!store.operatingHoursVoList || store.operatingHoursVoList.length === 0) {
-      return false;
-    }
+
     const now = new Date();
     const currentDay = now.getDay() === 0 ? 7 : now.getDay();
     const currentTime = now.getHours().toString().padStart(2, '0') + ":" +
@@ -109,8 +107,14 @@ export class MyStoresComponent {
       const start = s.openTime?.substring(0, 5);
       const end = s.closeTime?.substring(0, 5);
 
+      if (!start || !end) return false;
+      // 處理跨日邏輯
+      if (end < start) {
+        return currentTime >= start || currentTime <= end;
+      }
+
       return currentTime >= start && currentTime <= end;
-    })
+    });
   }
 
   // 收藏按鈕
