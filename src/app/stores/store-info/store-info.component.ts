@@ -319,7 +319,7 @@ export class StoreInfoComponent implements OnInit, OnDestroy {
     // 3) publish 權限：publish=false 且不是建立者 → 擋掉
     if (this.store.publish === false) {
       const createdBy = this.store.createdBy;
-      if (!this.userId || createdBy !== this.userId) {
+      if (!this.userId || !this.isAdmin()) {
         this.toastWarn('不公開店家', '此為不公開店家');
         // 延遲再跳轉
         setTimeout(() => {
