@@ -36,7 +36,7 @@ export class PopularComponent {
   salesDetailList = signal<SalesLeaderboardProjection[]>([]);
 
   // 篩選條件
-  statusFilter = signal<'ALL' | 'YEAR' | 'MONTHLY' | 'WEEKLY' | 'DAILY'>('MONTHLY');
+  statusFilter = signal<'ALL' | 'YEAR' | 'MONTHLY' | 'WEEKLY' | 'DAILY'>('ALL');
 
   // 排行榜資料
   top10List = signal<any[]>([]);
@@ -44,8 +44,8 @@ export class PopularComponent {
   topFive = computed(() => this.salesDetailList().slice(0, 5));
 
   statusOptions: StatusOption[] = [
-    // { label: '顯示全部時間', value: 'ALL' },
-    // { label: '顯示 1 年', value: 'YEAR' },
+    { label: '顯示全部時間', value: 'ALL' },
+    { label: '顯示 1 年', value: 'YEAR' },
     { label: '顯示 1 個月', value: 'MONTHLY' },
     { label: '顯示 1 個禮拜', value: 'WEEKLY' },
     { label: '顯示 1 天', value: 'DAILY' },
