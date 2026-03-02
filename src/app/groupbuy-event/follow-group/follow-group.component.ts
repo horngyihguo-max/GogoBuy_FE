@@ -349,7 +349,7 @@ export class FollowGroupComponent implements OnDestroy {
     this.groupId = Number(this.route.snapshot.paramMap.get('id') || 0);
 
     // 取得 target_user_id (由管理中心帶過來)
-    this.route.queryParams.subscribe(params => {
+    this.route.queryParams.subscribe((params) => {
       if (params['target_user_id']) {
         this.targetUserId = params['target_user_id'];
       }
@@ -562,7 +562,7 @@ export class FollowGroupComponent implements OnDestroy {
         const normalized = this.normalizeStoreResponse(res);
         this.store = normalized;
         this.afterLoaded();
-        
+
         // 如果有指定目標用戶，載入該用戶的訂單，否則載入目前登入者的
         const loadId = this.targetUserId || this.userId;
         this.loadExistingOrder(this.groupId, loadId);
@@ -1963,7 +1963,7 @@ export class FollowGroupComponent implements OnDestroy {
   // 建構POST資料
   buildOrderPostPayload(eventsId: number, userId: string): any {
     const targetUserId = this.targetUserId || userId; // 如果有指定目標，就是幫目標下單
-    
+
     return {
       eventsId,
       userId: targetUserId,
@@ -2010,7 +2010,7 @@ export class FollowGroupComponent implements OnDestroy {
   loadPopular(storeId: number) {
     this.http
       .getApi(
-        `http://localhost:8080/gogobuy/salesStats/top10/${storeId}?type=MONTHLY`,
+        `http://localhost:8080/gogobuy/salesStats/top10/${storeId}?type=YEAR`,
       )
       .subscribe({
         next: (res: any) => {

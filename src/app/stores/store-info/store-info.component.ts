@@ -172,7 +172,7 @@ export class StoreInfoComponent implements OnInit, OnDestroy {
   loadPopular(storeId: number) {
     this.http
       .getApi(
-        `http://localhost:8080/gogobuy/salesStats/top10/${storeId}?type=MONTHLY`,
+        `http://localhost:8080/gogobuy/salesStats/top10/${storeId}?type=YEAR`,
       )
       .subscribe({
         next: (res: any) => {
