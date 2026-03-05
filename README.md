@@ -1,10 +1,10 @@
 [GogoBuy] - 電子商務前端專案
-📌 專案簡介
+專案簡介
 GogoBuy 是一個現代化的電子商務平台前端介面，旨在提供流暢的購物體驗。使用者可以瀏覽商品、加入購物車、管理會員資料，並進行模擬結帳流程。
 
 線上演示： 點擊查看 Demo 連結 (若有 Vercel/Netlify 部署請放這)
 
-✨ 核心功能
+核心功能
 商品瀏覽：支援分類篩選、關鍵字搜尋及分頁功能。
 
 購物車系統：即時更新商品數量、計算總金額。
@@ -26,30 +26,7 @@ GogoBuy 是一個現代化的電子商務平台前端介面，旨在提供流暢
 
 API 串接：Axios (搭配 RESTful API)
 
-🚀 快速開始
-前置作業
-請確保你的電腦已安裝 Node.js (建議 v16 以上)。
-
-安裝步驟
-複製此專案：
-
-Bash
-git clone https://github.com/Mickey11566/GogoBuy_FE.git
-進入專案目錄：
-
-Bash
-cd GogoBuy_FE
-安裝依賴套件：
-
-Bash
-npm install  # 或 yarn install
-啟動開發伺服器：
-
-Bash
-npm run dev  # 或 npm start
-開啟瀏覽器並造訪 http://localhost:3000
-
-📝 學習筆記 / 挑戰
+學習筆記 / 挑戰
 
 效能優化：如何處理圖片加載，GOOGLE LH3多次拉取會造成ERROR 429，更改為使用圖床存取圖片，避免出現ERROR 429，使圖片破圖。
 
